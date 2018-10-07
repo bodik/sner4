@@ -5,6 +5,7 @@ blinker==1.4
 Click==7.0
 Flask==1.0.2
 Flask-DebugToolbar==0.10.1
+Flask-SQLAlchemy==2.3.2
 itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
@@ -15,6 +16,7 @@ pluggy==0.7.1
 py==1.6.0
 pytest==3.8.2
 six==1.11.0
+SQLAlchemy==1.2.12
 waitress==1.1.0
 WebOb==1.8.2
 WebTest==2.0.32
