@@ -6,9 +6,9 @@ from sner_web.models import Task
 
 
 
-def create_app(config_file="sner_web.cfg"):
+def create_app():
 	app = Flask(__name__)
-	app.config.from_pyfile(config_file)
+	app.config.from_envvar("SNER_CONFIG")
 
 	toolbar.init_app(app)
 	db.init_app(app)

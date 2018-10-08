@@ -1,4 +1,4 @@
 env/
 __pycache__/
 *.swp
-sner4web.cfg
+sner_web.cfg
