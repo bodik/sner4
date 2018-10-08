@@ -1,5 +1,5 @@
 import pytest
-from sner4web import create_app
+from sner_web import create_app
 from webtest import TestApp
 
 
