@@ -32,8 +32,7 @@ def job_assign_route(queue_id=None):
 		queue = Queue.query.filter(Queue.id == queue_id).one_or_none()
 	else:
 		# select highest priority active task with some targets
-		#TODO: a little magic here which kind of join, if any, is used
-		queue = Queue.query.filter(Queue.active, Queue.id == Target.queue_id).order_by(Queue.priority.desc()).first()
+		queue = Queue.query.filter(Queue.active, Queue.targets.any()).order_by(Queue.priority.desc()).first()
 
 	if queue:
 		assigned_targets = []
