@@ -3,7 +3,7 @@
 import click
 from flask.cli import with_appcontext
 from sner.server.extensions import db
-from sner.server.model.scheduler import Profile, Task
+from sner.server.model.scheduler import Profile, Target, Task
 
 
 @click.group(name='db', help='sner.server db management')
@@ -32,11 +32,16 @@ def db_initdata():
 	db.session.add(profile)
 	db.session.commit()
 
-	targets = [str(x) for x in range(1000)]
-	task = Task(name='ping localhost', profile=profile, targets=targets, group_size=5, priority=0)
+	task = Task(name='ping localhost', profile=profile, group_size=5, priority=0)
 	db.session.add(task)
-	task = Task(name='ping localhost 1', profile=profile, targets=targets, group_size=1, priority=0)
+	for target in range(100):
+		db.session.add(Target(target=target, task=task))
+	db.session.commit()
+
+	task = Task(name='ping localhost 1', profile=profile, group_size=1, priority=0)
 	db.session.add(task)
+	for target in range(100):
+		db.session.add(Target(target=target, task=task, scheduled=True))
 	db.session.commit()
 
 	profile = Profile(

@@ -3,10 +3,10 @@
 from random import random
 from sner.server.command.scheduler import scheduler_command
 from sner.server.extensions import db
-from sner.server.model.scheduler import Task
+from sner.server.model.scheduler import Target, Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_task, model_test_profile # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_target, create_test_task, model_test_profile # pylint: disable=unused-import
 
 
 def test_task_list_command(runner, model_test_profile): # pylint: disable=redefined-outer-name
@@ -33,15 +33,16 @@ def test_task_add_command(runner, model_test_profile): # pylint: disable=redefin
 	test_task = create_test_task()
 	test_task.name = test_task.name+' command add '+str(random())
 	test_task.profile = model_test_profile
+	test_target = create_test_target()
 
 
-	result = runner.invoke(scheduler_command, ['task_add', str(test_task.profile.id), '--name', test_task.name]+test_task.targets)
+	result = runner.invoke(scheduler_command, ['task_add', str(test_task.profile.id), '--name', test_task.name, test_target.target])
 	assert result.exit_code == 0
 
 	task = Task.query.filter(Task.name == test_task.name).one_or_none()
 	assert task is not None
 	assert task.name == test_task.name
-	assert task.targets == test_task.targets
+	assert task.targets[0].target == test_target.target
 
 
 	db.session.delete(task)
@@ -55,6 +56,9 @@ def test_task_delete_command(runner, model_test_profile): # pylint: disable=rede
 	test_task.name = test_task.name+' delete command '+str(random())
 	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
+	test_target = create_test_target()
+	test_target.task = test_task
+	persist_and_detach(test_target)
 
 
 	result = runner.invoke(scheduler_command, ['task_delete', str(test_task.id)])
@@ -71,13 +75,17 @@ def test_task_targets_command_schedule(runner, model_test_profile): # pylint: di
 	test_task.name = test_task.name+' schedule command '+str(random())
 	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
+	test_target = create_test_target()
+	test_target.task = test_task
+	persist_and_detach(test_target)
+	tmpid = test_task.id
 
 
 	result = runner.invoke(scheduler_command, ['task_targets', str(test_task.id), 'schedule'])
 	assert result.exit_code == 0
 
-	task = Task.query.filter(Task.id == test_task.id).one_or_none()
-	assert len(task.scheduled_targets) is len(test_task.targets)
+	task = Task.query.filter(Task.id == tmpid).one_or_none()
+	assert task.targets[0].scheduled
 
 
 	db.session.delete(task)
@@ -91,13 +99,17 @@ def test_task_targets_command_unschedule(runner, model_test_profile): # pylint: 
 	test_task.name = test_task.name+' unschedule command '+str(random())
 	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
+	test_target = create_test_target()
+	test_target.task = test_task
+	persist_and_detach(test_target)
+	tmpid = test_task.id
 
 
 	result = runner.invoke(scheduler_command, ['task_targets', str(test_task.id), 'unschedule'])
 	assert result.exit_code == 0
 
-	task = Task.query.filter(Task.id == test_task.id).one_or_none()
-	assert not task.scheduled_targets
+	task = Task.query.filter(Task.id == tmpid).one_or_none()
+	assert not task.targets[0].scheduled
 
 
 	db.session.delete(task)

@@ -5,7 +5,8 @@ from netaddr import IPNetwork
 from flask.cli import with_appcontext
 from sner.server.controller.scheduler.task import task_targets_action
 from sner.server.extensions import db
-from sner.server.model.scheduler import Profile, Task
+from sner.server.model.scheduler import Profile, Target, Task
+from sqlalchemy import func
 
 
 @click.group(name='scheduler', help='sner.server scheduler management')
@@ -19,11 +20,15 @@ def scheduler_command():
 def task_list():
 	"""list tasks"""
 
+	count_targets = {}
+	for task_id, count in db.session.query(Target.task_id, func.count(Target.id)).group_by(Target.task_id).all():
+		count_targets[task_id] = count
+
 	headers = ['id', 'name', 'profile', 'targets', 'created', 'modified']
 	fmt = '%-4s %-20s %-40s %-8s %-30s %-30s'
 	print(fmt % tuple(headers))
 	for task in Task.query.all():
-		print(fmt % (task.id, task.name, task.profile, len(task.targets), task.created, task.modified))
+		print(fmt % (task.id, task.name, task.profile, count_targets.get(task.id, 0), task.created, task.modified))
 
 
 @scheduler_command.command(name='task_add', help='add a new task')
@@ -40,12 +45,14 @@ def task_add(profile_id, targets, **kwargs):
 	profile = Profile.query.filter(Profile.id == profile_id).one_or_none()
 	if not profile:
 		raise RuntimeError('no such profile')
-
 	targets = list(targets)
 	if kwargs["file"]:
 		targets += kwargs["file"].read().splitlines()
-	task = Task(name=kwargs["name"], profile=profile, targets=targets, group_size=kwargs["group_size"], priority=kwargs["priority"])
+
+	task = Task(name=kwargs["name"], profile=profile, group_size=kwargs["group_size"], priority=kwargs["priority"])
 	db.session.add(task)
+	for target in targets:
+		db.session.add(Target(target=target, task=task))
 	db.session.commit()
 
 

@@ -20,6 +20,7 @@ class TaskForm(FlaskForm):
 
 	name = StringField(label='Name', validators=[validators.Length(max=1000)])
 	profile = QuerySelectField(query_factory=lambda: Profile.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
-	targets = LinesField(label='Targets', validators=[validators.Length(max=1000)])
 	group_size = IntegerField(label='Group size', default=1)
 	priority = IntegerField(label='Priority', default=0)
+
+	targets_field = LinesField(label='Targets')

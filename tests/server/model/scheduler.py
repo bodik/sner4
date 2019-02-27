@@ -5,7 +5,7 @@ import json
 import pytest
 import uuid
 from sner.server.extensions import db
-from sner.server.model.scheduler import Job, Profile, Task
+from sner.server.model.scheduler import Job, Profile, Target, Task
 
 from tests.server import persist_and_detach
 
@@ -35,10 +35,8 @@ def create_test_task():
 
 	return Task(
 		name='task name',
-		targets=['1', '2', '3'],
 		group_size=2,
-		priority=10,
-		scheduled_targets=['4'])
+		priority=10)
 
 
 @pytest.fixture(scope='session')
@@ -52,6 +50,14 @@ def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-
 	yield test_task
 	db.session.delete(Task.query.get(tmpid))
 	db.session.commit()
+
+
+def create_test_target():
+	"""test target data"""
+
+	return Target(
+		target='testtarget',
+		scheduled=False)
 
 
 def create_test_job():
