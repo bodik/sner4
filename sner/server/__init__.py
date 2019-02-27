@@ -1,7 +1,8 @@
 """main application package module"""
 
 from flask import flash, Flask, render_template
-from sner.server.commands import init_db, init_data
+from sner.server.command.db import db_command
+from sner.server.command.scheduler import scheduler_command
 from sner.server.controller import scheduler
 from sner.server.extensions import db, toolbar
 
@@ -17,8 +18,8 @@ def create_app():
 
 	app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
 
-	app.cli.add_command(init_db)
-	app.cli.add_command(init_data)
+	app.cli.add_command(db_command)
+	app.cli.add_command(scheduler_command)
 
 	@app.route('/')
 	def index_route(): # pylint: disable=unused-variable

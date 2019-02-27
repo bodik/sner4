@@ -20,3 +20,9 @@ def app():
 def client(app): # pylint: disable=redefined-outer-name
 	"""create webtest testapp client"""
 	return TestApp(app)
+
+
+@pytest.fixture(scope='session')
+def runner(app): # pylint: disable=redefined-outer-name
+	"""create cli test runner"""
+	return app.test_cli_runner()

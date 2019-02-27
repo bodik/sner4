@@ -1,33 +1,16 @@
 """controller profile tests"""
 
-import pytest
 from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner.server.extensions import db
 from sner.server.model.scheduler import Profile
-from .. import persist_and_detach
+
+from tests.server import persist_and_detach
+from tests.server.model.scheduler import create_test_profile
 
 
-def create_test_profile():
-	"""test profile data"""
-	return Profile(
-		name='test profile name',
-		module='test',
-		params='--arg1 abc --arg2')
-
-
-@pytest.fixture(scope='session')
-def model_test_profile(app):
-	"""persistent test profile"""
-	test_profile = persist_and_detach(create_test_profile())
-	yield test_profile
-	test_profile = Profile.query.get(test_profile.id)
-	db.session.delete(test_profile)
-	db.session.commit()
-
-
-def test_list_route(client):
+def test_profile_list_route(client):
 	"""list route test"""
 
 	response = client.get(url_for('scheduler.profile_list_route'))
@@ -35,7 +18,7 @@ def test_list_route(client):
 	assert b'<h1>Profiles list' in response
 
 
-def test_add_route(client):
+def test_profile_add_route(client):
 	"""add route test"""
 
 	test_profile = create_test_profile()
@@ -60,7 +43,7 @@ def test_add_route(client):
 	db.session.commit()
 
 
-def test_edit_route(client):
+def test_profile_edit_route(client):
 	"""edit route test"""
 
 	test_profile = create_test_profile()
@@ -85,7 +68,7 @@ def test_edit_route(client):
 	db.session.commit()
 
 
-def test_delete_route(client):
+def test_profile_delete_route(client):
 	"""delete route test"""
 
 	test_profile = create_test_profile()

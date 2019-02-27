@@ -26,6 +26,7 @@ def job_assign_route(task_id=None):
 	"""assign job for worker"""
 
 	assignment = {}
+	targets = []
 	wait_for_lock(ScheduledTarget.__tablename__)
 
 	task = Task.query.filter(Task.scheduled_targets.any())
@@ -34,23 +35,21 @@ def job_assign_route(task_id=None):
 	task = task.order_by(Task.priority.desc()).first()
 
 	if task:
-		targets = []
-		for _ in range(task.group_size):
-			scheduled_target = ScheduledTarget.query.filter(ScheduledTarget.task == task).order_by(func.random()).first()
-			if not scheduled_target:
-				break
-			targets.append(scheduled_target.target)
-			db.session.delete(scheduled_target)
+		scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == task).order_by(func.random()).limit(task.group_size).all()
+		if scheduled_targets:
+			for item in scheduled_targets:
+				targets.append(item.target)
+				db.session.delete(item)
 
-		assignment = {
-			"id": str(uuid.uuid4()),
-			"module": task.profile.module,
-			"params": task.profile.params,
-			"targets": targets}
-		job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=targets)
+			assignment = {
+				"id": str(uuid.uuid4()),
+				"module": task.profile.module,
+				"params": task.profile.params,
+				"targets": targets}
+			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=targets)
+			db.session.add(job)
 
-		db.session.add(job)
-
+	# at least, we have to clear the lock
 	db.session.commit()
 	return jsonify(assignment)
 

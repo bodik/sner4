@@ -4,6 +4,10 @@ indent-string=\t
 indent-after-paren=1
 
 
+[BASIC]
+good-names=e
+
+
 [TYPECHECK]
 ignored-classes=SQLAlchemy, sqlalchemy.orm.scoping.scoped_session
 

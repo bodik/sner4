@@ -1,4 +1,4 @@
-"""command line interface"""
+"""db commands"""
 
 import click
 from flask.cli import with_appcontext
@@ -6,23 +6,29 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Profile, Task
 
 
-@click.command(name='sner_init_db', help='initialize database schema')
+@click.group(name='db', help='sner.server db management')
+def db_command():
+	"""db command group/container"""
+	pass
+
+
+@db_command.command(name='init', help='initialize database schema')
 @with_appcontext
-def init_db():
+def db_init():
 	"""initialize database schema"""
 
 	db.create_all()
 
 
-@click.command(name='sner_init_data', help='put initial data to database')
+@db_command.command(name='initdata', help='put initial data to database')
 @with_appcontext
-def init_data():
+def db_initdata():
 	"""put initial data to database"""
 
 	profile = Profile(
 		name='nmap ping host discovery',
 		module='nmap',
-		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200  -sn')
+		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sn')
 	db.session.add(profile)
 	db.session.commit()
 
@@ -33,10 +39,9 @@ def init_data():
 	db.session.add(task)
 	db.session.commit()
 
-
 	profile = Profile(
 		name='nmap default SYN scan',
 		module='nmap',
-		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200  -sS')
+		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sS')
 	db.session.add(profile)
 	db.session.commit()

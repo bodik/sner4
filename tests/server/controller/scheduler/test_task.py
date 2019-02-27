@@ -1,37 +1,16 @@
 """controller task tests"""
 
-import pytest
 from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner.server.extensions import db
 from sner.server.model.scheduler import Task, ScheduledTarget
-from .. import persist_and_detach
-from .test_profile import model_test_profile # pylint: disable=unused-import
+
+from tests.server import persist_and_detach
+from tests.server.model.scheduler import create_test_task, model_test_profile # pylint: disable=unused-import
 
 
-def create_test_task():
-	"""test task data"""
-	return Task(
-		name='task name',
-		targets=['1', '2', '3'],
-		group_size=2,
-		priority=10)
-
-
-@pytest.fixture(scope='session')
-def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-name
-	"""persistent test task"""
-	test_task = create_test_task()
-	test_task.profile = model_test_profile
-	persist_and_detach(test_task)
-	yield test_task
-	test_task = Task.query.get(test_task.id)
-	db.session.delete(test_task)
-	db.session.commit()
-
-
-def test_list_route(client):
+def test_task_list_route(client):
 	"""list route test"""
 
 	response = client.get(url_for('scheduler.task_list_route'))
@@ -39,7 +18,7 @@ def test_list_route(client):
 	assert b'<h1>Tasks list' in response
 
 
-def test_add_route(client, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_add_route(client, model_test_profile): # pylint: disable=redefined-outer-name
 	"""add route test"""
 
 	test_task = create_test_task()
@@ -66,7 +45,7 @@ def test_add_route(client, model_test_profile): # pylint: disable=redefined-oute
 	db.session.commit()
 
 
-def test_edit_route(client, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_edit_route(client, model_test_profile): # pylint: disable=redefined-outer-name
 	"""edit route test"""
 
 	test_task = create_test_task()
@@ -92,7 +71,7 @@ def test_edit_route(client, model_test_profile): # pylint: disable=redefined-out
 	db.session.commit()
 
 
-def test_delete_route(client, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_delete_route(client, model_test_profile): # pylint: disable=redefined-outer-name
 	"""delete route test"""
 
 	test_task = create_test_task()
@@ -109,7 +88,7 @@ def test_delete_route(client, model_test_profile): # pylint: disable=redefined-o
 	assert task is None
 
 
-def test_targets_route_schedule(client, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_targets_route_schedule(client, model_test_profile): # pylint: disable=redefined-outer-name
 	"""targets schedule route test"""
 
 	test_task = create_test_task()
@@ -126,14 +105,12 @@ def test_targets_route_schedule(client, model_test_profile): # pylint: disable=r
 	assert len(scheduled_targets) is len(test_task.targets)
 
 
-	for item in scheduled_targets:
-		db.session.delete(item)
 	db.session.delete(test_task)
 	db.session.commit()
 
 
 
-def test_targets_route_unschedule(client, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_targets_route_unschedule(client, model_test_profile): # pylint: disable=redefined-outer-name
 	"""targets unschedule route test"""
 
 	test_task = create_test_task()

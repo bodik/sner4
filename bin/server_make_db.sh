@@ -10,5 +10,5 @@ psql --command="SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE dat
 psql -t --command="SELECT 'drop table '||tablename||' cascade;' FROM pg_tables WHERE schemaname='public';" sner | psql sner
 
 export FLASK_APP="sner.server"
-flask sner_init_db
-flask sner_init_data
+flask db init
+flask db initdata
