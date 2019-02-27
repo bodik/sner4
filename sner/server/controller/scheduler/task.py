@@ -5,7 +5,7 @@ from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.form.scheduler import TaskForm
-from sner.server.model.scheduler import Job, Profile, ScheduledTarget, Task
+from sner.server.model.scheduler import Job, Profile, Task
 from sner.server.utils import wait_for_lock
 from sqlalchemy import func
 
@@ -15,9 +15,6 @@ def task_list_route():
 	"""list tasks"""
 
 	tasks = Task.query.all()
-	count_scheduled_targets = {}
-	for task_id, count in db.session.query(ScheduledTarget.task_id, func.count(ScheduledTarget.id)).group_by(ScheduledTarget.task_id).all():
-		count_scheduled_targets[task_id] = count
 	count_jobs = {}
 	for task_id, count in db.session.query(Job.task_id, func.count(Job.id)).group_by(Job.task_id).all():
 		count_jobs[task_id] = count
@@ -25,7 +22,6 @@ def task_list_route():
 	return render_template(
 		'scheduler/task/list.html',
 		tasks=tasks,
-		count_scheduled_targets=count_scheduled_targets,
 		count_jobs=count_jobs,
 		generic_button_form=GenericButtonForm())
 
@@ -55,6 +51,7 @@ def task_edit_route(task_id):
 	form = TaskForm(obj=task)
 
 	if form.validate_on_submit():
+		#TODO: http parameter pollution vs framework mass-assign vulnerability
 		form.populate_obj(task)
 		db.session.commit()
 		return redirect(url_for('scheduler.task_list_route'))
@@ -98,14 +95,12 @@ def task_targets_route(task_id, action):
 def task_targets_action(task, action):
 	"""task targets bussiness logic"""
 
-	wait_for_lock(ScheduledTarget.__tablename__)
+	wait_for_lock(Task.__tablename__)
 
 	if action == 'schedule':
-		for target in task.targets:
-			db.session.add(ScheduledTarget(target=target, task=task))
+		task.scheduled_targets = task.targets
 
 	if action == 'unschedule':
-		for item in task.scheduled_targets:
-			db.session.delete(item)
+		task.scheduled_targets = []
 
 	db.session.commit()

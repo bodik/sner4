@@ -24,7 +24,7 @@
 			<td>{{ task.id }}</td>
 			<td>{{ task.name }}</td>
 			<td>{{ task.profile }}</td>
-			<td>{{ task.targets|length }} | {{ count_scheduled_targets[task.id]|default(0) }} | {{ count_jobs[task.id]|default(0) }}</td>
+			<td>{{ task.targets|length }} | {{ task.scheduled_targets|length }} | {{ count_jobs[task.id]|default(0) }}</td>
 			<td>{{ task.group_size }}</td>
 			<td>{{ task.priority }}</td>
 			<td>{{ task.created|datetime }}</td>

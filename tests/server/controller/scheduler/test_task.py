@@ -4,7 +4,7 @@ from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner.server.extensions import db
-from sner.server.model.scheduler import Task, ScheduledTarget
+from sner.server.model.scheduler import Task
 
 from tests.server import persist_and_detach
 from tests.server.model.scheduler import create_test_task, model_test_profile # pylint: disable=unused-import
@@ -101,11 +101,11 @@ def test_task_targets_route_schedule(client, model_test_profile): # pylint: disa
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
-	scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == test_task).all()
-	assert len(scheduled_targets) is len(test_task.targets)
+	task = Task.query.filter(Task.id == test_task.id).one_or_none()
+	assert len(task.scheduled_targets) is len(test_task.targets)
 
 
-	db.session.delete(test_task)
+	db.session.delete(task)
 	db.session.commit()
 
 
@@ -117,18 +117,15 @@ def test_task_targets_route_unschedule(client, model_test_profile): # pylint: di
 	test_task.name = test_task.name+' unschedule '+str(random())
 	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
-	test_scheduled_target = ScheduledTarget(target='testtarget')
-	test_scheduled_target.task = test_task
-	persist_and_detach(test_scheduled_target)
 
 
 	form = client.get(url_for('scheduler.task_targets_route', task_id=test_task.id, action='unschedule')).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
-	scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == test_task).all()
-	assert not scheduled_targets
+	task = Task.query.filter(Task.id == test_task.id).one_or_none()
+	assert not task.scheduled_targets
 
 
-	db.session.delete(test_task)
+	db.session.delete(task)
 	db.session.commit()

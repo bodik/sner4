@@ -37,7 +37,8 @@ def create_test_task():
 		name='task name',
 		targets=['1', '2', '3'],
 		group_size=2,
-		priority=10)
+		priority=10,
+		scheduled_targets=['4'])
 
 
 @pytest.fixture(scope='session')

@@ -4,7 +4,7 @@ import json
 from flask import url_for
 from http import HTTPStatus
 from sner.server.extensions import db
-from sner.server.model.scheduler import Job, ScheduledTarget, Task
+from sner.server.model.scheduler import Job, Task
 
 from tests.server import persist_and_detach
 from tests.server.model.scheduler import create_test_job, model_test_profile, model_test_task # pylint: disable=unused-import
@@ -21,14 +21,14 @@ def test_job_list_route(client):
 def test_job_assign_route(client, model_test_task): # pylint: disable=redefined-outer-name
 	"""assign route test"""
 
-	task = Task.query.filter(Task.id == model_test_task.id).one_or_none()
-	db.session.add(ScheduledTarget(target=task.targets[0], task=task))
-	db.session.commit()
+	test_task = model_test_task
 
 
-	response = client.get(url_for('scheduler.job_assign_route', task_id=task.id))
+	response = client.get(url_for('scheduler.job_assign_route', task_id=test_task.id))
 	assert response.status_code == HTTPStatus.OK
 	assert isinstance(json.loads(response.body.decode('utf-8')), dict)
+
+	task = Task.query.filter(Task.id == test_task.id).one_or_none()
 	assert len(task.jobs) == 1
 
 

@@ -1,13 +1,16 @@
 """job controler"""
 
 import json
+import random
 import uuid
 from flask import jsonify, redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
-from sner.server.model.scheduler import Job, ScheduledTarget, Task
+from sner.server.model.scheduler import Job, Task
 from sner.server.utils import wait_for_lock
+from sqlalchemy import cast, String
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.expression import func
 
 
@@ -26,28 +29,26 @@ def job_assign_route(task_id=None):
 	"""assign job for worker"""
 
 	assignment = {}
-	targets = []
-	wait_for_lock(ScheduledTarget.__tablename__)
+	wait_for_lock(Task.__tablename__)
 
-	task = Task.query.filter(Task.scheduled_targets.any())
+	task = Task.query.filter(cast(Task.scheduled_targets, String) != '[]')
 	if task_id:
 		task = task.filter(Task.id == task_id)
 	task = task.order_by(Task.priority.desc()).first()
 
 	if task:
-		scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == task).order_by(func.random()).limit(task.group_size).all()
-		if scheduled_targets:
-			for item in scheduled_targets:
-				targets.append(item.target)
-				db.session.delete(item)
+		assigned_targets = []
+		for _ in range(min(task.group_size, len(task.scheduled_targets))):
+			assigned_targets.append(task.scheduled_targets.pop(random.randrange(len(task.scheduled_targets))))
+		flag_modified(task, 'scheduled_targets')
 
-			assignment = {
-				"id": str(uuid.uuid4()),
-				"module": task.profile.module,
-				"params": task.profile.params,
-				"targets": targets}
-			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=targets)
-			db.session.add(job)
+		assignment = {
+			"id": str(uuid.uuid4()),
+			"module": task.profile.module,
+			"params": task.profile.params,
+			"targets": assigned_targets}
+		job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=assigned_targets)
+		db.session.add(job)
 
 	# at least, we have to clear the lock
 	db.session.commit()
