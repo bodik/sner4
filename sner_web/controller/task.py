@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, url_for
-from sner4web.extensions import db
-from sner4web.forms import TaskForm, DeleteButtonForm
-from sner4web.models import Task
+from sner_web.extensions import db
+from sner_web.forms import TaskForm, DeleteButtonForm
+from sner_web.models import Task
 
 
 blueprint = Blueprint("task", __name__)

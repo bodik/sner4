@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from sner4web.extensions import db
+from sner_web.extensions import db
 from sqlalchemy.types import TypeDecorator
 
 

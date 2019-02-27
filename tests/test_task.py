@@ -1,8 +1,8 @@
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from sner4web.extensions import db
-from sner4web.models import Task
+from sner_web.extensions import db
+from sner_web.models import Task
 
 
 def create_test_task():

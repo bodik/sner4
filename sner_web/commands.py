@@ -1,6 +1,6 @@
 import click
 from flask.cli import with_appcontext
-from sner4web.extensions import db
+from sner_web.extensions import db
 
 
 @click.command(name="initdb", help="creates database")

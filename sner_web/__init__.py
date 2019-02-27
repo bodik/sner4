@@ -1,12 +1,12 @@
 from flask import flash, Flask, render_template
-from sner4web.commands import initdb
-from sner4web.controller import task
-from sner4web.extensions import db, toolbar
-from sner4web.models import Task
+from sner_web.commands import initdb
+from sner_web.controller import task
+from sner_web.extensions import db, toolbar
+from sner_web.models import Task
 
 
 
-def create_app(config_file="sner4web.cfg"):
+def create_app(config_file="sner_web.cfg"):
 	app = Flask(__name__)
 	app.config.from_pyfile(config_file)
 
