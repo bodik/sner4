@@ -4,7 +4,7 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import NestedMutableJson
-from .extensions import db
+from sner.server.extensions import db
 
 
 class Profile(db.Model):

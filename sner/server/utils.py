@@ -3,7 +3,7 @@ shared utilities
 """
 
 import time
-from .extensions import db
+from sner.server.extensions import db
 
 
 def wait_for_lock(table):

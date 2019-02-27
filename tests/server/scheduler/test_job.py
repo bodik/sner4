@@ -8,8 +8,8 @@ from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner.server.extensions import db
-from sner.server.models import Job, ScheduledTarget, Task
-from . import persist_and_detach
+from sner.server.model.scheduler import Job, ScheduledTarget, Task
+from .. import persist_and_detach
 from .test_profile import model_test_profile # pylint: disable=unused-import
 from .test_task import model_test_task # pylint: disable=unused-import
 

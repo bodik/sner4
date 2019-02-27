@@ -2,8 +2,8 @@
 
 import click
 from flask.cli import with_appcontext
-from .extensions import db
-from .models import Profile, Task
+from sner.server.extensions import db
+from sner.server.model.scheduler import Profile, Task
 
 
 @click.command(name='sner_init_db', help='initialize database schema')

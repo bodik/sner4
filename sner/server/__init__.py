@@ -1,10 +1,9 @@
 """main application package module"""
 
 from flask import flash, Flask, render_template
-from .commands import init_db, init_data
-from .controller import job, profile, task
-from .extensions import db, toolbar
-from .models import Profile, Task
+from sner.server.commands import init_db, init_data
+from sner.server.controller.scheduler import job, profile, task
+from sner.server.extensions import db, toolbar
 
 
 def create_app():
@@ -16,9 +15,9 @@ def create_app():
 	toolbar.init_app(app)
 	db.init_app(app)
 
-	app.register_blueprint(job.blueprint, url_prefix='/job')
-	app.register_blueprint(profile.blueprint, url_prefix='/profile')
-	app.register_blueprint(task.blueprint, url_prefix='/task')
+	app.register_blueprint(job.blueprint, url_prefix='/scheduler/job')
+	app.register_blueprint(profile.blueprint, url_prefix='/scheduler/profile')
+	app.register_blueprint(task.blueprint, url_prefix='/scheduler/task')
 
 	app.cli.add_command(init_db)
 	app.cli.add_command(init_data)

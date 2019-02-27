@@ -3,21 +3,22 @@
 import json
 import uuid
 from flask import Blueprint, jsonify, redirect, render_template, url_for
+from sner.server.extensions import db
+from sner.server.form import GenericButtonForm
+from sner.server.model.scheduler import Job, ScheduledTarget, Task
+from sner.server.utils import wait_for_lock
 from sqlalchemy.sql.expression import func
-from ..extensions import db
-from ..forms import GenericButtonForm
-from ..models import Job, ScheduledTarget, Task
-from ..utils import wait_for_lock
 
 
-blueprint = Blueprint('job', __name__) # pylint: disable=invalid-name
+blueprint = Blueprint('job', __name__)
+
 
 @blueprint.route('/list')
 def list_route():
 	"""list jobs"""
 
 	jobs = Job.query.all()
-	return render_template('job/list.html', jobs=jobs, generic_button_form=GenericButtonForm())
+	return render_template('scheduler/job/list.html', jobs=jobs, generic_button_form=GenericButtonForm())
 
 
 #TODO: post? csfr protection?
