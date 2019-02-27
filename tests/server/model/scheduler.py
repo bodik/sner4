@@ -43,8 +43,8 @@ def create_test_job(a_test_queue):
 
 	return Job(
 		id=str(uuid.uuid4()),
-		assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
 		queue=a_test_queue,
+		assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
 		time_start=datetime.datetime.now(),
 		time_end=datetime.datetime.now())
 

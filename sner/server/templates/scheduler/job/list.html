@@ -8,10 +8,10 @@
 	<thead>
 		<tr>
 			<th>id</th>
+			<th>queue</th>
 			<th>assignment</th>
 			<th>retval</th>
 			<th>output</th>
-			<th>queue</th>
 			<th>time_start</th>
 			<th>time_end</th>
 			<th></th>
@@ -21,10 +21,10 @@
 		{% for job in jobs %}
 		<tr>
 			<td>{{ job.id }}</td>
+			<td>{{ job.queue }}</td>
 			<td>{{ job.assignment }}</td>
 			<td>{{ job.retval }}</td>
 			<td>{{ job.output }}</td>
-			<td>{{ job.queue }}</td>
 			<td>{{ job.time_start|datetime }}</td>
 			<td>{{ job.time_end|datetime }}</td>
 			<td>
