@@ -1,3 +1,5 @@
+"""main sner module"""
+
 from flask import flash, Flask, render_template
 from sner_web.commands import initdb
 from sner_web.controller import profile, task
@@ -7,6 +9,8 @@ from sner_web.models import Profile, Task
 
 
 def create_app():
+	"""flask application factory"""
+
 	app = Flask(__name__)
 	app.config.from_envvar("SNER_CONFIG")
 
@@ -19,7 +23,7 @@ def create_app():
 	app.cli.add_command(initdb)
 
 	@app.route("/")
-	def index():
+	def index_route(): # pylint: disable=unused-variable
 		flash("info", "info")
 		flash("success", "success")
 		flash("warning", "warning")

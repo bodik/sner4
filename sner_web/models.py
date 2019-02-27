@@ -1,5 +1,8 @@
-from datetime import datetime
+"""main models"""
+# pylint: disable=too-few-public-methods,abstract-method
+
 import json
+from datetime import datetime
 from sner_web.extensions import db
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
@@ -8,6 +11,8 @@ from sqlalchemy.types import TypeDecorator
 
 # model item to put basic structures to db
 class Json(TypeDecorator):
+	"""json type, allow to store basic structures (namely list) to database"""
+
 	impl = db.Text
 	def process_bind_param(self, value, dialect):
 		return json.dumps(value)
@@ -17,6 +22,8 @@ class Json(TypeDecorator):
 
 
 class Profile(db.Model):
+	"""holds setting for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
+
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1024))
 	arguments = db.Column(db.Text())
@@ -27,6 +34,8 @@ class Profile(db.Model):
 
 
 class Task(db.Model):
+	"""profile assignment for concrete targets"""
+
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1024))
 	priority = db.Column(db.Integer(), nullable=False)

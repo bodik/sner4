@@ -1,0 +1,16 @@
+[BASIC]
+good-names=id
+
+
+[FORMAT]
+max-line-length=150
+indent-string=\t
+indent-after-paren=1
+
+
+[TYPECHECK]
+ignored-classes=SQLAlchemy, sqlalchemy.orm.scoping.scoped_session
+
+
+[MESSAGES CONTROL]
+disable=wrong-import-order

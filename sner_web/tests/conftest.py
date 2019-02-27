@@ -1,21 +1,24 @@
-from sner_web.tests.test_profile import create_test_profile
+"""pytest config and fixtures"""
+
 import pytest
-from sner_web import create_app, db
+from sner_web import create_app
 from webtest import TestApp
 
 
 
 @pytest.fixture(scope="session")
-def app(request):
-	app = create_app()
-	ctx = app.test_request_context()
+def app():
+	"""yield application as pytest fixture"""
+
+	_app = create_app()
+	ctx = _app.test_request_context()
 	ctx.push()
-	yield app
+	yield _app
 	ctx.pop()
 
 
 
 @pytest.fixture(scope="session")
-def client(app):
-	"""A test client for the app."""
+def client(app): # pylint: disable=redefined-outer-name
+	"""create webtest testapp client"""
 	return TestApp(app)

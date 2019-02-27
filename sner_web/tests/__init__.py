@@ -1,3 +1,5 @@
+"""sner_web tests"""
+
 from sner_web import db
 
 

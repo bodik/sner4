@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="tasks">
-	<h1>Tasks list <a class="btn btn-xs btn-success" href="{{ url_for('task.add') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+	<h1>Tasks list <a class="btn btn-xs btn-success" href="{{ url_for('task.add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
 	<table id="tasks_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -28,8 +28,8 @@
 			<td>{{ task.created }}</td>
 			<td>{{ task.modified }}</td>
 			<td>
-				<a class="btn btn-xs btn-primary" href="{{ url_for('task.edit', id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=task_delete_form, form_url=url_for('task.delete', id=task.id) %}{% include 'deletebutton.html' %}{% endwith %}
+				<a class="btn btn-xs btn-primary" href="{{ url_for('task.edit_route', id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=task_delete_form, form_url=url_for('task.delete_route', id=task.id) %}{% include 'deletebutton.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}
