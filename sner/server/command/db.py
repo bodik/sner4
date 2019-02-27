@@ -26,27 +26,28 @@ def db_initdata():
 	"""put initial data to database"""
 
 	task = Task(
-		name='nmap ping host discovery',
-		module='nmap',
-		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sn')
+		name='dummy',
+		module='dummy',
+		params='--dummyparam 1')
 	db.session.add(task)
 	db.session.commit()
 
-	queue = Queue(name='ping localhost', task=task, group_size=5, priority=0, active=True)
+	queue = Queue(name='dummy', task=task, group_size=3, priority=10, active=True)
 	db.session.add(queue)
 	for target in range(100):
 		db.session.add(Target(target=target, queue=queue))
 	db.session.commit()
 
-	queue = Queue(name='ping localhost 1', task=task, group_size=1, priority=10, active=False)
-	db.session.add(queue)
-	for target in range(100):
-		db.session.add(Target(target=target, queue=queue))
-	db.session.commit()
 
 	task = Task(
-		name='nmap default SYN scan',
+		name='tcp fullport scan',
 		module='nmap',
-		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sS')
+		params='-sS -A -p1-65535 -Pn --reason --min-hostgroup 16 --max-retries 4  --min-rate 900 --max-rate 1500') # --data-length?
 	db.session.add(task)
+	db.session.commit()
+
+	queue = Queue(name='netx fullport', task=task, group_size=16, priority=10, active=False)
+	db.session.add(queue)
+	for target in range(100):
+		db.session.add(Target(target='10.0.0.%d'%target, queue=queue))
 	db.session.commit()

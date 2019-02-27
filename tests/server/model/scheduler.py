@@ -70,3 +70,15 @@ def fixture_test_queue(app, fixture_test_task): # pylint: disable=redefined-oute
 	yield test_queue
 	db.session.delete(Queue.query.get(tmpid))
 	db.session.commit()
+
+
+@pytest.fixture()
+def fixture_test_job(app, fixture_test_queue): # pylint: disable=redefined-outer-name,unused-argument
+	"""persistent test job"""
+
+	test_job = create_test_job(fixture_test_queue)
+	persist_and_detach(test_job)
+	tmpid = test_job.id
+	yield test_job
+	db.session.delete(Job.query.get(tmpid))
+	db.session.commit()

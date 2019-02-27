@@ -1,9 +1,15 @@
 """job controler"""
 
+import base64
 import json
+import os
+import re
+import time
 import uuid
-from flask import jsonify, redirect, render_template, url_for
-from sner.server import db, wait_for_lock
+from datetime import datetime
+from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
+from http import HTTPStatus
+from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import GenericButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
@@ -64,6 +70,32 @@ def job_assign_route(queue_id=None):
 	return jsonify(assignment)
 
 
+@blueprint.route('/job/output', methods=['POST'])
+def job_output_route():
+	"""receive output from assigned job"""
+
+	try:
+		assignment_id = request.json['id']
+		retval = request.json['retval']
+		output = base64.b64decode(request.json['output'])
+	except Exception:
+		return Response(status=HTTPStatus.BAD_REQUEST)
+	if not re.match(r'[a-f0-9\-]{32}', assignment_id):
+		return Response(status=HTTPStatus.BAD_REQUEST)
+
+	output_path = os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], assignment_id)
+	with open(output_path, 'wb') as ftmp:
+		ftmp.write(output)
+
+	job = Job.query.filter(Job.id == assignment_id).one_or_none()
+	job.retval = retval
+	job.output = output_path
+	job.time_end = datetime.utcnow()
+	db.session.commit()
+
+	return Response(status=HTTPStatus.OK)
+
+
 @blueprint.route('/job/delete/<job_id>', methods=['GET', 'POST'])
 def job_delete_route(job_id):
 	"""delete job"""
@@ -72,6 +104,8 @@ def job_delete_route(job_id):
 	form = GenericButtonForm()
 
 	if form.validate_on_submit():
+		if job.output:
+			os.remove(job.output)
 		db.session.delete(job)
 		db.session.commit()
 		return redirect(url_for('scheduler.job_list_route'))
