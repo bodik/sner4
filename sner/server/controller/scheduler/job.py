@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from flask import Blueprint, jsonify, redirect, render_template, url_for
+from flask import jsonify, redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
@@ -30,18 +30,18 @@ def job_assign_route(task_id=None):
 
 	task = Task.query.filter(Task.scheduled_targets.any())
 	if task_id:
-		task = task.filter(Task.id==task_id)
+		task = task.filter(Task.id == task_id)
 	task = task.order_by(Task.priority.desc()).first()
 
 	if task:
 		targets = []
-		for i in range(task.group_size):
-			scheduled_target = ScheduledTarget.query.filter(ScheduledTarget.task==task).order_by(func.random()).first()
+		for _ in range(task.group_size):
+			scheduled_target = ScheduledTarget.query.filter(ScheduledTarget.task == task).order_by(func.random()).first()
 			if not scheduled_target:
 				break
 			targets.append(scheduled_target.target)
 			db.session.delete(scheduled_target)
-		
+
 		assignment = {
 			"id": str(uuid.uuid4()),
 			"module": task.profile.module,

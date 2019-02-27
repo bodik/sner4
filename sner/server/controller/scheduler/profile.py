@@ -1,6 +1,6 @@
 """controller profile"""
 
-from flask import Blueprint, redirect, render_template, url_for
+from flask import redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm

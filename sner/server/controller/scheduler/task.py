@@ -1,11 +1,11 @@
 """controller task"""
 
-from flask import Blueprint, redirect, render_template, url_for
+from flask import redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.form.scheduler import TaskForm
-from sner.server.model.scheduler import Job, Profile, ScheduledTarget, Task
+from sner.server.model.scheduler import Profile, ScheduledTarget, Task
 from sner.server.utils import wait_for_lock
 
 
@@ -22,7 +22,7 @@ def task_list_route():
 def task_add_route(profile_id=None):
 	"""add task"""
 
-	form = TaskForm(profile=Profile.query.filter(Profile.id==profile_id).one_or_none())
+	form = TaskForm(profile=Profile.query.filter(Profile.id == profile_id).one_or_none())
 
 	if form.validate_on_submit():
 		task = Task()
@@ -88,4 +88,8 @@ def task_targets_route(task_id, action):
 
 		return redirect(url_for('scheduler.task_list_route'))
 
-	return render_template('button_generic.html', form=form, form_url=url_for('scheduler.task_targets_route', task_id=task_id, action=action), button_caption=action.title())
+	return render_template(
+		'button_generic.html',
+		form=form,
+		form_url=url_for('scheduler.task_targets_route', task_id=task_id, action=action),
+		button_caption=action.title())
