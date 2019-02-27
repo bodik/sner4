@@ -4,7 +4,7 @@ from flask import redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
-from sner.server.form.scheduler import QueueForm
+from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
 from sner.server.model.scheduler import Queue, Target, Task
 from sner.server.utils import wait_for_lock
 from sqlalchemy import func
@@ -29,7 +29,7 @@ def queue_list_route():
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
 @blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'])
 def queue_add_route(task_id=None):
-	"""add queue"""
+	"""queue add"""
 
 	form = QueueForm(task=Task.query.filter(Task.id == task_id).one_or_none())
 
@@ -38,8 +38,6 @@ def queue_add_route(task_id=None):
 		#TODO: http parameter pollution vs framework mass-assign vulnerability
 		form.populate_obj(queue)
 		db.session.add(queue)
-		for target in form.data["targets_field"]:
-			db.session.add(Target(target=target, queue=queue))
 		db.session.commit()
 		return redirect(url_for('scheduler.queue_list_route'))
 
@@ -48,29 +46,55 @@ def queue_add_route(task_id=None):
 
 @blueprint.route('/queue/edit/<queue_id>', methods=['GET', 'POST'])
 def queue_edit_route(queue_id):
-	"""edit queue"""
+	"""queue edit"""
 
 	queue = Queue.query.get(queue_id)
 	form = QueueForm(obj=queue)
 
 	if form.validate_on_submit():
 		form.populate_obj(queue)
-		#TODO: better targets update handling, full replacement would not work on just update of the priority in the middle of the task
-		wait_for_lock(Target.__tablename__)
-		for target in Target.query.filter(Target.queue == queue).all():
-			db.session.delete(target)
-		for target in form.data["targets_field"]:
-			db.session.add(Target(target=target, queue=queue))
 		db.session.commit()
 		return redirect(url_for('scheduler.queue_list_route'))
 
-	form.targets_field.data = [tmp.target for tmp in Target.query.filter(Target.queue == queue).all()]
 	return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_edit_route', queue_id=queue_id))
+
+
+@blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
+def queue_enqueue_route(queue_id):
+	"""queue enqueue"""
+
+	queue = Queue.query.get(queue_id)
+	form = QueueEnqueueForm()
+
+	if form.validate_on_submit():
+		targets = []
+		for target in form.data["targets"]:
+			targets.append({'target': target, 'queue_id': queue.id})
+		db.session.bulk_insert_mappings(Target, targets)
+		db.session.commit()
+		return redirect(url_for('scheduler.queue_list_route'))
+
+	return render_template('scheduler/queue/enqueue.html', form=form, form_url=url_for('scheduler.queue_enqueue_route', queue_id=queue_id))
+
+
+@blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
+def queue_flush_route(queue_id):
+	"""queue flush"""
+
+	queue = Queue.query.get(queue_id)
+	form = GenericButtonForm()
+
+	if form.validate_on_submit():
+		db.session.query(Target).filter(Target.queue_id == queue.id).delete()
+		db.session.commit()
+		return redirect(url_for('scheduler.queue_list_route'))
+
+	return render_template('button_generic.html', form=form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id), button_caption='Flush')
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
 def queue_delete_route(queue_id):
-	"""delete queue"""
+	"""queue delete"""
 
 	queue = Queue.query.get(queue_id)
 	form = GenericButtonForm()

@@ -24,4 +24,8 @@ class QueueForm(FlaskForm):
 	priority = IntegerField(label='Priority', default=0)
 	active = BooleanField(label='Active')
 
-	targets_field = LinesField(label='Targets')
+
+class QueueEnqueueForm(FlaskForm):
+	"""queue enqueue form"""
+
+	targets = LinesField(label='Targets')
