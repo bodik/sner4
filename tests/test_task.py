@@ -1,12 +1,17 @@
 from flask import url_for
 from http import HTTPStatus
+import pytest
 from random import random
 from sner_web.extensions import db
 from sner_web.models import Task
+from test_profile import create_test_profile
 
 
 def create_test_task():
-	return Task(name="task name", targets=["1", "2", "3"])
+	return Task( \
+		name="task name",
+		priority=10,
+		targets=["1", "2", "3"])
 
 
 
@@ -24,6 +29,7 @@ def test_add(client):
 
 	form = client.get(url_for("task.add")).form
 	form["name"] = test_task.name
+	form["priority"] = test_task.priority
 	form["targets"] = "\n".join(test_task.targets)
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND

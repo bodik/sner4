@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profiles">
+	<h1>Profiles list <a class="btn btn-xs btn-success" href="{{ url_for('profile.add') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+
+	<table id="tasks_table" class="datatable table table-hover table-responsive">
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>name</th>
+			<th>arguments</th>
+			<th>tasks</th>
+			<th>created</th>
+			<th>modified</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for profile in profiles %}
+		<tr>
+			<td>{{ profile.id }}</td>
+			<td>{{ profile.name }}</td>
+			<td>{{ profile.arguments }}</td>
+			<td>{{ profile.tasks }}</td>
+			<td>{{ profile.created }}</td>
+			<td>{{ profile.modified }}</td>
+			<td>
+				<a class="btn btn-xs btn-primary" href="{{ url_for('profile.edit', id=profile.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=profile_delete_form, form_url=url_for('profile.delete', id=profile.id) %}{% include 'deletebutton.html' %}{% endwith %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
+{% endblock %}

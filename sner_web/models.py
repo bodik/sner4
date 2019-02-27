@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from sner_web.extensions import db
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
 
 
@@ -14,9 +15,22 @@ class Json(TypeDecorator):
 
 
 
+class Profile(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(1024))
+	arguments = db.Column(db.Text())
+	tasks = relationship("Task", back_populates="profile")
+	created = db.Column(db.DateTime(), default=datetime.utcnow)
+	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+
 class Task(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1024))
-	targets = db.Column(Json(), default=list, nullable=False)
+	priority = db.Column(db.Integer(), nullable=False)
+	profile_id = db.Column(db.Integer(), db.ForeignKey("profile.id"))
+	profile = relationship("Profile", back_populates="tasks")
+	targets = db.Column(Json(), nullable=False)
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
