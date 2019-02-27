@@ -12,9 +12,9 @@
 		<tr>
 			<th>id</th>
 			<th>name</th>
-			<th>priority</th>
 			<th>profile</th>
 			<th>targets | queued</th>
+			<th>priority</th>
 			<th>created</th>
 			<th>modified</th>
 			<th></th>
@@ -25,11 +25,11 @@
 		<tr>
 			<td>{{ task.id }}</td>
 			<td>{{ task.name }}</td>
-			<td>{{ task.priority }}</td>
 			<td>{{ task.profile }}</td>
 			<td>{{ task.targets|length }} | {{ task.scheduled_targets|length }}</td>
-			<td>{{ task.created }}</td>
-			<td>{{ task.modified }}</td>
+			<td>{{ task.priority }}</td>
+			<td>{{ task.created|datetime }}</td>
+			<td>{{ task.modified|datetime }}</td>
 			<td>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('task.edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 				{% with form=generic_button_form, form_url=url_for('task.targets_route', task_id=task.id, action='schedule'), button_caption='Schedule' %}{% include 'button_generic.html' %}{% endwith %}

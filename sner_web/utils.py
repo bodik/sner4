@@ -1,9 +1,17 @@
-"""shared utilities"""
+"""
+shared utilities
+"""
 
-from sner_web.extensions import db
+import time
+from .extensions import db
 
 
 def wait_for_lock(table):
+	"""
+	wait for database lock
+	"""
+
+	#TODO: passive wait for lock
 	while True:
 		try:
 			db.session.execute('LOCK TABLE %s' % table)

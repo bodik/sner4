@@ -1,9 +1,9 @@
 """controller profile"""
 
 from flask import Blueprint, redirect, render_template, url_for
-from sner_web.extensions import db
-from sner_web.forms import ProfileForm, GenericButtonForm
-from sner_web.models import Profile
+from ..extensions import db
+from ..forms import ProfileForm, GenericButtonForm
+from ..models import Profile
 
 
 blueprint = Blueprint('profile', __name__) # pylint: disable=invalid-name

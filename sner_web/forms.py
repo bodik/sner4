@@ -1,9 +1,9 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from sner_web.models import Profile
 from wtforms import IntegerField, StringField, TextAreaField, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from .models import Profile
 
 
 class LinesField(TextAreaField):
@@ -32,13 +32,14 @@ class ProfileForm(FlaskForm):
 	"""profile edit form"""
 
 	name = StringField(label='Name', validators=[validators.Length(max=1024)])
-	arguments = TextAreaField(label='Arguments')
+	module = StringField(label='Module', validators=[validators.Length(max=100)])
+	params = TextAreaField(label='Parameters')
 
 
 class TaskForm(FlaskForm):
 	"""task edit form"""
 
 	name = StringField(label='Name', validators=[validators.Length(max=1024)])
-	priority = IntegerField(label='Priority', default=0)
 	profile = QuerySelectField(query_factory=lambda: Profile.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
 	targets = LinesField(label='Targets', validators=[validators.Length(max=1024)])
+	priority = IntegerField(label='Priority', default=0)

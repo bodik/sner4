@@ -1,8 +1,8 @@
 """pytest config and fixtures"""
 
 import pytest
-from sner_web import create_app
 from webtest import TestApp
+from .. import create_app
 
 
 @pytest.fixture(scope='session')

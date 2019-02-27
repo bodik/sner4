@@ -1,10 +1,10 @@
 """main application package module"""
 
 from flask import flash, Flask, render_template
-from sner_web.commands import init_db, init_data
-from sner_web.controller import profile, task
-from sner_web.extensions import db, toolbar
-from sner_web.models import Profile, Task
+from .commands import init_db, init_data
+from .controller import profile, task
+from .extensions import db, toolbar
+from .models import Profile, Task
 
 
 def create_app():
@@ -29,5 +29,12 @@ def create_app():
 		flash('warning', 'warning')
 		flash('error', 'error')
 		return render_template('index.html')
+
+	@app.template_filter('datetime')
+	def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"):
+		"""Format a datetime"""
+		if value is None:
+			return ""
+		return value.strftime(fmt)
 
 	return app

@@ -4,16 +4,17 @@ import pytest
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from sner_web.extensions import db
-from sner_web.models import Profile
-from sner_web.tests import persist_and_detach
+from ..extensions import db
+from ..models import Profile
+from ..tests import persist_and_detach
 
 
 def create_test_profile():
 	"""test profile data"""
 	return Profile(
 		name='test profile name',
-		arguments='--arg1 abc --arg2')
+		module='test',
+		params='--arg1 abc --arg2')
 
 
 @pytest.fixture(scope='session')
@@ -43,14 +44,16 @@ def test_add_route(client):
 
 	form = client.get(url_for('profile.add_route')).form
 	form['name'] = test_profile.name
-	form['arguments'] = test_profile.arguments
+	form['module'] = test_profile.module
+	form['params'] = test_profile.params
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
 	profile = Profile.query.filter(Profile.name == test_profile.name).one_or_none()
 	assert profile is not None
 	assert profile.name == test_profile.name
-	assert profile.arguments == test_profile.arguments
+	assert profile.module == test_profile.module
+	assert profile.params == test_profile.params
 
 
 	db.session.delete(profile)
@@ -67,14 +70,14 @@ def test_edit_route(client):
 
 	form = client.get(url_for('profile.edit_route', profile_id=test_profile.id)).form
 	form['name'] = form['name'].value+' edited'
-	form['arguments'] = form['arguments'].value+' added_argument'
+	form['params'] = form['params'].value+' added_parameter'
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
 	profile = Profile.query.filter(Profile.id == test_profile.id).one_or_none()
 	assert profile is not None
 	assert profile.name == form['name'].value
-	assert 'added_argument' in profile.arguments
+	assert 'added_parameter' in profile.params
 	assert profile.modified > profile.created
 
 

@@ -4,10 +4,10 @@ import logging
 import uuid
 import time
 from flask import Blueprint, jsonify, redirect, render_template, url_for
-from sner_web.extensions import db
-from sner_web.forms import GenericButtonForm, TaskForm
-from sner_web.models import Profile, ScheduledTarget, Task
-from sner_web.utils import wait_for_lock
+from ..extensions import db
+from ..forms import GenericButtonForm, TaskForm
+from ..models import Profile, ScheduledTarget, Task
+from ..utils import wait_for_lock
 
 
 blueprint = Blueprint('task', __name__) # pylint: disable=invalid-name

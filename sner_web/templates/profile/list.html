@@ -9,7 +9,8 @@
 		<tr>
 			<th>id</th>
 			<th>name</th>
-			<th>arguments</th>
+			<th>module</th>
+			<th>params</th>
 			<th>tasks</th>
 			<th>created</th>
 			<th>modified</th>
@@ -21,10 +22,11 @@
 		<tr>
 			<td>{{ profile.id }}</td>
 			<td>{{ profile.name }}</td>
-			<td>{{ profile.arguments }}</td>
+			<td>{{ profile.module }}</td>
+			<td>{{ profile.params }}</td>
 			<td>{{ profile.tasks }}</td>
-			<td>{{ profile.created }}</td>
-			<td>{{ profile.modified }}</td>
+			<td>{{ profile.created|datetime }}</td>
+			<td>{{ profile.modified|datetime }}</td>
 			<td>
 				<a class="btn btn-xs btn-default" href="{{ url_for('task.add_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-plus"></span> Task</a>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('profile.edit_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>

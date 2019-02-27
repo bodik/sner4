@@ -3,10 +3,10 @@
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from sner_web.extensions import db
-from sner_web.models import Task, ScheduledTarget
-from sner_web.tests import persist_and_detach
-from sner_web.tests.test_profile import model_test_profile # pylint: disable=unused-import
+from ..extensions import db
+from ..models import Task, ScheduledTarget
+from ..tests import persist_and_detach
+from ..tests.test_profile import model_test_profile # pylint: disable=unused-import
 
 
 def create_test_task():

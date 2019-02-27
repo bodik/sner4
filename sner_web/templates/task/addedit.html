@@ -7,16 +7,13 @@
 
 	<form class="form-horizontal" action="{{ form_url }}" method="post">
 		{{ form.csrf_token }}
-
-		{{ b_wtf.bootstrap_field(form.profile, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.priority, horizontal=True) }}
-
+		{{ b_wtf.bootstrap_field(form.profile, horizontal=True) }}
 		<div class="form-group">
 			{{ form.targets.label(class="col-sm-2 control-label") }}
 			<div class="col-sm-10">{{ form.targets(class="form-control", rows="10")|safe }}</div>
 		</div>
-
+		{{ b_wtf.bootstrap_field(form.priority, horizontal=True) }}
 		<div class="form-group">
 			<label class="col-sm-2 control-label"></label>
 			<div class="col-sm-10"><button class="btn-default btn" type="submit">Save</button></div>
