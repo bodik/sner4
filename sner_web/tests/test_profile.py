@@ -1,14 +1,27 @@
 from flask import url_for
 from http import HTTPStatus
+import pytest
 from random import random
 from sner_web.extensions import db
 from sner_web.models import Profile
+from sner_web.tests import persist_and_detach
+
 
 
 def create_test_profile():
 	return Profile( \
 		name="test profile name",
 		arguments="--arg1 abc --arg2")
+
+
+
+@pytest.fixture(scope="session")
+def model_test_profile(app):
+	test_profile = persist_and_detach(create_test_profile())
+	yield test_profile
+	test_profile = Profile.query.get(test_profile.id)
+	db.session.delete(test_profile)
+	db.session.commit()
 
 
 
@@ -45,10 +58,7 @@ def test_edit(client):
 	# create a test-specific testing data, might be replaced by fixtures but we got with this for now
 	test_profile = create_test_profile()
 	test_profile.name = test_profile.name+" edit "+str(random())
-	db.session.add(test_profile) # add the new object to session
-	db.session.commit() # commit it's creating
-	db.session.refresh(test_profile) # refresh all attributes, eg. fetch at least it's assigned id
-	db.session.expunge(test_profile) # detach the object from session to have the independent data available for following testcase
+	persist_and_detach(test_profile)
 
 
 	form = client.get(url_for("profile.edit", id=test_profile.id)).form
@@ -72,10 +82,7 @@ def test_edit(client):
 def test_delete(client):
 	test_profile = create_test_profile()
 	test_profile.name = test_profile.name+" delete "+str(random())
-	db.session.add(test_profile)
-	db.session.commit()
-	db.session.refresh(test_profile)
-	db.session.expunge(test_profile)
+	persist_and_detach(test_profile)
 
 
 	form = client.get(url_for("profile.delete", id=test_profile.id)).form

@@ -4,7 +4,9 @@ import pytest
 from random import random
 from sner_web.extensions import db
 from sner_web.models import Task
-from test_profile import create_test_profile
+from sner_web.tests import persist_and_detach
+from sner_web.tests.test_profile import model_test_profile
+
 
 
 def create_test_task():
@@ -22,14 +24,16 @@ def test_list(client):
 
 
 
-def test_add(client):
+def test_add(client, model_test_profile):
 	test_task = create_test_task()
 	test_task.name = test_task.name+" add "+str(random())
+	test_task.parent = model_test_profile
 
 
 	form = client.get(url_for("task.add")).form
 	form["name"] = test_task.name
 	form["priority"] = test_task.priority
+	form["profile"] = test_task.parent.id
 	form["targets"] = "\n".join(test_task.targets)
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
@@ -45,14 +49,11 @@ def test_add(client):
 
 
 
-def test_edit(client):
-	# create a test-specific testing data, might be replaced by fixtures but we got with this for now
+def test_edit(client, model_test_profile):
 	test_task = create_test_task()
 	test_task.name = test_task.name+" edit "+str(random())
-	db.session.add(test_task) # add the new object to session
-	db.session.commit() # commit it's creating
-	db.session.refresh(test_task) # refresh all attributes, eg. fetch at least it's assigned id
-	db.session.expunge(test_task) # detach the object from session to have the independent data available for following testcase
+	test_task.parent = model_test_profile
+	persist_and_detach(test_task)
 
 
 	form = client.get(url_for("task.edit", id=test_task.id)).form
@@ -73,13 +74,11 @@ def test_edit(client):
 
 
 
-def test_delete(client):
+def test_delete(client, model_test_profile):
 	test_task = create_test_task()
 	test_task.name = test_task.name+" delete "+str(random())
-	db.session.add(test_task)
-	db.session.commit()
-	db.session.refresh(test_task)
-	db.session.expunge(test_task)
+	test_task.parent = model_test_profile
+	persist_and_detach(test_task)
 
 
 	form = client.get(url_for("task.delete", id=test_task.id)).form
