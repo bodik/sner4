@@ -18,7 +18,7 @@ def create_test_profile():
 
 
 @pytest.fixture(scope='session')
-def model_test_profile(app): # pylint: disable=unused-argument
+def model_test_profile():
 	"""persistent test profile"""
 	test_profile = persist_and_detach(create_test_profile())
 	yield test_profile

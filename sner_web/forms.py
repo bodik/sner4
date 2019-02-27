@@ -31,7 +31,7 @@ class GenericButtonForm(FlaskForm):
 class ProfileForm(FlaskForm):
 	"""profile edit form"""
 
-	name = StringField(label='Name', validators=[validators.Length(max=1024)])
+	name = StringField(label='Name', validators=[validators.Length(max=1000)])
 	module = StringField(label='Module', validators=[validators.Length(max=100)])
 	params = TextAreaField(label='Parameters')
 
@@ -39,7 +39,8 @@ class ProfileForm(FlaskForm):
 class TaskForm(FlaskForm):
 	"""task edit form"""
 
-	name = StringField(label='Name', validators=[validators.Length(max=1024)])
+	name = StringField(label='Name', validators=[validators.Length(max=1000)])
 	profile = QuerySelectField(query_factory=lambda: Profile.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
-	targets = LinesField(label='Targets', validators=[validators.Length(max=1024)])
+	targets = LinesField(label='Targets', validators=[validators.Length(max=1000)])
+	group_size = IntegerField(label='Group size', default=1)
 	priority = IntegerField(label='Priority', default=0)

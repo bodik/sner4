@@ -27,9 +27,9 @@ def init_data():
 	db.session.commit()
 
 	targets = [str(x) for x in range(1000)]
-	task = Task(name='ping localhost', priority=0, targets=targets, profile=profile)
+	task = Task(name='ping localhost', profile=profile, targets=targets, group_size=5, priority=0)
 	db.session.add(task)
-	task = Task(name='ping localhost 1', priority=0, targets=targets, profile=profile)
+	task = Task(name='ping localhost 1', profile=profile, targets=targets, group_size=1, priority=0)
 	db.session.add(task)
 	db.session.commit()
 

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jobs">
+	<h1>Jobs list <a class="btn btn-xs btn-default" href="{{ url_for('job.assign_route') }}"> Assign</a></h1>
+
+	<table id="jobs_table" class="datatable table table-hover table-responsive">
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>assignment</th>
+			<th>result</th>
+			<th>task</th>
+			<th>targets</th>
+			<th>time_start</th>
+			<th>time_end</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for job in jobs %}
+		<tr>
+			<td>{{ job.id }}</td>
+			<td>{{ job.assignment }}</td>
+			<td>{{ job.result }}</td>
+			<td>{{ job.task }}</td>
+			<td>{{ job.targets }}</td>
+			<td>{{ job.time_start|datetime }}</td>
+			<td>{{ job.time_end|datetime }}</td>
+			<td>
+				{% with form=generic_button_form, form_url=url_for('job.delete_route', job_id=job.id) %}{% include 'button_delete.html' %}{% endwith %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
+{% endblock %}

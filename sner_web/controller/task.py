@@ -1,12 +1,9 @@
 """controller task"""
 
-import logging
-import uuid
-import time
-from flask import Blueprint, jsonify, redirect, render_template, url_for
+from flask import Blueprint, redirect, render_template, url_for
 from ..extensions import db
 from ..forms import GenericButtonForm, TaskForm
-from ..models import Profile, ScheduledTarget, Task
+from ..models import Job, Profile, ScheduledTarget, Task
 from ..utils import wait_for_lock
 
 
@@ -93,21 +90,3 @@ def targets_route(task_id, action):
 		return redirect(url_for('task.list_route'))
 
 	return render_template('button_generic.html', form=form, form_url=url_for('task.targets_route', task_id=task_id, action=action), button_caption=action.title())
-
-
-#TODO: post? csfr protection?
-@blueprint.route('/assign')
-def assign_route():
-	"""assign job for worker"""
-
-	job = {'id': uuid.uuid4(), 'targets': []}
-	wait_for_lock(ScheduledTarget.__tablename__)
-	task = Task.query.filter(Task.scheduled_targets.any()).order_by(Task.priority).first()
-	if task:
-		scheduled_target = ScheduledTarget.query.filter(ScheduledTarget.task==task).first()
-		job['targets'].append(scheduled_target.target)
-		job['arguments'] = task.profile.arguments
-		db.session.delete(scheduled_target)
-	db.session.commit()
-
-	return jsonify(job)

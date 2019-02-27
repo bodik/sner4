@@ -1,9 +1,10 @@
 """controller task tests"""
 
+import pytest
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from ..extensions import db
+from sner_web.extensions import db
 from ..models import Task, ScheduledTarget
 from ..tests import persist_and_detach
 from ..tests.test_profile import model_test_profile # pylint: disable=unused-import
@@ -13,8 +14,21 @@ def create_test_task():
 	"""test task data"""
 	return Task(
 		name='task name',
-		priority=10,
-		targets=['1', '2', '3'])
+		targets=['1', '2', '3'],
+		group_size=2,
+		priority=10)
+
+
+@pytest.fixture(scope='session')
+def model_test_task(model_test_profile): # pylint: disable=redefined-outer-name
+	"""persistent test task"""
+	test_task = create_test_task()
+	test_task.profile = model_test_profile
+	persist_and_detach(test_task)
+	yield test_task
+	test_task = Task.query.get(test_task.id)
+	db.session.delete(test_task)
+	db.session.commit()
 
 
 def test_list_route(client):
@@ -35,9 +49,10 @@ def test_add_route(client, model_test_profile): # pylint: disable=redefined-oute
 
 	form = client.get(url_for('task.add_route')).form
 	form['name'] = test_task.name
-	form['priority'] = test_task.priority
 	form['profile'] = test_task.profile.id
 	form['targets'] = '\n'.join(test_task.targets)
+	form['group_size'] = test_task.group_size
+	form['priority'] = test_task.priority
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 

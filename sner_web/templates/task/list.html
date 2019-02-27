@@ -2,10 +2,7 @@
 
 {% block content %}
 <div class="tasks">
-	<h1>Tasks list
-		<a class="btn btn-xs btn-success" href="{{ url_for('task.add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a>
-		<a class="btn btn-xs btn-default" href="{{ url_for('task.assign_route') }}"> Assign</a>
-	</h1>
+	<h1>Tasks list <a class="btn btn-xs btn-success" href="{{ url_for('task.add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
 	<table id="tasks_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -14,6 +11,7 @@
 			<th>name</th>
 			<th>profile</th>
 			<th>targets | queued</th>
+			<th>group_size</th>
 			<th>priority</th>
 			<th>created</th>
 			<th>modified</th>
@@ -27,6 +25,7 @@
 			<td>{{ task.name }}</td>
 			<td>{{ task.profile }}</td>
 			<td>{{ task.targets|length }} | {{ task.scheduled_targets|length }}</td>
+			<td>{{ task.group_size }}</td>
 			<td>{{ task.priority }}</td>
 			<td>{{ task.created|datetime }}</td>
 			<td>{{ task.modified|datetime }}</td>
