@@ -1,5 +1,6 @@
 #!/bin/sh
 
-BASE="$(dirname $(readlink -f $0))/.."
+BASE="$(readlink -f $(dirname $(readlink -f $0))/..)"
 
+export SNER_CONFIG="${BASE}/sner_web.cfg"
 python -m pytest tests $@
