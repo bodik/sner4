@@ -4,7 +4,7 @@ from flask import url_for
 from http import HTTPStatus
 
 
-def test_index(client):
+def test_index_route(client):
 	"""test root url"""
 
 	response = client.get(url_for('index_route'))
