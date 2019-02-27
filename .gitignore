@@ -2,3 +2,5 @@ env/
 __pycache__/
 *.swp
 sner-server.cfg
+var/
+!var/.placeholder
