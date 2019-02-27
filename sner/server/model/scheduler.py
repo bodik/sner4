@@ -36,6 +36,7 @@ class Task(db.Model):
 	profile_id = db.Column(db.Integer(), db.ForeignKey('profile.id'), nullable=False)
 	group_size = db.Column(db.Integer(), nullable=False)
 	priority = db.Column(db.Integer(), nullable=False)
+	active = db.Column(db.Boolean())
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -54,7 +55,6 @@ class Target(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	target = db.Column(db.Text())
-	scheduled = db.Column(db.Boolean())
 	task_id = db.Column(db.Integer(), db.ForeignKey('task.id'), nullable=False)
 
 	task = relationship('Task', back_populates='targets')

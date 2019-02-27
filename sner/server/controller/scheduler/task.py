@@ -1,6 +1,6 @@
 """controller task"""
 
-from flask import redirect, render_template, url_for
+from flask import current_app, redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
@@ -18,19 +18,11 @@ def task_list_route():
 	count_targets = {}
 	for task_id, count in db.session.query(Target.task_id, func.count(Target.id)).group_by(Target.task_id).all():
 		count_targets[task_id] = count
-	count_scheduled_targets = {}
-	for task_id, count in db.session.query(Target.task_id, func.count(Target.id)).filter(Target.scheduled == True).group_by(Target.task_id).all():
-		count_scheduled_targets[task_id] = count
-	count_jobs = {}
-	for task_id, count in db.session.query(Job.task_id, func.count(Job.id)).group_by(Job.task_id).all():
-		count_jobs[task_id] = count
 
 	return render_template(
 		'scheduler/task/list.html',
 		tasks=tasks,
 		count_targets=count_targets,
-		count_scheduled_targets=count_scheduled_targets,
-		count_jobs=count_jobs,
 		generic_button_form=GenericButtonForm())
 
 
@@ -88,38 +80,3 @@ def task_delete_route(task_id):
 		return redirect(url_for('scheduler.task_list_route'))
 
 	return render_template('button_delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))
-
-
-@blueprint.route('/task/targets/<task_id>/<action>', methods=['GET', 'POST'])
-def task_targets_route(task_id, action):
-	"""schedule/unschedule task targets to queue"""
-
-	task = Task.query.get(task_id)
-	form = GenericButtonForm()
-
-	if form.validate_on_submit():
-		task_targets_action(task, action)
-		return redirect(url_for('scheduler.task_list_route'))
-
-	return render_template(
-		'button_generic.html',
-		form=form,
-		form_url=url_for('scheduler.task_targets_route', task_id=task_id, action=action),
-		button_caption=action.title())
-
-
-def task_targets_action(task, action):
-	"""task targets bussiness logic"""
-
-	wait_for_lock(Target.__tablename__)
-
-	#TODO: refactoring here to simplify code
-	if action == 'schedule':
-		for target in Target.query.filter(Target.task == task).all():
-			target.scheduled = True
-
-	if action == 'unschedule':
-		for target in Target.query.filter(Target.task == task).all():
-			target.scheduled = False
-
-	db.session.commit()

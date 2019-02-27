@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 from sner.server.form import LinesField
 from sner.server.model.scheduler import Profile
-from wtforms import IntegerField, StringField, TextAreaField, validators
+from wtforms import BooleanField, IntegerField, StringField, TextAreaField, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 
@@ -22,5 +22,6 @@ class TaskForm(FlaskForm):
 	profile = QuerySelectField(query_factory=lambda: Profile.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
 	group_size = IntegerField(label='Group size', default=1)
 	priority = IntegerField(label='Priority', default=0)
+	active = BooleanField(label='Active')
 
 	targets_field = LinesField(label='Targets')

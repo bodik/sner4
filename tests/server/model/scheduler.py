@@ -19,7 +19,7 @@ def create_test_profile():
 		params='--arg1 abc --arg2')
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def model_test_profile(app): # pylint: disable=unused-argument
 	"""persistent test profile"""
 
@@ -39,7 +39,7 @@ def create_test_task():
 		priority=10)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-name,unused-argument
 	"""persistent test task"""
 
@@ -55,9 +55,7 @@ def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-
 def create_test_target():
 	"""test target data"""
 
-	return Target(
-		target='testtarget',
-		scheduled=False)
+	return Target(target='testtarget')
 
 
 def create_test_job():

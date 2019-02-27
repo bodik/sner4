@@ -3,7 +3,6 @@
 import click
 from netaddr import IPNetwork
 from flask.cli import with_appcontext
-from sner.server.controller.scheduler.task import task_targets_action
 from sner.server.extensions import db
 from sner.server.model.scheduler import Profile, Target, Task
 from sqlalchemy import func
@@ -67,19 +66,6 @@ def task_delete(task_id):
 		raise RuntimeError('no such task')
 	db.session.delete(task)
 	db.session.commit()
-
-
-@scheduler_command.command(name='task_targets', help='task targets action')
-@click.argument('task_id', type=int)
-@click.argument('action')
-@with_appcontext
-def task_targets(task_id, action):
-	"""schedule/unschedule targets of the task"""
-
-	task = Task.query.filter(Task.id == task_id).one_or_none()
-	if not task:
-		raise RuntimeError('no such task')
-	task_targets_action(task, action)
 
 
 @scheduler_command.command(name='enumips', help='enumerate ip address range')

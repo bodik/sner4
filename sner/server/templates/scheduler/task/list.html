@@ -10,9 +10,10 @@
 			<th>id</th>
 			<th>name</th>
 			<th>profile</th>
-			<th>targets | scheduled | jobs</th>
 			<th>group_size</th>
 			<th>priority</th>
+			<th>active</th>
+			<th>targets</th>
 			<th>created</th>
 			<th>modified</th>
 			<th></th>
@@ -24,15 +25,14 @@
 			<td>{{ task.id }}</td>
 			<td>{{ task.name }}</td>
 			<td>{{ task.profile }}</td>
-			<td>{{ count_targets[task.id]|default(0) }} | {{ count_scheduled_targets[task.id]|default(0) }} | {{ count_jobs[task.id]|default(0) }}</td>
 			<td>{{ task.group_size }}</td>
 			<td>{{ task.priority }}</td>
+			<td>{{ task.active }}</td>
+			<td>{{ count_targets[task.id]|default(0) }}</td>
 			<td>{{ task.created|datetime }}</td>
 			<td>{{ task.modified|datetime }}</td>
 			<td>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.task_edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('scheduler.task_targets_route', task_id=task.id, action='schedule'), button_caption='Schedule' %}{% include 'button_generic.html' %}{% endwith %}
-				{% with form=generic_button_form, form_url=url_for('scheduler.task_targets_route', task_id=task.id, action='unschedule'), button_caption='Unschedule' %}{% include 'button_generic.html' %}{% endwith %}
 				{% with form=generic_button_form, form_url=url_for('scheduler.task_delete_route', task_id=task.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
 		</tr>

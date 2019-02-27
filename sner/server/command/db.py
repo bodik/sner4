@@ -32,16 +32,16 @@ def db_initdata():
 	db.session.add(profile)
 	db.session.commit()
 
-	task = Task(name='ping localhost', profile=profile, group_size=5, priority=0)
+	task = Task(name='ping localhost', profile=profile, group_size=5, priority=0, active=True)
 	db.session.add(task)
 	for target in range(100):
 		db.session.add(Target(target=target, task=task))
 	db.session.commit()
 
-	task = Task(name='ping localhost 1', profile=profile, group_size=1, priority=0)
+	task = Task(name='ping localhost 1', profile=profile, group_size=1, priority=10, active=False)
 	db.session.add(task)
 	for target in range(100):
-		db.session.add(Target(target=target, task=task, scheduled=True))
+		db.session.add(Target(target=target, task=task))
 	db.session.commit()
 
 	profile = Profile(

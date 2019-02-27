@@ -32,23 +32,24 @@ def job_assign_route(task_id=None):
 	if task_id:
 		task = Task.query.filter(Task.id == task_id).one_or_none()
 	else:
-		# select highest priority task with some scheduled targets
+		# select highest priority active task with some targets
 		#TODO: a little magic here which kind of join, if any, is used
-		task = Task.query.filter(Task.id == Target.task_id, Target.scheduled==True).order_by(Task.priority.desc()).first()
+		task = Task.query.filter(Task.active == True, Task.id == Target.task_id).order_by(Task.priority.desc()).first()
 
 	if task:
 		assigned_targets = []
 		for target in Target.query.filter(Target.task == task).order_by(func.random()).limit(task.group_size):
 			assigned_targets.append(target.target)
-			target.scheduled = False
+			db.session.delete(target)
 
-		assignment = {
-			"id": str(uuid.uuid4()),
-			"module": task.profile.module,
-			"params": task.profile.params,
-			"targets": assigned_targets}
-		job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=assigned_targets)
-		db.session.add(job)
+		if assigned_targets:
+			assignment = {
+				"id": str(uuid.uuid4()),
+				"module": task.profile.module,
+				"params": task.profile.params,
+				"targets": assigned_targets}
+			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=assigned_targets)
+			db.session.add(job)
 
 	# at least, we have to clear the lock
 	db.session.commit()

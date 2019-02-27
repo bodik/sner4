@@ -6,7 +6,7 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Target, Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_target, create_test_task, model_test_profile # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_task, create_test_target, model_test_profile # pylint: disable=unused-import
 
 
 def test_task_list_command(runner, model_test_profile): # pylint: disable=redefined-outer-name
@@ -56,9 +56,6 @@ def test_task_delete_command(runner, model_test_profile): # pylint: disable=rede
 	test_task.name = test_task.name+' delete command '+str(random())
 	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
-	test_target = create_test_target()
-	test_target.task = test_task
-	persist_and_detach(test_target)
 
 
 	result = runner.invoke(scheduler_command, ['task_delete', str(test_task.id)])
@@ -66,54 +63,6 @@ def test_task_delete_command(runner, model_test_profile): # pylint: disable=rede
 
 	task = Task.query.filter(Task.id == test_task.id).one_or_none()
 	assert task is None
-
-
-def test_task_targets_command_schedule(runner, model_test_profile): # pylint: disable=redefined-outer-name
-	"""task schedule command test"""
-
-	test_task = create_test_task()
-	test_task.name = test_task.name+' schedule command '+str(random())
-	test_task.profile = model_test_profile
-	persist_and_detach(test_task)
-	test_target = create_test_target()
-	test_target.task = test_task
-	persist_and_detach(test_target)
-	tmpid = test_task.id
-
-
-	result = runner.invoke(scheduler_command, ['task_targets', str(test_task.id), 'schedule'])
-	assert result.exit_code == 0
-
-	task = Task.query.filter(Task.id == tmpid).one_or_none()
-	assert task.targets[0].scheduled
-
-
-	db.session.delete(task)
-	db.session.commit()
-
-
-def test_task_targets_command_unschedule(runner, model_test_profile): # pylint: disable=redefined-outer-name
-	"""task unschedule command test"""
-
-	test_task = create_test_task()
-	test_task.name = test_task.name+' unschedule command '+str(random())
-	test_task.profile = model_test_profile
-	persist_and_detach(test_task)
-	test_target = create_test_target()
-	test_target.task = test_task
-	persist_and_detach(test_target)
-	tmpid = test_task.id
-
-
-	result = runner.invoke(scheduler_command, ['task_targets', str(test_task.id), 'unschedule'])
-	assert result.exit_code == 0
-
-	task = Task.query.filter(Task.id == tmpid).one_or_none()
-	assert not task.targets[0].scheduled
-
-
-	db.session.delete(task)
-	db.session.commit()
 
 
 def test_enumips(runner):

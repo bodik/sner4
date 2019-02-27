@@ -7,7 +7,7 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Job, Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_job, model_test_profile, model_test_task # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_job, create_test_target, model_test_profile, model_test_task # pylint: disable=unused-import
 
 
 def test_job_list_route(client):
@@ -22,6 +22,9 @@ def test_job_assign_route(client, model_test_task): # pylint: disable=redefined-
 	"""assign route test"""
 
 	test_task = model_test_task
+	test_target = create_test_target()
+	test_target.task = test_task
+	persist_and_detach(test_target)
 
 
 	response = client.get(url_for('scheduler.job_assign_route', task_id=test_task.id))
