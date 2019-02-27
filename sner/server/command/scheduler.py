@@ -53,6 +53,7 @@ def queue_add(task_id, **kwargs):
 @click.argument('queue_id', type=int)
 @click.argument('argtargets', nargs=-1)
 @click.option('--file', type=click.File('r'))
+@with_appcontext
 def queue_enqueue(queue_id, argtargets, **kwargs):
 	"""enqueue targets to queue"""
 
@@ -72,6 +73,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
 
 @scheduler_command.command(name='queue_flush', help='flush all targets from queue')
 @click.argument('queue_id', type=int)
+@with_appcontext
 def queue_flush(queue_id):
 	"""flush targets from queue"""
 
