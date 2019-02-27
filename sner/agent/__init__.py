@@ -16,15 +16,15 @@ from contextlib import contextmanager
 from http import HTTPStatus
 
 
-logger = logging.getLogger() # pylint: disable=invalid-name
-logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s %(message)s')
+logger = logging.getLogger('sner.agent') # pylint: disable=invalid-name
+logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
+logger.setLevel(logging.INFO)
 
 
 def run_once(server, queue=None):
 	"""get and process one job"""
 
 	## get the assignment
-	logger.debug('sner.agent attempt to get assignment')
 	url = '%s/scheduler/job/assign' % server
 	if queue:
 		url += '/%s' % queue
@@ -39,7 +39,7 @@ def run_once(server, queue=None):
 
 
 	## process the assignment
-	logger.debug('sner.agent assignment processing')
+	logger.debug('sner.agent processing assignment')
 	jobdir = assignment['id']
 	output = '%s.tar.bz2' % jobdir
 	retval = 1
@@ -56,7 +56,6 @@ def run_once(server, queue=None):
 	with tarfile.open(output, 'w:bz2') as ftmp:
 		ftmp.add(jobdir)
 	shutil.rmtree(jobdir)
-	logger.debug('sner.agent assignment done')
 
 
 	## postback output and retval
@@ -66,10 +65,8 @@ def run_once(server, queue=None):
 	response = requests.post(
 		'%s/scheduler/job/output' % server,
 		json={'id': assignment['id'], 'retval': retval, 'output': output_data})
-	logger.debug(response)
 	if response.status_code == HTTPStatus.OK:
 		os.remove(output)
-	logger.debug('sner.agent uploading assignment output done')
 
 
 	return 0
