@@ -31,16 +31,25 @@ class Profile(db.Model):
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+	def __str__(self):
+		return "<Profile: %s>" % self.name
+
 
 
 class Task(db.Model):
-	"""profile assignment for concrete targets"""
+	"""profile assignment for specific targets"""
 
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1024))
 	priority = db.Column(db.Integer(), nullable=False)
-	profile_id = db.Column(db.Integer(), db.ForeignKey("profile.id"))
-	profile = relationship("Profile", back_populates="tasks")
 	targets = db.Column(Json(), nullable=False)
+	profile_id = db.Column(db.Integer(), db.ForeignKey("profile.id"), nullable=False)
+	profile = relationship("Profile", back_populates="tasks")
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+	def __repr__(self):
+		return "<%s>" % self.name
+
+	def __str__(self):
+		return "<Task: %s>" % self.name

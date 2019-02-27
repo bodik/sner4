@@ -2,8 +2,8 @@
 
 from flask import Blueprint, redirect, render_template, url_for
 from sner_web.extensions import db
-from sner_web.forms import TaskForm, DeleteButtonForm
-from sner_web.models import Task
+from sner_web.forms import DeleteButtonForm, GenericButtonForm, TaskForm
+from sner_web.models import Profile, Task
 
 
 
@@ -21,16 +21,19 @@ def list_route():
 
 
 @blueprint.route("/add", methods=['GET', 'POST'])
-def add_route():
+@blueprint.route("/add/<profile_id>", methods=['GET', 'POST'])
+def add_route(profile_id=None):
 	"""add task"""
 
-	form = TaskForm()
+	form = TaskForm(profile=Profile.query.filter(Profile.id==profile_id).one_or_none())
+
 	if form.validate_on_submit():
 		task = Task()
 		form.populate_obj(task)
 		db.session.add(task)
 		db.session.commit()
 		return redirect(url_for("task.list_route"))
+
 	return render_template("task/addedit.html", form=form, form_url=url_for("task.add_route"))
 
 
@@ -41,10 +44,12 @@ def edit_route(id): # pylint: disable=redefined-builtin
 
 	task = Task.query.get(id)
 	form = TaskForm(obj=task)
+
 	if form.validate_on_submit():
 		form.populate_obj(task)
 		db.session.commit()
 		return redirect(url_for("task.list_route"))
+
 	return render_template("task/addedit.html", form=form, form_url=url_for("task.edit_route", id=id))
 
 
