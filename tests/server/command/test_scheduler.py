@@ -69,13 +69,14 @@ def test_queue_flush_command(runner, fixture_test_queue): # pylint: disable=rede
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
 	persist_and_detach(test_target)
+	tmpid = test_queue.id
 
 
-	result = runner.invoke(scheduler_command, ['queue_flush', str(test_queue.id)])
+	result = runner.invoke(scheduler_command, ['queue_flush', str(tmpid)])
 	assert result.exit_code == 0
 
 
-	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+	queue = Queue.query.filter(Queue.id == tmpid).one_or_none()
 	assert not queue.targets
 
 
