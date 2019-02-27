@@ -2,7 +2,7 @@
 
 from flask import Blueprint, redirect, render_template, url_for
 from sner_web.extensions import db
-from sner_web.forms import DeleteButtonForm, GenericButtonForm, TaskForm
+from sner_web.forms import GenericButtonForm, TaskForm
 from sner_web.models import Profile, Task
 
 

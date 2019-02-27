@@ -28,7 +28,6 @@
 			<td>{{ task.created }}</td>
 			<td>{{ task.modified }}</td>
 			<td>
-				{% with form=generic_button_form, form_url=url_for('task.schedule_route', id=task.id), button_caption='Schedule' %}{% include 'button_generic.html' %}{% endwith %}
 				<a class="btn btn-xs btn-primary" href="{{ url_for('task.edit_route', id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 				{% with form=generic_button_form, form_url=url_for('task.delete_route', id=task.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
