@@ -46,7 +46,6 @@ def create_test_job(a_test_task):
 		assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
 		result=None,
 		task=a_test_task,
-		targets=['1', '2'],
 		time_start=datetime.datetime.now(),
 		time_end=datetime.datetime.now())
 

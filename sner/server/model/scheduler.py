@@ -1,12 +1,6 @@
 """sqlalchemy models"""
 # pylint: disable=too-few-public-methods,abstract-method
 
-# caveat: beware of db.JSON change tracking which works only on full
-# assignment, not for list operations such as .pop(), .append() use
-# sqlalchemy...flag_modified to ensure the change on commit(). alternatives
-# such as NestedMutableJson has severe performance penatly for large (10^3
-# items lists)
-
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from sner.server.extensions import db
@@ -67,7 +61,6 @@ class Job(db.Model):
 	assignment = db.Column(db.Text())
 	result = db.Column(db.LargeBinary)
 	task_id = db.Column(db.Integer(), db.ForeignKey('task.id'), nullable=False)
-	targets = db.Column(db.JSON(), nullable=False)
 	time_start = db.Column(db.DateTime(), default=datetime.utcnow)
 	time_end = db.Column(db.DateTime())
 

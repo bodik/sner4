@@ -48,7 +48,7 @@ def job_assign_route(task_id=None):
 				"module": task.profile.module,
 				"params": task.profile.params,
 				"targets": assigned_targets}
-			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task, targets=assigned_targets)
+			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task)
 			db.session.add(job)
 
 	# at least, we have to clear the lock
