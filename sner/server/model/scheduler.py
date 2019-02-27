@@ -10,7 +10,7 @@ class Task(db.Model):
 	"""holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(1000))
+	name = db.Column(db.String(1000), unique=True)
 	module = db.Column(db.String(100), nullable=False)
 	params = db.Column(db.Text())
 

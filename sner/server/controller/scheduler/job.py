@@ -45,7 +45,10 @@ def job_assign_route(queue_id=None):
 	wait_for_lock(Target.__tablename__)
 
 	if queue_id:
-		queue = Queue.query.filter(Queue.id == queue_id).one_or_none()
+		if queue_id.isnumeric():
+			queue = Queue.query.filter(Queue.id == int(queue_id)).one_or_none()
+		else:
+			queue = Queue.query.filter(Queue.name == queue_id).one_or_none()
 	else:
 		# select highest priority active task with some targets
 		queue = Queue.query.filter(Queue.active, Queue.targets.any()).order_by(Queue.priority.desc()).first()
