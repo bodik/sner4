@@ -3,7 +3,6 @@
 from flask import flash, Flask, render_template
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
-from time import sleep
 
 
 toolbar = DebugToolbarExtension() # pylint: disable=invalid-name
@@ -43,17 +42,3 @@ def create_app():
 		return value.strftime(fmt)
 
 	return app
-
-
-
-def wait_for_lock(table):
-	"""wait for database lock"""
-
-	#TODO: passive wait for lock
-	while True:
-		try:
-			db.session.execute('LOCK TABLE %s' % table)
-			break
-		except Exception:
-			db.session.rollback()
-			sleep(0.01)

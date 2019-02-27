@@ -24,6 +24,17 @@ def job_list_route():
 def job_assign_route(queue_id=None):
 	"""assign job for worker"""
 
+	def wait_for_lock(table):
+		"""wait for database lock"""
+		#TODO: passive wait for lock
+		while True:
+			try:
+				db.session.execute('LOCK TABLE %s' % table)
+				break
+			except Exception:
+				db.session.rollback()
+				time.sleep(0.01)
+
 	assignment = {}
 	wait_for_lock(Target.__tablename__)
 
