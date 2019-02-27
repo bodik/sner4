@@ -4,7 +4,7 @@ from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner.server.extensions import db
-from sner.server.model.scheduler import Target, Queue
+from sner.server.model.scheduler import Queue
 
 from tests.server import persist_and_detach
 from tests.server.model.scheduler import create_test_queue, create_test_target, fixture_test_queue, fixture_test_task # pylint: disable=unused-import
@@ -60,7 +60,6 @@ def test_queue_edit_route(client, fixture_test_queue): # pylint: disable=redefin
 
 	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
 	assert queue.name == form['name'].value
-	assert queue.modified > queue.created
 
 
 def test_queue_delete_route(client, fixture_test_task): # pylint: disable=redefined-outer-name

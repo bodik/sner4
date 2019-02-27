@@ -11,8 +11,6 @@
 			<th>name</th>
 			<th>module</th>
 			<th>params</th>
-			<th>created</th>
-			<th>modified</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -23,8 +21,6 @@
 			<td>{{ task.name }}</td>
 			<td>{{ task.module }}</td>
 			<td>{{ task.params }}</td>
-			<td>{{ task.created|datetime }}</td>
-			<td>{{ task.modified|datetime }}</td>
 			<td>
 				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_add_route', task_id=task.id) }}"><span class="glyphicon glyphicon-plus"></span> Queue</a>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.task_edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>

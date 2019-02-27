@@ -1,11 +1,11 @@
 """controller queue"""
 
-from flask import current_app, redirect, render_template, url_for
+from flask import redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.form.scheduler import QueueForm
-from sner.server.model.scheduler import Job, Queue, Target, Task
+from sner.server.model.scheduler import Queue, Target, Task
 from sner.server.utils import wait_for_lock
 from sqlalchemy import func
 
@@ -56,6 +56,7 @@ def queue_edit_route(queue_id):
 	if form.validate_on_submit():
 		form.populate_obj(queue)
 		#TODO: better targets update handling, full replacement would not work on just update of the priority in the middle of the task
+		wait_for_lock(Target.__tablename__)
 		for target in Target.query.filter(Target.queue == queue).all():
 			db.session.delete(target)
 		for target in form.data["targets_field"]:

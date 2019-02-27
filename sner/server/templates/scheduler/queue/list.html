@@ -14,8 +14,6 @@
 			<th>priority</th>
 			<th>active</th>
 			<th>targets</th>
-			<th>created</th>
-			<th>modified</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -24,13 +22,11 @@
 		<tr>
 			<td>{{ queue.id }}</td>
 			<td>{{ queue.name }}</td>
-			<td>{{ queue.profile }}</td>
+			<td>{{ queue.task }}</td>
 			<td>{{ queue.group_size }}</td>
 			<td>{{ queue.priority }}</td>
 			<td>{{ queue.active }}</td>
 			<td>{{ count_targets[queue.id]|default(0) }}</td>
-			<td>{{ queue.created|datetime }}</td>
-			<td>{{ queue.modified|datetime }}</td>
 			<td>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.queue_edit_route', queue_id=queue.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 				{% with form=generic_button_form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue.id) %}{% include 'button_delete.html' %}{% endwith %}

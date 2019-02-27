@@ -1,7 +1,6 @@
 """job controler"""
 
 import json
-import random
 import uuid
 from flask import jsonify, redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
@@ -34,7 +33,7 @@ def job_assign_route(queue_id=None):
 	else:
 		# select highest priority active task with some targets
 		#TODO: a little magic here which kind of join, if any, is used
-		queue = Queue.query.filter(Queue.active == True, Queue.id == Target.queue_id).order_by(Queue.priority.desc()).first()
+		queue = Queue.query.filter(Queue.active, Queue.id == Target.queue_id).order_by(Queue.priority.desc()).first()
 
 	if queue:
 		assigned_targets = []

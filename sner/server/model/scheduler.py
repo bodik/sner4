@@ -13,8 +13,6 @@ class Task(db.Model):
 	name = db.Column(db.String(1000))
 	module = db.Column(db.String(100), nullable=False)
 	params = db.Column(db.Text())
-	created = db.Column(db.DateTime(), default=datetime.utcnow)
-	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	queues = relationship('Queue', back_populates='task')
 
@@ -31,8 +29,6 @@ class Queue(db.Model):
 	group_size = db.Column(db.Integer(), nullable=False)
 	priority = db.Column(db.Integer(), nullable=False)
 	active = db.Column(db.Boolean())
-	created = db.Column(db.DateTime(), default=datetime.utcnow)
-	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	task = relationship('Task', back_populates='queues')
 	targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')

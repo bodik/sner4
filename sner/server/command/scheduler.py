@@ -23,11 +23,11 @@ def queue_list():
 	for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
 		count_targets[queue_id] = count
 
-	headers = ['id', 'name', 'task', 'targets', 'created', 'modified']
-	fmt = '%-4s %-20s %-40s %-8s %-30s %-30s'
+	headers = ['id', 'name', 'task', 'targets']
+	fmt = '%-4s %-20s %-40s %-8s'
 	print(fmt % tuple(headers))
 	for queue in Queue.query.all():
-		print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0), queue.created, queue.modified))
+		print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
 
 
 @scheduler_command.command(name='queue_add', help='add a new queue')

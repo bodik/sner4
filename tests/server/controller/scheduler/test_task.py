@@ -7,7 +7,7 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_task, fixture_test_task
+from tests.server.model.scheduler import create_test_task, fixture_test_task # pylint: disable=unused-import
 
 
 def test_task_list_route(client):
@@ -43,7 +43,7 @@ def test_task_add_route(client):
 	db.session.commit()
 
 
-def test_task_edit_route(client, fixture_test_task):
+def test_task_edit_route(client, fixture_test_task): # pylint: disable=redefined-outer-name
 	"""task edit route test"""
 
 	test_task = fixture_test_task
@@ -61,7 +61,6 @@ def test_task_edit_route(client, fixture_test_task):
 	assert task
 	assert task.name == form['name'].value
 	assert 'added_parameter' in task.params
-	assert task.modified > task.created
 
 
 def test_task_delete_route(client):
