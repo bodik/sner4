@@ -1,4 +1,4 @@
-"""main forms module"""
+"""flask forms"""
 
 from flask_wtf import FlaskForm
 from sner_web.models import Profile

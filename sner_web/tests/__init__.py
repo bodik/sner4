@@ -1,4 +1,4 @@
-"""sner_web tests"""
+"""tests subpackage"""
 
 from sner_web import db
 

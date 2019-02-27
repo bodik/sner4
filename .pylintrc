@@ -1,7 +1,3 @@
-[BASIC]
-good-names=id
-
-
 [FORMAT]
 max-line-length=150
 indent-string=\t

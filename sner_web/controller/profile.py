@@ -1,4 +1,4 @@
-"""profile entity controller"""
+"""controller profile"""
 
 from flask import Blueprint, redirect, render_template, url_for
 from sner_web.extensions import db

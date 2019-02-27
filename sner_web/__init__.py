@@ -1,4 +1,4 @@
-"""main sner module"""
+"""main application package module"""
 
 from flask import flash, Flask, render_template
 from sner_web.commands import initdb

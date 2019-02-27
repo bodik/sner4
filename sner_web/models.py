@@ -1,4 +1,4 @@
-"""main models"""
+"""sqlalchemy """
 # pylint: disable=too-few-public-methods,abstract-method
 
 import json
@@ -22,7 +22,7 @@ class Json(TypeDecorator):
 
 
 class Profile(db.Model):
-	"""holds setting for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
+	"""holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1024))

@@ -1,4 +1,4 @@
-"""tests for default controller"""
+"""controller default tests"""
 
 from flask import url_for
 from http import HTTPStatus

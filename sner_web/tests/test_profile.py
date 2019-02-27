@@ -1,4 +1,4 @@
-"""profile controller test module"""
+"""controller profile tests"""
 
 import pytest
 from flask import url_for

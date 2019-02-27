@@ -1,4 +1,4 @@
-"""extension registry for the project. flask heavily uses global singletons pattern"""
+"""extension registry (mainly flask global singletons)"""
 
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy

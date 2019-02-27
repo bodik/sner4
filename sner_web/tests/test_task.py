@@ -1,4 +1,4 @@
-"""task controller test module"""
+"""controller task tests"""
 
 from flask import url_for
 from http import HTTPStatus
