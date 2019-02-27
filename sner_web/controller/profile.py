@@ -31,7 +31,7 @@ def add_route():
 	return render_template('profile/addedit.html', form=form, form_url=url_for('profile.add_route'))
 
 
-@blueprint.route('/edit/<int:profile_id>', methods=['GET', 'POST'])
+@blueprint.route('/edit/<profile_id>', methods=['GET', 'POST'])
 def edit_route(profile_id):
 	"""edit profile"""
 
@@ -44,7 +44,7 @@ def edit_route(profile_id):
 	return render_template('profile/addedit.html', form=form, form_url=url_for('profile.edit_route', profile_id=profile_id))
 
 
-@blueprint.route("/delete/<int:profile_id>", methods=['GET', 'POST'])
+@blueprint.route("/delete/<profile_id>", methods=['GET', 'POST'])
 def delete_route(profile_id):
 	"""delete profile"""
 

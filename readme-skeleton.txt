@@ -8,3 +8,5 @@
 * `flask_sqlalchemy`
 * `flask_wtforms`
 * `https://github.com/carlnewton/bootstrap-wtf/` -- bootstrapforms
+* `sqlalchemy_json` -- store list without special db support
+* `psycopg2-binary`

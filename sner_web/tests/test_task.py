@@ -4,7 +4,7 @@ from flask import url_for
 from http import HTTPStatus
 from random import random
 from sner_web.extensions import db
-from sner_web.models import Task
+from sner_web.models import Task, ScheduledTarget
 from sner_web.tests import persist_and_detach
 from sner_web.tests.test_profile import model_test_profile # pylint: disable=unused-import
 
@@ -92,3 +92,51 @@ def test_delete_route(client, model_test_profile): # pylint: disable=redefined-o
 
 	task = Task.query.filter(Task.id == test_task.id).one_or_none()
 	assert task is None
+
+
+def test_targets_route_schedule(client, model_test_profile): # pylint: disable=redefined-outer-name
+	"""targets schedule route test"""
+
+	test_task = create_test_task()
+	test_task.name = test_task.name+' schedule '+str(random())
+	test_task.profile = model_test_profile
+	persist_and_detach(test_task)
+
+
+	form = client.get(url_for('task.targets_route', task_id=test_task.id, action='schedule')).form
+	response = form.submit()
+	assert response.status_code == HTTPStatus.FOUND
+
+	scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == test_task).all()
+	assert len(scheduled_targets) is len(test_task.targets)
+
+
+	for item in scheduled_targets:
+		db.session.delete(item)
+	db.session.delete(test_task)
+	db.session.commit()
+
+
+
+def test_targets_route_unschedule(client, model_test_profile): # pylint: disable=redefined-outer-name
+	"""targets unschedule route test"""
+
+	test_task = create_test_task()
+	test_task.name = test_task.name+' unschedule '+str(random())
+	test_task.profile = model_test_profile
+	persist_and_detach(test_task)
+	test_scheduled_target = ScheduledTarget(target='testtarget')
+	test_scheduled_target.task = test_task
+	persist_and_detach(test_scheduled_target)
+
+
+	form = client.get(url_for('task.targets_route', task_id=test_task.id, action='unschedule')).form
+	response = form.submit()
+	assert response.status_code == HTTPStatus.FOUND
+
+	scheduled_targets = ScheduledTarget.query.filter(ScheduledTarget.task == test_task).all()
+	assert not scheduled_targets
+
+
+	db.session.delete(test_task)
+	db.session.commit()
