@@ -8,13 +8,10 @@
 	<form class="form-horizontal" action="{{ form_url }}" method="post">
 		{{ form.csrf_token }}
 		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.profile, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.group_size, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.priority, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.active, horizontal=True) }}
+		{{ b_wtf.bootstrap_field(form.module, horizontal=True) }}
 		<div class="form-group">
-			{{ form.targets_field.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.targets_field(class="form-control", rows="10")|safe }}</div>
+			{{ form.params.label(class="col-sm-2 control-label") }}
+			<div class="col-sm-10">{{ form.params(class="form-control", rows="10")|safe }}</div>
 		</div>
 		<div class="form-group">
 			<label class="col-sm-2 control-label"></label>

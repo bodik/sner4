@@ -3,59 +3,59 @@
 from random import random
 from sner.server.command.scheduler import scheduler_command
 from sner.server.extensions import db
-from sner.server.model.scheduler import Target, Task
+from sner.server.model.scheduler import Target, Queue
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_task, create_test_target, fixture_test_task, fixture_test_profile # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_queue, create_test_target, fixture_test_queue, fixture_test_task # pylint: disable=unused-import
 
 
-def test_task_list_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
-	"""task list command test"""
+def test_queue_list_command(runner, fixture_test_queue): # pylint: disable=redefined-outer-name
+	"""queue list command test"""
 
-	test_task = fixture_test_task
-	test_task.name += ' command list '+str(random())
-	persist_and_detach(test_task)
+	test_queue = fixture_test_queue
+	test_queue.name += ' command list '+str(random())
+	persist_and_detach(test_queue)
 
 
-	result = runner.invoke(scheduler_command, ['task_list'])
+	result = runner.invoke(scheduler_command, ['queue_list'])
 	assert result.exit_code == 0
-	assert test_task.name in result.output
+	assert test_queue.name in result.output
 
 
-def test_task_add_command(runner, fixture_test_profile): # pylint: disable=redefined-outer-name
-	"""task add command test"""
+def test_queue_add_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
+	"""queue add command test"""
 
-	test_task = create_test_task(fixture_test_profile)
-	test_task.name += ' command add '+str(random())
-	test_target = create_test_target(test_task)
+	test_queue = create_test_queue(fixture_test_task)
+	test_queue.name += ' command add '+str(random())
+	test_target = create_test_target(test_queue)
 
 
-	result = runner.invoke(scheduler_command, ['task_add', str(test_task.profile.id), '--name', test_task.name, test_target.target])
+	result = runner.invoke(scheduler_command, ['queue_add', str(test_queue.task.id), '--name', test_queue.name, test_target.target])
 	assert result.exit_code == 0
 
-	task = Task.query.filter(Task.name == test_task.name).one_or_none()
-	assert task is not None
-	assert task.name == test_task.name
-	assert task.targets[0].target == test_target.target
+	queue = Queue.query.filter(Queue.name == test_queue.name).one_or_none()
+	assert queue
+	assert queue.name == test_queue.name
+	assert queue.targets[0].target == test_target.target
 
 
-	db.session.delete(task)
+	db.session.delete(queue)
 	db.session.commit()
 
 
-def test_task_delete_command(runner, fixture_test_profile): # pylint: disable=redefined-outer-name
-	"""delete route test"""
+def test_queue_delete_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
+	"""queue delete command test"""
 
-	test_task = create_test_task(fixture_test_profile)
-	test_task.name = test_task.name+' delete command '+str(random())
-	persist_and_detach(test_task)
+	test_queue = create_test_queue(fixture_test_task)
+	test_queue.name = test_queue.name+' delete command '+str(random())
+	persist_and_detach(test_queue)
 
 
-	result = runner.invoke(scheduler_command, ['task_delete', str(test_task.id)])
+	result = runner.invoke(scheduler_command, ['queue_delete', str(test_queue.id)])
 	assert result.exit_code == 0
 
-	task = Task.query.filter(Task.id == test_task.id).one_or_none()
-	assert task is None
+	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+	assert not queue
 
 
 def test_enumips(runner):

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="queues">
+	<h1>Queues list <a class="btn btn-xs btn-success" href="{{ url_for('scheduler.queue_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+
+	<table id="queues_table" class="datatable table table-hover table-responsive">
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>name</th>
+			<th>task</th>
+			<th>group_size</th>
+			<th>priority</th>
+			<th>active</th>
+			<th>targets</th>
+			<th>created</th>
+			<th>modified</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for queue in queues %}
+		<tr>
+			<td>{{ queue.id }}</td>
+			<td>{{ queue.name }}</td>
+			<td>{{ queue.profile }}</td>
+			<td>{{ queue.group_size }}</td>
+			<td>{{ queue.priority }}</td>
+			<td>{{ queue.active }}</td>
+			<td>{{ count_targets[queue.id]|default(0) }}</td>
+			<td>{{ queue.created|datetime }}</td>
+			<td>{{ queue.modified|datetime }}</td>
+			<td>
+				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.queue_edit_route', queue_id=queue.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=generic_button_form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue.id) %}{% include 'button_delete.html' %}{% endwith %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
+{% endblock %}

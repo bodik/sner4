@@ -7,7 +7,7 @@ from flask import jsonify, redirect, render_template, url_for
 from sner.server.controller.scheduler import blueprint
 from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
-from sner.server.model.scheduler import Job, Target, Task
+from sner.server.model.scheduler import Job, Queue, Target
 from sner.server.utils import wait_for_lock
 from sqlalchemy.sql.expression import func
 
@@ -22,33 +22,33 @@ def job_list_route():
 
 #TODO: post? csfr protection?
 @blueprint.route('/job/assign')
-@blueprint.route('/job/assign/<task_id>')
-def job_assign_route(task_id=None):
+@blueprint.route('/job/assign/<queue_id>')
+def job_assign_route(queue_id=None):
 	"""assign job for worker"""
 
 	assignment = {}
 	wait_for_lock(Target.__tablename__)
 
-	if task_id:
-		task = Task.query.filter(Task.id == task_id).one_or_none()
+	if queue_id:
+		queue = Queue.query.filter(Queue.id == queue_id).one_or_none()
 	else:
 		# select highest priority active task with some targets
 		#TODO: a little magic here which kind of join, if any, is used
-		task = Task.query.filter(Task.active == True, Task.id == Target.task_id).order_by(Task.priority.desc()).first()
+		queue = Queue.query.filter(Queue.active == True, Queue.id == Target.queue_id).order_by(Queue.priority.desc()).first()
 
-	if task:
+	if queue:
 		assigned_targets = []
-		for target in Target.query.filter(Target.task == task).order_by(func.random()).limit(task.group_size):
+		for target in Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size):
 			assigned_targets.append(target.target)
 			db.session.delete(target)
 
 		if assigned_targets:
 			assignment = {
 				"id": str(uuid.uuid4()),
-				"module": task.profile.module,
-				"params": task.profile.params,
+				"module": queue.task.module,
+				"params": queue.task.params,
 				"targets": assigned_targets}
-			job = Job(id=assignment["id"], assignment=json.dumps(assignment), task=task)
+			job = Job(id=assignment["id"], assignment=json.dumps(assignment), queue=queue)
 			db.session.add(job)
 
 	# at least, we have to clear the lock

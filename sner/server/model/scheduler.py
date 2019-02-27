@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from sner.server.extensions import db
 
 
-class Profile(db.Model):
+class Task(db.Model):
 	"""holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
 	id = db.Column(db.Integer, primary_key=True)
@@ -16,32 +16,32 @@ class Profile(db.Model):
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-	tasks = relationship('Task', back_populates='profile')
+	queues = relationship('Queue', back_populates='task')
 
 	def __str__(self):
-		return '<Profile: %s>' % self.name
+		return '<Task: %s>' % self.name
 
 
-class Task(db.Model):
-	"""profile assignment for specific targets"""
+class Queue(db.Model):
+	"""task assignment for specific targets"""
 
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(1000))
-	profile_id = db.Column(db.Integer(), db.ForeignKey('profile.id'), nullable=False)
+	task_id = db.Column(db.Integer(), db.ForeignKey('task.id'), nullable=False)
 	group_size = db.Column(db.Integer(), nullable=False)
 	priority = db.Column(db.Integer(), nullable=False)
 	active = db.Column(db.Boolean())
 	created = db.Column(db.DateTime(), default=datetime.utcnow)
 	modified = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-	profile = relationship('Profile', back_populates='tasks')
-	targets = relationship('Target', back_populates='task', cascade='delete,delete-orphan')
-	jobs = relationship('Job', back_populates='task', cascade='delete,delete-orphan')
+	task = relationship('Task', back_populates='queues')
+	targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
+	jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan')
 
 	def __repr__(self):
-		return '<Task: %s>' % self.name
+		return '<Queue: %s>' % self.name
 	def __str__(self):
-		return '<Task: %s>' % self.name
+		return '<Queue: %s>' % self.name
 
 
 class Target(db.Model):
@@ -49,9 +49,9 @@ class Target(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	target = db.Column(db.Text())
-	task_id = db.Column(db.Integer(), db.ForeignKey('task.id'), nullable=False)
+	queue_id = db.Column(db.Integer(), db.ForeignKey('queue.id'), nullable=False)
 
-	task = relationship('Task', back_populates='targets')
+	queue = relationship('Queue', back_populates='targets')
 
 
 class Job(db.Model):
@@ -60,8 +60,8 @@ class Job(db.Model):
 	id = db.Column(db.String(100), primary_key=True)
 	assignment = db.Column(db.Text())
 	result = db.Column(db.LargeBinary)
-	task_id = db.Column(db.Integer(), db.ForeignKey('task.id'), nullable=False)
+	queue_id = db.Column(db.Integer(), db.ForeignKey('queue.id'), nullable=False)
 	time_start = db.Column(db.DateTime(), default=datetime.utcnow)
 	time_end = db.Column(db.DateTime())
 
-	task = relationship('Task', back_populates='jobs')
+	queue = relationship('Queue', back_populates='jobs')

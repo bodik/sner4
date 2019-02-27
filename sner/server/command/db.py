@@ -3,7 +3,7 @@
 import click
 from flask.cli import with_appcontext
 from sner.server.extensions import db
-from sner.server.model.scheduler import Profile, Target, Task
+from sner.server.model.scheduler import Queue, Task, Target
 
 
 @click.group(name='db', help='sner.server db management')
@@ -25,28 +25,28 @@ def db_init():
 def db_initdata():
 	"""put initial data to database"""
 
-	profile = Profile(
+	task = Task(
 		name='nmap ping host discovery',
 		module='nmap',
 		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sn')
-	db.session.add(profile)
-	db.session.commit()
-
-	task = Task(name='ping localhost', profile=profile, group_size=5, priority=0, active=True)
 	db.session.add(task)
-	for target in range(100):
-		db.session.add(Target(target=target, task=task))
 	db.session.commit()
 
-	task = Task(name='ping localhost 1', profile=profile, group_size=1, priority=10, active=False)
-	db.session.add(task)
+	queue = Queue(name='ping localhost', task=task, group_size=5, priority=0, active=True)
+	db.session.add(queue)
 	for target in range(100):
-		db.session.add(Target(target=target, task=task))
+		db.session.add(Target(target=target, queue=queue))
 	db.session.commit()
 
-	profile = Profile(
+	queue = Queue(name='ping localhost 1', task=task, group_size=1, priority=10, active=False)
+	db.session.add(queue)
+	for target in range(100):
+		db.session.add(Target(target=target, queue=queue))
+	db.session.commit()
+
+	task = Task(
 		name='nmap default SYN scan',
 		module='nmap',
 		params='--min-hostgroup 16 --max-retries 4 --min-rate 100 --max-rate 200 -sS')
-	db.session.add(profile)
+	db.session.add(task)
 	db.session.commit()

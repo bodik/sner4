@@ -2,12 +2,12 @@
 
 from flask_wtf import FlaskForm
 from sner.server.form import LinesField
-from sner.server.model.scheduler import Profile
+from sner.server.model.scheduler import Task
 from wtforms import BooleanField, IntegerField, StringField, TextAreaField, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 
-class ProfileForm(FlaskForm):
+class TaskForm(FlaskForm):
 	"""profile edit form"""
 
 	name = StringField(label='Name', validators=[validators.Length(max=1000)])
@@ -15,11 +15,11 @@ class ProfileForm(FlaskForm):
 	params = TextAreaField(label='Parameters')
 
 
-class TaskForm(FlaskForm):
-	"""task edit form"""
+class QueueForm(FlaskForm):
+	"""queue edit form"""
 
 	name = StringField(label='Name', validators=[validators.Length(max=1000)])
-	profile = QuerySelectField(query_factory=lambda: Profile.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
+	task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
 	group_size = IntegerField(label='Group size', default=1)
 	priority = IntegerField(label='Priority', default=0)
 	active = BooleanField(label='Active')
