@@ -75,19 +75,19 @@ def job_output_route():
 	"""receive output from assigned job"""
 
 	try:
-		assignment_id = request.json['id']
+		job_id = request.json['id']
 		retval = request.json['retval']
 		output = base64.b64decode(request.json['output'])
 	except Exception:
 		return Response(status=HTTPStatus.BAD_REQUEST)
-	if not re.match(r'[a-f0-9\-]{32}', assignment_id):
+	if not re.match(r'[a-f0-9\-]{32}', job_id):
 		return Response(status=HTTPStatus.BAD_REQUEST)
 
-	output_path = os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], assignment_id)
+	output_path = os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], job_id)
 	with open(output_path, 'wb') as ftmp:
 		ftmp.write(output)
 
-	job = Job.query.filter(Job.id == assignment_id).one_or_none()
+	job = Job.query.filter(Job.id == job_id).one_or_none()
 	job.retval = retval
 	job.output = output_path
 	job.time_end = datetime.utcnow()
