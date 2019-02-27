@@ -6,7 +6,6 @@ from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
 from sner.server.model.scheduler import Queue, Target, Task
-from sner.server.utils import wait_for_lock
 from sqlalchemy import func
 
 

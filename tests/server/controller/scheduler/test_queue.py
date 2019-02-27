@@ -23,7 +23,6 @@ def test_queue_add_route(client, fixture_test_task): # pylint: disable=redefined
 
 	test_queue = create_test_queue(fixture_test_task)
 	test_queue.name += ' add '+str(random())
-	test_target = create_test_target(test_queue)
 
 
 	form = client.get(url_for('scheduler.queue_add_route')).form
