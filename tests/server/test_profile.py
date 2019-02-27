@@ -4,9 +4,9 @@ import pytest
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from ..extensions import db
-from ..models import Profile
-from ..tests import persist_and_detach
+from sner.server.extensions import db
+from sner.server.models import Profile
+from . import persist_and_detach
 
 
 def create_test_profile():

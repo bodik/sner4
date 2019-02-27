@@ -1,6 +1,6 @@
 """tests subpackage"""
 
-from ..extensions import db
+from sner.server.extensions import db
 
 
 def persist_and_detach(model):

@@ -2,7 +2,7 @@
 
 import pytest
 from webtest import TestApp
-from .. import create_app
+from sner.server import create_app
 
 
 @pytest.fixture(scope='session')

@@ -7,11 +7,11 @@ import uuid
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from ..extensions import db
-from ..models import Job, ScheduledTarget, Task
-from ..tests import persist_and_detach
-from ..tests.test_profile import model_test_profile # pylint: disable=unused-import
-from ..tests.test_task import model_test_task # pylint: disable=unused-import
+from sner.server.extensions import db
+from sner.server.models import Job, ScheduledTarget, Task
+from . import persist_and_detach
+from .test_profile import model_test_profile # pylint: disable=unused-import
+from .test_task import model_test_task # pylint: disable=unused-import
 
 
 def create_test_job():
