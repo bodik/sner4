@@ -2,3 +2,4 @@
 
 * `python3-virtualenv` -- project containment
 * `flask` -- routing, ?cli
+* `flask-debugtoolbar`
