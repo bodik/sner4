@@ -2,7 +2,7 @@
 
 from flask import flash, Flask, render_template
 from sner.server.commands import init_db, init_data
-from sner.server.controller.scheduler import job, profile, task
+from sner.server.controller import scheduler
 from sner.server.extensions import db, toolbar
 
 
@@ -15,9 +15,7 @@ def create_app():
 	toolbar.init_app(app)
 	db.init_app(app)
 
-	app.register_blueprint(job.blueprint, url_prefix='/scheduler/job')
-	app.register_blueprint(profile.blueprint, url_prefix='/scheduler/profile')
-	app.register_blueprint(task.blueprint, url_prefix='/scheduler/task')
+	app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
 
 	app.cli.add_command(init_db)
 	app.cli.add_command(init_data)

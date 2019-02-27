@@ -34,7 +34,7 @@ def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-
 def test_list_route(client):
 	"""list route test"""
 
-	response = client.get(url_for('task.list_route'))
+	response = client.get(url_for('scheduler.task_list_route'))
 	assert response.status_code == HTTPStatus.OK
 	assert b'<h1>Tasks list' in response
 
@@ -47,7 +47,7 @@ def test_add_route(client, model_test_profile): # pylint: disable=redefined-oute
 	test_task.profile = model_test_profile
 
 
-	form = client.get(url_for('task.add_route')).form
+	form = client.get(url_for('scheduler.task_add_route')).form
 	form['name'] = test_task.name
 	form['profile'] = test_task.profile.id
 	form['targets'] = '\n'.join(test_task.targets)
@@ -75,7 +75,7 @@ def test_edit_route(client, model_test_profile): # pylint: disable=redefined-out
 	persist_and_detach(test_task)
 
 
-	form = client.get(url_for('task.edit_route', task_id=test_task.id)).form
+	form = client.get(url_for('scheduler.task_edit_route', task_id=test_task.id)).form
 	form['name'] = form['name'].value+' edited'
 	form['targets'] = form['targets'].value+'\nadded target'
 	response = form.submit()
@@ -101,7 +101,7 @@ def test_delete_route(client, model_test_profile): # pylint: disable=redefined-o
 	persist_and_detach(test_task)
 
 
-	form = client.get(url_for('task.delete_route', task_id=test_task.id)).form
+	form = client.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -118,7 +118,7 @@ def test_targets_route_schedule(client, model_test_profile): # pylint: disable=r
 	persist_and_detach(test_task)
 
 
-	form = client.get(url_for('task.targets_route', task_id=test_task.id, action='schedule')).form
+	form = client.get(url_for('scheduler.task_targets_route', task_id=test_task.id, action='schedule')).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -145,7 +145,7 @@ def test_targets_route_unschedule(client, model_test_profile): # pylint: disable
 	persist_and_detach(test_scheduled_target)
 
 
-	form = client.get(url_for('task.targets_route', task_id=test_task.id, action='unschedule')).form
+	form = client.get(url_for('scheduler.task_targets_route', task_id=test_task.id, action='unschedule')).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 

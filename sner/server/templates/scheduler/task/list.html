@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="tasks">
-	<h1>Tasks list <a class="btn btn-xs btn-success" href="{{ url_for('task.add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+	<h1>Tasks list <a class="btn btn-xs btn-success" href="{{ url_for('scheduler.task_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
 	<table id="tasks_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -30,10 +30,10 @@
 			<td>{{ task.created|datetime }}</td>
 			<td>{{ task.modified|datetime }}</td>
 			<td>
-				<a class="btn btn-xs btn-primary" href="{{ url_for('task.edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('task.targets_route', task_id=task.id, action='schedule'), button_caption='Schedule' %}{% include 'button_generic.html' %}{% endwith %}
-				{% with form=generic_button_form, form_url=url_for('task.targets_route', task_id=task.id, action='unschedule'), button_caption='Unschedule' %}{% include 'button_generic.html' %}{% endwith %}
-				{% with form=generic_button_form, form_url=url_for('task.delete_route', task_id=task.id) %}{% include 'button_delete.html' %}{% endwith %}
+				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.task_edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=generic_button_form, form_url=url_for('scheduler.task_targets_route', task_id=task.id, action='schedule'), button_caption='Schedule' %}{% include 'button_generic.html' %}{% endwith %}
+				{% with form=generic_button_form, form_url=url_for('scheduler.task_targets_route', task_id=task.id, action='unschedule'), button_caption='Unschedule' %}{% include 'button_generic.html' %}{% endwith %}
+				{% with form=generic_button_form, form_url=url_for('scheduler.task_delete_route', task_id=task.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}

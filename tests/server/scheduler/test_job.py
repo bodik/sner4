@@ -27,7 +27,7 @@ def create_test_job():
 def test_list_route(client):
 	"""list route test"""
 
-	response = client.get(url_for('job.list_route'))
+	response = client.get(url_for('scheduler.job_list_route'))
 	assert response.status_code == HTTPStatus.OK
 	assert b'<h1>Jobs list' in response
 
@@ -40,7 +40,7 @@ def test_assign_route(client, model_test_task):
 	db.session.commit()
 
 
-	response = client.get(url_for('job.assign_route', task_id=task.id))
+	response = client.get(url_for('scheduler.job_assign_route', task_id=task.id))
 	assert response.status_code == HTTPStatus.OK
 	assert type(json.loads(response.body.decode('utf-8'))) is dict
 	assert len(task.jobs) == 1
@@ -61,7 +61,7 @@ def test_delete_route(client, model_test_task):
 	persist_and_detach(test_job)
 
 
-	form = client.get(url_for('job.delete_route', job_id=test_job.id)).form
+	form = client.get(url_for('scheduler.job_delete_route', job_id=test_job.id)).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 

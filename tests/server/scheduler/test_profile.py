@@ -30,7 +30,7 @@ def model_test_profile(app):
 def test_list_route(client):
 	"""list route test"""
 
-	response = client.get(url_for('profile.list_route'))
+	response = client.get(url_for('scheduler.profile_list_route'))
 	assert response.status_code == HTTPStatus.OK
 	assert b'<h1>Profiles list' in response
 
@@ -42,7 +42,7 @@ def test_add_route(client):
 	test_profile.name = test_profile.name+' add '+str(random())
 
 
-	form = client.get(url_for('profile.add_route')).form
+	form = client.get(url_for('scheduler.profile_add_route')).form
 	form['name'] = test_profile.name
 	form['module'] = test_profile.module
 	form['params'] = test_profile.params
@@ -68,7 +68,7 @@ def test_edit_route(client):
 	persist_and_detach(test_profile)
 
 
-	form = client.get(url_for('profile.edit_route', profile_id=test_profile.id)).form
+	form = client.get(url_for('scheduler.profile_edit_route', profile_id=test_profile.id)).form
 	form['name'] = form['name'].value+' edited'
 	form['params'] = form['params'].value+' added_parameter'
 	response = form.submit()
@@ -93,7 +93,7 @@ def test_delete_route(client):
 	persist_and_detach(test_profile)
 
 
-	form = client.get(url_for('profile.delete_route', profile_id=test_profile.id)).form
+	form = client.get(url_for('scheduler.profile_delete_route', profile_id=test_profile.id)).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 

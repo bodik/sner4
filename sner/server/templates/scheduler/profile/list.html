@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="profiles">
-	<h1>Profiles list <a class="btn btn-xs btn-success" href="{{ url_for('profile.add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+	<h1>Profiles list <a class="btn btn-xs btn-success" href="{{ url_for('scheduler.profile_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
 	<table id="tasks_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -28,9 +28,9 @@
 			<td>{{ profile.created|datetime }}</td>
 			<td>{{ profile.modified|datetime }}</td>
 			<td>
-				<a class="btn btn-xs btn-default" href="{{ url_for('task.add_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-plus"></span> Task</a>
-				<a class="btn btn-xs btn-primary" href="{{ url_for('profile.edit_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('profile.delete_route', profile_id=profile.id) %}{% include 'button_delete.html' %}{% endwith %}
+				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.task_add_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-plus"></span> Task</a>
+				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.profile_edit_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=generic_button_form, form_url=url_for('scheduler.profile_delete_route', profile_id=profile.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}
