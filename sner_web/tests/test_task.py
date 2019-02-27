@@ -33,13 +33,13 @@ def test_add_route(client, model_test_profile): # pylint: disable=redefined-oute
 
 	test_task = create_test_task()
 	test_task.name = test_task.name+" add "+str(random())
-	test_task.parent = model_test_profile
+	test_task.profile = model_test_profile
 
 
 	form = client.get(url_for("task.add_route")).form
 	form["name"] = test_task.name
 	form["priority"] = test_task.priority
-	form["profile"] = test_task.parent.id
+	form["profile"] = test_task.profile.id
 	form["targets"] = "\n".join(test_task.targets)
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
@@ -60,7 +60,7 @@ def test_edit_route(client, model_test_profile): # pylint: disable=redefined-out
 
 	test_task = create_test_task()
 	test_task.name = test_task.name+" edit "+str(random())
-	test_task.parent = model_test_profile
+	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
 
 
@@ -87,7 +87,7 @@ def test_delete_route(client, model_test_profile): # pylint: disable=redefined-o
 
 	test_task = create_test_task()
 	test_task.name = test_task.name+" delete "+str(random())
-	test_task.parent = model_test_profile
+	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
 
 

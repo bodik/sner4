@@ -1,7 +1,7 @@
 """main application package module"""
 
 from flask import flash, Flask, render_template
-from sner_web.commands import initdb
+from sner_web.commands import init_db, init_data
 from sner_web.controller import profile, task
 from sner_web.extensions import db, toolbar
 from sner_web.models import Profile, Task
@@ -20,7 +20,8 @@ def create_app():
 	app.register_blueprint(profile.blueprint, url_prefix="/profile")
 	app.register_blueprint(task.blueprint, url_prefix="/task")
 
-	app.cli.add_command(initdb)
+	app.cli.add_command(init_db)
+	app.cli.add_command(init_data)
 
 	@app.route("/")
 	def index_route(): # pylint: disable=unused-variable
