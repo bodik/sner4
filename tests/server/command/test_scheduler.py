@@ -6,15 +6,14 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Target, Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_task, create_test_target, model_test_profile # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_task, create_test_target, fixture_test_task, fixture_test_profile # pylint: disable=unused-import
 
 
-def test_task_list_command(runner, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_list_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
 	"""task list command test"""
 
-	test_task = create_test_task()
-	test_task.name = test_task.name+' command list '+str(random())
-	test_task.profile = model_test_profile
+	test_task = fixture_test_task
+	test_task.name += ' command list '+str(random())
 	persist_and_detach(test_task)
 
 
@@ -23,17 +22,12 @@ def test_task_list_command(runner, model_test_profile): # pylint: disable=redefi
 	assert test_task.name in result.output
 
 
-	db.session.delete(test_task)
-	db.session.commit()
-
-
-def test_task_add_command(runner, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_add_command(runner, fixture_test_profile): # pylint: disable=redefined-outer-name
 	"""task add command test"""
 
-	test_task = create_test_task()
-	test_task.name = test_task.name+' command add '+str(random())
-	test_task.profile = model_test_profile
-	test_target = create_test_target()
+	test_task = create_test_task(fixture_test_profile)
+	test_task.name += ' command add '+str(random())
+	test_target = create_test_target(test_task)
 
 
 	result = runner.invoke(scheduler_command, ['task_add', str(test_task.profile.id), '--name', test_task.name, test_target.target])
@@ -49,12 +43,11 @@ def test_task_add_command(runner, model_test_profile): # pylint: disable=redefin
 	db.session.commit()
 
 
-def test_task_delete_command(runner, model_test_profile): # pylint: disable=redefined-outer-name
+def test_task_delete_command(runner, fixture_test_profile): # pylint: disable=redefined-outer-name
 	"""delete route test"""
 
-	test_task = create_test_task()
+	test_task = create_test_task(fixture_test_profile)
 	test_task.name = test_task.name+' delete command '+str(random())
-	test_task.profile = model_test_profile
 	persist_and_detach(test_task)
 
 

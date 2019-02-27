@@ -7,7 +7,7 @@ from sner.server.extensions import db
 from sner.server.model.scheduler import Profile
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_profile
+from tests.server.model.scheduler import create_test_profile, fixture_test_profile
 
 
 def test_profile_list_route(client):
@@ -43,11 +43,11 @@ def test_profile_add_route(client):
 	db.session.commit()
 
 
-def test_profile_edit_route(client):
+def test_profile_edit_route(client, fixture_test_profile):
 	"""edit route test"""
 
-	test_profile = create_test_profile()
-	test_profile.name = test_profile.name+' edit '+str(random())
+	test_profile = fixture_test_profile
+	test_profile.name += ' edit '+str(random())
 	persist_and_detach(test_profile)
 
 
@@ -62,10 +62,6 @@ def test_profile_edit_route(client):
 	assert profile.name == form['name'].value
 	assert 'added_parameter' in profile.params
 	assert profile.modified > profile.created
-
-
-	db.session.delete(profile)
-	db.session.commit()
 
 
 def test_profile_delete_route(client):
