@@ -1,8 +1,8 @@
 """controller task"""
 
 from flask import redirect, render_template, url_for
+from sner.server import db
 from sner.server.controller.scheduler import blueprint
-from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.form.scheduler import TaskForm
 from sner.server.model.scheduler import Task

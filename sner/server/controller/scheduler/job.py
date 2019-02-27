@@ -3,11 +3,10 @@
 import json
 import uuid
 from flask import jsonify, redirect, render_template, url_for
+from sner.server import db, wait_for_lock
 from sner.server.controller.scheduler import blueprint
-from sner.server.extensions import db
 from sner.server.form import GenericButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
-from sner.server.utils import wait_for_lock
 from sqlalchemy.sql.expression import func
 
 

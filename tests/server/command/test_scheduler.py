@@ -1,8 +1,8 @@
 """command scheduler tests"""
 
 from random import random
+from sner.server import db
 from sner.server.command.scheduler import scheduler_command
-from sner.server.extensions import db
 from sner.server.model.scheduler import Queue
 
 from tests.server import persist_and_detach

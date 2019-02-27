@@ -2,7 +2,7 @@
 
 import click
 from flask.cli import with_appcontext
-from sner.server.extensions import db
+from sner.server import db
 from sner.server.model.scheduler import Queue, Task, Target
 
 

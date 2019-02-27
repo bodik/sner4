@@ -4,7 +4,7 @@ import json
 from flask import url_for
 from http import HTTPStatus
 from random import random
-from sner.server.extensions import db
+from sner.server import db
 from sner.server.model.scheduler import Job, Queue
 
 from tests.server import persist_and_detach

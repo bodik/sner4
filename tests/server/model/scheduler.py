@@ -4,7 +4,7 @@ import datetime
 import json
 import pytest
 import uuid
-from sner.server.extensions import db
+from sner.server import db
 from sner.server.model.scheduler import Job, Queue, Target, Task
 
 from tests.server import persist_and_detach

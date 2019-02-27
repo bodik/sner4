@@ -3,7 +3,7 @@
 
 from datetime import datetime
 from sqlalchemy.orm import relationship
-from sner.server.extensions import db
+from sner.server import db
 
 
 class Task(db.Model):

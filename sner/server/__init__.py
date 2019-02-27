@@ -1,10 +1,13 @@
 """main application package module"""
 
 from flask import flash, Flask, render_template
-from sner.server.command.db import db_command
-from sner.server.command.scheduler import scheduler_command
-from sner.server.controller import scheduler
-from sner.server.extensions import db, toolbar
+from flask_debugtoolbar import DebugToolbarExtension
+from flask_sqlalchemy import SQLAlchemy
+from time import sleep
+
+
+toolbar = DebugToolbarExtension() # pylint: disable=invalid-name
+db = SQLAlchemy() # pylint: disable=invalid-name
 
 
 def create_app():
@@ -16,9 +19,12 @@ def create_app():
 	toolbar.init_app(app)
 	db.init_app(app)
 
+	from sner.server.controller import scheduler
 	app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
 
+	from sner.server.command.db import db_command
 	app.cli.add_command(db_command)
+	from sner.server.command.scheduler import scheduler_command
 	app.cli.add_command(scheduler_command)
 
 	@app.route('/')
@@ -37,3 +43,17 @@ def create_app():
 		return value.strftime(fmt)
 
 	return app
+
+
+
+def wait_for_lock(table):
+	"""wait for database lock"""
+
+	#TODO: passive wait for lock
+	while True:
+		try:
+			db.session.execute('LOCK TABLE %s' % table)
+			break
+		except Exception:
+			db.session.rollback()
+			sleep(0.01)
