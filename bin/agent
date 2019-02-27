@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""sner agent runner stub"""
+
+import sys
+from os import path
+sys.path.append(path.join(path.dirname(__file__), ".."))
+
+from sner.agent import main
+if __name__ == '__main__':
+	sys.exit(main())

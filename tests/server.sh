@@ -1,6 +1,5 @@
 #!/bin/sh
+set -e
 
-BASE="$(readlink -f $(dirname $(readlink -f $0))/..)"
-export SNER_CONFIG="${BASE}/sner-server.cfg"
-
+export SNER_CONFIG="../../sner-server.cfg"
 python -m pytest -p no:cacheprovider $@
