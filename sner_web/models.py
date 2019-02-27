@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
 
 
+
 # model item to put basic structures to db
 class Json(TypeDecorator):
 	impl = db.Text

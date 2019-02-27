@@ -4,6 +4,7 @@ from sner_web import create_app, db
 from webtest import TestApp
 
 
+
 @pytest.fixture(scope="session")
 def app(request):
 	app = create_app()

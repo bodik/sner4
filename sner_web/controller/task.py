@@ -4,6 +4,7 @@ from sner_web.forms import TaskForm, DeleteButtonForm
 from sner_web.models import Task
 
 
+
 blueprint = Blueprint("task", __name__)
 
 

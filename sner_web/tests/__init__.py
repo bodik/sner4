@@ -1,6 +1,7 @@
 from sner_web import db
 
 
+
 def persist_and_detach(model):
 	"""would persist entity/model and detach. used mainly for testing"""
 

@@ -5,6 +5,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.widgets import TextArea
 
 
+
 class LinesField(TextAreaField):
 	# value to form
 	def _value(self):

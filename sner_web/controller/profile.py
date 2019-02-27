@@ -4,6 +4,7 @@ from sner_web.forms import ProfileForm, DeleteButtonForm
 from sner_web.models import Profile
 
 
+
 blueprint = Blueprint("profile", __name__)
 
 
