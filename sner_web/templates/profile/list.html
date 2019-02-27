@@ -28,7 +28,7 @@
 			<td>
 				<a class="btn btn-xs btn-default" href="{{ url_for('task.add_route', profile_id=profile.id) }}"><span class="glyphicon glyphicon-plus"></span> Task</a>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('profile.edit_route', id=profile.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=profile_delete_form, form_url=url_for('profile.delete_route', id=profile.id) %}{% include 'deletebutton.html' %}{% endwith %}
+				{% with form=generic_button_form, form_url=url_for('profile.delete_route', id=profile.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}

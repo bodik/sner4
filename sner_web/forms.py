@@ -25,12 +25,6 @@ class LinesField(TextAreaField):
 
 
 
-class DeleteButtonForm(FlaskForm):
-	"""delete form"""
-	pass
-
-
-
 class GenericButtonForm(FlaskForm):
 	"""generic button form"""
 	pass

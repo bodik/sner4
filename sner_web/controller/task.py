@@ -16,7 +16,7 @@ def list_route():
 	"""list tasks"""
 
 	tasks = Task.query.all()
-	return render_template("task/list.html", tasks=tasks, task_delete_form=DeleteButtonForm())
+	return render_template("task/list.html", tasks=tasks, generic_button_form=GenericButtonForm())
 
 
 
@@ -59,9 +59,11 @@ def delete_route(id): # pylint: disable=redefined-builtin
 	"""delete task"""
 
 	task = Task.query.get(id)
-	form = DeleteButtonForm()
+	form = GenericButtonForm()
+
 	if form.validate_on_submit():
 		db.session.delete(task)
 		db.session.commit()
 		return redirect(url_for("task.list_route"))
-	return render_template("deletebutton.html", form=form, form_url=url_for("task.delete_route", id=id))
+
+	return render_template("button_delete.html", form=form, form_url=url_for("task.delete_route", id=id))

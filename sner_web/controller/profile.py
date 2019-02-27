@@ -2,7 +2,7 @@
 
 from flask import Blueprint, redirect, render_template, url_for
 from sner_web.extensions import db
-from sner_web.forms import ProfileForm, DeleteButtonForm
+from sner_web.forms import ProfileForm, GenericButtonForm
 from sner_web.models import Profile
 
 
@@ -16,7 +16,7 @@ def list_route():
 	"""list profiles"""
 
 	profiles = Profile.query.all()
-	return render_template("profile/list.html", profiles=profiles, profile_delete_form=DeleteButtonForm())
+	return render_template("profile/list.html", profiles=profiles, generic_button_form=GenericButtonForm())
 
 
 
@@ -54,9 +54,9 @@ def delete_route(id): # pylint: disable=redefined-builtin
 	"""delete profile"""
 
 	profile = Profile.query.get(id)
-	form = DeleteButtonForm()
+	form = GenericButtonForm()
 	if form.validate_on_submit():
 		db.session.delete(profile)
 		db.session.commit()
 		return redirect(url_for("profile.list_route"))
-	return render_template("deletebutton.html", form=form, form_url=url_for("profile.delete_route", id=id))
+	return render_template("button_delete.html", form=form, form_url=url_for("profile.delete_route", id=id))
