@@ -20,7 +20,7 @@ def create_test_task():
 
 
 @pytest.fixture(scope='session')
-def model_test_task(model_test_profile): # pylint: disable=redefined-outer-name
+def model_test_task(app, model_test_profile): # pylint: disable=redefined-outer-name
 	"""persistent test task"""
 	test_task = create_test_task()
 	test_task.profile = model_test_profile
