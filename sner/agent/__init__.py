@@ -29,11 +29,11 @@ def run_once(server, queue=None):
 	if queue:
 		url += '/%s' % queue
 	assignment = requests.get(url).json()
-	### no work available
 	if 'id' not in assignment:
+		# no work available
 		return 0
-	### assignment corrupted
 	if (not re.match(r'[a-f0-9\-]{32}', assignment['id'])) or ('module' not in assignment):
+		# assignment corrupted
 		return 1
 	logger.debug('sner.agent got assignment: %s', assignment)
 
@@ -41,10 +41,8 @@ def run_once(server, queue=None):
 	## process the assignment
 	logger.debug('sner.agent processing assignment')
 	jobdir = assignment['id']
-	output = '%s.tar.bz2' % jobdir
-	retval = 1
-
 	oldcwd = os.getcwd()
+	retval = 1
 	try:
 		os.makedirs(jobdir, mode=0o700)
 		os.chdir(jobdir)
@@ -52,7 +50,7 @@ def run_once(server, queue=None):
 		retval = module_instance.run()
 	finally:
 		os.chdir(oldcwd)
-
+	output = '%s.tar.bz2' % jobdir
 	with tarfile.open(output, 'w:bz2') as ftmp:
 		ftmp.add(jobdir)
 	shutil.rmtree(jobdir)
