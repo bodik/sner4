@@ -23,6 +23,7 @@ fi
 
 
 # cleanup test data 
+bin/server.sh scheduler job_delete ${JOBID}
 bin/server.sh scheduler queue_delete ${TESTID}
 bin/server.sh scheduler task_delete ${TESTID}
 

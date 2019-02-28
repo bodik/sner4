@@ -2,6 +2,7 @@
 
 import click
 import json
+import os
 from flask.cli import with_appcontext
 from netaddr import IPNetwork
 from sner.server import db
@@ -181,7 +182,7 @@ def job_list():
 	fmt = '%-36s %-20s %-25s %6s %-30s %-20s %-20s'
 	print(fmt % tuple(headers))
 	for job in Job.query.all():
-		print(fmt % (job.id, json.dumps(job.queue.name), json.dumps(job.assignment[:17]+'...'), job.retval, job.output, format_datetime(job.time_start), format_datetime(job.time_end)))
+		print(fmt % (job.id, json.dumps(job.queue.name if job.queue else ''), json.dumps(job.assignment[:17]+'...'), job.retval, job.output, format_datetime(job.time_start), format_datetime(job.time_end)))
 
 
 @scheduler_command.command(name='job_delete', help='delete job')

@@ -17,7 +17,7 @@ class Task(db.Model):
 	queues = relationship('Queue', back_populates='task')
 
 	def __str__(self):
-		return '<Task: %s>' % self.name
+		return '<Task: %d:%s>' % (self.id, self.name)
 
 
 class Queue(db.Model):
@@ -32,12 +32,12 @@ class Queue(db.Model):
 
 	task = relationship('Task', back_populates='queues')
 	targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
-	jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan')
+	jobs = relationship('Job', back_populates='queue')
 
 	def __repr__(self):
-		return '<Queue: %s>' % self.name
+		return '<Queue: %d:%s>' % (self.id, self.name)
 	def __str__(self):
-		return '<Queue: %s>' % self.name
+		return '<Queue: %d:%s>' % (self.id, self.name)
 
 
 class Target(db.Model):
@@ -54,7 +54,7 @@ class Job(db.Model):
 	"""assigned job"""
 
 	id = db.Column(db.String(100), primary_key=True)
-	queue_id = db.Column(db.Integer(), db.ForeignKey('queue.id'), nullable=False)
+	queue_id = db.Column(db.Integer(), db.ForeignKey('queue.id'))
 	assignment = db.Column(db.Text())
 	retval = db.Column(db.Integer)
 	output = db.Column(db.Text())
