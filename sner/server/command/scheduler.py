@@ -11,6 +11,7 @@ from sqlalchemy import func
 
 
 def taskbyx(taskid):
+	"""get task by id or name"""
 	if taskid.isnumeric():
 		task = Task.query.filter(Task.id == int(taskid)).one_or_none()
 	else:
@@ -19,6 +20,7 @@ def taskbyx(taskid):
 
 
 def queuebyx(queueid):
+	"""get queue by id or name"""
 	if queueid.isnumeric():
 		queue = Queue.query.filter(Queue.id == int(queueid)).one_or_none()
 	else:
@@ -80,7 +82,7 @@ def task_add(module, **kwargs):
 @scheduler_command.command(name='task_delete', help='delete task')
 @click.argument('task_id')
 @with_appcontext
-def task_delete(task_id, **kwargs):
+def task_delete(task_id):
 	"""delete task"""
 
 	task = taskbyx(task_id)
@@ -182,7 +184,14 @@ def job_list():
 	fmt = '%-36s %-20s %-25s %6s %-30s %-20s %-20s'
 	print(fmt % tuple(headers))
 	for job in Job.query.all():
-		print(fmt % (job.id, json.dumps(job.queue.name if job.queue else ''), json.dumps(job.assignment[:17]+'...'), job.retval, job.output, format_datetime(job.time_start), format_datetime(job.time_end)))
+		print(fmt % (
+			job.id,
+			json.dumps(job.queue.name if job.queue else ''),
+			json.dumps(job.assignment[:17]+'...'),
+			job.retval,
+			job.output,
+			format_datetime(job.time_start),
+			format_datetime(job.time_end)))
 
 
 @scheduler_command.command(name='job_delete', help='delete job')

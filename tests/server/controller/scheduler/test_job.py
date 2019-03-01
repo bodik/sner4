@@ -10,7 +10,7 @@ from sner.server import db
 from sner.server.model.scheduler import Job, Queue
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_job, create_test_target, fixture_test_job, fixture_test_queue, fixture_test_task # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_job, create_test_target
 
 
 def test_job_list_route(client):
@@ -21,19 +21,19 @@ def test_job_list_route(client):
 	assert b'<h1>Jobs list' in response
 
 
-def test_job_assign_route(client, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_job_assign_route(client, test_queue):
 	"""job assign route test"""
 
-	test_target = create_test_target(fixture_test_queue)
+	test_target = create_test_target(test_queue)
 	test_target.target += 'job assign '+str(random())
 	persist_and_detach(test_target)
 
 
-	response = client.get(url_for('scheduler.job_assign_route', queue_id=fixture_test_queue.id))
+	response = client.get(url_for('scheduler.job_assign_route', queue_id=test_queue.id))
 	assert response.status_code == HTTPStatus.OK
 	assert isinstance(json.loads(response.body.decode('utf-8')), dict)
 
-	queue = Queue.query.filter(Queue.id == fixture_test_queue.id).one_or_none()
+	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
 	assert len(queue.jobs) == 1
 
 
@@ -41,10 +41,9 @@ def test_job_assign_route(client, fixture_test_queue): # pylint: disable=redefin
 	db.session.commit()
 
 
-def test_job_output_route(client, fixture_test_job): # pylint: disable=redefined-outer-name
+def test_job_output_route(client, test_job):
 	"""job output route test"""
 
-	test_job = fixture_test_job
 	test_job.assignment = json.dumps('{"module": "job outpu %s"}'%str(random()))
 	persist_and_detach(test_job)
 
@@ -64,10 +63,10 @@ def test_job_output_route(client, fixture_test_job): # pylint: disable=redefined
 	os.remove(job.output)
 
 
-def test_job_delete_route(client, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_job_delete_route(client, test_queue):
 	"""delete route test"""
 
-	test_job = create_test_job(fixture_test_queue)
+	test_job = create_test_job(test_queue)
 	test_job.assignment = json.dumps('{"module": "job delete %s"}'%str(random()))
 	persist_and_detach(test_job)
 

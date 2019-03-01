@@ -3,7 +3,7 @@
 import json
 
 
-class Dummy():
+class Dummy(): # pylint: disable=too-few-public-methods
 	"""simple dummy agent module"""
 
 	def __init__(self, assignment):

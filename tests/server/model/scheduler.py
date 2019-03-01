@@ -50,35 +50,35 @@ def create_test_job(a_test_queue):
 
 
 @pytest.fixture()
-def fixture_test_task(app): # pylint: disable=unused-argument
+def test_task():
 	"""persistent test task"""
 
-	test_task = persist_and_detach(create_test_task())
-	tmpid = test_task.id
-	yield test_task
-	db.session.delete(Task.query.get(tmpid))
+	tmp_task = persist_and_detach(create_test_task())
+	tmp_id = tmp_task.id
+	yield tmp_task
+	db.session.delete(Task.query.get(tmp_id))
 	db.session.commit()
 
 
 @pytest.fixture()
-def fixture_test_queue(app, fixture_test_task): # pylint: disable=redefined-outer-name,unused-argument
+def test_queue(test_task): # pylint: disable=redefined-outer-name
 	"""persistent test queue"""
 
-	test_queue = create_test_queue(fixture_test_task)
-	persist_and_detach(test_queue)
-	tmpid = test_queue.id
-	yield test_queue
-	db.session.delete(Queue.query.get(tmpid))
+	tmp_queue = create_test_queue(test_task)
+	persist_and_detach(tmp_queue)
+	tmp_id = tmp_queue.id
+	yield tmp_queue
+	db.session.delete(Queue.query.get(tmp_id))
 	db.session.commit()
 
 
 @pytest.fixture()
-def fixture_test_job(app, fixture_test_queue): # pylint: disable=redefined-outer-name,unused-argument
+def test_job(test_queue): # pylint: disable=redefined-outer-name
 	"""persistent test job"""
 
-	test_job = create_test_job(fixture_test_queue)
-	persist_and_detach(test_job)
-	tmpid = test_job.id
-	yield test_job
-	db.session.delete(Job.query.get(tmpid))
+	tmp_job = create_test_job(test_queue)
+	persist_and_detach(tmp_job)
+	tmp_id = tmp_job.id
+	yield tmp_job
+	db.session.delete(Job.query.get(tmp_id))
 	db.session.commit()

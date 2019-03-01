@@ -7,9 +7,7 @@ from sner.server.command.scheduler import scheduler_command
 from sner.server.model.scheduler import Job, Queue, Task
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import (
-	create_test_job, create_test_queue, create_test_target,	create_test_task,
-	fixture_test_job, fixture_test_queue, fixture_test_task) # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_job, create_test_queue, create_test_target, create_test_task
 
 
 ## misc commands tests
@@ -26,10 +24,9 @@ def test_enumips(runner):
 
 ## task commands tests
 
-def test_task_list_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
+def test_task_list_command(runner, test_task):
 	"""task list command test"""
 
-	test_task = fixture_test_task
 	test_task.name += ' command list '+str(random())
 	persist_and_detach(test_task)
 
@@ -39,7 +36,7 @@ def test_task_list_command(runner, fixture_test_task): # pylint: disable=redefin
 	assert test_task.name in result.output
 
 
-def test_task_add_command(runner): # pylint: disable=redefined-outer-name
+def test_task_add_command(runner):
 	"""task add command test"""
 
 	test_task = create_test_task()
@@ -58,7 +55,7 @@ def test_task_add_command(runner): # pylint: disable=redefined-outer-name
 	db.session.commit()
 
 
-def test_task_delete_command(runner): # pylint: disable=redefined-outer-name
+def test_task_delete_command(runner):
 	"""job delete command test"""
 
 	test_task = create_test_task()
@@ -76,10 +73,9 @@ def test_task_delete_command(runner): # pylint: disable=redefined-outer-name
 
 ## queue commands tests
 
-def test_queue_list_command(runner, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_list_command(runner, test_queue):
 	"""queue list command test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' command list '+str(random())
 	persist_and_detach(test_queue)
 
@@ -89,10 +85,10 @@ def test_queue_list_command(runner, fixture_test_queue): # pylint: disable=redef
 	assert test_queue.name in result.output
 
 
-def test_queue_add_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
+def test_queue_add_command(runner, test_task):
 	"""queue add command test"""
 
-	test_queue = create_test_queue(fixture_test_task)
+	test_queue = create_test_queue(test_task)
 	test_queue.name += ' command add '+str(random())
 
 
@@ -108,10 +104,9 @@ def test_queue_add_command(runner, fixture_test_task): # pylint: disable=redefin
 	db.session.commit()
 
 
-def test_queue_enqueue_command(runner, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_enqueue_command(runner, test_queue):
 	"""queue enqueue route test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' command enqueue '+str(random())
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
@@ -128,10 +123,9 @@ def test_queue_enqueue_command(runner, fixture_test_queue): # pylint: disable=re
 	db.session.commit()
 
 
-def test_queue_flush_command(runner, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_flush_command(runner, test_queue):
 	"""queue flush route test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' command flush '+str(random())
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
@@ -147,10 +141,10 @@ def test_queue_flush_command(runner, fixture_test_queue): # pylint: disable=rede
 	assert not queue.targets
 
 
-def test_queue_delete_command(runner, fixture_test_task): # pylint: disable=redefined-outer-name
+def test_queue_delete_command(runner, test_task):
 	"""queue delete command test"""
 
-	test_queue = create_test_queue(fixture_test_task)
+	test_queue = create_test_queue(test_task)
 	test_queue.name = test_queue.name+' command delete '+str(random())
 	persist_and_detach(test_queue)
 
@@ -165,10 +159,9 @@ def test_queue_delete_command(runner, fixture_test_task): # pylint: disable=rede
 
 ## job commands tests
 
-def test_job_list_command(runner, fixture_test_job): # pylint: disable=redefined-outer-name
+def test_job_list_command(runner, test_job):
 	"""job list command test"""
 
-	test_job = fixture_test_job
 	test_job.assignment = json.dumps('{"module": "job list command %s"}'%str(random()))
 	persist_and_detach(test_job)
 
@@ -178,10 +171,10 @@ def test_job_list_command(runner, fixture_test_job): # pylint: disable=redefined
 	assert test_job.id in result.output
 
 
-def test_task_delete_command(runner, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_job_delete_command(runner, test_queue):
 	"""job delete command test"""
 
-	test_job = create_test_job(fixture_test_queue)
+	test_job = create_test_job(test_queue)
 	test_job.assignment = json.dumps('{"module": "job delete %s"}'%str(random()))
 	persist_and_detach(test_job)
 

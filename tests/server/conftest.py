@@ -4,6 +4,9 @@ import pytest
 from webtest import TestApp
 from sner.server import create_app
 
+## import other fixtures to have them available in other tests
+from tests.server.model.scheduler import test_job, test_queue, test_task # pylint: disable=unused-import
+
 
 @pytest.fixture(scope='session')
 def app():

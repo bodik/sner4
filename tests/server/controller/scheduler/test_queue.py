@@ -7,7 +7,7 @@ from sner.server import db
 from sner.server.model.scheduler import Queue
 
 from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_queue, create_test_target, fixture_test_queue, fixture_test_task # pylint: disable=unused-import
+from tests.server.model.scheduler import create_test_queue, create_test_target
 
 
 def test_queue_list_route(client):
@@ -18,10 +18,10 @@ def test_queue_list_route(client):
 	assert b'<h1>Queues list' in response
 
 
-def test_queue_add_route(client, fixture_test_task): # pylint: disable=redefined-outer-name
+def test_queue_add_route(client, test_task):
 	"""queue add route test"""
 
-	test_queue = create_test_queue(fixture_test_task)
+	test_queue = create_test_queue(test_task)
 	test_queue.name += ' add '+str(random())
 
 
@@ -42,10 +42,9 @@ def test_queue_add_route(client, fixture_test_task): # pylint: disable=redefined
 	db.session.commit()
 
 
-def test_queue_edit_route(client, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_edit_route(client, test_queue):
 	"""queue edit route test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' edit '+str(random())
 	persist_and_detach(test_queue)
 
@@ -59,10 +58,9 @@ def test_queue_edit_route(client, fixture_test_queue): # pylint: disable=redefin
 	assert queue.name == form['name'].value
 
 
-def test_queue_enqueue_route(client, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_enqueue_route(client, test_queue):
 	"""queue enqueue route test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' enqueue '+str(random())
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
@@ -81,10 +79,9 @@ def test_queue_enqueue_route(client, fixture_test_queue): # pylint: disable=rede
 	db.session.commit()
 
 
-def test_queue_flush_route(client, fixture_test_queue): # pylint: disable=redefined-outer-name
+def test_queue_flush_route(client, test_queue):
 	"""queue flush route test"""
 
-	test_queue = fixture_test_queue
 	test_queue.name += ' flush '+str(random())
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
@@ -99,10 +96,10 @@ def test_queue_flush_route(client, fixture_test_queue): # pylint: disable=redefi
 	assert not queue.targets
 
 
-def test_queue_delete_route(client, fixture_test_task): # pylint: disable=redefined-outer-name
+def test_queue_delete_route(client, test_task):
 	"""queue delete route test"""
 
-	test_queue = create_test_queue(fixture_test_task)
+	test_queue = create_test_queue(test_task)
 	test_queue.name += ' delete '+str(random())
 	persist_and_detach(test_queue)
 
