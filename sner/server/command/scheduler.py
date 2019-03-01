@@ -1,13 +1,15 @@
 """scheduler commands"""
 
-import click
 import json
 import os
+
+import click
 from flask.cli import with_appcontext
 from netaddr import IPNetwork
+from sqlalchemy import func
+
 from sner.server import db
 from sner.server.model.scheduler import Job, Queue, Target, Task
-from sqlalchemy import func
 
 
 def taskbyx(taskid):

@@ -2,11 +2,12 @@
 
 import datetime
 import json
-import pytest
 import uuid
+
+import pytest
+
 from sner.server import db
 from sner.server.model.scheduler import Job, Queue, Target, Task
-
 from tests.server import persist_and_detach
 
 

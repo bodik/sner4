@@ -1,10 +1,11 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from sner.server.form import LinesField
-from sner.server.model.scheduler import Task
 from wtforms import BooleanField, IntegerField, StringField, TextAreaField, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
+
+from sner.server.form import LinesField
+from sner.server.model.scheduler import Task
 
 
 class TaskForm(FlaskForm):

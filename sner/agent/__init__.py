@@ -7,13 +7,15 @@ import json
 import logging
 import os
 import re
-import requests
 import shutil
-import sner.agent.modules
 import sys
 import tarfile
 from contextlib import contextmanager
 from http import HTTPStatus
+
+import requests
+
+import sner.agent.modules
 
 
 logger = logging.getLogger('sner.agent') # pylint: disable=invalid-name

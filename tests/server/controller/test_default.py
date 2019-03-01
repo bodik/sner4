@@ -1,7 +1,8 @@
 """controller default tests"""
 
-from flask import url_for
 from http import HTTPStatus
+
+from flask import url_for
 
 
 def test_index_route(client):

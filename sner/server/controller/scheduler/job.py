@@ -7,13 +7,15 @@ import re
 import time
 import uuid
 from datetime import datetime
-from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
 from http import HTTPStatus
+
+from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
+from sqlalchemy.sql.expression import func
+
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import GenericButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
-from sqlalchemy.sql.expression import func
 
 
 @blueprint.route('/job/list')
