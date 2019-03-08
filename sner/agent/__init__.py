@@ -34,10 +34,10 @@ def get_assignment(server, queue=None):
 		url += '/%s' % queue
 
 	assignment = requests.get(url).json()
-	jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 	if not assignment:
 		# no work available
 		return 0
+	jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 	logger.debug('got assignment: %s', assignment)
 
 	return assignment
@@ -90,6 +90,7 @@ def main():
 	parser.add_argument('--workdir', default='/tmp', help='workdir')
 	parser.add_argument('--server', default='http://localhost:18000', help='server uri')
 	parser.add_argument('--queue', help='select specific queue to work on')
+	parser.add_argument('--single', action='store_true', help='do not loop for another assignments')
 	parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
 	args = parser.parse_args()
 	if args.debug:
@@ -97,23 +98,27 @@ def main():
 	logger.debug(args)
 
 	os.chdir(args.workdir)
-	ret = 0
+
+	## manual assignment
 	if args.assignment:
-		## manual assignment
 		assignment = json.loads(args.assignment)
 		if 'id' not in assignment:
 			assignment['id'] = str(uuid.uuid4())
 		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 		(retval, output_file) = process_assignment(assignment)
 		logger.debug('processed from command-line: %d, %s', retval, os.path.abspath(output_file))
-		ret = retval
-	else:
-		## fetch and process assignment from server
+		return retval
+
+	## fetch and process assignment from server
+	while True:
 		assignment = get_assignment(args.server, args.queue)
 		if assignment:
 			(retval, output_file) = process_assignment(assignment)
-			ret = upload_output(args.server, assignment, retval, output_file)
-	return ret
+			upload_output(args.server, assignment, retval, output_file)
+		if args.single:
+			break
+
+	return 0
 
 
 if __name__ == '__main__':

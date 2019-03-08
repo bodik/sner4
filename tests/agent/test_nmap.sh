@@ -9,7 +9,7 @@ bin/server.sh scheduler queue_add ${TESTID} --name ${TESTID}
 bin/server.sh scheduler queue_enqueue ${TESTID} "127.0.0.1"
 
 
-bin/agent --debug --queue ${TESTID}
+bin/agent --debug --queue ${TESTID} --single
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent failed'
 fi
