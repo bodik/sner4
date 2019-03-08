@@ -10,6 +10,7 @@ import re
 import shutil
 import sys
 import tarfile
+import uuid
 from contextlib import contextmanager
 from http import HTTPStatus
 
@@ -25,27 +26,26 @@ logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
 
 
-def run_once(server, queue=None):
-	"""get and process one job"""
+def get_assignment(server, queue=None):
+	"""get the assignment"""
 
-	## get the assignment
 	url = '%s/scheduler/job/assign' % server
 	if queue:
 		url += '/%s' % queue
-	try:
-		assignment = requests.get(url).json()
-		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
-	except Exception as e:
-		# comm error or assignment corrupted
-		logger.error('get assignment: %s', e)
-		return 1
+
+	assignment = requests.get(url).json()
+	jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 	if not assignment:
 		# no work available
 		return 0
 	logger.debug('got assignment: %s', assignment)
 
+	return assignment
 
-	## process the assignment
+
+def process_assignment(assignment):
+	"""process assignment"""
+
 	logger.debug('processing assignment')
 	jobdir = assignment['id']
 	oldcwd = os.getcwd()
@@ -62,18 +62,21 @@ def run_once(server, queue=None):
 		ftmp.add(jobdir)
 	shutil.rmtree(jobdir)
 
+	return (retval, output_file)
 
-	## postback output and retval
+
+def upload_output(server, assignment, retval, output_file):
+	"""upload processed assignment output_file"""
+
 	logger.debug('uploading assignment output')
 	with open(output_file, 'rb') as ftmp:
 		output = base64.b64encode(ftmp.read()).decode('utf-8')
 	response = requests.post(
 		'%s/scheduler/job/output' % server,
 		json={'id': assignment['id'], 'retval': retval, 'output': output})
-	if response.status_code == HTTPStatus.OK:
-		os.remove(output_file)
 
-
+	if response.status_code != HTTPStatus.OK:
+		return 1
 	return 0
 
 
@@ -82,16 +85,33 @@ def main():
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--debug', action='store_true', help='show debug output')
-	parser.add_argument('--server', default='http://localhost:18000', help='server uri')
 	parser.add_argument('--workdir', default='/tmp', help='workdir')
+	parser.add_argument('--server', default='http://localhost:18000', help='server uri')
 	parser.add_argument('--queue', help='select specific queue to work on')
+	parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
 	args = parser.parse_args()
 	if args.debug:
 		logger.setLevel(logging.DEBUG)
 	logger.debug(args)
 
 	os.chdir(args.workdir)
-	return run_once(args.server, args.queue)
+	ret = 0
+	if args.assignment:
+		## manual assignment
+		assignment = json.loads(args.assignment)
+		if 'id' not in assignment:
+			assignment['id'] = str(uuid.uuid4())
+		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+		(retval, output_file) = process_assignment(assignment)
+		logger.debug('processed from command-line: %d, %s', retval, os.path.abspath(output_file))
+		ret = retval
+	else:
+		## fetch and process assignment from server
+		assignment = get_assignment(args.server, args.queue)
+		if assignment:
+			(retval, output_file) = process_assignment(assignment)
+			ret = upload_output(args.server, assignment, retval, output_file)
+	return ret
 
 
 if __name__ == '__main__':

@@ -25,29 +25,45 @@ def db_init():
 def db_initdata():
 	"""put initial data to database"""
 
-	task = Task(
+	## dummy testing task and queue
+	db.session.add(Task(
 		name='dummy',
 		module='dummy',
-		params='--dummyparam 1')
-	db.session.add(task)
-	db.session.commit()
+		params='--dummyparam 1'))
 
-	queue = Queue(name='dummy', task=task, group_size=3, priority=10, active=True)
+
+	## basic nmap module scanning
+	db.session.add(Task(
+		name='dns recon',
+		module='nmap',
+		params='-Pn --reason   -sL'))
+
+	db.session.add(Task(
+		name='default scan',
+		module='nmap',
+		params='-Pn --reason   -A'))
+
+	db.session.add(Task(
+		name='full tcp scan',
+		module='nmap',
+		params='-Pn --reason   -sS -A -p1-65535   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+
+	db.session.add(Task(
+		name='basic udp scan',
+		module='nmap',
+		params='-Pn --reason   -sU -sV   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+
+
+	## development queues with default targets
+	queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
 	db.session.add(queue)
 	for target in range(100):
 		db.session.add(Target(target=target, queue=queue))
-	db.session.commit()
 
-
-	task = Task(
-		name='tcp fullport scan',
-		module='nmap',
-		params='-sS -A -p1-65535 -Pn --reason --min-hostgroup 16 --max-retries 4  --min-rate 900 --max-rate 1500') # --data-length?
-	db.session.add(task)
-	db.session.commit()
-
-	queue = Queue(name='netx fullport', task=task, group_size=16, priority=10, active=False)
+	queue = Queue(name='fulltcp netx', task=Task.query.filter(Task.name == 'dns recon').one(), group_size=16, priority=10, active=False)
 	db.session.add(queue)
 	for target in range(100):
 		db.session.add(Target(target='10.0.0.%d'%target, queue=queue))
+
+
 	db.session.commit()
