@@ -15,7 +15,7 @@ if [ $? -ne 0 ]; then
 fi
 
 JOBID=$(bin/server.sh scheduler job_list | grep ${TESTID} | awk '{print $1}')
-unzip -p var/${JOBID} ${JOBID}/output.gnmap | grep -q 'Host: 127.0.0.1 (localhost)'
+unzip -p var/scheduler/${JOBID} ${JOBID}/output.gnmap | grep -q 'Host: 127.0.0.1 (localhost)'
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent output failed'
 fi

@@ -19,6 +19,10 @@ from sner.server.form import GenericButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
 
 
+def job_output_filename(job_id):
+	return os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], 'scheduler', job_id)
+
+
 @blueprint.route('/job/list')
 def job_list_route():
 	"""list jobs"""
@@ -88,13 +92,11 @@ def job_output_route():
 	except Exception:
 		return Response(status=HTTPStatus.BAD_REQUEST)
 
-	output_file = os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], job_id)
-	with open(output_file, 'wb') as ftmp:
+	with open(job_output_filename(job_id), 'wb') as ftmp:
 		ftmp.write(output)
 
 	job = Job.query.filter(Job.id == job_id).one_or_none()
 	job.retval = retval
-	job.output = output_file
 	job.time_end = datetime.utcnow()
 	db.session.commit()
 
@@ -109,8 +111,9 @@ def job_delete_route(job_id):
 	form = GenericButtonForm()
 
 	if form.validate_on_submit():
-		if job.output:
-			os.remove(job.output)
+		output_file = job_output_filename(job_id)
+		if os.path.exists(output_file):
+			os.remove(output_file)
 		db.session.delete(job)
 		db.session.commit()
 		return redirect(url_for('scheduler.job_list_route'))

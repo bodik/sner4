@@ -57,7 +57,6 @@ class Job(db.Model):
 	queue_id = db.Column(db.Integer(), db.ForeignKey('queue.id'))
 	assignment = db.Column(db.Text())
 	retval = db.Column(db.Integer)
-	output = db.Column(db.Text())
 	time_start = db.Column(db.DateTime(), default=datetime.utcnow)
 	time_end = db.Column(db.DateTime())
 

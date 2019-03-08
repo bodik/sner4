@@ -9,6 +9,7 @@ from random import random
 from flask import url_for
 
 from sner.server import db
+from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue
 from tests.server import persist_and_detach
 from tests.server.model.scheduler import create_test_job, create_test_target
@@ -56,12 +57,11 @@ def test_job_output_route(client, test_job):
 
 	job = Job.query.filter(Job.id == test_job.id).one_or_none()
 	assert job.retval == 12345
-	assert job.output == 'var/%s' % test_job.id
-	with open(job.output, 'r') as ftmp:
+	with open(job_output_filename(test_job.id), 'r') as ftmp:
 		assert ftmp.read() == 'a-test-file-contents'
 
 
-	os.remove(job.output)
+	os.remove(job_output_filename(test_job.id))
 
 
 def test_job_delete_route(client, test_queue):

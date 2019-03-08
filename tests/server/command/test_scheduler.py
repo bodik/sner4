@@ -4,6 +4,7 @@ import json
 from random import random
 from sner.server import db
 from sner.server.command.scheduler import scheduler_command
+from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue, Task
 
 from tests.server import persist_and_detach

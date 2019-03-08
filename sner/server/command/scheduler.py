@@ -9,6 +9,7 @@ from netaddr import IPNetwork
 from sqlalchemy import func
 
 from sner.server import db
+from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
@@ -182,8 +183,8 @@ def job_list():
 			return None
 		return value.strftime(fmt)
 
-	headers = ['id', 'queue', 'assignment', 'retval', 'output', 'time_start', 'time_end']
-	fmt = '%-36s %-20s %-25s %6s %-30s %-20s %-20s'
+	headers = ['id', 'queue', 'assignment', 'retval', 'time_start', 'time_end']
+	fmt = '%-36s %-20s %-25s %6s %-20s %-20s'
 	print(fmt % tuple(headers))
 	for job in Job.query.all():
 		print(fmt % (
@@ -191,7 +192,6 @@ def job_list():
 			json.dumps(job.queue.name if job.queue else ''),
 			json.dumps(job.assignment[:17]+'...'),
 			job.retval,
-			job.output,
 			format_datetime(job.time_start),
 			format_datetime(job.time_end)))
 
@@ -203,7 +203,8 @@ def job_delete(job_id):
 	"""delete queue"""
 
 	job = Job.query.filter(Job.id == job_id).one_or_none()
-	if job.output:
-		os.remove(job.output)
+	output_file = job_output_filename(job_id)
+	if os.path.exists(output_file):
+		os.remove(output_file)
 	db.session.delete(job)
 	db.session.commit()
