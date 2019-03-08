@@ -9,8 +9,8 @@ import os
 import re
 import shutil
 import sys
-import tarfile
 import uuid
+import zipfile
 from contextlib import contextmanager
 from http import HTTPStatus
 
@@ -57,9 +57,11 @@ def process_assignment(assignment):
 		retval = module_instance.run()
 	finally:
 		os.chdir(oldcwd)
-	output_file = '%s.tar.bz2' % jobdir
-	with tarfile.open(output_file, 'w:bz2') as ftmp:
-		ftmp.add(jobdir)
+	output_file = '%s.zip' % jobdir
+	with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as output_zip:
+		for root, _dirs, files in os.walk(jobdir):
+			for fname in files:
+				output_zip.write(os.path.join(root, fname))
 	shutil.rmtree(jobdir)
 
 	return (retval, output_file)
