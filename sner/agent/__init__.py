@@ -13,9 +13,11 @@ import tarfile
 from contextlib import contextmanager
 from http import HTTPStatus
 
+import jsonschema
 import requests
 
 import sner.agent.modules
+import sner.agent.protocol
 
 
 logger = logging.getLogger('sner.agent') # pylint: disable=invalid-name
@@ -30,14 +32,16 @@ def run_once(server, queue=None):
 	url = '%s/scheduler/job/assign' % server
 	if queue:
 		url += '/%s' % queue
-	assignment = requests.get(url).json()
-	if 'id' not in assignment:
+	try:
+		assignment = requests.get(url).json()
+		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+	except Exception as e:
+		# comm error or assignment corrupted
+		logger.error('get assignment: %s', e)
+		return 1
+	if not assignment:
 		# no work available
 		return 0
-	if (not re.match(r'[a-f0-9\-]{32}', assignment['id'])) or ('module' not in assignment):
-		# assignment corrupted
-		return 1
-	logger.debug('sner.agent got assignment: %s', assignment)
 	logger.debug('got assignment: %s', assignment)
 
 

@@ -3,15 +3,16 @@
 import base64
 import json
 import os
-import re
 import time
 import uuid
 from datetime import datetime
 from http import HTTPStatus
 
+import jsonschema
 from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy.sql.expression import func
 
+import sner.agent.protocol
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import GenericButtonForm
@@ -80,12 +81,11 @@ def job_output_route():
 	"""receive output from assigned job"""
 
 	try:
+		jsonschema.validate(request.json, schema=sner.agent.protocol.output)
 		job_id = request.json['id']
 		retval = request.json['retval']
 		output = base64.b64decode(request.json['output'])
 	except Exception:
-		return Response(status=HTTPStatus.BAD_REQUEST)
-	if not re.match(r'[a-f0-9\-]{32}', job_id):
 		return Response(status=HTTPStatus.BAD_REQUEST)
 
 	output_file = os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], job_id)

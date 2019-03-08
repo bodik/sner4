@@ -99,7 +99,7 @@ output			= jsonobject
 				; {
 				;	"id": uuid,
 				;	"retval": int,
-				;	"output": string, base64 encoded binary data
+				;	"output": string, base64 encoded data
 				; }
 
 http-ok			= "HTTP/x.x 200 OK" ; standard http response
