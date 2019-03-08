@@ -38,10 +38,11 @@ def run_once(server, queue=None):
 		# assignment corrupted
 		return 1
 	logger.debug('sner.agent got assignment: %s', assignment)
+	logger.debug('got assignment: %s', assignment)
 
 
 	## process the assignment
-	logger.debug('sner.agent processing assignment')
+	logger.debug('processing assignment')
 	jobdir = assignment['id']
 	oldcwd = os.getcwd()
 	retval = 1
@@ -59,7 +60,7 @@ def run_once(server, queue=None):
 
 
 	## postback output and retval
-	logger.debug('sner.agent uploading assignment output')
+	logger.debug('uploading assignment output')
 	with open(output, 'rb') as ftmp:
 		output_data = base64.b64encode(ftmp.read()).decode('utf-8')
 	response = requests.post(
