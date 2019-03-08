@@ -9,13 +9,14 @@
 ## install packages dependencies
 apt-get install postgresql-all unzip
 
-## clone and configure
+## clone
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4
 cd sner4
+ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
+
+## configure, create env, database and run server
 cp sner-server.cfg.example sner-server.cfg
 editor sner-server.cfg
-
-## create env, db and run server
 sh bin/make_env.sh
 . env/bin/activate
 sh bin/make_db.sh
