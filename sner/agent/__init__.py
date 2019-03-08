@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 """sner agent"""
 
-import argparse
-import base64
 import json
 import logging
 import os
 import re
 import shutil
+import signal
 import sys
-import uuid
-import zipfile
-from contextlib import contextmanager
+from argparse import ArgumentParser
+from base64 import b64encode
 from http import HTTPStatus
+from io import BytesIO
+from time import sleep
+from uuid import uuid4
+from zipfile import ZipFile, ZIP_DEFLATED
 
 import jsonschema
 import requests
@@ -26,101 +28,142 @@ logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
 
 
-def get_assignment(server, queue=None):
-	"""get the assignment"""
-
-	url = '%s/scheduler/job/assign' % server
-	if queue:
-		url += '/%s' % queue
-
-	assignment = requests.get(url).json()
-	if not assignment:
-		# no work available
-		return 0
-	jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
-	logger.debug('got assignment: %s', assignment)
-
-	return assignment
+class Agent():
+	def __init__(self):
+		self.log = logging.getLogger('sner.agent')
+		self.shutdown = False
+		self.module_instance = None
 
 
-def process_assignment(assignment):
-	"""process assignment"""
+	def run(self, server, queue, oneshot=False):
+		"""fetch and process assignment from server"""
 
-	logger.debug('processing assignment')
-	jobdir = assignment['id']
-	oldcwd = os.getcwd()
-	retval = 1
-	try:
-		os.makedirs(jobdir, mode=0o700)
-		os.chdir(jobdir)
-		module_instance = getattr(sner.agent.modules, assignment['module'].capitalize())(assignment)
-		retval = module_instance.run()
-	finally:
-		os.chdir(oldcwd)
-	output_file = '%s.zip' % jobdir
-	with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as output_zip:
-		for root, _dirs, files in os.walk(jobdir):
-			for fname in files:
-				output_zip.write(os.path.join(root, fname))
-	shutil.rmtree(jobdir)
-
-	return (retval, output_file)
+		def zipdir(path):
+			"""pack directory to in memory zipfile"""
+			buf = BytesIO()
+			with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
+				for root, _dirs, files in os.walk(jobdir):
+					for fname in files:
+						output_zip.write(os.path.join(root, fname))
+			return b64encode(buf.getvalue()).decode('utf-8')
 
 
-def upload_output(server, assignment, retval, output_file):
-	"""upload processed assignment output_file"""
+		### setup signal handlers
+		original_signal_handlers = {}
+		for isig, ihan in [(signal.SIGTERM, self.terminate), (signal.SIGINT, self.terminate), (signal.SIGUSR1, self.shutdown)]:
+			original_signal_handlers[isig] = signal.getsignal(isig)
+			signal.signal(isig, ihan)
 
-	logger.debug('uploading assignment output')
-	with open(output_file, 'rb') as ftmp:
-		output = base64.b64encode(ftmp.read()).decode('utf-8')
-	response = requests.post(
-		'%s/scheduler/job/output' % server,
-		json={'id': assignment['id'], 'retval': retval, 'output': output})
 
-	if response.status_code != HTTPStatus.OK:
-		return 1
-	return 0
+		retval = 0
+		while not self.shutdown:
+			## get assignment
+			assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s'%queue if queue else '')).json()
+			self.log.debug('got assignment: %s', assignment)
+
+			if assignment:
+				## process it
+				retval = self.process_assignment(assignment)
+				self.log.debug('processed, retval=%d', retval)
+
+				## upload output
+				jobdir = assignment['id']
+				output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
+				response = requests.post('%s/scheduler/job/output' % server, json=output)
+				if response.status_code == HTTPStatus.OK:
+					shutil.rmtree(jobdir)
+				else:
+					self.log.error('output upload failed')
+					retval = 1
+					self.shutdown = True
+			elif not oneshot:
+				## wait for assignment if not in oneshot mode
+				sleep(10)
+
+			## end if requested
+			if oneshot:
+				self.shutdown = True
+
+
+		### restore signal handlers
+		for isig, ihan in original_signal_handlers.items():
+			signal.signal(isig, ihan)
+
+		return retval
+
+
+	def shutdown(self, signum=None, frame=None): # pylint: disable=unused-argument
+		"""wait for current assignment to finish"""
+
+		self.log.info('shutdown')
+		self.shutdown = True
+
+
+	def terminate(self, signum=None, frame=None): # pylint: disable=unused-argument:
+		"""terminate at once"""
+
+		self.log.info('terminate')
+		self.shutdown = True
+		if self.module_instance:
+			self.module_instance.terminate()
+
+
+	def process_assignment(self, assignment):
+		"""process assignment"""
+
+		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+		jobdir = assignment['id']
+
+		oldcwd = os.getcwd()
+		try:
+			os.makedirs(jobdir, mode=0o700)
+			os.chdir(jobdir)
+			self.module_instance = getattr(sner.agent.modules, assignment['module'].capitalize())()
+			retval = self.module_instance.run(assignment)
+		except Exception as e:
+			self.log.error(e)
+			retval = 1
+		finally:
+			self.module_instance = None
+			os.chdir(oldcwd)
+
+		return retval
 
 
 def main():
 	"""sner agent main"""
 
-	parser = argparse.ArgumentParser()
+	parser = ArgumentParser()
 	parser.add_argument('--debug', action='store_true', help='show debug output')
 	parser.add_argument('--workdir', default='/tmp', help='workdir')
 	parser.add_argument('--server', default='http://localhost:18000', help='server uri')
 	parser.add_argument('--queue', help='select specific queue to work on')
-	parser.add_argument('--single', action='store_true', help='do not loop for another assignments')
+	parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
 	parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
+
+	parser.add_argument('--shutdown', type=int, help='request gracefull shutdown of the agent specified by PID')
+	parser.add_argument('--terminate', type=int, help='request immediate termination of the agent specified by PID')
+
 	args = parser.parse_args()
 	if args.debug:
 		logger.setLevel(logging.DEBUG)
 	logger.debug(args)
 
+	## agent process management helpers
+	if args.shutdown:
+		return os.kill(args.shutdown, signal.SIGUSR1)
+	if args.terminate:
+		return os.kill(args.terminate, signal.SIGTERM)
+
+	## agent itself
 	os.chdir(args.workdir)
-
-	## manual assignment
 	if args.assignment:
-		assignment = json.loads(args.assignment)
-		if 'id' not in assignment:
-			assignment['id'] = str(uuid.uuid4())
-		jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
-		(retval, output_file) = process_assignment(assignment)
-		logger.debug('processed from command-line: %d, %s', retval, os.path.abspath(output_file))
-		return retval
-
-	## fetch and process assignment from server
-	while True:
-		assignment = get_assignment(args.server, args.queue)
-		if assignment:
-			(retval, output_file) = process_assignment(assignment)
-			upload_output(args.server, assignment, retval, output_file)
-		else:
-			break
-		if args.single:
-			break
-
-	return 0
+		tmp = json.loads(args.assignment)
+		if 'id' not in tmp:
+			tmp['id'] = str(uuid4())
+		return Agent().process_assignment(tmp)
+	else:
+		return Agent().run(args.server, args.queue, args.oneshot)
 
 
 if __name__ == '__main__':

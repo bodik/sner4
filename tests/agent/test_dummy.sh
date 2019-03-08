@@ -10,7 +10,7 @@ bin/server.sh scheduler queue_add ${TESTID} --name ${TESTID}
 bin/server.sh scheduler queue_enqueue ${TESTID} "${TESTID}_target"
 
 
-bin/agent --debug --queue ${TESTID} --single
+bin/agent --debug --queue ${TESTID} --oneshot
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent failed'
 fi
