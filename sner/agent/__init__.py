@@ -53,21 +53,21 @@ def run_once(server, queue=None):
 		retval = module_instance.run()
 	finally:
 		os.chdir(oldcwd)
-	output = '%s.tar.bz2' % jobdir
-	with tarfile.open(output, 'w:bz2') as ftmp:
+	output_file = '%s.tar.bz2' % jobdir
+	with tarfile.open(output_file, 'w:bz2') as ftmp:
 		ftmp.add(jobdir)
 	shutil.rmtree(jobdir)
 
 
 	## postback output and retval
 	logger.debug('uploading assignment output')
-	with open(output, 'rb') as ftmp:
-		output_data = base64.b64encode(ftmp.read()).decode('utf-8')
+	with open(output_file, 'rb') as ftmp:
+		output = base64.b64encode(ftmp.read()).decode('utf-8')
 	response = requests.post(
 		'%s/scheduler/job/output' % server,
-		json={'id': assignment['id'], 'retval': retval, 'output': output_data})
+		json={'id': assignment['id'], 'retval': retval, 'output': output})
 	if response.status_code == HTTPStatus.OK:
-		os.remove(output)
+		os.remove(output_file)
 
 
 	return 0
