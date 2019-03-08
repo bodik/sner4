@@ -28,9 +28,9 @@ bin/make_test.sh
 
 ### Basic dns recon
 ```
-sh bin/server.sh scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
-sh bin/server.sh scheduler enumips 192.0.2.0/24 | sh bin/server.sh scheduler queue_enqueue 'example_dns_recon' --file -
-sh bin/agent --debug --queue 'example_dns_recon'
+bin/server.sh scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
+bin/server.sh scheduler enumips 192.0.2.0/24 | sh bin/server.sh scheduler queue_enqueue 'example_dns_recon' --file -
+bin/agent --debug --queue 'example_dns_recon'
 ```
 
 
