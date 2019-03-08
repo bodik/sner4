@@ -115,6 +115,8 @@ def main():
 		if assignment:
 			(retval, output_file) = process_assignment(assignment)
 			upload_output(args.server, assignment, retval, output_file)
+		else:
+			break
 		if args.single:
 			break
 
