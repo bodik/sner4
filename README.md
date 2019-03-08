@@ -3,6 +3,8 @@
 
 ## Quick start
 
+
+### Installation
 ```
 ## install packages dependencies
 apt-get install postgresql-all unzip
@@ -21,6 +23,13 @@ screen -S sner4-server -dm sh bin/server.sh
 
 ## run test suite
 sh bin/make_test.sh
+```
+
+### Basic dns recon
+```
+sh bin/server.sh scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
+sh bin/server.sh scheduler enumips 192.0.2.0/24 | sh bin/server.sh scheduler queue_enqueue 'example_dns_recon' --file -
+sh bin/agent --debug --queue 'example_dns_recon'
 ```
 
 
