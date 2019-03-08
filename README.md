@@ -17,13 +17,13 @@ ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
 ## configure, create env, database and run server
 cp sner-server.cfg.example sner-server.cfg
 editor sner-server.cfg
-sh bin/make_env.sh
+bin/make_env.sh
 . env/bin/activate
-sh bin/make_db.sh
+bin/make_db.sh
 screen -S sner4-server -dm sh bin/server.sh
 
 ## run test suite
-sh bin/make_test.sh
+bin/make_test.sh
 ```
 
 ### Basic dns recon
