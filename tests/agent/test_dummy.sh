@@ -16,7 +16,7 @@ if [ $? -ne 0 ]; then
 fi
 
 JOBID=$(bin/server.sh scheduler job_list | grep ${TESTID} | awk '{print $1}')
-unzip -p var/scheduler/${JOBID} ${JOBID}/assignment.json | grep -q -- "--dummyparam 1"
+unzip -p var/scheduler/${JOBID} assignment.json | grep -q -- "--dummyparam 1"
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent output failed'
 fi

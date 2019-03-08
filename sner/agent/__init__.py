@@ -46,7 +46,9 @@ class Agent():
 			with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
 				for root, _dirs, files in os.walk(path):
 					for fname in files:
-						output_zip.write(os.path.join(root, fname))
+						filepath = os.path.join(root, fname)
+						arcname = os.path.join(*(filepath.split(os.path.sep)[1:]))
+						output_zip.write(filepath, arcname)
 			return b64encode(buf.getvalue()).decode('utf-8')
 
 
