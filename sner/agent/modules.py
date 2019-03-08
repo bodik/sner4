@@ -16,7 +16,7 @@ class Base():
 		self.process = None
 
 
-	def run(self, assignment):
+	def run(self, assignment): # pylint: disable=no-self-use
 		"""run the agent"""
 
 		with open('assignment.json', 'w+') as ftmp:
@@ -28,7 +28,7 @@ class Base():
 		"""execute command and capture output"""
 
 		with open(output_file, 'w') as output_fd:
-			self.process = subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT, preexec_fn=os.setsid)
+			self.process = subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
 			retval = self.process.wait()
 			self.process = None
 		return retval
@@ -42,7 +42,7 @@ class Base():
 		self.process.poll()
 		if self.process.returncode is None:
 			try:
-				os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+				os.kill(self.process.pid, signal.SIGTERM)
 			except Exception as e:
 				self.log.error(e)
 

@@ -29,9 +29,11 @@ logger.setLevel(logging.INFO)
 
 
 class Agent():
+	"""agent class to fetch and execute assignments from central job server"""
+
 	def __init__(self):
 		self.log = logging.getLogger('sner.agent')
-		self.shutdown = False
+		self.loop = True
 		self.module_instance = None
 
 
@@ -42,7 +44,7 @@ class Agent():
 			"""pack directory to in memory zipfile"""
 			buf = BytesIO()
 			with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
-				for root, _dirs, files in os.walk(jobdir):
+				for root, _dirs, files in os.walk(path):
 					for fname in files:
 						output_zip.write(os.path.join(root, fname))
 			return b64encode(buf.getvalue()).decode('utf-8')
@@ -56,7 +58,7 @@ class Agent():
 
 
 		retval = 0
-		while not self.shutdown:
+		while self.loop:
 			## get assignment
 			assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s'%queue if queue else '')).json()
 			self.log.debug('got assignment: %s', assignment)
@@ -75,14 +77,14 @@ class Agent():
 				else:
 					self.log.error('output upload failed')
 					retval = 1
-					self.shutdown = True
+					self.loop = False
 			elif not oneshot:
 				## wait for assignment if not in oneshot mode
 				sleep(10)
 
 			## end if requested
 			if oneshot:
-				self.shutdown = True
+				self.loop = False
 
 
 		### restore signal handlers
@@ -96,14 +98,14 @@ class Agent():
 		"""wait for current assignment to finish"""
 
 		self.log.info('shutdown')
-		self.shutdown = True
+		self.loop = False
 
 
-	def terminate(self, signum=None, frame=None): # pylint: disable=unused-argument:
+	def terminate(self, signum=None, frame=None): # pylint: disable=unused-argument
 		"""terminate at once"""
 
 		self.log.info('terminate')
-		self.shutdown = True
+		self.loop = False
 		if self.module_instance:
 			self.module_instance.terminate()
 
@@ -155,15 +157,16 @@ def main():
 	if args.terminate:
 		return os.kill(args.terminate, signal.SIGTERM)
 
-	## agent itself
+	## agent with custom assignment
 	os.chdir(args.workdir)
 	if args.assignment:
 		tmp = json.loads(args.assignment)
 		if 'id' not in tmp:
 			tmp['id'] = str(uuid4())
 		return Agent().process_assignment(tmp)
-	else:
-		return Agent().run(args.server, args.queue, args.oneshot)
+
+	## standard agent
+	return Agent().run(args.server, args.queue, args.oneshot)
 
 
 if __name__ == '__main__':
