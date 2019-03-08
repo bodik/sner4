@@ -1,5 +1,30 @@
 # sner -- slow network recon
 
+
+## Quick start
+
+```
+## install packages dependencies
+apt-get install postgresql-all unzip
+
+## clone and configure
+git clone https://gitlab.flab.cesnet.cz/bodik/sner4
+cd sner4
+cp sner-server.cfg.example sner-server.cfg
+editor sner-server.cfg
+
+## create env, db and run server
+sh bin/make_env.sh
+. env/bin/activate
+sh bin/make_db.sh
+screen -S sner4-server -dm sh bin/server.sh
+
+## run test suite
+sh bin/make_test.sh
+```
+
+
+
 ## Project description
 
 Currently, an ad-hoc developed version of the orchestration tool/wrapper for
