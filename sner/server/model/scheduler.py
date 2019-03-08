@@ -2,7 +2,9 @@
 # pylint: disable=too-few-public-methods,abstract-method
 
 from datetime import datetime
+
 from sqlalchemy.orm import relationship
+
 from sner.server import db
 
 
