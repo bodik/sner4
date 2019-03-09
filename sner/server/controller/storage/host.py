@@ -48,13 +48,6 @@ def host_vizdns_json_route():
 		node[items[0]] = to_tree(node[items[0]], items[1:])
 		return node
 
-	crop = request.args.get('crop', 1, type=int)
-	hostnames_tree = {}
-	for ihost in Host.query.all():
-		if ihost.hostname:
-			hostnames_tree = to_tree(hostnames_tree, list(reversed(ihost.hostname.split('.')[crop:])))
-
-
 	## walk through the tree and generate list of nodes and links
 	def to_graph_data(parentid, treedata, nodes, links):
 		for node in treedata:
@@ -64,6 +57,13 @@ def host_vizdns_json_route():
 				links.append({'source': parentid, 'target': nodeid})
 			(nodes, links) = to_graph_data(nodeid, treedata[node], nodes, links)
 		return (nodes, links)
+
+	crop = request.args.get('crop', 1, type=int)
+
+	hostnames_tree = {}
+	for ihost in Host.query.all():
+		if ihost.hostname:
+			hostnames_tree = to_tree(hostnames_tree, list(reversed(ihost.hostname.split('.')[crop:])))
 
 	(nodes, links) = to_graph_data(None, hostnames_tree, [], [])
 
