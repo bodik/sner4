@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style type="text/css">
+svg {
+	border:1px solid lightgrey;
+}
+.links {
+	stroke: lightgray; stroke-opacity: .6; stroke-width: 1px;
+}
+.nodes {}
+.text {
+	font-size: small;
+}
+</style>
+{% endblock %}
+
+{% block script %}
+<script src="https://d3js.org/d3.v4.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!--
+	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
+	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
+	https://github.com/ninjaconcept/d3-force-directed-graph
+	https://bl.ocks.org/rofrischmann/74e3b61530c350d1ec1771416249a535
+	https://bl.ocks.org/mbostock/1129492
+-->
+<div class="hosts">
+	<div>crop: {% for level in range(0,3) %}<a class="btn btn-default" href="{{ url_for('storage.host_vizdns_route', crop=level) }}">{{level}}</a> {% endfor %}<div>
+	<svg></svg>
+</div>
+
+<script>
+var colors = d3.scaleOrdinal(d3.schemeCategory20);
+var radius = 5;
+
+var width = $(".hosts")[0].clientWidth;
+var height = 0.8*window.innerHeight;
+var svg = d3.select('svg')
+	.attr('width', width)
+	.attr('height', height);
+
+var linkElements;
+var nodeElements;
+var textElements;
+
+var linkForce = d3.forceLink()
+	.id(function (link) { return link.id })
+	.distance(100).strength(1);
+
+var simulation = d3.forceSimulation()
+	.force('link', linkForce)
+	.force('charge', d3.forceManyBody())
+	.force('center', d3.forceCenter(width / 2, height / 2));
+
+var dragDrop = d3.drag()
+	.on('start', function (node) {
+		node.fx = node.x;
+		node.fy = node.y;
+	})
+	.on('drag', function (node) {
+		simulation.alphaTarget(0.7).restart();
+		node.fx = d3.event.x;
+		node.fy = d3.event.y;
+	})
+	.on('end', function (node) {
+		if (!d3.event.active) {
+			simulation.alphaTarget(0);
+		}
+		node.fx = null;
+		node.fy = null;
+	});
+
+d3.json("vizdns.json?crop={{crop}}", function (error, graph) {
+	if (error) throw error;
+	update(graph.nodes, graph.links);
+});
+
+function update(nodes, links) {
+	linkElements = svg.append("g")
+		.attr("class", "links")
+		.selectAll("line")
+		.data(links)
+		.enter().append("line")
+			.attr("class", "link");
+
+
+	nodeElements = svg.append("g")
+		.attr("class", "nodes")
+		.selectAll("circle")
+		.data(nodes)
+		.enter().append("circle")
+			.attr("class", "node")
+			.attr("r", 5)
+			.style("fill", function (d, i) {return colors(i);})
+			.call(dragDrop)
+	nodeElements
+		.append("title")
+		.text(function (d) { return d.id; });
+
+
+	textElements = svg.append("g")
+		.attr("class", "texts")
+		.selectAll("text")
+		.data(nodes)
+		.enter().append("text")
+			.attr("class", "text")
+			.text(function (d) { return d.name; })
+			.attr("dx", 15)
+			.attr("dy", 4);
+
+
+	simulation
+		.nodes(nodes)
+		.on("tick", ticked);
+	simulation
+		.force("link")
+		.links(links);
+}
+
+function ticked() {
+	nodeElements
+		.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
+		.attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
+
+	textElements
+		.attr('x', function (d) { return d.x })
+		.attr('y', function (d) { return d.y });
+
+	linkElements
+		.attr('x1', function (d) { return d.source.x })
+		.attr('y1', function (d) { return d.source.y })
+		.attr('x2', function (d) { return d.target.x })
+		.attr('y2', function (d) { return d.target.y });
+}
+</script>
+{% endblock %}
