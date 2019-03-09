@@ -27,6 +27,8 @@ def create_app():
 	app.cli.add_command(db_command)
 	from sner.server.command.scheduler import scheduler_command
 	app.cli.add_command(scheduler_command)
+	from sner.server.command.storage import storage_command
+	app.cli.add_command(storage_command)
 
 	@app.route('/')
 	def index_route(): # pylint: disable=unused-variable
