@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hosts">
+	<h1>Hosts list</h1>
+
+	<table id="hosts_table" class="datatable table table-hover table-responsive">
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>address</th>
+			<th>hostname</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for host in hosts %}
+		<tr>
+			<td>{{ host.id }}</td>
+			<td>{{ host.address }}</td>
+			<td>{{ host.hostname }}</td>
+			<td>
+				{% with form=generic_button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button_delete.html' %}{% endwith %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
+{% endblock %}
