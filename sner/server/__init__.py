@@ -20,6 +20,8 @@ def create_app():
 
 	from sner.server.controller import scheduler
 	app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
+	from sner.server.controller import storage
+	app.register_blueprint(storage.blueprint, url_prefix='/storage')
 
 	from sner.server.command.db import db_command
 	app.cli.add_command(db_command)
