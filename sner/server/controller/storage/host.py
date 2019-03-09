@@ -1,6 +1,6 @@
 """controller host"""
 
-from flask import jsonify, redirect, render_template, url_for
+from flask import current_app, jsonify, redirect, render_template, request, url_for
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
@@ -12,7 +12,8 @@ from sner.server.model.storage import Host
 def host_list_route():
 	"""list hosts"""
 
-	hosts = Host.query.all()
+	page = request.args.get('page', 1, type=int)
+	hosts = Host.query.paginate(page, current_app.config['SNER_ITEMS_PER_PAGE'])
 	return render_template('storage/host/list.html', hosts=hosts, generic_button_form=GenericButtonForm())
 
 

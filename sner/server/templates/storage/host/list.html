@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% import "macros.html" as macro %}
 
 {% block content %}
 <div class="hosts">
 	<h1>Hosts list</h1>
+
+	<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>
 
 	<table id="hosts_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -14,7 +17,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for host in hosts %}
+		{% for host in hosts.items %}
 		<tr>
 			<td>{{ host.id }}</td>
 			<td>{{ host.address }}</td>
@@ -26,5 +29,7 @@
 		{% endfor %}
 	</tbody>
 	</table>
+
+	<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>
 </div>
 {% endblock %}
