@@ -19,6 +19,47 @@ def test_host_list_route(client):
 	assert b'<h1>Hosts list' in response
 
 
+def test_task_add_route(client):
+	"""host add route test"""
+
+	test_host = create_test_host()
+	test_host.hostname = 'add%d.%s' % (random(), test_host.hostname)
+
+
+	form = client.get(url_for('storage.host_add_route')).form
+	form['address'] = test_host.address
+	form['hostname'] = test_host.hostname
+	form['os'] = test_host.os
+	response = form.submit()
+	assert response.status_code == HTTPStatus.FOUND
+
+	host = Host.query.filter(Host.hostname == test_host.hostname).one_or_none()
+	assert host
+	assert host.hostname == test_host.hostname
+	assert host.os == test_host.os
+
+
+	db.session.delete(host)
+	db.session.commit()
+
+
+def test_host_edit_route(client, test_host):
+	"""host edit route test"""
+
+	test_host.hostname = 'edit%d.%s' % (random(), test_host.hostname)
+	persist_and_detach(test_host)
+
+
+	form = client.get(url_for('storage.host_edit_route', host_id=test_host.id)).form
+	form['hostname'] = 'edited-'+form['hostname'].value
+	response = form.submit()
+	assert response.status_code == HTTPStatus.FOUND
+
+	host = Host.query.filter(Host.id == test_host.id).one_or_none()
+	assert host
+	assert host.hostname == form['hostname'].value
+
+
 def test_host_delete_route(client):
 	"""host delete route test"""
 

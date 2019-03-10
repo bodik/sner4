@@ -3,9 +3,9 @@
 
 {% block content %}
 <div class="hosts">
-	<h1>Hosts list</h1>
+	<h1>Hosts list <a class="btn btn-xs btn-success" href="{{ url_for('storage.host_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
-	<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>
+	{% if hosts.pages > 1 %}<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>{% endif %}
 
 	<table id="hosts_table" class="datatable table table-hover table-responsive">
 	<thead>
@@ -13,6 +13,9 @@
 			<th>id</th>
 			<th>address</th>
 			<th>hostname</th>
+			<th>os</th>
+			<th>created</th>
+			<th>modified</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -22,7 +25,11 @@
 			<td>{{ host.id }}</td>
 			<td>{{ host.address }}</td>
 			<td>{{ host.hostname }}</td>
+			<td>{{ host.os }}</td>
+			<td>{{ host.created|datetime }}</td>
+			<td>{{ host.modified|datetime }}</td>
 			<td>
+				<a class="btn btn-xs btn-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 				{% with form=generic_button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button_delete.html' %}{% endwith %}
 			</td>
 		</tr>
@@ -30,6 +37,6 @@
 	</tbody>
 	</table>
 
-	<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>
+	{% if hosts.pages > 1 %}<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>{% endif %}
 </div>
 {% endblock %}

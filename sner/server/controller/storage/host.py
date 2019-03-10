@@ -5,6 +5,7 @@ from flask import current_app, jsonify, redirect, render_template, request, url_
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import GenericButtonForm
+from sner.server.form.storage import HostForm
 from sner.server.model.storage import Host
 
 
@@ -14,7 +15,39 @@ def host_list_route():
 
 	page = request.args.get('page', 1, type=int)
 	hosts = Host.query.paginate(page, current_app.config['SNER_ITEMS_PER_PAGE'])
+
 	return render_template('storage/host/list.html', hosts=hosts, generic_button_form=GenericButtonForm())
+
+
+@blueprint.route('/host/add', methods=['GET', 'POST'])
+def host_add_route():
+	"""add host"""
+
+	form = HostForm()
+
+	if form.validate_on_submit():
+		host = Host()
+		form.populate_obj(host)
+		db.session.add(host)
+		db.session.commit()
+		return redirect(url_for('storage.host_list_route'))
+
+	return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_add_route'))
+
+
+@blueprint.route('/host/edit/<host_id>', methods=['GET', 'POST'])
+def host_edit_route(host_id):
+	"""edit host"""
+
+	host = Host.query.get(host_id)
+	form = HostForm(obj=host)
+
+	if form.validate_on_submit():
+		form.populate_obj(host)
+		db.session.commit()
+		return redirect(url_for('storage.host_list_route'))
+
+	return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_edit_route', host_id=host_id))
 
 
 @blueprint.route('/host/delete/<host_id>', methods=['GET', 'POST'])
@@ -23,10 +56,12 @@ def host_delete_route(host_id):
 
 	host = Host.query.get(host_id)
 	form = GenericButtonForm()
+
 	if form.validate_on_submit():
 		db.session.delete(host)
 		db.session.commit()
 		return redirect(url_for('storage.host_list_route'))
+
 	return render_template('button_delete.html', form=form, form_url=url_for('storage.host_delete_route', host_id=host_id))
 
 
