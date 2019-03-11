@@ -25,7 +25,7 @@ class Host(db.Model):
 
 class Service(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	host_id = db.Column(db.Integer, db.ForeignKey('host.id'))
+	host_id = db.Column(db.Integer, db.ForeignKey('host.id'), nullable=False)
 	proto = db.Column(db.String(10), nullable=False)
 	port = db.Column(db.Integer, nullable=False)
 	state = db.Column(db.String(100))
