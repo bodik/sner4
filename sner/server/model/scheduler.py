@@ -19,7 +19,7 @@ class Task(db.Model):
 	queues = relationship('Queue', back_populates='task')
 
 	def __repr__(self):
-		return '<Task: %d:%s>' % (self.id, self.name)
+		return '<Task %d: %s>' % (self.id, self.name)
 
 
 class Queue(db.Model):
@@ -37,7 +37,7 @@ class Queue(db.Model):
 	jobs = relationship('Job', back_populates='queue')
 
 	def __repr__(self):
-		return '<Queue: %d:%s>' % (self.id, self.name)
+		return '<Queue %d: %s>' % (self.id, self.name)
 
 
 
@@ -49,6 +49,10 @@ class Target(db.Model):
 	queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'), nullable=False)
 
 	queue = relationship('Queue', back_populates='targets')
+
+	def __repr__(self):
+		return '<Target %d: %s>' % (self.id, self.target)
+
 
 
 class Job(db.Model):
@@ -62,3 +66,6 @@ class Job(db.Model):
 	time_end = db.Column(db.DateTime)
 
 	queue = relationship('Queue', back_populates='jobs')
+
+	def __repr__(self):
+		return '<Job %d>' % self.id

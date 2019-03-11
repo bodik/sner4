@@ -18,8 +18,6 @@ def storage_command():
 	pass
 
 
-## parser commands
-
 @storage_command.command(name='import', help='import data from files')
 @with_appcontext
 @click.argument('path', nargs=-1)

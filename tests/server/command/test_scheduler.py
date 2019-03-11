@@ -13,7 +13,7 @@ from tests.server.model.scheduler import create_test_job, create_test_queue, cre
 
 ## misc commands tests
 
-def test_enumips(runner):
+def test_enumips_command(runner):
 	"""basic enumerator test"""
 
 	result = runner.invoke(scheduler_command, ['enumips', '127.0.0.128/30'])
