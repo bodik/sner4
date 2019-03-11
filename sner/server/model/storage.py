@@ -21,3 +21,17 @@ class Host(db.Model):
 
 	def __repr__(self):
 		return '%s (%s)' % (self.address, self.hostname if self.hostname else '')
+
+
+class Service(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	host_id = db.Column(db.Integer, db.ForeignKey('host.id'))
+	proto = db.Column(db.String(10), nullable=False)
+	port = db.Column(db.Integer, nullable=False)
+	state = db.Column(db.String(100))
+	name = db.Column(db.String(100))
+	info = db.Column(db.String(2000))
+	created = db.Column(db.DateTime, default=datetime.utcnow)
+	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+	host = relationship('Host', back_populates='services')
