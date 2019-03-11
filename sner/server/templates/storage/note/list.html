@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "macros.html" as macro %}
+
+{% block content %}
+<div class="notes">
+	<h1>Notes list</h1>
+
+	{% if notes.pages > 1 %}<div class="text-center">{{ macro.pagination(notes, request.url_rule.endpoint) }}</div>{% endif %}
+
+	<table id="notes_table" class="datatable table table-hover table-responsive">
+	<thead>
+		<tr>
+			<th>id</th>
+			<th>host</th>
+			<th>ntype</th>
+			<th>data</th>
+			<th>created</th>
+			<th>modified</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for note in notes.items %}
+		<tr>
+			<td>{{ note.id }}</td>
+			<td>{{ note.host }}</td>
+			<td>{{ note.ntype }}</td>
+			<td>{{ note.data[:80] }}..</td>
+			<td>{{ note.created|datetime }}</td>
+			<td>{{ note.modified|datetime }}</td>
+			<td>
+				<a class="btn btn-xs btn-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				{% with form=generic_button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button_delete.html' %}{% endwith %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+
+	{% if notes.pages > 1 %}<div class="text-center">{{ macro.pagination(notes, request.url_rule.endpoint) }}</div>{% endif %}
+</div>
+{% endblock %}

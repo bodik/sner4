@@ -35,3 +35,14 @@ class Service(db.Model):
 	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	host = relationship('Host', back_populates='services')
+
+
+class Note(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	host_id = db.Column(db.Integer, db.ForeignKey('host.id'))
+	ntype = db.Column(db.String(500))
+	data = db.Column(db.Text)
+	created = db.Column(db.DateTime, default=datetime.utcnow)
+	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+	host = relationship('Host', back_populates='notes')

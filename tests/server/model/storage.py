@@ -3,7 +3,7 @@
 import pytest
 
 from sner.server import db
-from sner.server.model.storage import Host, Service
+from sner.server.model.storage import Host, Note, Service
 from tests.server import persist_and_detach
 
 
@@ -28,6 +28,15 @@ def create_test_service(a_test_host):
 		info='product: OpenSSH version: 7.4p1 Debian 10+deb9u4 extrainfo: protocol 2.0 ostype: Linux')
 
 
+def create_test_note(a_test_host):
+	"""test note data"""
+
+	return Note(
+		host=a_test_host,
+		ntype='testnote.ntype',
+		data='test note data')
+
+
 @pytest.fixture()
 def test_host():
 	"""persistent test host"""
@@ -47,4 +56,15 @@ def test_service(test_host):
 	tmp_id = tmp_service.id
 	yield tmp_service
 	db.session.delete(Service.query.get(tmp_id))
+	db.session.commit()
+
+
+@pytest.fixture()
+def test_note(test_host):
+	"""persistent test note"""
+
+	tmp_note = persist_and_detach(create_test_note(test_host))
+	tmp_id = tmp_note.id
+	yield tmp_note
+	db.session.delete(Note.query.get(tmp_id))
 	db.session.commit()

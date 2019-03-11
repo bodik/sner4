@@ -21,3 +21,11 @@ class ServiceForm(FlaskForm):
 	state = StringField('State', validators=[validators.Length(max=100)])
 	name = StringField('Name', validators=[validators.Length(max=100)])
 	info = TextAreaField('Info')
+
+
+class NoteForm(FlaskForm):
+	"""note edit form"""
+
+	host_id = HiddenField()
+	ntype = StringField('nType', validators=[validators.Length(max=500)])
+	data = TextAreaField('Data')
