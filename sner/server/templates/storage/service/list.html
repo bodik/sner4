@@ -43,6 +43,6 @@
 	</tbody>
 	</table>
 
-	<div class="text-center">{{ macro.pagination(services, request.url_rule.endpoint) }}</div>
+	{% if services.pages > 1 %}<div class="text-center">{{ macro.pagination(services, request.url_rule.endpoint) }}</div>{% endif %}
 </div>
 {% endblock %}
