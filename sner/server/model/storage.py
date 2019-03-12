@@ -9,6 +9,8 @@ from sner.server import db
 
 
 class Host(db.Model):
+	"""basic host (ip-centric) model"""
+
 	id = db.Column(db.Integer, primary_key=True)
 	address = db.Column(postgresql.INET, nullable=False)
 	hostname = db.Column(db.String(256))
@@ -24,6 +26,8 @@ class Host(db.Model):
 
 
 class Service(db.Model):
+	"""discovered host service"""
+
 	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id'), nullable=False)
 	proto = db.Column(db.String(10), nullable=False)
@@ -41,6 +45,8 @@ class Service(db.Model):
 
 
 class Note(db.Model):
+	"""host assigned note, generic data container"""
+
 	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id'), nullable=False)
 	ntype = db.Column(db.String(500))

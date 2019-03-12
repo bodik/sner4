@@ -49,7 +49,7 @@ def test_host():
 
 
 @pytest.fixture()
-def test_service(test_host):
+def test_service(test_host): # pylint: disable=redefined-outer-name
 	"""persistent test service"""
 
 	tmp_service = persist_and_detach(create_test_service(test_host))
@@ -60,7 +60,7 @@ def test_service(test_host):
 
 
 @pytest.fixture()
-def test_note(test_host):
+def test_note(test_host): # pylint: disable=redefined-outer-name
 	"""persistent test note"""
 
 	tmp_note = persist_and_detach(create_test_note(test_host))

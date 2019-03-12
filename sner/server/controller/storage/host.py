@@ -67,12 +67,15 @@ def host_delete_route(host_id):
 
 @blueprint.route('/host/vizdns')
 def host_vizdns_route():
+	"""dns hierarchy tree visualization"""
+
 	crop = request.args.get('crop', 1, type=int)
 	return render_template('storage/host/vizdns.html', crop=crop)
 
 
 @blueprint.route('/host/vizdns.json')
 def host_vizdns_json_route():
+	"""dns hierarchy tree visualization data generator"""
 
 	## from all hostnames we know, create tree structure dict-of-dicts
 	def to_tree(node, items):

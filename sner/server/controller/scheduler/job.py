@@ -20,6 +20,7 @@ from sner.server.model.scheduler import Job, Queue, Target
 
 
 def job_output_filename(job_id):
+	"""helper, returns path to job datafile, would go to (doctrine)Repository if sqlalchemy had one"""
 	return os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], 'scheduler', job_id)
 
 

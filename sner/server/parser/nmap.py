@@ -1,7 +1,6 @@
 """parsers to import from agent outputs to storage"""
 
 import json
-import logging
 import sys
 
 import libnmap.parser
@@ -11,11 +10,10 @@ from sner.server.parser import register_parser
 from sner.server.model.storage import Host, Note, Service
 
 
-logger = logging.getLogger('sner.server.parser.nmap')
-
-
 @register_parser('nmap')
 class NmapParser():
+	"""nmap xml output parser"""
+
 	JOB_OUTPUT_DATAFILE = 'output.xml'
 
 
@@ -81,17 +79,19 @@ class NmapParser():
 			host = NmapParser.import_host(ihost)
 
 			for iservice in ihost.services:
-				service = NmapParser.import_service(host, iservice)
+				NmapParser.import_service(host, iservice)
 
 			db.session.commit()
 			print('parsed host: %s' % host)
 
 
-if __name__ == '__main__':
-	p = NmapParser()
+
+def debug_parser():
+	"""cli helper, pull data from report and display"""
+
 	with open(sys.argv[1], 'r') as ftmp:
 		report = libnmap.parser.NmapParser.parse_fromstring(ftmp.read())
-	
+
 	for host in report.hosts:
 		print('# host: %s' % host.hostnames)
 		print('## host dict')
@@ -107,3 +107,6 @@ if __name__ == '__main__':
 			print(tmp.get_dict())
 			print('#### service scripts_results')
 			print(json.dumps(tmp.scripts_results, indent=2))
+
+if __name__ == '__main__':
+	debug_parser()

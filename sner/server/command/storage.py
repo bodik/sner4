@@ -1,11 +1,11 @@
 """storage commands"""
 
+import os
+from zipfile import ZipFile
+
 import click
 import magic
-import os
-
 from flask.cli import with_appcontext
-from zipfile import ZipFile
 
 from sner.server import db
 from sner.server.model.storage import Host

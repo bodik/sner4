@@ -1,8 +1,9 @@
 """storage commands tests"""
 
 import json
-import pytest
 import re
+
+import pytest
 
 from sner.server import db
 from sner.server.command.storage import storage_command
@@ -21,7 +22,7 @@ def test_import_nmap_command(runner):
 	assert host.os == 'Linux 3.8 - 4.6'
 	assert [x.port for x in host.services] == [22, 25, 139, 445, 5432]
 	tmpnote = Note.query.filter(Note.host == host, Note.ntype == 'nmap.smtp-commands.tcp.25').one_or_none()
-	assert "PIPELINING" in json.loads(tmpnote.data)["output"] 
+	assert "PIPELINING" in json.loads(tmpnote.data)["output"]
 
 
 	db.session.delete(host)
@@ -29,5 +30,6 @@ def test_import_nmap_command(runner):
 
 
 @pytest.mark.skip(reason='would note test flushing database')
-def test_flush_command(runner):
+def test_flush_command():
+	"""flush storage database; no separate test db, test not implemented"""
 	pass

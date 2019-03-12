@@ -8,7 +8,7 @@ import signal
 import subprocess
 
 
-registered_modules = {}
+registered_modules = {} # pylint: disable=invalid-name
 def register_module(name):
 	"""register module class to registry"""
 
