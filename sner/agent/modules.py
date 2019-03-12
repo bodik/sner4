@@ -8,6 +8,17 @@ import signal
 import subprocess
 
 
+registered_modules = {}
+def register_module(name):
+	"""register module class to registry"""
+
+	def register_module_real(cls):
+		if cls not in registered_modules:
+			registered_modules[name] = cls
+		return cls
+	return register_module_real
+
+
 class Base():
 	"""simple dummy agent module"""
 
@@ -46,12 +57,13 @@ class Base():
 			except Exception as e:
 				self.log.error(e)
 
-
+@register_module('dummy')
 class Dummy(Base):
 	"""testing agent impl"""
 	pass
 
 
+@register_module('nmap')
 class Nmap(Base):
 	"""nmap wrapper"""
 

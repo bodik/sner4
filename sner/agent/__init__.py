@@ -19,8 +19,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import jsonschema
 import requests
 
-import sner.agent.modules
 import sner.agent.protocol
+from sner.agent.modules import registered_modules
 
 
 logger = logging.getLogger('sner.agent') # pylint: disable=invalid-name
@@ -122,7 +122,7 @@ class Agent():
 		try:
 			os.makedirs(jobdir, mode=0o700)
 			os.chdir(jobdir)
-			self.module_instance = getattr(sner.agent.modules, assignment['module'].capitalize())()
+			self.module_instance = registered_modules[assignment['module']]()
 			retval = self.module_instance.run(assignment)
 		except Exception as e:
 			self.log.error(e)
