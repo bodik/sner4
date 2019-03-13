@@ -4,6 +4,7 @@ import click
 from flask.cli import with_appcontext
 from sner.server import db
 from sner.server.model.scheduler import Queue, Task, Target
+from sner.server.model.storage import Host, Service, Note
 
 
 @click.group(name='db', help='sner.server db management')
@@ -25,14 +26,15 @@ def db_init():
 def db_initdata():
 	"""put initial data to database"""
 
-	## dummy testing task and queue
+## scheduler test data
+	### dummy testing task and queue
 	db.session.add(Task(
 		name='dummy',
 		module='dummy',
 		params='--dummyparam 1'))
 
 
-	## basic nmap module scanning
+	### basic nmap module scanning
 	db.session.add(Task(
 		name='dns recon',
 		module='nmap',
@@ -54,7 +56,7 @@ def db_initdata():
 		params='-Pn --reason   -sU -sV   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
 
-	## development queues with default targets
+	### development queues with default targets
 	queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
 	db.session.add(queue)
 	for target in range(100):
@@ -64,6 +66,26 @@ def db_initdata():
 	db.session.add(queue)
 	for target in range(100):
 		db.session.add(Target(target='10.0.0.%d'%target, queue=queue))
+
+
+## storage test data
+	db.session.add(Host(
+		address='127.4.4.4',
+		hostname='testhost.testdomain.test',
+		os='Test Linux 1'))
+
+	db.session.add(Service(
+		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+		proto='tcp',
+		port=12345,
+		state='open:testreason',
+		name='testservice',
+		info='testservice info'))
+
+	db.session.add(Note(
+		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+		ntype='sner.testnote',
+		data='testnote data'))
 
 
 	db.session.commit()
