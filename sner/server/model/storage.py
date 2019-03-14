@@ -49,7 +49,7 @@ class Note(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id'), nullable=False)
-	ntype = db.Column(db.String(500))
+	ntype = db.Column(db.String(500), nullable=False)
 	data = db.Column(db.Text)
 	created = db.Column(db.DateTime, default=datetime.utcnow)
 	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
