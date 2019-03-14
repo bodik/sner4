@@ -1,7 +1,14 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, IntegerField, StringField, TextAreaField, validators
+from wtforms import HiddenField, IntegerField, StringField, TextAreaField, ValidationError, validators
+
+from sner.server.model.storage import Host
+
+
+def host_id_exists(form, field):
+	if not Host.query.filter(Host.id == field.data).one_or_none():
+		raise ValidationError('No such host')
 
 
 class HostForm(FlaskForm):
@@ -15,7 +22,7 @@ class HostForm(FlaskForm):
 class ServiceForm(FlaskForm):
 	"""service edit form"""
 
-	host_id = HiddenField()
+	host_id = IntegerField('Host_id', validators=[host_id_exists])
 	proto = StringField('Proto', validators=[validators.Length(max=10)])
 	port = IntegerField('Port', validators=[validators.NumberRange(min=0, max=65535)])
 	state = StringField('State', validators=[validators.Length(max=100)])
@@ -23,9 +30,10 @@ class ServiceForm(FlaskForm):
 	info = TextAreaField('Info')
 
 
+
 class NoteForm(FlaskForm):
 	"""note edit form"""
 
-	host_id = HiddenField()
+	host_id = IntegerField('Host_id', validators=[host_id_exists])
 	ntype = StringField('nType', validators=[validators.Length(max=500)])
 	data = TextAreaField('Data')

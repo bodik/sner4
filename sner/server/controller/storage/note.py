@@ -31,8 +31,7 @@ def note_add_route(host_id):
 		db.session.commit()
 		return redirect(url_for('storage.note_list_route'))
 
-	host = Host.query.filter(Host.id == host_id).one_or_none()
-	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_add_route', host_id=host_id), host=host)
+	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_add_route', host_id=host_id))
 
 
 @blueprint.route('/note/edit/<note_id>', methods=['GET', 'POST'])
@@ -47,8 +46,7 @@ def note_edit_route(note_id):
 		db.session.commit()
 		return redirect(url_for('storage.note_list_route'))
 
-	host = note.host
-	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_edit_route', note_id=note_id), host=host)
+	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_edit_route', note_id=note_id))
 
 
 @blueprint.route('/note/delete/<note_id>', methods=['GET', 'POST'])

@@ -31,8 +31,7 @@ def service_add_route(host_id):
 		db.session.commit()
 		return redirect(url_for('storage.service_list_route'))
 
-	host = Host.query.filter(Host.id == host_id).one_or_none()
-	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_add_route', host_id=host_id), host=host)
+	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_add_route', host_id=host_id))
 
 
 @blueprint.route('/service/edit/<service_id>', methods=['GET', 'POST'])
@@ -47,8 +46,7 @@ def service_edit_route(service_id):
 		db.session.commit()
 		return redirect(url_for('storage.service_list_route'))
 
-	host = service.host
-	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_edit_route', service_id=service_id), host=host)
+	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_edit_route', service_id=service_id))
 
 
 @blueprint.route('/service/delete/<service_id>', methods=['GET', 'POST'])
