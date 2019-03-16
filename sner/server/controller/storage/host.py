@@ -101,7 +101,9 @@ def host_vizdns_json_route():
 	hostnames_tree = {}
 	for ihost in Host.query.all():
 		if ihost.hostname:
-			hostnames_tree = to_tree(hostnames_tree, list(reversed(ihost.hostname.split('.')[crop:])))
+			tmp = list(reversed(ihost.hostname.split('.')[crop:]))
+			if tmp:
+				hostnames_tree = to_tree(hostnames_tree, tmp)
 
 	(nodes, links) = to_graph_data(None, hostnames_tree, [], [])
 
