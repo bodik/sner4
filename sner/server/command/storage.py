@@ -5,6 +5,7 @@ from zipfile import ZipFile
 
 import click
 import magic
+from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server import db
@@ -38,7 +39,10 @@ def storage_import(path, parser):
 	parser_impl = registered_parsers[parser]
 	for item in path:
 		if os.path.isfile(item):
-			parser_impl.data_to_storage(data_from_file(item, parser_impl))
+			try:
+				parser_impl.data_to_storage(data_from_file(item, parser_impl))
+			except Exception as e:
+				current_app.logger.error('import \'%s\' failed: %s', item, e)
 
 
 @storage_command.command(name='flush', help='flush all objects from storage')
