@@ -103,7 +103,7 @@ def host_vizdns_json_route():
 		if ihost.hostname:
 			tmp = list(reversed(ihost.hostname.split('.')[crop:]))
 			if tmp:
-				hostnames_tree = to_tree(hostnames_tree, tmp)
+				hostnames_tree = to_tree(hostnames_tree, ['DOTROOT']+tmp)
 
 	(nodes, links) = to_graph_data(None, hostnames_tree, [], [])
 
