@@ -4,6 +4,7 @@ import json
 import os
 
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 from netaddr import IPNetwork
 from sqlalchemy import func
@@ -203,6 +204,10 @@ def job_delete(job_id):
 	"""delete queue"""
 
 	job = Job.query.filter(Job.id == job_id).one_or_none()
+	if not job:
+		current_app.logger.error('no such job')
+		return 1
+
 	output_file = job_output_filename(job_id)
 	if os.path.exists(output_file):
 		os.remove(output_file)
