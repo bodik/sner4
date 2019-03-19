@@ -81,9 +81,8 @@ class NmapParser():
 			for iservice in ihost.services:
 				NmapParser.import_service(host, iservice)
 
-			db.session.commit()
 			print('parsed host: %s' % host)
-
+		db.session.commit()
 
 
 def debug_parser():
