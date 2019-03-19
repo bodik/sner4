@@ -120,7 +120,8 @@ TODO: authentication
 ```
 ;; definitions
 
-queue-id		= UUID ; uuid identifier
+queue-id		= 1*DIGIT / 1*ALPHA
+				; queue identifier
 
 assignment		= jsonobject
 				; {
@@ -129,6 +130,7 @@ assignment		= jsonobject
 				;	"params": string,
 				;	"targets": array of strings
 				; }
+				; full schema defined in agent.protocol module
 
 output			= jsonobject
 				; {
@@ -136,6 +138,7 @@ output			= jsonobject
 				;	"retval": int,
 				;	"output": string, base64 encoded data
 				; }
+				; full schema defined in agent.protocol module
 
 http-ok			= "HTTP/x.x 200 OK" ; standard http response
 http-bad-request	= "HTTP/x.x 400 Bad Request" ; standard http response
