@@ -50,6 +50,5 @@ def storage_import(path, parser):
 def storage_flush():
 	"""flush all objects from storage"""
 
-	for host in Host.query.all():
-		db.session.delete(host)
+	db.session.query(Host).delete()
 	db.session.commit()
