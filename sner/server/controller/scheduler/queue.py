@@ -35,7 +35,6 @@ def queue_add_route(task_id=None):
 
 	if form.validate_on_submit():
 		queue = Queue()
-		#TODO: http parameter pollution vs framework mass-assign vulnerability
 		form.populate_obj(queue)
 		db.session.add(queue)
 		db.session.commit()
