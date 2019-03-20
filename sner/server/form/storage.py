@@ -1,12 +1,12 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, IntegerField, StringField, TextAreaField, ValidationError, validators
+from wtforms import IntegerField, StringField, TextAreaField, ValidationError, validators
 
 from sner.server.model.storage import Host
 
 
-def host_id_exists(form, field):
+def host_id_exists(form, field): # pylint: disable=unused-argument
 	"""validate submitted host_id"""
 
 	if not Host.query.filter(Host.id == field.data).one_or_none():
@@ -16,7 +16,7 @@ def host_id_exists(form, field):
 def empty_to_none(data):
 	"""cast empty value/string to none"""
 
-	return (data or None)
+	return data or None
 
 
 class HostForm(FlaskForm):

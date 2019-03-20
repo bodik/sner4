@@ -213,3 +213,4 @@ def job_delete(job_id):
 		os.remove(output_file)
 	db.session.delete(job)
 	db.session.commit()
+	return 0

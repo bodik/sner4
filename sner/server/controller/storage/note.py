@@ -6,7 +6,7 @@ from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import GenericButtonForm
 from sner.server.form.storage import NoteForm
-from sner.server.model.storage import Host, Note
+from sner.server.model.storage import Note
 
 
 @blueprint.route('/note/list')
