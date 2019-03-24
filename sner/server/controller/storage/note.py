@@ -34,7 +34,7 @@ def note_list_json_route():
 		query = query.filter(Note.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.append(ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
+		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in notes:
