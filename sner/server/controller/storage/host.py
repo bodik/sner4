@@ -2,12 +2,13 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
+from sqlalchemy import distinct, func
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import GenericButtonForm
 from sner.server.form.storage import HostForm
-from sner.server.model.storage import Host
+from sner.server.model.storage import Host, Note, Service
 
 
 @blueprint.route('/host/list')
@@ -22,14 +23,17 @@ def host_list_json_route():
 	"""list hosts, data endpoint"""
 
 	columns = [
-		ColumnDT(Host.id, None, "id"),
-		ColumnDT(Host.address, None, "address"),
-		ColumnDT(Host.hostname, None, "hostname"),
-		ColumnDT(Host.os, None, "os"),
-		ColumnDT(Host.created, None, "created"),
-		ColumnDT(Host.modified, None, "modified")
+		ColumnDT(Host.id, mData='id'),
+		ColumnDT(Host.address, mData='address'),
+		ColumnDT(Host.hostname, mData='hostname'),
+		ColumnDT(Host.os, mData='os'),
+		ColumnDT(func.count(distinct(Service.id)), mData='count_services', global_search=False),
+		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False),
+		ColumnDT(Host.created, mData='created'),
+		ColumnDT(Host.modified, mData='modified')
 	]
-	hosts = DataTables(request.values.to_dict(), db.session.query().select_from(Host), columns).output_result()
+	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
+	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 
 	if "data" in hosts:
 		generic_button_form = GenericButtonForm()

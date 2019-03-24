@@ -4,8 +4,8 @@
 <script type="text/javascript">
 	var datatables_ajax_custom = {
 		"ajax": {"url": "/storage/host/list.json", "method": "POST"},
-		"columns": columns_with_buttons(["id", "address", "hostname", "os", "created", "modified"])
-	}
+		"columns": columns_with_buttons(["id", "address", "hostname", "os", "count_services", "count_notes", "created", "modified"])
+	};
 </script>
 {% endblock %}
 
@@ -13,7 +13,6 @@
 <div class="hosts">
 	<h1>Hosts list <a class="btn btn-xs btn-success" href="{{ url_for('storage.host_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
-	<table id="hosts_table" class="datatable_ajax table table-hover table-responsive">
-	</table>
+	<table id="hosts_table" class="datatable_ajax table table-hover table-responsive"></table>
 </div>
 {% endblock %}

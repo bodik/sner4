@@ -23,7 +23,7 @@ def test_host_list_route(client):
 def test_host_list_json_route(client, test_host):
 	"""host list_json route test"""
 
-	test_host.hostname = 'test host list json %d' % random()
+	test_host.hostname = 'test host list json %s' % random()
 	persist_and_detach(test_host)
 
 	response = client.post(url_for('storage.host_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_host.hostname})
