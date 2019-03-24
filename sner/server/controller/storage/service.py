@@ -23,29 +23,29 @@ def service_list_json_route():
 	"""list services, data endpoint"""
 
 	columns = [
-		ColumnDT(Service.id, None, "id"),
-		ColumnDT(Service.proto, None, "proto"),
-		ColumnDT(Service.port, None, "port"),
-		ColumnDT(Service.name, None, "name"),
-		ColumnDT(Service.state, None, "state"),
-		ColumnDT(Service.info, None, "info"),
-		ColumnDT(Service.created, None, "created"),
-		ColumnDT(Service.modified, None, "modified")
+		ColumnDT(Service.id, mData='id'),
+		ColumnDT(Service.proto, mData='proto'),
+		ColumnDT(Service.port, mData='port'),
+		ColumnDT(Service.name, mData='name'),
+		ColumnDT(Service.state, mData='state'),
+		ColumnDT(Service.info, mData='info'),
+		ColumnDT(Service.created, mData='created'),
+		ColumnDT(Service.modified, mData='modified')
 	]
 	query = db.session.query().select_from(Service)
 	if 'host_id' in request.values:
 		query = query.filter(Service.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
+		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), mData='host'))
 
 	services = DataTables(request.values.to_dict(), query, columns).output_result()
-	if "data" in services:
+	if 'data' in services:
 		generic_button_form = GenericButtonForm()
-		for service in services["data"]:
-			service["created"] = service["created"].strftime('%Y-%m-%dT%H:%M:%S')
-			service["modified"] = service["modified"].strftime('%Y-%m-%dT%H:%M:%S')
-			service["_buttons"] = render_template('storage/service/list_datatable_controls.html', service=service, generic_button_form=generic_button_form)
+		for service in services['data']:
+			service['created'] = service['created'].strftime('%Y-%m-%dT%H:%M:%S')
+			service['modified'] = service['modified'].strftime('%Y-%m-%dT%H:%M:%S')
+			service['_buttons'] = render_template('storage/service/list_datatable_controls.html', service=service, generic_button_form=generic_button_form)
 
 	return jsonify(services)
 

@@ -23,26 +23,26 @@ def note_list_json_route():
 	"""list notes, data endpoint"""
 
 	columns = [
-		ColumnDT(Note.id, None, "id"),
-		ColumnDT(Note.ntype, None, "ntype"),
-		ColumnDT(Note.data, None, "data"),
-		ColumnDT(Note.created, None, "created"),
-		ColumnDT(Note.modified, None, "modified")
+		ColumnDT(Note.id, mData='id'),
+		ColumnDT(Note.ntype, mData='ntype'),
+		ColumnDT(Note.data, mData='data'),
+		ColumnDT(Note.created, mData='created'),
+		ColumnDT(Note.modified, mData='modified')
 	]
 	query = db.session.query().select_from(Note)
 	if 'host_id' in request.values:
 		query = query.filter(Note.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
+		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), mData='host'))
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
-	if "data" in notes:
+	if 'data' in notes:
 		generic_button_form = GenericButtonForm()
-		for note in notes["data"]:
-			note["created"] = note["created"].strftime('%Y-%m-%dT%H:%M:%S')
-			note["modified"] = note["modified"].strftime('%Y-%m-%dT%H:%M:%S')
-			note["_buttons"] = render_template('storage/note/list_datatable_controls.html', note=note, generic_button_form=generic_button_form)
+		for note in notes['data']:
+			note['created'] = note['created'].strftime('%Y-%m-%dT%H:%M:%S')
+			note['modified'] = note['modified'].strftime('%Y-%m-%dT%H:%M:%S')
+			note['_buttons'] = render_template('storage/note/list_datatable_controls.html', note=note, generic_button_form=generic_button_form)
 
 	return jsonify(notes)
 
