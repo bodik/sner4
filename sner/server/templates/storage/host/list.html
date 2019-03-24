@@ -3,7 +3,7 @@
 {% block script %}
 <script type="text/javascript">
 	var datatables_ajax_custom = {
-		"ajax": {"url": "/storage/host/list.json", "method": "POST"},
+		"ajax": {"url": "{{ url_for('storage.host_list_json_route') }}", "method": "POST"},
 		"columns": columns_with_buttons(["id", "address", "hostname", "os", "count_services", "count_notes", "created", "modified"])
 	};
 </script>
