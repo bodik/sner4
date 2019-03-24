@@ -1,5 +1,6 @@
 """controller host"""
 
+from datatables import ColumnDT, DataTables
 from flask import current_app, jsonify, redirect, render_template, request, url_for
 
 from sner.server import db
@@ -13,10 +14,31 @@ from sner.server.model.storage import Host
 def host_list_route():
 	"""list hosts"""
 
-	page = request.args.get('page', 1, type=int)
-	hosts = Host.query.paginate(page, current_app.config['SNER_ITEMS_PER_PAGE'])
+	return render_template('storage/host/list.html')
 
-	return render_template('storage/host/list.html', hosts=hosts, generic_button_form=GenericButtonForm())
+
+@blueprint.route('/host/list.json', methods=['GET', 'POST'])
+def host_list_json_route():
+	"""list hosts, data endpoint"""
+
+	columns = [
+		ColumnDT(Host.id, None, "id"),
+		ColumnDT(Host.address, None, "address"),
+		ColumnDT(Host.hostname, None, "hostname"),
+		ColumnDT(Host.os, None, "os"),
+		ColumnDT(Host.created, None, "created"),
+		ColumnDT(Host.modified, None, "modified")
+	]
+	hosts = DataTables(request.values.to_dict(), db.session.query().select_from(Host), columns).output_result()
+
+	if "data" in hosts:
+		generic_button_form = GenericButtonForm()
+		for host in hosts["data"]:
+			host["created"] = host["created"].strftime('%Y-%m-%dT%H:%M:%S')
+			host["modified"] = host["modified"].strftime('%Y-%m-%dT%H:%M:%S')
+			host["_buttons"] = render_template('storage/host/list_datatable_controls.html', host=host, generic_button_form=generic_button_form)
+
+	return jsonify(hosts)
 
 
 @blueprint.route('/host/add', methods=['GET', 'POST'])

@@ -1,44 +1,19 @@
 {% extends "base.html" %}
-{% import "macros.html" as macro %}
+
+{% block script %}
+<script type="text/javascript">
+	var datatables_ajax_custom = {
+		"ajax": {"url": "/storage/host/list.json", "method": "POST"},
+		"columns": columns_with_buttons(["id", "address", "hostname", "os", "created", "modified"])
+	}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="hosts">
 	<h1>Hosts list <a class="btn btn-xs btn-success" href="{{ url_for('storage.host_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
-	{% if hosts.pages > 1 %}<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>{% endif %}
-
-	<table id="hosts_table" class="datatable table table-hover table-responsive">
-	<thead>
-		<tr>
-			<th>id</th>
-			<th>address</th>
-			<th>hostname</th>
-			<th>os</th>
-			<th>created</th>
-			<th>modified</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for host in hosts.items %}
-		<tr>
-			<td>{{ host.id }}</td>
-			<td>{{ host.address }}</td>
-			<td>{{ host.hostname }}</td>
-			<td>{{ host.os }}</td>
-			<td>{{ host.created|datetime }}</td>
-			<td>{{ host.modified|datetime }}</td>
-			<td>
-				<a class="btn btn-xs btn-default" href="{{ url_for('storage.service_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Service</a>
-				<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Note</a>
-				<a class="btn btn-xs btn-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button_delete.html' %}{% endwith %}
-			</td>
-		</tr>
-		{% endfor %}
-	</tbody>
+	<table id="hosts_table" class="datatable_ajax table table-hover table-responsive">
 	</table>
-
-	{% if hosts.pages > 1 %}<div class="text-center">{{ macro.pagination(hosts, request.url_rule.endpoint) }}</div>{% endif %}
 </div>
 {% endblock %}
