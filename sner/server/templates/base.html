@@ -26,6 +26,14 @@
 		/* required items on forms */
 		label.control-label.required:after { content:"*"; color:red; }
 	</style>
+	<script type="text/javascript">
+		// datatables columns api helper
+		function columns_with_buttons(cols) {
+			return cols.map(function(d) {return {"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()};})
+				.concat({"name": "_buttons", "title": "_buttons", "data": "_buttons", "render": null, "orderable": false});
+		}
+	</script>
+
 	{% block style %}{% endblock %}
 	{% block script %}{% endblock %}
 </head>
@@ -82,9 +90,23 @@
 		if (typeof datatables_custom !== 'undefined') {
 			datatables_options = $.extend({}, datatables_options, datatables_custom);
 		}
+
+		var datatables_ajax_options = {
+			"serverSide": true,
+			"order": [[ 0, "asc" ]],
+			"dom": "<flptip>",
+			"paging": true,
+			"pageLength": 10,
+			"info": true,
+		};
+		if (typeof datatables_ajax_custom !== 'undefined') {
+			datatables_ajax_options = $.extend({}, datatables_ajax_options, datatables_ajax_custom);
+		}
+
 		$(document).ready(function(){
 			$('[data-toggle="popover"]').popover();
 			$('.datatable').DataTable(datatables_options);
+			$('.datatable_ajax').DataTable(datatables_ajax_options);
 		});
 	</script>
 </body>

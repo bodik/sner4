@@ -1,48 +1,19 @@
 {% extends "base.html" %}
-{% import "macros.html" as macro %}
+
+{% block script %}
+<script type="text/javascript">
+	var datatables_ajax_custom = {
+		"ajax": {"url": "/storage/service/list.json", "method": "POST"},
+		"columns": columns_with_buttons(["id", "host", "proto", "port", "name", "state", "info", "created", "modified"])
+	}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="services">
 	<h1>Services list</h1>
 
-	{% if services.pages > 1 %}<div class="text-center">{{ macro.pagination(services, request.url_rule.endpoint) }}</div>{% endif %}
-
-	<table id="services_table" class="datatable table table-hover table-responsive">
-	<thead>
-		<tr>
-			<th>id</th>
-			<th>host</th>
-			<th>proto</th>
-			<th>port</th>
-			<th>name</th>
-			<th>state</th>
-			<th>info</th>
-			<th>created</th>
-			<th>modified</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for service in services.items %}
-		<tr>
-			<td>{{ service.id }}</td>
-			<td>{{ service.host }}</td>
-			<td>{{ service.proto }}</td>
-			<td>{{ service.port }}</td>
-			<td>{{ service.name }}</td>
-			<td>{{ service.state }}</td>
-			<td>{{ service.info }}</td>
-			<td>{{ service.created|datetime }}</td>
-			<td>{{ service.modified|datetime }}</td>
-			<td>
-				<a class="btn btn-xs btn-primary" href="{{ url_for('storage.service_edit_route', service_id=service.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('storage.service_delete_route', service_id=service.id) %}{% include 'button_delete.html' %}{% endwith %}
-			</td>
-		</tr>
-		{% endfor %}
-	</tbody>
+	<table id="services_table" class="datatable_ajax table table-hover table-responsive">
 	</table>
-
-	{% if services.pages > 1 %}<div class="text-center">{{ macro.pagination(services, request.url_rule.endpoint) }}</div>{% endif %}
 </div>
 {% endblock %}

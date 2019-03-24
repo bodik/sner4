@@ -29,10 +29,12 @@ py==1.6.0
 pylint==2.1.1
 pyrsistent==0.14.11
 pytest==3.8.2
+python-dateutil==2.8.0
 python-libnmap==0.7.0
 requests==2.21.0
 six==1.11.0
 SQLAlchemy==1.2.12
+sqlalchemy-datatables==1.2.0
 sqlalchemy-json==0.2.3
 SQLAlchemy-Utils==0.33.11
 typed-ast==1.1.0

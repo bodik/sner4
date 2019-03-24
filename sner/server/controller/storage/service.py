@@ -1,21 +1,48 @@
 """controller service"""
 
-from flask import current_app, redirect, render_template, request, url_for
+from datatables import ColumnDT, DataTables
+from flask import current_app, jsonify, redirect, render_template, request, url_for
+from sqlalchemy.sql import func
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import GenericButtonForm
 from sner.server.form.storage import ServiceForm
-from sner.server.model.storage import Service
+from sner.server.model.storage import Host, Service
 
 
 @blueprint.route('/service/list')
 def service_list_route():
 	"""list services"""
 
-	page = request.args.get('page', 1, type=int)
-	services = Service.query.paginate(page, current_app.config['SNER_ITEMS_PER_PAGE'])
-	return render_template('storage/service/list.html', services=services, generic_button_form=GenericButtonForm())
+	return render_template('storage/service/list.html')
+
+
+@blueprint.route('/service/list.json', methods=['GET', 'POST'])
+def service_list_json_route():
+	"""list services, data endpoint"""
+
+	columns = [
+		ColumnDT(Service.id, None, "id"),
+		ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"),
+		ColumnDT(Service.proto, None, "proto"),
+		ColumnDT(Service.port, None, "port"),
+		ColumnDT(Service.name, None, "name"),
+		ColumnDT(Service.state, None, "state"),
+		ColumnDT(Service.info, None, "info"),
+		ColumnDT(Service.created, None, "created"),
+		ColumnDT(Service.modified, None, "modified")
+	]
+	services = DataTables(request.values.to_dict(), db.session.query().select_from(Service).join(Host), columns).output_result()
+
+	if "data" in services:
+		generic_button_form = GenericButtonForm()
+		for service in services["data"]:
+			service["created"] = service["created"].strftime('%Y-%m-%dT%H:%M:%S')
+			service["modified"] = service["modified"].strftime('%Y-%m-%dT%H:%M:%S')
+			service["_buttons"] = render_template('storage/service/list_datatable_controls.html', service=service, generic_button_form=generic_button_form)
+
+	return jsonify(services)
 
 
 @blueprint.route('/service/add/<host_id>', methods=['GET', 'POST'])
