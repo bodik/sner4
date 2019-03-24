@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hosts">
+	<h1>Host {{host.address}} ({{host.hostname}})</h1>
+
+	<div>
+		<dl class="dl-horizontal">
+		<dt>os</dt><dd>{{host.os}}</dd>
+		<dt>created</dt><dd>{{host.created|datetime}}</dd>
+		<dt>modified</dt><dd>{{host.modified|datetime}}</dd>
+		</dl>
+	</div>
+
+
+	<h2>Services</h2>
+	<table id="datatable_host_services" class="table table-hover table-responsive"></table>
+	<script type="text/javascript">
+		var datatable_host_services = {
+			"ajax": {"url": "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", "method": "POST"},
+			"columns": columns_with_buttons(["id", "proto", "port", "name", "state", "info", "created", "modified"]),
+		}
+		$(document).ready(function(){
+			$('#datatable_host_services').DataTable($.extend({}, datatables_ajax_options, datatable_host_services));
+		});
+	</script>
+
+
+	<h2>Notes</h2>
+	<table id="datatable_host_notes" class="table table-hover table-responsive"></table>
+	<script type="text/javascript">
+		var datatable_host_notes = {
+			"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
+			"columns": columns_with_buttons(["id", "ntype", "data", "created", "modified"]),
+		}
+		$(document).ready(function(){
+			$('#datatable_host_notes').DataTable($.extend({}, datatables_ajax_options, datatable_host_notes));
+		});
+	</script>
+</div>
+{% endblock %}

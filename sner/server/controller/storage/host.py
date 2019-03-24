@@ -130,3 +130,13 @@ def host_vizdns_json_route():
 	(nodes, links) = to_graph_data(None, hostnames_tree, [], [])
 
 	return jsonify({'nodes': nodes, 'links': links})
+
+
+@blueprint.route('/host/view/<host_id>')
+def host_view_route(host_id):
+	"""view host"""
+
+	host = Host.query.get(host_id)
+	form = GenericButtonForm()
+
+	return render_template('storage/host/view.html', host=host)

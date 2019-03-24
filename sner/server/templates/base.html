@@ -96,9 +96,19 @@
 			"processing": true,
 			"order": [[ 0, "asc" ]],
 			"dom": "<flprtip>",
+			"info": true,
+
 			"paging": true,
 			"pageLength": 10,
-			"info": true,
+			"drawCallback": function(settings) {
+				var pagination = $('#'+this.attr('id')+'_wrapper .dataTables_paginate');
+				var totalPages = this.api().page.info().pages;
+				if (totalPages <= 1) {
+					pagination.hide();
+				} else {
+					pagination.show();
+				}
+			}
 		};
 		if (typeof datatables_ajax_custom !== 'undefined') {
 			datatables_ajax_options = $.extend({}, datatables_ajax_options, datatables_ajax_custom);

@@ -24,7 +24,6 @@ def service_list_json_route():
 
 	columns = [
 		ColumnDT(Service.id, None, "id"),
-		ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"),
 		ColumnDT(Service.proto, None, "proto"),
 		ColumnDT(Service.port, None, "port"),
 		ColumnDT(Service.name, None, "name"),
@@ -33,8 +32,14 @@ def service_list_json_route():
 		ColumnDT(Service.created, None, "created"),
 		ColumnDT(Service.modified, None, "modified")
 	]
-	services = DataTables(request.values.to_dict(), db.session.query().select_from(Service).join(Host), columns).output_result()
+	query = db.session.query().select_from(Service)
+	if 'host_id' in request.values:
+		query = query.filter(Service.host_id == request.values.get('host_id'))
+	else:
+		query = query.join(Host)
+		columns.append(ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
 
+	services = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in services:
 		generic_button_form = GenericButtonForm()
 		for service in services["data"]:

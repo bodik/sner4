@@ -24,14 +24,19 @@ def note_list_json_route():
 
 	columns = [
 		ColumnDT(Note.id, None, "id"),
-		ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"),
 		ColumnDT(Note.ntype, None, "ntype"),
 		ColumnDT(Note.data, None, "data"),
 		ColumnDT(Note.created, None, "created"),
 		ColumnDT(Note.modified, None, "modified")
 	]
-	notes = DataTables(request.values.to_dict(), db.session.query().select_from(Note).join(Host), columns).output_result()
+	query = db.session.query().select_from(Note)
+	if 'host_id' in request.values:
+		query = query.filter(Note.host_id == request.values.get('host_id'))
+	else:
+		query = query.join(Host)
+		columns.append(ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), None, "host"))
 
+	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in notes:
 		generic_button_form = GenericButtonForm()
 		for note in notes["data"]:
