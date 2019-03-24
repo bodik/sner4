@@ -1,7 +1,7 @@
 """controller host"""
 
 from datatables import ColumnDT, DataTables
-from flask import current_app, jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 
 from sner.server import db
 from sner.server.controller.storage import blueprint

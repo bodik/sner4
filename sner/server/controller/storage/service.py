@@ -1,7 +1,7 @@
 """controller service"""
 
 from datatables import ColumnDT, DataTables
-from flask import current_app, jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
