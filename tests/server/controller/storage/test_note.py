@@ -1,5 +1,6 @@
 """controller notes tests"""
 
+import json
 from http import HTTPStatus
 from random import random
 
@@ -17,6 +18,18 @@ def test_note_list_route(client):
 	response = client.get(url_for('storage.note_list_route'))
 	assert response.status_code == HTTPStatus.OK
 	assert b'<h1>Notes list' in response
+
+
+def test_note_list_json_route(client, test_note):
+	"""note list_json route test"""
+
+	test_note.data = 'test note list json %d' % random()
+	persist_and_detach(test_note)
+
+	response = client.post(url_for('storage.note_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_note.data})
+	assert response.status_code == HTTPStatus.OK
+	response_data = json.loads(response.body.decode('utf-8'))
+	assert response_data["data"][0]["data"] == test_note.data
 
 
 def test_note_add_route(client, test_host):
