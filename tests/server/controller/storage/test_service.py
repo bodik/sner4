@@ -23,7 +23,7 @@ def test_service_list_route(client):
 def test_service_list_json_route(client, test_service):
 	"""service list_json route test"""
 
-	test_service.info = 'test service list json %d' % random()
+	test_service.info = 'test service list json %f' % random()
 	persist_and_detach(test_service)
 
 	response = client.post(url_for('storage.service_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_service.info})
@@ -36,7 +36,7 @@ def test_service_add_route(client, test_host):
 	"""service add route test"""
 
 	test_service = create_test_service(test_host)
-	test_service.info = 'test service add %d' % random()
+	test_service.info = 'test service add %f' % random()
 
 
 	form = client.get(url_for('storage.service_add_route', host_id=test_service.host.id)).form
@@ -62,7 +62,7 @@ def test_service_add_route(client, test_host):
 def test_service_edit_route(client, test_service):
 	"""service edit route test"""
 
-	test_service.info = 'test service edit %d' % random()
+	test_service.info = 'test service edit %f' % random()
 	persist_and_detach(test_service)
 
 
@@ -82,7 +82,7 @@ def test_service_delete_route(client, test_host):
 	"""service delete route test"""
 
 	test_service = create_test_service(test_host)
-	test_service.info = 'test service delete %d' % random()
+	test_service.info = 'test service delete %f' % random()
 	persist_and_detach(test_service)
 
 

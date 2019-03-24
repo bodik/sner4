@@ -23,7 +23,7 @@ def test_task_add_route(client):
 	"""task add route test"""
 
 	test_task = create_test_task()
-	test_task.name = test_task.name+' add '+str(random())
+	test_task.name += ' add %f' % random()
 
 
 	form = client.get(url_for('scheduler.task_add_route')).form
@@ -47,7 +47,7 @@ def test_task_add_route(client):
 def test_task_edit_route(client, test_task):
 	"""task edit route test"""
 
-	test_task.name += ' edit '+str(random())
+	test_task.name += ' edit %f' % random()
 	persist_and_detach(test_task)
 
 
@@ -67,7 +67,7 @@ def test_task_delete_route(client):
 	"""task delete route test"""
 
 	test_task = create_test_task()
-	test_task.name += ' delete '+str(random())
+	test_task.name += ' delete %f' % random()
 	persist_and_detach(test_task)
 
 

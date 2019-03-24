@@ -23,7 +23,7 @@ def test_queue_add_route(client, test_task):
 	"""queue add route test"""
 
 	test_queue = create_test_queue(test_task)
-	test_queue.name += ' add '+str(random())
+	test_queue.name += ' add %f' % random()
 
 
 	form = client.get(url_for('scheduler.queue_add_route')).form
@@ -46,7 +46,7 @@ def test_queue_add_route(client, test_task):
 def test_queue_edit_route(client, test_queue):
 	"""queue edit route test"""
 
-	test_queue.name += ' edit '+str(random())
+	test_queue.name += ' edit %f' % random()
 	persist_and_detach(test_queue)
 
 
@@ -62,7 +62,7 @@ def test_queue_edit_route(client, test_queue):
 def test_queue_enqueue_route(client, test_queue):
 	"""queue enqueue route test"""
 
-	test_queue.name += ' enqueue '+str(random())
+	test_queue.name += ' enqueue %f' % random()
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
 
@@ -83,7 +83,7 @@ def test_queue_enqueue_route(client, test_queue):
 def test_queue_flush_route(client, test_queue):
 	"""queue flush route test"""
 
-	test_queue.name += ' flush '+str(random())
+	test_queue.name += ' flush %f' % random()
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
 	persist_and_detach(test_target)
@@ -101,7 +101,7 @@ def test_queue_delete_route(client, test_task):
 	"""queue delete route test"""
 
 	test_queue = create_test_queue(test_task)
-	test_queue.name += ' delete '+str(random())
+	test_queue.name += ' delete %f' % random()
 	persist_and_detach(test_queue)
 
 

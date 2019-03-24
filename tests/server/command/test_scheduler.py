@@ -27,7 +27,7 @@ def test_enumips_command(runner):
 def test_task_list_command(runner, test_task):
 	"""task list command test"""
 
-	test_task.name += ' command list '+str(random())
+	test_task.name += ' command list %f' % random()
 	persist_and_detach(test_task)
 
 
@@ -40,7 +40,7 @@ def test_task_add_command(runner):
 	"""task add command test"""
 
 	test_task = create_test_task()
-	test_task.name += ' command add '+str(random())
+	test_task.name += ' command add %f' % random()
 
 
 	result = runner.invoke(scheduler_command, ['task_add', test_task.module, '--name', test_task.name, '--params', test_task.params])
@@ -59,7 +59,7 @@ def test_task_delete_command(runner):
 	"""job delete command test"""
 
 	test_task = create_test_task()
-	test_task.name += ' command delete '+str(random())
+	test_task.name += ' command delete %f' % random()
 	persist_and_detach(test_task)
 
 
@@ -76,7 +76,7 @@ def test_task_delete_command(runner):
 def test_queue_list_command(runner, test_queue):
 	"""queue list command test"""
 
-	test_queue.name += ' command list '+str(random())
+	test_queue.name += ' command list %f' % random()
 	persist_and_detach(test_queue)
 
 
@@ -89,7 +89,7 @@ def test_queue_add_command(runner, test_task):
 	"""queue add command test"""
 
 	test_queue = create_test_queue(test_task)
-	test_queue.name += ' command add '+str(random())
+	test_queue.name += ' command add %f' % random()
 
 
 	result = runner.invoke(scheduler_command, ['queue_add', str(test_queue.task.id), '--name', test_queue.name])
@@ -107,7 +107,7 @@ def test_queue_add_command(runner, test_task):
 def test_queue_enqueue_command(runner, test_queue):
 	"""queue enqueue route test"""
 
-	test_queue.name += ' command enqueue '+str(random())
+	test_queue.name += ' command enqueue %f' % random()
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
 
@@ -126,7 +126,7 @@ def test_queue_enqueue_command(runner, test_queue):
 def test_queue_flush_command(runner, test_queue):
 	"""queue flush route test"""
 
-	test_queue.name += ' command flush '+str(random())
+	test_queue.name += ' command flush %f' % random()
 	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
 	persist_and_detach(test_target)
@@ -145,7 +145,7 @@ def test_queue_delete_command(runner, test_task):
 	"""queue delete command test"""
 
 	test_queue = create_test_queue(test_task)
-	test_queue.name = test_queue.name+' command delete '+str(random())
+	test_queue.name += ' command delete %f' % random()
 	persist_and_detach(test_queue)
 
 
@@ -162,7 +162,7 @@ def test_queue_delete_command(runner, test_task):
 def test_job_list_command(runner, test_job):
 	"""job list command test"""
 
-	test_job.assignment = json.dumps('{"module": "job list command %s"}'%str(random()))
+	test_job.assignment = json.dumps('{"module": "job list command %f"}' % random())
 	persist_and_detach(test_job)
 
 
@@ -175,7 +175,7 @@ def test_job_delete_command(runner, test_queue):
 	"""job delete command test"""
 
 	test_job = create_test_job(test_queue)
-	test_job.assignment = json.dumps('{"module": "job delete %s"}'%str(random()))
+	test_job.assignment = json.dumps('{"module": "job delete %f"}' % random())
 	persist_and_detach(test_job)
 
 

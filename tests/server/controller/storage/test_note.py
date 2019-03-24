@@ -23,7 +23,7 @@ def test_note_list_route(client):
 def test_note_list_json_route(client, test_note):
 	"""note list_json route test"""
 
-	test_note.data = 'test note list json %d' % random()
+	test_note.data = 'test note list json %f' % random()
 	persist_and_detach(test_note)
 
 	response = client.post(url_for('storage.note_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_note.data})
@@ -36,7 +36,7 @@ def test_note_add_route(client, test_host):
 	"""note add route test"""
 
 	test_note = create_test_note(test_host)
-	test_note.data = 'test note add %d' % random()
+	test_note.data = 'test note add %f' % random()
 
 
 	form = client.get(url_for('storage.note_add_route', host_id=test_note.host.id)).form
@@ -58,7 +58,7 @@ def test_note_add_route(client, test_host):
 def test_note_edit_route(client, test_note):
 	"""note edit route test"""
 
-	test_note.data = 'test note edit %d' % random()
+	test_note.data = 'test note edit %f' % random()
 	persist_and_detach(test_note)
 
 
@@ -76,7 +76,7 @@ def test_note_delete_route(client, test_host):
 	"""note delete route test"""
 
 	test_note = create_test_note(test_host)
-	test_note.data = 'test note delete %d' % random()
+	test_note.data = 'test note delete %f' % random()
 	persist_and_detach(test_note)
 
 

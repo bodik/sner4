@@ -23,7 +23,7 @@ def test_host_list_route(client):
 def test_host_list_json_route(client, test_host):
 	"""host list_json route test"""
 
-	test_host.hostname = 'test host list json %s' % random()
+	test_host.hostname = 'test host list json %f' % random()
 	persist_and_detach(test_host)
 
 	response = client.post(url_for('storage.host_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_host.hostname})
@@ -36,7 +36,7 @@ def test_task_add_route(client):
 	"""host add route test"""
 
 	test_host = create_test_host()
-	test_host.hostname = 'add%d.%s' % (random(), test_host.hostname)
+	test_host.hostname = 'add%f.%s' % (random(), test_host.hostname)
 
 
 	form = client.get(url_for('storage.host_add_route')).form
@@ -59,7 +59,7 @@ def test_task_add_route(client):
 def test_host_edit_route(client, test_host):
 	"""host edit route test"""
 
-	test_host.hostname = 'edit%d.%s' % (random(), test_host.hostname)
+	test_host.hostname = 'edit%f.%s' % (random(), test_host.hostname)
 	persist_and_detach(test_host)
 
 
@@ -77,7 +77,7 @@ def test_host_delete_route(client):
 	"""host delete route test"""
 
 	test_host = create_test_host()
-	test_host.hostname = 'delete%s.%s' % (random(), test_host.hostname)
+	test_host.hostname = 'delete%f.%s' % (random(), test_host.hostname)
 	persist_and_detach(test_host)
 
 

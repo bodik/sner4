@@ -27,7 +27,7 @@ def test_job_assign_route(client, test_queue):
 	"""job assign route test"""
 
 	test_target = create_test_target(test_queue)
-	test_target.target += 'job assign '+str(random())
+	test_target.target += 'job assign %f' % random()
 	persist_and_detach(test_target)
 
 
@@ -46,7 +46,7 @@ def test_job_assign_route(client, test_queue):
 def test_job_output_route(client, test_job):
 	"""job output route test"""
 
-	test_job.assignment = json.dumps('{"module": "job outpu %s"}'%str(random()))
+	test_job.assignment = json.dumps('{"module": "job outpu %f"}' % random())
 	persist_and_detach(test_job)
 
 
@@ -68,7 +68,7 @@ def test_job_delete_route(client, test_queue):
 	"""delete route test"""
 
 	test_job = create_test_job(test_queue)
-	test_job.assignment = json.dumps('{"module": "job delete %s"}'%str(random()))
+	test_job.assignment = json.dumps('{"module": "job delete %f"}' % random())
 	persist_and_detach(test_job)
 
 
