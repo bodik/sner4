@@ -1,5 +1,18 @@
 {% extends "base.html" %}
 
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$("a[data-toggle='tab']").on("show.bs.tab", function(e) {
+		localStorage.setItem("host_view_activeTab", $(e.target).attr("href"));
+	});
+	var activeTab = localStorage.getItem("host_view_activeTab");
+	if (!activeTab) { activeTab = $("a[data-toggle='tab']").first().attr("href"); }
+	$("#host_view a[href='" + activeTab + "']").tab("show");
+});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="hosts">
 	<h1>Host {{host.address}} ({{host.hostname}})</h1>
@@ -13,29 +26,38 @@
 	</div>
 
 
-	<h2>Services</h2>
-	<table id="datatable_host_services" class="table table-hover table-responsive"></table>
-	<script type="text/javascript">
-		var datatable_host_services = {
-			"ajax": {"url": "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", "method": "POST"},
-			"columns": columns_with_buttons(["id", "proto", "port", "name", "state", "info", "created", "modified"]),
-		}
-		$(document).ready(function(){
-			$('#datatable_host_services').DataTable($.extend({}, datatables_ajax_options, datatable_host_services));
-		});
-	</script>
+	<ul class="nav nav-tabs" role="tablist" id="host_view">
+		<li role="presentation" class=""><a href="#services" role="tab" data-toggle="tab">Services</a></li>
+		<li role="presentation" class=""><a href="#notes" role="tab" data-toggle="tab">Notes</a></li>
+	</ul>
 
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane" id="services">
 
-	<h2>Notes</h2>
-	<table id="datatable_host_notes" class="table table-hover table-responsive"></table>
-	<script type="text/javascript">
-		var datatable_host_notes = {
-			"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
-			"columns": columns_with_buttons(["id", "ntype", "data", "created", "modified"]),
-		}
-		$(document).ready(function(){
-			$('#datatable_host_notes').DataTable($.extend({}, datatables_ajax_options, datatable_host_notes));
-		});
-	</script>
+			<table id="datatable_host_services" class="table table-hover table-responsive" width="100%"></table>
+			<script type="text/javascript">
+				var datatable_host_services = {
+					"ajax": {"url": "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", "method": "POST"},
+					"columns": columns_with_buttons(["id", "proto", "port", "name", "state", "info", "created", "modified"]),
+				}
+				$(document).ready(function(){
+					$('#datatable_host_services').DataTable($.extend({}, datatables_ajax_options, datatable_host_services));
+				});
+			</script>
+		</div>
+
+		<div role="tabpanel" class="tab-pane" id="notes">
+			<table id="datatable_host_notes" class="table table-hover table-responsive" width="100%"></table>
+			<script type="text/javascript">
+				var datatable_host_notes = {
+					"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
+					"columns": columns_with_buttons(["id", "ntype", "data", "created", "modified"]),
+				}
+				$(document).ready(function(){
+					$('#datatable_host_notes').DataTable($.extend({}, datatables_ajax_options, datatable_host_notes));
+				});
+			</script>
+		</div>
+	</div>
 </div>
 {% endblock %}
