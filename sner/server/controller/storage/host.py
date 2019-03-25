@@ -141,6 +141,5 @@ def host_view_route(host_id):
 	"""view host"""
 
 	host = Host.query.get(host_id)
-	form = GenericButtonForm()
 
 	return render_template('storage/host/view.html', host=host)
