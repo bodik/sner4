@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.portmap_item').on('mouseenter', function() {
+		$.ajax({
+			url: "{{ url_for('storage.service_portstat_route', port='REPLACE') }}".replace('REPLACE', $(this).attr('data-port')),
+			success: function (data, status, jqXHR) { $('#port_detail').html(data);	}
+		});
+	});
+});
+</script> 
+{% endblock %}
+
+{% block content %}
+<h1>Services portmap</h1>
+
+<div class="row">
+	<div class="col-md-8">
+	{% for tmp in data %}
+		<a class="portmap_item" href="{{ url_for('storage.service_list_route', port=tmp['port']) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
+	{% endfor %}
+	</div>
+
+	<div id="port_detail" class="col-md-4">
+	</div>
+</div>
+{% endblock %}

@@ -57,6 +57,7 @@
 				<li><a href="{{ url_for('storage.host_list_route') }}">st:Hosts</a></li>
 				<li><a href="{{ url_for('storage.host_vizdns_route') }}">st:Hosts:vizdns</a></li>
 				<li><a href="{{ url_for('storage.service_list_route') }}">st:Services</a></li>
+				<li><a href="{{ url_for('storage.service_vizports_route') }}">st:Services:vizports</a></li>
 				<li><a href="{{ url_for('storage.note_list_route') }}">st:Notes</a></li>
 			</ul>
 		</div><!--/.nav-collapse -->
@@ -115,7 +116,6 @@
 		}
 
 		$(document).ready(function(){
-			$('[data-toggle="popover"]').popover();
 			$('.datatable').DataTable(datatables_options);
 			$('.datatable_ajax').DataTable(datatables_ajax_options);
 		});

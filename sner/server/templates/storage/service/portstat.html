@@ -1,0 +1,24 @@
+<h2>Port {{port}}</h2>
+
+<h3>Stats</h3>
+<dl class="dl-horizontal">
+	{% for key, val in stats.items() %}
+	<dt>{{key}}</dt><dd>{{val}}</dd>
+	{% endfor %}
+</dl>
+
+{% if banners  %}
+<h3>Banners</h3>
+<ul>
+	{% for banner in banners %}
+	<li>{{banner[0]}}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+<h3>Hosts</h3>
+<ul>
+	{% for host, host_id in hosts %}
+	<li><a href="{{ url_for('storage.host_view_route', host_id=host_id) }}">{{host}}</a></li>
+	{% endfor %}
+</ul>

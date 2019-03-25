@@ -92,3 +92,29 @@ def test_service_delete_route(client, test_host):
 
 	service = Service.query.filter(Service.id == test_service.id).one_or_none()
 	assert not service
+
+
+def test_service_vizports_route(client, test_service):
+	"""service vizports route test"""
+
+	test_service.port = int(random()*65535)
+	persist_and_detach(test_service)
+
+	response = client.get(url_for('storage.service_vizports_route'))
+	assert response.status_code == HTTPStatus.OK
+
+	elems = response.lxml.xpath("//a[@class='portmap_item' and @data-port='%d']" % test_service.port)
+	assert elems
+
+
+def test_service_portstat_route(client, test_service):
+	"""service portstat route test"""
+
+	test_service.info = 'test service banner %f' % random()
+	persist_and_detach(test_service)
+
+	response = client.get(url_for('storage.service_portstat_route', port=test_service.port))
+	assert response.status_code == HTTPStatus.OK
+
+	elems = response.lxml.xpath("//li[text()='%s']" % test_service.info)
+	assert elems
