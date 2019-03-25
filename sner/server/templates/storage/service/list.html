@@ -2,10 +2,10 @@
 
 {% block script %}
 <script type="text/javascript">
-	var datatables_ajax_custom = {
+	var datatable_ajax_custom = {
 		"ajax": {"url": "{{ url_for('storage.service_list_json_route', **request.args) }}", "method": "POST"},
 		"columns": columns_with_buttons(["id", "host", "proto", "port", "name", "state", "info", "created", "modified"])
-	}
+	};
 </script>
 {% endblock %}
 
@@ -13,7 +13,6 @@
 <div class="services">
 	<h1>Services list{% if 'port' in request.args %} <small><a class="btn btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a></small>{% endif %}</h1>
 
-	<table id="services_table" class="datatable_ajax table table-hover table-responsive">
-	</table>
+	<table id="services_table" class="datatable_ajax table table-hover table-responsive"></table>
 </div>
 {% endblock %}

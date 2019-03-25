@@ -26,12 +26,55 @@
 		/* required items on forms */
 		label.control-label.required:after { content:"*"; color:red; }
 	</style>
+
 	<script type="text/javascript">
 		// datatables columns api helper
 		function columns_with_buttons(cols) {
 			return cols.map(function(d) {return {"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()};})
 				.concat({"name": "_buttons", "title": "_buttons", "data": "_buttons", "render": null, "orderable": false});
 		}
+
+		var datatable_static_options = {
+			"columnDefs": [ {
+				"targets": "no-sort",
+				"orderable": false,
+			} ],
+			"order": [[ 0, "asc" ]],
+			"paging": false,
+			"info" : false
+		};
+
+		var datatable_ajax_options = {
+			"serverSide": true,
+			"processing": true,
+			"order": [[ 0, "asc" ]],
+			"dom": "<flprtip>",
+			"info": true,
+
+			"paging": true,
+			"pageLength": 10,
+			"drawCallback": function(settings) {
+				var pagination = $('#'+this.attr('id')+'_wrapper .dataTables_paginate');
+				var totalPages = this.api().page.info().pages;
+				if (totalPages <= 1) {
+					pagination.hide();
+				} else {
+					pagination.show();
+				}
+			}
+		};
+
+		$(document).ready(function() {
+			if (typeof datatable_static_custom !== 'undefined') {
+				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
+			}
+			$('.datatable_static').DataTable(datatable_static_options);
+
+			if (typeof datatable_ajax_custom !== 'undefined') {
+				datatable_ajax_options = $.extend({}, datatable_ajax_options, datatable_ajax_custom);
+			}
+			$('.datatable_ajax').DataTable(datatable_ajax_options);
+		});
 	</script>
 
 	{% block style %}{% endblock %}
@@ -76,49 +119,6 @@
 		{% for category, message in get_flashed_messages(with_categories=true) %}
 		toastr['{{ category }}']('{{ message }}');
 		{% endfor %}
-	</script>
-
-	<script>
-		var datatables_options = {
-			"columnDefs": [ {
-				"targets": "no-sort",
-				"orderable": false,
-			} ],
-			"order": [[ 0, "asc" ]],
-			"paging": false,
-			"info" : false
-		};
-		if (typeof datatables_custom !== 'undefined') {
-			datatables_options = $.extend({}, datatables_options, datatables_custom);
-		}
-
-		var datatables_ajax_options = {
-			"serverSide": true,
-			"processing": true,
-			"order": [[ 0, "asc" ]],
-			"dom": "<flprtip>",
-			"info": true,
-
-			"paging": true,
-			"pageLength": 10,
-			"drawCallback": function(settings) {
-				var pagination = $('#'+this.attr('id')+'_wrapper .dataTables_paginate');
-				var totalPages = this.api().page.info().pages;
-				if (totalPages <= 1) {
-					pagination.hide();
-				} else {
-					pagination.show();
-				}
-			}
-		};
-		if (typeof datatables_ajax_custom !== 'undefined') {
-			datatables_ajax_options = $.extend({}, datatables_ajax_options, datatables_ajax_custom);
-		}
-
-		$(document).ready(function(){
-			$('.datatable').DataTable(datatables_options);
-			$('.datatable_ajax').DataTable(datatables_ajax_options);
-		});
 	</script>
 </body>
 </html>

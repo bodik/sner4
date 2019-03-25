@@ -2,10 +2,10 @@
 
 {% block script %}
 <script type="text/javascript">
-	var datatables_ajax_custom = {
+	var datatable_ajax_custom = {
 		"ajax": {"url": "{{ url_for('storage.note_list_json_route') }}", "method": "POST"},
 		"columns": columns_with_buttons(["id", "host", "ntype", "data", "created", "modified"])
-	}
+	};
 </script>
 {% endblock %}
 
@@ -13,7 +13,6 @@
 <div class="notes">
 	<h1>Notes list</h1>
 
-	<table id="notes_table" class="datatable_ajax table table-hover table-responsive">
-	</table>
+	<table id="notes_table" class="datatable_ajax table table-hover table-responsive"></table>
 </div>
 {% endblock %}

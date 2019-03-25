@@ -2,14 +2,14 @@
 
 {% block script %}
 <script type="text/javascript">
-$(document).ready(function() {
-	$("a[data-toggle='tab']").on("show.bs.tab", function(e) {
-		localStorage.setItem("host_view_activeTab", $(e.target).attr("href"));
+	$(document).ready(function() {
+		$("a[data-toggle='tab']").on("show.bs.tab", function(e) {
+			localStorage.setItem("host_view_activeTab", $(e.target).attr("href"));
+		});
+		var activeTab = localStorage.getItem("host_view_activeTab");
+		if (!activeTab) { activeTab = $("a[data-toggle='tab']").first().attr("href"); }
+		$("#host_view a[href='" + activeTab + "']").tab("show");
 	});
-	var activeTab = localStorage.getItem("host_view_activeTab");
-	if (!activeTab) { activeTab = $("a[data-toggle='tab']").first().attr("href"); }
-	$("#host_view a[href='" + activeTab + "']").tab("show");
-});
 </script>
 {% endblock %}
 
@@ -39,9 +39,9 @@ $(document).ready(function() {
 				var datatable_host_services = {
 					"ajax": {"url": "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", "method": "POST"},
 					"columns": columns_with_buttons(["id", "proto", "port", "name", "state", "info", "created", "modified"]),
-				}
-				$(document).ready(function(){
-					$('#datatable_host_services').DataTable($.extend({}, datatables_ajax_options, datatable_host_services));
+				};
+				$(document).ready(function() {
+					$('#datatable_host_services').DataTable($.extend({}, datatable_ajax_options, datatable_host_services));
 				});
 			</script>
 		</div>
@@ -52,9 +52,9 @@ $(document).ready(function() {
 				var datatable_host_notes = {
 					"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
 					"columns": columns_with_buttons(["id", "ntype", "data", "created", "modified"]),
-				}
-				$(document).ready(function(){
-					$('#datatable_host_notes').DataTable($.extend({}, datatables_ajax_options, datatable_host_notes));
+				};
+				$(document).ready(function() {
+					$('#datatable_host_notes').DataTable($.extend({}, datatable_ajax_options, datatable_host_notes));
 				});
 			</script>
 		</div>
