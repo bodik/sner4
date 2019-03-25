@@ -59,4 +59,4 @@ def task_delete_route(task_id):
 		db.session.commit()
 		return redirect(url_for('scheduler.task_list_route'))
 
-	return render_template('button_delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))
+	return render_template('button-delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))

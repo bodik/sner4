@@ -51,7 +51,7 @@ def service_list_json_route():
 	if 'data' in services:
 		generic_button_form = GenericButtonForm()
 		for service in services['data']:
-			service['_buttons'] = render_template('storage/service/list_datatable_controls.html', service=service, generic_button_form=generic_button_form)
+			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, generic_button_form=generic_button_form)
 
 	return jsonify(services)
 
@@ -99,7 +99,7 @@ def service_delete_route(service_id):
 		db.session.commit()
 		return redirect(url_for('storage.service_list_route'))
 
-	return render_template('button_delete.html', form=form, form_url=url_for('storage.service_delete_route', service_id=service_id))
+	return render_template('button-delete.html', form=form, form_url=url_for('storage.service_delete_route', service_id=service_id))
 
 
 @blueprint.route('/service/vizports')

@@ -15,7 +15,7 @@
 
 {% block content %}
 <div class="hosts">
-	<h1>Host {{host.address}} ({{host.hostname}})</h1>
+	<h1>Host {{host.address}} ({{host.hostname}}) <small>{% include 'storage/host/pagepart-controls.html' %}</small></h1>
 
 	<div>
 		<dl class="dl-horizontal">

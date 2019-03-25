@@ -88,7 +88,7 @@ def queue_flush_route(queue_id):
 		db.session.commit()
 		return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('button_generic.html', form=form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id), button_caption='Flush')
+	return render_template('button-generic.html', form=form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id), button_caption='Flush')
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
@@ -103,4 +103,4 @@ def queue_delete_route(queue_id):
 		db.session.commit()
 		return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('button_delete.html', form=form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue_id))
+	return render_template('button-delete.html', form=form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue_id))

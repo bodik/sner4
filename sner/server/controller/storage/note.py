@@ -38,7 +38,7 @@ def note_list_json_route():
 	if 'data' in notes:
 		generic_button_form = GenericButtonForm()
 		for note in notes['data']:
-			note['_buttons'] = render_template('storage/note/list_datatable_controls.html', note=note, generic_button_form=generic_button_form)
+			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, generic_button_form=generic_button_form)
 
 	return jsonify(notes)
 
@@ -84,4 +84,4 @@ def note_delete_route(note_id):
 		db.session.delete(note)
 		db.session.commit()
 		return redirect(url_for('storage.note_list_route'))
-	return render_template('button_delete.html', form=form, form_url=url_for('storage.note_delete_route', note_id=note_id))
+	return render_template('button-delete.html', form=form, form_url=url_for('storage.note_delete_route', note_id=note_id))

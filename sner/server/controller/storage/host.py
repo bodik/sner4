@@ -36,7 +36,7 @@ def host_list_json_route():
 	if "data" in hosts:
 		generic_button_form = GenericButtonForm()
 		for host in hosts["data"]:
-			host["_buttons"] = render_template('storage/host/list_datatable_controls.html', host=host, generic_button_form=generic_button_form)
+			host["_buttons"] = render_template('storage/host/pagepart-controls.html', host=host, generic_button_form=generic_button_form)
 
 	return jsonify(hosts)
 
@@ -84,7 +84,7 @@ def host_delete_route(host_id):
 		db.session.commit()
 		return redirect(url_for('storage.host_list_route'))
 
-	return render_template('button_delete.html', form=form, form_url=url_for('storage.host_delete_route', host_id=host_id))
+	return render_template('button-delete.html', form=form, form_url=url_for('storage.host_delete_route', host_id=host_id))
 
 
 @blueprint.route('/host/vizdns')
