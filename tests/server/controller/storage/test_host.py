@@ -17,7 +17,7 @@ def test_host_list_route(client):
 
 	response = client.get(url_for('storage.host_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Hosts list' in response
+	assert '<h1>Hosts list' in response
 
 
 def test_host_list_json_route(client, test_host):

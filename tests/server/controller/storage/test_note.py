@@ -17,7 +17,7 @@ def test_note_list_route(client):
 
 	response = client.get(url_for('storage.note_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Notes list' in response
+	assert '<h1>Notes list' in response
 
 
 def test_note_list_json_route(client, test_note):

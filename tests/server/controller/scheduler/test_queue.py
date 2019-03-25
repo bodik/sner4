@@ -16,7 +16,7 @@ def test_queue_list_route(client):
 
 	response = client.get(url_for('scheduler.queue_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Queues list' in response
+	assert '<h1>Queues list' in response
 
 
 def test_queue_add_route(client, test_task):

@@ -20,7 +20,7 @@ def test_job_list_route(client):
 
 	response = client.get(url_for('scheduler.job_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Jobs list' in response
+	assert '<h1>Jobs list' in response
 
 
 def test_job_assign_route(client, test_queue):

@@ -17,7 +17,7 @@ def test_service_list_route(client):
 
 	response = client.get(url_for('storage.service_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Services list' in response
+	assert '<h1>Services list' in response
 
 
 def test_service_list_json_route(client, test_service):

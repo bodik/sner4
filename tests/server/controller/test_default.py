@@ -10,4 +10,4 @@ def test_index_route(client):
 
 	response = client.get(url_for('index_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'logo.png' in response
+	assert 'logo.png' in response

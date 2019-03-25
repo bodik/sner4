@@ -16,7 +16,7 @@ def test_task_list_route(client):
 
 	response = client.get(url_for('scheduler.task_list_route'))
 	assert response.status_code == HTTPStatus.OK
-	assert b'<h1>Tasks list' in response
+	assert '<h1>Tasks list' in response
 
 
 def test_task_add_route(client):
