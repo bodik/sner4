@@ -28,9 +28,7 @@ def host_list_json_route():
 		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Host.os, mData='os'),
 		ColumnDT(func.count(distinct(Service.id)), mData='count_services', global_search=False),
-		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False),
-		ColumnDT(Host.created, mData='created'),
-		ColumnDT(Host.modified, mData='modified')
+		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False)
 	]
 	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
@@ -38,8 +36,6 @@ def host_list_json_route():
 	if "data" in hosts:
 		generic_button_form = GenericButtonForm()
 		for host in hosts["data"]:
-			host["created"] = host["created"].strftime('%Y-%m-%dT%H:%M:%S')
-			host["modified"] = host["modified"].strftime('%Y-%m-%dT%H:%M:%S')
 			host["_buttons"] = render_template('storage/host/list_datatable_controls.html', host=host, generic_button_form=generic_button_form)
 
 	return jsonify(hosts)

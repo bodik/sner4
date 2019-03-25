@@ -25,9 +25,7 @@ def note_list_json_route():
 	columns = [
 		ColumnDT(Note.id, mData='id'),
 		ColumnDT(Note.ntype, mData='ntype'),
-		ColumnDT(Note.data, mData='data'),
-		ColumnDT(Note.created, mData='created'),
-		ColumnDT(Note.modified, mData='modified')
+		ColumnDT(Note.data, mData='data')
 	]
 	query = db.session.query().select_from(Note)
 	if 'host_id' in request.values:
@@ -40,8 +38,6 @@ def note_list_json_route():
 	if 'data' in notes:
 		generic_button_form = GenericButtonForm()
 		for note in notes['data']:
-			note['created'] = note['created'].strftime('%Y-%m-%dT%H:%M:%S')
-			note['modified'] = note['modified'].strftime('%Y-%m-%dT%H:%M:%S')
 			note['_buttons'] = render_template('storage/note/list_datatable_controls.html', note=note, generic_button_form=generic_button_form)
 
 	return jsonify(notes)

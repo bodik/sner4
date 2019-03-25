@@ -32,9 +32,7 @@ def service_list_json_route():
 		ColumnDT(Service.port, mData='port'),
 		ColumnDT(Service.name, mData='name'),
 		ColumnDT(Service.state, mData='state'),
-		ColumnDT(Service.info, mData='info'),
-		ColumnDT(Service.created, mData='created'),
-		ColumnDT(Service.modified, mData='modified')
+		ColumnDT(Service.info, mData='info')
 	]
 	query = db.session.query().select_from(Service)
 
@@ -53,8 +51,6 @@ def service_list_json_route():
 	if 'data' in services:
 		generic_button_form = GenericButtonForm()
 		for service in services['data']:
-			service['created'] = service['created'].strftime('%Y-%m-%dT%H:%M:%S')
-			service['modified'] = service['modified'].strftime('%Y-%m-%dT%H:%M:%S')
 			service['_buttons'] = render_template('storage/service/list_datatable_controls.html', service=service, generic_button_form=generic_button_form)
 
 	return jsonify(services)
