@@ -31,8 +31,8 @@ def host_list_json_route():
 		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False)
 	]
 	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
-	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 
+	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in hosts:
 		generic_button_form = GenericButtonForm()
 		for host in hosts["data"]:

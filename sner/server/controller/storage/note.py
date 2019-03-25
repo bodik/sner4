@@ -28,11 +28,13 @@ def note_list_json_route():
 		ColumnDT(Note.data, mData='data')
 	]
 	query = db.session.query().select_from(Note)
+
+	## endpoint is shared by generic service_list and host_view
 	if 'host_id' in request.values:
 		query = query.filter(Note.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), mData='host'))
+		columns.insert(1, ColumnDT(func.concat(Host.id, ' ', Host.address, ' ', Host.hostname), mData='host'))
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in notes:

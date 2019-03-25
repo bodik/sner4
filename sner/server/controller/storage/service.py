@@ -41,7 +41,7 @@ def service_list_json_route():
 		query = query.filter(Service.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.address, ' (', Host.hostname, ')'), mData='host'))
+		columns.insert(1, ColumnDT(func.concat(Host.id, ' ', Host.address, ' ', Host.hostname), mData='host'))
 
 	## port filtering is used from service_vizports
 	if 'port' in request.values:
