@@ -87,3 +87,37 @@ def test_host_delete_route(client):
 
 	host = Host.query.filter(Host.id == test_host.id).one_or_none()
 	assert not host
+
+
+def test_host_vizdns_route(client):
+	"""host vizdns route test"""
+
+	response = client.get(url_for('storage.host_vizdns_route'))
+	assert response.status_code == HTTPStatus.OK
+
+
+def test_host_vizdns_json_route(client, test_host):
+	"""host vizdns.json route test"""
+
+	test_host.hostname = 'vizdns%d' % (random()*10000.0)
+	persist_and_detach(test_host)
+
+
+	response = client.get(url_for('storage.host_vizdns_json_route', crop=0))
+	assert response.status_code == HTTPStatus.OK
+
+	response_data = json.loads(response.body.decode('utf-8'))
+	assert test_host.hostname in [tmp["name"] for tmp in response_data["nodes"]]
+
+
+def test_host_view_route(client, test_host):
+	"""host view route test"""
+
+	test_host.hostname = 'view%f.%s' % (random(), test_host.hostname)
+	persist_and_detach(test_host)
+
+
+	response = client.get(url_for('storage.host_view_route', host_id=test_host.id))
+	assert response.status_code == HTTPStatus.OK
+
+	assert '<h1>Host %s (%s)' % (test_host.address, test_host.hostname) in response
