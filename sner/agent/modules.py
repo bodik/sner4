@@ -73,4 +73,4 @@ class Nmap(Base):
 		super().run(assignment)
 		with open('targets', 'w') as ftmp:
 			ftmp.write('\n'.join(assignment['targets']))
-		return self.execute('/usr/bin/nmap -iL targets -oA output %s' % assignment['params'])
+		return self.execute('nmap -iL targets -oA output %s' % assignment['params'])
