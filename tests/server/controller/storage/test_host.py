@@ -32,7 +32,7 @@ def test_host_list_json_route(client, test_host):
 	assert response_data["data"][0]["hostname"] == test_host.hostname
 
 
-def test_task_add_route(client):
+def test_host_add_route(client):
 	"""host add route test"""
 
 	test_host = create_test_host()
