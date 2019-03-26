@@ -28,8 +28,8 @@ def host_list_json_route():
 		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Host.os, mData='os'),
 		ColumnDT(Host.comment, mData='comment'),
-		ColumnDT(func.count(distinct(Service.id)), mData='count_services', global_search=False),
-		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False)
+		ColumnDT(func.count(distinct(Service.id)), mData='nr_svcs', global_search=False),
+		ColumnDT(func.count(distinct(Note.id)), mData='nr_notes', global_search=False)
 	]
 	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
 
