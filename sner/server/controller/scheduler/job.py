@@ -15,7 +15,7 @@ from sqlalchemy.sql.expression import func
 import sner.agent.protocol
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
 
 
@@ -29,7 +29,7 @@ def job_list_route():
 	"""list jobs"""
 
 	jobs = Job.query.all()
-	return render_template('scheduler/job/list.html', jobs=jobs, generic_button_form=GenericButtonForm())
+	return render_template('scheduler/job/list.html', jobs=jobs, button_form=ButtonForm())
 
 
 #TODO: post? csfr protection?
@@ -109,7 +109,7 @@ def job_delete_route(job_id):
 	"""delete job"""
 
 	job = Job.query.get(job_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		output_file = job_output_filename(job_id)

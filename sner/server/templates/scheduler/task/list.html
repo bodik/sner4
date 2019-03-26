@@ -24,7 +24,7 @@
 			<td>
 				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_add_route', task_id=task.id) }}"><span class="glyphicon glyphicon-plus"></span> Queue</a>
 				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.task_edit_route', task_id=task.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-				{% with form=generic_button_form, form_url=url_for('scheduler.task_delete_route', task_id=task.id) %}{% include 'button-delete.html' %}{% endwith %}
+				{% with form=button_form, form_url=url_for('scheduler.task_delete_route', task_id=task.id) %}{% include 'button-delete.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}

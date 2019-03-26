@@ -6,7 +6,7 @@ from sqlalchemy import distinct, func
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
 from sner.server.model.storage import Host, Note, Service
 
@@ -34,9 +34,9 @@ def host_list_json_route():
 
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in hosts:
-		generic_button_form = GenericButtonForm()
+		button_form = ButtonForm()
 		for host in hosts["data"]:
-			host["_buttons"] = render_template('storage/host/pagepart-controls.html', host=host, generic_button_form=generic_button_form)
+			host["_buttons"] = render_template('storage/host/pagepart-controls.html', host=host, button_form=button_form)
 
 	return jsonify(hosts)
 
@@ -77,7 +77,7 @@ def host_delete_route(host_id):
 	"""delete host"""
 
 	host = Host.query.get(host_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		db.session.delete(host)
@@ -137,4 +137,4 @@ def host_view_route(host_id):
 	"""view host"""
 
 	host = Host.query.get(host_id)
-	return render_template('storage/host/view.html', host=host, generic_button_form=GenericButtonForm())
+	return render_template('storage/host/view.html', host=host, button_form=ButtonForm())

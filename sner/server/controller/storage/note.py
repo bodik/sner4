@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm
 from sner.server.model.storage import Host, Note
 
@@ -38,9 +38,9 @@ def note_list_json_route():
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in notes:
-		generic_button_form = GenericButtonForm()
+		button_form = ButtonForm()
 		for note in notes['data']:
-			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, generic_button_form=generic_button_form)
+			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
 
 	return jsonify(notes)
 
@@ -82,7 +82,7 @@ def note_delete_route(note_id):
 	"""delete note"""
 
 	note = Note.query.get(note_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 	if form.validate_on_submit():
 		db.session.delete(note)
 		db.session.commit()

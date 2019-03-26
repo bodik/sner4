@@ -21,6 +21,6 @@ class LinesField(TextAreaField):
 			self.data = [] # pylint: disable=attribute-defined-outside-init
 
 
-class GenericButtonForm(FlaskForm):
+class ButtonForm(FlaskForm):
 	"""generic button form"""
 	pass

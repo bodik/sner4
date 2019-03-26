@@ -28,7 +28,7 @@
 			<td>{{ job.time_start|datetime }}</td>
 			<td>{{ job.time_end|datetime }}</td>
 			<td>
-				{% with form=generic_button_form, form_url=url_for('scheduler.job_delete_route', job_id=job.id) %}{% include 'button-delete.html' %}{% endwith %}
+				{% with form=button_form, form_url=url_for('scheduler.job_delete_route', job_id=job.id) %}{% include 'button-delete.html' %}{% endwith %}
 			</td>
 		</tr>
 		{% endfor %}

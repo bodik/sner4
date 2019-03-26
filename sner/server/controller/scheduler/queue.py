@@ -5,7 +5,7 @@ from sqlalchemy import func
 
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
 from sner.server.model.scheduler import Queue, Target, Task
 
@@ -23,7 +23,7 @@ def queue_list_route():
 		'scheduler/queue/list.html',
 		queues=queues,
 		count_targets=count_targets,
-		generic_button_form=GenericButtonForm())
+		button_form=ButtonForm())
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
@@ -81,7 +81,7 @@ def queue_flush_route(queue_id):
 	"""queue flush"""
 
 	queue = Queue.query.get(queue_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		db.session.query(Target).filter(Target.queue_id == queue.id).delete()
@@ -96,7 +96,7 @@ def queue_delete_route(queue_id):
 	"""queue delete"""
 
 	queue = Queue.query.get(queue_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		db.session.delete(queue)

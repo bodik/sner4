@@ -6,7 +6,7 @@ from sqlalchemy.sql import distinct, func
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
 
@@ -49,9 +49,9 @@ def service_list_json_route():
 
 	services = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in services:
-		generic_button_form = GenericButtonForm()
+		button_form = ButtonForm()
 		for service in services['data']:
-			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, generic_button_form=generic_button_form)
+			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, button_form=button_form)
 
 	return jsonify(services)
 
@@ -93,7 +93,7 @@ def service_delete_route(service_id):
 	"""delete service"""
 
 	service = Service.query.get(service_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		db.session.delete(service)

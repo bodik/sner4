@@ -3,7 +3,7 @@
 from flask import redirect, render_template, url_for
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
-from sner.server.form import GenericButtonForm
+from sner.server.form import ButtonForm
 from sner.server.form.scheduler import TaskForm
 from sner.server.model.scheduler import Task
 
@@ -13,7 +13,7 @@ def task_list_route():
 	"""list tasks"""
 
 	tasks = Task.query.all()
-	return render_template('scheduler/task/list.html', tasks=tasks, generic_button_form=GenericButtonForm())
+	return render_template('scheduler/task/list.html', tasks=tasks, button_form=ButtonForm())
 
 
 @blueprint.route('/task/add', methods=['GET', 'POST'])
@@ -52,7 +52,7 @@ def task_delete_route(task_id):
 	"""delete task"""
 
 	task = Task.query.get(task_id)
-	form = GenericButtonForm()
+	form = ButtonForm()
 
 	if form.validate_on_submit():
 		db.session.delete(task)
