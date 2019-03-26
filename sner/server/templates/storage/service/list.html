@@ -20,6 +20,6 @@
 <div class="services">
 	<h1>Services list{% if 'port' in request.args %} <small><a class="btn btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a></small>{% endif %}</h1>
 
-	<table id="services_table" class="datatable_ajax table table-hover table-responsive"></table>
+	<table id="services_table" class="datatable_ajax table table-hover table-responsive table-condensed"></table>
 </div>
 {% endblock %}
