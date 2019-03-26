@@ -27,6 +27,7 @@ def host_list_json_route():
 		ColumnDT(Host.address, mData='address'),
 		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Host.os, mData='os'),
+		ColumnDT(Host.comment, mData='comment'),
 		ColumnDT(func.count(distinct(Service.id)), mData='count_services', global_search=False),
 		ColumnDT(func.count(distinct(Note.id)), mData='count_notes', global_search=False)
 	]

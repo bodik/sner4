@@ -13,7 +13,8 @@ def create_test_host():
 	return Host(
 		address='127.128.129.130',
 		hostname='localhost.localdomain',
-		os='some linux')
+		os='some linux',
+		comment='testing webserver')
 
 
 def create_test_service(a_test_host):
@@ -25,7 +26,8 @@ def create_test_service(a_test_host):
 		port=22,
 		state='up:syn-ack',
 		name='ssh',
-		info='product: OpenSSH version: 7.4p1 Debian 10+deb9u4 extrainfo: protocol 2.0 ostype: Linux')
+		info='product: OpenSSH version: 7.4p1 Debian 10+deb9u4 extrainfo: protocol 2.0 ostype: Linux',
+		comment='a test service comment')
 
 
 def create_test_note(a_test_host):
@@ -34,7 +36,8 @@ def create_test_note(a_test_host):
 	return Note(
 		host=a_test_host,
 		ntype='testnote.ntype',
-		data='test note data')
+		data='test note data',
+		comment='some test note comment')
 
 
 @pytest.fixture()

@@ -72,7 +72,8 @@ def db_initdata():
 	db.session.add(Host(
 		address='127.4.4.4',
 		hostname='testhost.testdomain.test',
-		os='Test Linux 1'))
+		os='Test Linux 1',
+		comment='a some unknown service server'))
 
 	db.session.add(Service(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
@@ -80,12 +81,14 @@ def db_initdata():
 		port=12345,
 		state='open:testreason',
 		name='testservice',
-		info='testservice info'))
+		info='testservice banner',
+		comment='manual testservice comment'))
 
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
 		ntype='sner.testnote',
-		data='testnote data'))
+		data='testnote data',
+		comment='test note comment'))
 
 
 	db.session.commit()

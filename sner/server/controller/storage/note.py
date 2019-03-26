@@ -25,7 +25,8 @@ def note_list_json_route():
 	columns = [
 		ColumnDT(Note.id, mData='id'),
 		ColumnDT(Note.ntype, mData='ntype'),
-		ColumnDT(Note.data, mData='data')
+		ColumnDT(Note.data, mData='data'),
+		ColumnDT(Note.comment, mData='comment')
 	]
 	query = db.session.query().select_from(Note)
 

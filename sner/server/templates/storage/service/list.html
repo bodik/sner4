@@ -11,7 +11,7 @@
 	};
 	var datatable_ajax_custom = {
 		"ajax": {"url": "{{ url_for('storage.service_list_json_route', **request.args) }}", "method": "POST"},
-		"columns": columns_with_buttons(["id", {"name": "host", "title": "host", "data": "host", "render": host_render}, "proto", "port", "name", "state", "info"])
+		"columns": columns_with_buttons(["id", {"name": "host", "title": "host", "data": "host", "render": host_render}, "proto", "port", "name", "state", "info", "comment"])
 	};
 </script>
 {% endblock %}

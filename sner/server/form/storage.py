@@ -25,6 +25,7 @@ class HostForm(FlaskForm):
 	address = StringField('Address', validators=[validators.IPAddress(ipv4=True, ipv6=True)])
 	hostname = StringField('Hostname', validators=[validators.Length(max=256)])
 	os = StringField('Os')
+	comment = TextAreaField('Comment')
 
 
 class ServiceForm(FlaskForm):
@@ -35,8 +36,8 @@ class ServiceForm(FlaskForm):
 	port = IntegerField('Port', validators=[validators.NumberRange(min=0, max=65535)])
 	state = StringField('State', validators=[validators.Length(max=100)])
 	name = StringField('Name', validators=[validators.Length(max=100)])
-	info = TextAreaField('Info')
-
+	info = StringField('Info', validators=[validators.Length(max=2000)])
+	comment = TextAreaField('Comment')
 
 
 class NoteForm(FlaskForm):
@@ -45,3 +46,4 @@ class NoteForm(FlaskForm):
 	host_id = IntegerField('Host_id', validators=[host_id_exists])
 	ntype = StringField('nType', validators=[validators.Length(min=1, max=500)], filters=[empty_to_none])
 	data = TextAreaField('Data')
+	comment = TextAreaField('Comment')

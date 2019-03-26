@@ -45,6 +45,7 @@ def test_service_add_route(client, test_host):
 	form['state'] = test_service.state
 	form['name'] = test_service.name
 	form['info'] = test_service.info
+	form['comment'] = test_service.comment
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -53,6 +54,7 @@ def test_service_add_route(client, test_host):
 	assert service.proto == test_service.proto
 	assert service.port == test_service.port
 	assert service.info == test_service.info
+	assert service.comment == test_service.comment
 
 
 	db.session.delete(service)
@@ -116,5 +118,4 @@ def test_service_portstat_route(client, test_service):
 	response = client.get(url_for('storage.service_portstat_route', port=test_service.port))
 	assert response.status_code == HTTPStatus.OK
 
-	elems = response.lxml.xpath("//li[text()='%s']" % test_service.info)
-	assert elems
+	assert response.lxml.xpath("//li[text()='%s']" % test_service.info)

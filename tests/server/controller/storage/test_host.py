@@ -43,6 +43,7 @@ def test_host_add_route(client):
 	form['address'] = test_host.address
 	form['hostname'] = test_host.hostname
 	form['os'] = test_host.os
+	form['comment'] = test_host.comment
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -50,6 +51,7 @@ def test_host_add_route(client):
 	assert host
 	assert host.hostname == test_host.hostname
 	assert host.os == test_host.os
+	assert host.comment == test_host.comment
 
 
 	db.session.delete(host)

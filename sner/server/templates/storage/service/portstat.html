@@ -7,11 +7,11 @@
 	{% endfor %}
 </dl>
 
-{% if banners  %}
-<h3>Banners</h3>
+{% if infos  %}
+<h3>Infos</h3>
 <ul>
-	{% for banner in banners %}
-	<li>{{banner[0]}}</li>
+	{% for info in infos %}
+	<li>{{info[0]}}</li>
 	{% endfor %}
 </ul>
 {% endif %}
@@ -22,3 +22,12 @@
 	<li><a href="{{ url_for('storage.host_view_route', host_id=host_id) }}">{{host}}</a></li>
 	{% endfor %}
 </ul>
+
+{% if comments  %}
+<h3>Comments</h3>
+<ul>
+	{% for comment in comments %}
+	<li>{{comment[0]}}</li>
+	{% endfor %}
+</ul>
+{% endif %}

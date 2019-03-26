@@ -42,6 +42,7 @@ def test_note_add_route(client, test_host):
 	form = client.get(url_for('storage.note_add_route', host_id=test_note.host.id)).form
 	form['ntype'] = test_note.ntype
 	form['data'] = test_note.data
+	form['comment'] = test_note.comment
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -49,6 +50,7 @@ def test_note_add_route(client, test_host):
 	assert note
 	assert note.ntype == test_note.ntype
 	assert note.data == test_note.data
+	assert note.comment == test_note.comment
 
 
 	db.session.delete(note)

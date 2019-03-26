@@ -32,7 +32,8 @@ def service_list_json_route():
 		ColumnDT(Service.port, mData='port'),
 		ColumnDT(Service.name, mData='name'),
 		ColumnDT(Service.state, mData='state'),
-		ColumnDT(Service.info, mData='info')
+		ColumnDT(Service.info, mData='info'),
+		ColumnDT(Service.comment, mData='comment')
 	]
 	query = db.session.query().select_from(Service)
 
@@ -129,10 +130,11 @@ def service_portstat_route(port):
 	query = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port).order_by(Service.proto).group_by(Service.proto)
 	for proto, count in query.all():
 		stats[proto] = count
-	banners = db.session.query(distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
+	infos = db.session.query(distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
+	comments = db.session.query(distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
 	hosts = db.session \
 			.query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
 			.select_from(Service).join(Host) \
 			.filter(Service.port == port).all()
 
-	return render_template('storage/service/portstat.html', port=port, stats=stats, banners=banners, hosts=hosts)
+	return render_template('storage/service/portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)
