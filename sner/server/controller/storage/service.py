@@ -68,7 +68,7 @@ def service_add_route(host_id):
 		form.populate_obj(service)
 		db.session.add(service)
 		db.session.commit()
-		return redirect(url_for('storage.service_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
 	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_add_route', host_id=host_id), host=host)
 
@@ -83,7 +83,7 @@ def service_edit_route(service_id):
 	if form.validate_on_submit():
 		form.populate_obj(service)
 		db.session.commit()
-		return redirect(url_for('storage.service_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
 	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_edit_route', service_id=service_id), host=service.host)
 

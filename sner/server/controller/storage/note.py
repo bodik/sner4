@@ -57,7 +57,7 @@ def note_add_route(host_id):
 		form.populate_obj(note)
 		db.session.add(note)
 		db.session.commit()
-		return redirect(url_for('storage.note_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
 	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_add_route', host_id=host_id), host=host)
 
@@ -72,7 +72,7 @@ def note_edit_route(note_id):
 	if form.validate_on_submit():
 		form.populate_obj(note)
 		db.session.commit()
-		return redirect(url_for('storage.note_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
 	return render_template('storage/note/addedit.html', form=form, form_url=url_for('storage.note_edit_route', note_id=note_id), host=note.host)
 
