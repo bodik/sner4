@@ -52,7 +52,7 @@ def host_add_route():
 		form.populate_obj(host)
 		db.session.add(host)
 		db.session.commit()
-		return redirect(url_for('storage.host_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=host.id))
 
 	return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_add_route'))
 
@@ -67,7 +67,7 @@ def host_edit_route(host_id):
 	if form.validate_on_submit():
 		form.populate_obj(host)
 		db.session.commit()
-		return redirect(url_for('storage.host_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=host.id))
 
 	return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_edit_route', host_id=host_id))
 

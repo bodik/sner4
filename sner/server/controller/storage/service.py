@@ -98,7 +98,7 @@ def service_delete_route(service_id):
 	if form.validate_on_submit():
 		db.session.delete(service)
 		db.session.commit()
-		return redirect(url_for('storage.service_list_route'))
+		return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
 	return render_template('button-delete.html', form=form, form_url=url_for('storage.service_delete_route', service_id=service_id))
 
