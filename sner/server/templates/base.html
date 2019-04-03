@@ -28,9 +28,19 @@
 	</style>
 
 	<script type="text/javascript">
-		// datatables columns api helper
+		/**
+		 * Create datatables column definition.
+		 * Optional renderfn defaults to non-html rendering; use null to enable direct html rendering.
+		 */
+		function column(d, renderfn = $.fn.dataTable.render.text()) {
+			return {"name": d, "title": d, "data": d, "render": renderfn};
+		}
+
+		/**
+		 * Create array of datatables columns definitions, passthru objects with specific configuration, append buttons column.
+		 */
 		function columns_with_buttons(cols) {
-			return cols.map(function(d) { return (d instanceof Object) ? d : {"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()};})
+			return cols.map(function(d) { return (d instanceof Object) ? d : column(d);})
 				.concat({"name": "_buttons", "title": "_buttons", "data": "_buttons", "render": null, "orderable": false});
 		}
 

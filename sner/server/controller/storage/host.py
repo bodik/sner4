@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import distinct, func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint
+from sner.server.controller.storage import blueprint, render_columndt_host
 from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
 from sner.server.model.storage import Host, Note, Service
@@ -36,8 +36,9 @@ def host_list_json_route():
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in hosts:
 		button_form = ButtonForm()
-		for host in hosts["data"]:
-			host["_buttons"] = render_template('storage/host/pagepart-controls.html', host=host, button_form=button_form)
+		for host in hosts['data']:
+			host['address'] = render_template('storage/host/pagepart-view_link.html', host=host)
+			host['_buttons'] = render_template('storage/host/pagepart-controls.html', host=host, button_form=button_form)
 
 	return jsonify(hosts)
 

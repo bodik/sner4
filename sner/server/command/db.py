@@ -71,7 +71,7 @@ def db_initdata():
 ## storage test data
 	db.session.add(Host(
 		address='127.4.4.4',
-		hostname='testhost.testdomain.test',
+		hostname='testhost.testdomain.test<script>alert(1);</script>',
 		os='Test Linux 1',
 		comment='a some unknown service server'))
 

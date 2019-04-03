@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint
+from sner.server.controller.storage import blueprint, render_columndt_host
 from sner.server.form import ButtonForm
 from sner.server.form.storage import VulnForm
 from sner.server.model.storage import Host, Service, Vuln
@@ -44,6 +44,9 @@ def vuln_list_json_route():
 	if 'data' in vulns:
 		button_form = ButtonForm()
 		for vuln in vulns['data']:
+			if 'host' in vuln:
+				vuln['host'] = render_columndt_host(vuln['host'])
+			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', severity=vuln['severity'])
 			vuln['_buttons'] = render_template('storage/vuln/pagepart-controls.html', vuln=vuln, button_form=button_form)
 
 	return jsonify(vulns)

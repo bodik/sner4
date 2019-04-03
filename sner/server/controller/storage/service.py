@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import distinct, func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint
+from sner.server.controller.storage import blueprint, render_columndt_host
 from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
@@ -52,6 +52,8 @@ def service_list_json_route():
 	if 'data' in services:
 		button_form = ButtonForm()
 		for service in services['data']:
+			if 'host' in service:
+				service['host'] = render_columndt_host(service['host'])
 			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, button_form=button_form)
 
 	return jsonify(services)
