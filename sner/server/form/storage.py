@@ -1,9 +1,9 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, StringField, TextAreaField, ValidationError, validators
+from wtforms import IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
 
-from sner.server.model.storage import Host, Service
+from sner.server.model.storage import Host, Service, SeverityEnum
 
 
 def host_id_exists(form, field): # pylint: disable=unused-argument
@@ -57,7 +57,7 @@ class VulnForm(FlaskForm):
 	service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
 	name = StringField('Name', validators=[validators.Length(min=1, max=500)])
 	xtype = StringField('xType', validators=[validators.Length(max=500)])
-	severity = IntegerField('Severity', default=-1)
+	severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
 	descr = TextAreaField('Descr')
 	data = TextAreaField('Data')
 	comment = TextAreaField('Comment')

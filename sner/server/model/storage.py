@@ -1,12 +1,38 @@
 """sqlalchemy models"""
 # pylint: disable=too-few-public-methods,abstract-method
 
+import enum
 from datetime import datetime
 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import ChoiceType
 
 from sner.server import db
+
+
+class SeverityEnum(enum.IntEnum):
+	"""severity enum"""
+
+	unknown = 0
+	info = 1
+	low = 2
+	medium = 3
+	high = 4
+	critical = 5
+
+	@classmethod
+	def choices(cls):
+		"""from self/class generates list for SelectField"""
+		return [(choice.value, choice.name) for choice in cls]
+
+	@classmethod
+	def coerce(cls, item):
+		"""casts input from submitted form back to the corresponding python object"""
+		return cls(int(item)) if not isinstance(item, cls) else item
+
+	def __str__(self):
+		return self.name
 
 
 class Host(db.Model):
@@ -56,7 +82,7 @@ class Vuln(db.Model):
 	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
 	name = db.Column(db.String(1000), nullable=False)
 	xtype = db.Column(db.String(500))
-	severity = db.Column(db.Integer) # -1:unknown, 0:informational, 1:low, 2:medium, 3:high, 4:critical
+	severity = db.Column(ChoiceType(SeverityEnum, impl=db.Integer()))
 	descr = db.Column(db.Text)
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)

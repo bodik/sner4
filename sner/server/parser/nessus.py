@@ -8,7 +8,7 @@ from nessus_report_parser import parse_nessus_xml
 
 from sner.server import db
 from sner.server.parser import register_parser
-from sner.server.model.storage import Host, Note, Service, Vuln
+from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 
 
 @register_parser('nessus')
@@ -40,6 +40,7 @@ class NessusParser():
 	@staticmethod
 	def import_report_item(host, report_item):
 		report_item['port'] = int(report_item['port']) #TODO: push casting to the parser itself ?
+		report_item['severity'] = int(report_item['severity']) #TODO: push casting to the parser itself ?
 
 		service = None
 		if report_item['port']:
@@ -56,7 +57,7 @@ class NessusParser():
 				service=service,
 				xtype=xtype,
 				name=report_item['plugin_name'],
-				severity=report_item['severity'],
+				severity=SeverityEnum(1+report_item['severity']),
 				descr="## Synopsis\n\n%s\n##Description\n\n%s" % (report_item['synopsis'], report_item['description']),
 				data=report_item['plugin_output'])
 			db.session.add(vuln)
