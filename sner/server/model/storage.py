@@ -21,6 +21,7 @@ class Host(db.Model):
 	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	services = relationship('Service', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
+	vulns = relationship('Vuln', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
 	notes = relationship('Note', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
 
 	def __repr__(self):
@@ -42,9 +43,27 @@ class Service(db.Model):
 	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	host = relationship('Host', back_populates='services')
+	vulns = relationship('Vuln', back_populates='service')
 
 	def __repr__(self):
 		return '<Service %s: %s.%d>' % (self.id, self.proto, self.port)
+
+
+class Vuln(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+
+	host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
+	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
+	name = db.Column(db.String(1000), nullable=False)
+	xtype = db.Column(db.String(500))
+	severity = db.Column(db.Integer) # -1:unknown, 0:informational, 1:low, 2:medium, 3:high, 4:critical
+	descr = db.Column(db.Text)
+	data = db.Column(db.Text)
+	comment = db.Column(db.Text)
+	refs = db.Column(db.Text)
+
+	host = relationship('Host', back_populates='vulns')
+	service = relationship('Service', back_populates='vulns')
 
 
 class Note(db.Model):

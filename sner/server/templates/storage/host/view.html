@@ -29,12 +29,12 @@
 
 	<ul class="nav nav-tabs" role="tablist" id="host_view">
 		<li role="presentation" class=""><a href="#services" role="tab" data-toggle="tab">Services</a></li>
+		<li role="presentation" class=""><a href="#vulns" role="tab" data-toggle="tab">Vulns</a></li>
 		<li role="presentation" class=""><a href="#notes" role="tab" data-toggle="tab">Notes</a></li>
 	</ul>
 
 	<div class="tab-content">
 		<div role="tabpanel" class="tab-pane" id="services">
-
 			<table id="datatable_host_services" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
 				var datatable_host_services = {
@@ -46,6 +46,21 @@
 				});
 			</script>
 		</div>
+
+
+		<div role="tabpanel" class="tab-pane" id="vulns">
+			<table id="datatable_host_vulns" class="table table-hover table-responsive table-condensed" width="100%"></table>
+			<script type="text/javascript">
+				var datatable_host_vulns = {
+					"ajax": {"url": "{{ url_for('storage.vuln_list_json_route', host_id=host.id) }}", "method": "POST"},
+					"columns": columns_with_buttons(["id", "service", "name", "xtype", "severity", "comment", "refs"]),
+				};
+				$(document).ready(function() {
+					$('#datatable_host_vulns').DataTable($.extend({}, datatable_ajax_options, datatable_host_vulns));
+				});
+			</script>
+		</div>
+
 
 		<div role="tabpanel" class="tab-pane" id="notes">
 			<table id="datatable_host_notes" class="table table-hover table-responsive table-condensed" width="100%"></table>

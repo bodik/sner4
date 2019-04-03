@@ -1,2 +1,3 @@
+<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_add_route', model_name='service', model_id=service.id) }}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
 <a class="btn btn-xs btn-primary" href="{{ url_for('storage.service_edit_route', service_id=service.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 {% with form=button_form, form_url=url_for('storage.service_delete_route', service_id=service.id) %}{% include 'button-delete.html' %}{% endwith %}
