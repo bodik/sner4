@@ -13,3 +13,4 @@ def register_parser(name):
 
 
 import sner.server.parser.nmap # pylint: disable=wrong-import-position
+import sner.server.parser.nessus # pylint: disable=wrong-import-position
