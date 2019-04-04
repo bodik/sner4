@@ -11,25 +11,25 @@ from sqlalchemy_utils import ChoiceType
 from sner.server import db
 
 
-class SeverityEnum(enum.IntEnum):
+class SeverityEnum(enum.Enum):
 	"""severity enum"""
 
-	unknown = 0
-	info = 1
-	low = 2
-	medium = 3
-	high = 4
-	critical = 5
+	unknown = 'unknown'
+	info = 'info'
+	low = 'low'
+	medium = 'medium'
+	high = 'high'
+	critical = 'critical'
 
 	@classmethod
 	def choices(cls):
 		"""from self/class generates list for SelectField"""
-		return [(choice.value, choice.name) for choice in cls]
+		return [(choice, choice.name) for choice in cls]
 
 	@classmethod
 	def coerce(cls, item):
 		"""casts input from submitted form back to the corresponding python object"""
-		return cls(int(item)) if not isinstance(item, cls) else item
+		return cls(item) if not isinstance(item, cls) else item
 
 	def __str__(self):
 		return self.name
@@ -82,7 +82,7 @@ class Vuln(db.Model):
 	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
 	name = db.Column(db.String(1000), nullable=False)
 	xtype = db.Column(db.String(500))
-	severity = db.Column(ChoiceType(SeverityEnum, impl=db.Integer()))
+	severity = db.Column(ChoiceType(SeverityEnum, impl=db.Enum(SeverityEnum)))
 	descr = db.Column(db.Text)
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)

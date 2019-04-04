@@ -16,6 +16,7 @@ class NessusParser():
 	"""nessus .nessus output parser"""
 
 #	JOB_OUTPUT_DATAFILE = 'output.xml'
+	SEVERITY_MAP = {'0': 'info', '1': 'low', '2': 'medium', '3': 'high', '4': 'critical'}
 
 
 	@staticmethod
@@ -40,7 +41,6 @@ class NessusParser():
 	@staticmethod
 	def import_report_item(host, report_item):
 		report_item['port'] = int(report_item['port']) #TODO: push casting to the parser itself ?
-		report_item['severity'] = int(report_item['severity']) #TODO: push casting to the parser itself ?
 
 		service = None
 		if report_item['port']:
@@ -57,7 +57,7 @@ class NessusParser():
 				service=service,
 				xtype=xtype,
 				name=report_item['plugin_name'],
-				severity=SeverityEnum(1+report_item['severity']),
+				severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
 				descr="## Synopsis\n\n%s\n##Description\n\n%s" % (report_item['synopsis'], report_item['description']),
 				data=report_item['plugin_output'])
 			db.session.add(vuln)

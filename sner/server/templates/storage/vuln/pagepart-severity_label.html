@@ -1,2 +1,10 @@
-{%- set color = ["label-default", "label-primary", "label-success", "label-info", "label-warning", "label-danger"] -%}
-<span class="label {{ color[severity] }}">{{ severity }}</span>
+{%-
+set color = {
+	'unknown': 'label-default',
+	'info': 'label-primary',
+	'low': 'label-success',
+	'medium': 'label-info',
+	'high': 'label-warning',
+	'critical': 'label-danger'}
+-%}
+<span class="label {{ color[severity|string] }}">{{ severity }}</span>
