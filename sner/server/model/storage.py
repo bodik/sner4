@@ -1,17 +1,16 @@
 """sqlalchemy models"""
 # pylint: disable=too-few-public-methods,abstract-method
 
-import enum
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import ChoiceType
 
 from sner.server import db
 
 
-class SeverityEnum(enum.Enum):
+class SeverityEnum(Enum):
 	"""severity enum"""
 
 	unknown = 'unknown'
@@ -82,7 +81,7 @@ class Vuln(db.Model):
 	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
 	name = db.Column(db.String(1000), nullable=False)
 	xtype = db.Column(db.String(500))
-	severity = db.Column(ChoiceType(SeverityEnum, impl=db.Enum(SeverityEnum)))
+	severity = db.Column(db.Enum(SeverityEnum))
 	descr = db.Column(db.Text)
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)
