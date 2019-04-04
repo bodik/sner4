@@ -22,7 +22,7 @@ lxml==4.3.3
 MarkupSafe==1.0
 mccabe==0.6.1
 more-itertools==4.3.0
--e git+https://github.com/bodik/nessus-report-parser.git@c54a85b304541c93d75a3b201cf22641dbe95027#egg=nessus_report_parser
+git+https://github.com/bodik/nessus-report-parser.git@latest_cummulative#egg=nessus_report_parser
 netaddr==0.7.19
 pathlib2==2.3.2
 pkg-resources==0.0.0
