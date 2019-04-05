@@ -65,8 +65,8 @@ def vuln_list_json_route():
 		ColumnDT(Vuln.name, mData='name'),
 		ColumnDT(Vuln.xtype, mData='xtype'),
 		ColumnDT(Vuln.severity, mData='severity'),
-		ColumnDT(Vuln.comment, mData='comment'),
-		ColumnDT(Vuln.refs, mData='refs')
+		ColumnDT(Vuln.refs, mData='refs'),
+		ColumnDT(Vuln.comment, mData='comment')
 	]
 	query = db.session.query().select_from(Vuln).outerjoin(Service, Vuln.service_id == Service.id)
 
