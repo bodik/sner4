@@ -4,7 +4,7 @@
 <script type="text/javascript">
 	var datatable_ajax_custom = {
 		"ajax": {"url": "{{ url_for('storage.note_list_json_route') }}", "method": "POST"},
-		"columns": columns_with_buttons(["id", column("host", null), "ntype", "data", "comment"])
+		"columns": columns_with_buttons(["id", column("address", null), "hostname", "ntype", "data", "comment"])
 	};
 </script>
 {% endblock %}

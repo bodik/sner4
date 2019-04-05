@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint, render_columndt_host
+from sner.server.controller.storage import blueprint, render_host_address
 from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm
 from sner.server.model.storage import Host, Note
@@ -35,14 +35,16 @@ def note_list_json_route():
 		query = query.filter(Note.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.id, ' ', Host.address, ' ', Host.hostname), mData='host'))
+		columns[1:1] = [
+			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+			ColumnDT(Host.hostname, mData='hostname')]
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in notes:
 		button_form = ButtonForm()
 		for note in notes['data']:
-			if 'host' in note:
-				note['host'] = render_columndt_host(note['host'])
+			if 'address' in note:
+				note['address'] = render_host_address(*note['address'].split(' '))
 			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
 
 	return jsonify(notes)

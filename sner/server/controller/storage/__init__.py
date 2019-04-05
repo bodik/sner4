@@ -4,11 +4,8 @@ from flask import Blueprint, render_template
 blueprint = Blueprint('storage', __name__) # pylint: disable=invalid-name
 
 
-def render_columndt_host(data):
-	return render_template(
-		'storage/host/pagepart-view_link.html',
-		host=dict(zip(['id', 'address', 'hostname'], data.split(' '))),
-		show_hostname=True)
+def render_host_address(host_id, host_address):
+	return render_template('storage/host/pagepart-address_link.html', host_id=host_id, host_address=host_address)
 
 
 import sner.server.controller.storage.host # pylint: disable=wrong-import-position

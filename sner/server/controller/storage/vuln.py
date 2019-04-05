@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint, render_columndt_host
+from sner.server.controller.storage import blueprint, render_host_address
 from sner.server.form import ButtonForm
 from sner.server.form.storage import VulnForm
 from sner.server.model.storage import Host, Service, Vuln
@@ -75,14 +75,16 @@ def vuln_list_json_route():
 		query = query.filter(Vuln.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host, Vuln.host_id == Host.id)
-		columns.insert(1, ColumnDT(func.concat(Host.id, ' ', Host.address, ' ', Host.hostname), mData='host'))
+		columns[1:1] = [
+			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+			ColumnDT(Host.hostname, mData='hostname')]
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in vulns:
 		button_form = ButtonForm()
 		for vuln in vulns['data']:
-			if 'host' in vuln:
-				vuln['host'] = render_columndt_host(vuln['host'])
+			if 'address' in vuln:
+				vuln['address'] = render_host_address(*vuln['address'].split(' '))
 			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', severity=vuln['severity'])
 			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', refs=sorted(vuln['refs']))
 			vuln['_buttons'] = render_template('storage/vuln/pagepart-controls.html', vuln=vuln, button_form=button_form)

@@ -5,7 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import distinct, func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint, render_columndt_host
+from sner.server.controller.storage import blueprint, render_host_address
 from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
@@ -42,7 +42,9 @@ def service_list_json_route():
 		query = query.filter(Service.host_id == request.values.get('host_id'))
 	else:
 		query = query.join(Host)
-		columns.insert(1, ColumnDT(func.concat(Host.id, ' ', Host.address, ' ', Host.hostname), mData='host'))
+		columns[1:1] = [
+			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+			ColumnDT(Host.hostname, mData='hostname')]
 
 	## port filtering is used from service_vizports
 	if 'port' in request.values:
@@ -52,8 +54,8 @@ def service_list_json_route():
 	if 'data' in services:
 		button_form = ButtonForm()
 		for service in services['data']:
-			if 'host' in service:
-				service['host'] = render_columndt_host(service['host'])
+			if 'address' in service:
+				service['address'] = render_host_address(*service['address'].split(' '))
 			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, button_form=button_form)
 
 	return jsonify(services)
