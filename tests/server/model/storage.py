@@ -3,7 +3,7 @@
 import pytest
 
 from sner.server import db
-from sner.server.model.storage import Host, Note, Service
+from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 from tests.server import persist_and_detach
 
 
@@ -28,6 +28,21 @@ def create_test_service(a_test_host):
 		name='ssh',
 		info='product: OpenSSH version: 7.4p1 Debian 10+deb9u4 extrainfo: protocol 2.0 ostype: Linux',
 		comment='a test service comment')
+
+
+def create_test_vuln(a_test_host, a_test_service):
+	"""test vuln data"""
+
+	return Vuln(
+		host=a_test_host,
+		service=(a_test_service if a_test_service else None),
+		name='some vulnerability',
+		xtype='scannerx.moduley',
+		severity=SeverityEnum.unknown,
+		descr='a vulnerability description',
+		data='vuln proof',
+		refs=['URL-http://localhost/ref1', 'ref2'],
+		comment='some test vuln comment')
 
 
 def create_test_note(a_test_host):
@@ -59,6 +74,17 @@ def test_service(test_host): # pylint: disable=redefined-outer-name
 	tmp_id = tmp_service.id
 	yield tmp_service
 	db.session.delete(Service.query.get(tmp_id))
+	db.session.commit()
+
+
+@pytest.fixture()
+def test_vuln(test_host, test_service): # pylint: disable=redefined-outer-name
+	"""persistent test vuln"""
+
+	tmp_vuln = persist_and_detach(create_test_vuln(test_host, test_service))
+	tmp_id = tmp_vuln.id
+	yield tmp_vuln
+	db.session.delete(Vuln.query.get(tmp_id))
 	db.session.commit()
 
 
