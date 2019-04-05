@@ -69,6 +69,7 @@ class NoteForm(FlaskForm):
 	"""note edit form"""
 
 	host_id = IntegerField('Host_id', validators=[host_id_exists])
+	service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
 	xtype = StringField('xType', validators=[validators.Length(max=500)])
 	data = TextAreaField('Data')
 	comment = TextAreaField('Comment')

@@ -32,14 +32,14 @@ def test_note_list_json_route(client, test_note):
 	assert response_data["data"][0]["data"] == test_note.data
 
 
-def test_note_add_route(client, test_host):
+def test_note_add_route(client, test_host, test_service):
 	"""note add route test"""
 
-	test_note = create_test_note(test_host)
+	test_note = create_test_note(test_host, test_service)
 	test_note.data = 'test note add %f' % random()
 
 
-	form = client.get(url_for('storage.note_add_route', host_id=test_note.host.id)).form
+	form = client.get(url_for('storage.note_add_route', model_name='service', model_id=test_note.service.id)).form
 	form['xtype'] = test_note.xtype
 	form['data'] = test_note.data
 	form['comment'] = test_note.comment
@@ -77,7 +77,7 @@ def test_note_edit_route(client, test_note):
 def test_note_delete_route(client, test_host):
 	"""note delete route test"""
 
-	test_note = create_test_note(test_host)
+	test_note = create_test_note(test_host, None)
 	test_note.data = 'test note delete %f' % random()
 	persist_and_detach(test_note)
 

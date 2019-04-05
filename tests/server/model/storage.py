@@ -45,11 +45,12 @@ def create_test_vuln(a_test_host, a_test_service):
 		comment='some test vuln comment')
 
 
-def create_test_note(a_test_host):
+def create_test_note(a_test_host, a_test_service):
 	"""test note data"""
 
 	return Note(
 		host=a_test_host,
+		service=(a_test_service if a_test_service else None),
 		xtype='testnote.xtype',
 		data='test note data',
 		comment='some test note comment')
@@ -89,10 +90,10 @@ def test_vuln(test_host, test_service): # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture()
-def test_note(test_host): # pylint: disable=redefined-outer-name
+def test_note(test_host, test_service): # pylint: disable=redefined-outer-name
 	"""persistent test note"""
 
-	tmp_note = persist_and_detach(create_test_note(test_host))
+	tmp_note = persist_and_detach(create_test_note(test_host, test_service))
 	tmp_id = tmp_note.id
 	yield tmp_note
 	db.session.delete(Note.query.get(tmp_id))

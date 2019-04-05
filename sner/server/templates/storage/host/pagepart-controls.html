@@ -1,5 +1,5 @@
 <a class="btn btn-xs btn-default" href="{{ url_for('storage.service_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Service</a>
 <a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
-<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Note</a>
+<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Note</a>
 <a class="btn btn-xs btn-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
 {% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}

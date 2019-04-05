@@ -67,6 +67,7 @@ class Service(db.Model):
 
 	host = relationship('Host', back_populates='services')
 	vulns = relationship('Vuln', back_populates='service')
+	notes = relationship('Note', back_populates='service')
 
 	def __repr__(self):
 		return '<Service %s: %s.%d>' % (self.id, self.proto, self.port)
@@ -98,11 +99,13 @@ class Note(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
+	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
 	xtype = db.Column(db.String(500))
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)
 
 	host = relationship('Host', back_populates='notes')
+	service = relationship('Service', back_populates='notes')
 
 	def __repr__(self):
 		return '<Note %s: %s>' % (self.id, self.ntype)

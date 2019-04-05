@@ -49,7 +49,7 @@ class NessusParser():
 				db.session.add(service)
 
 		xtype = 'nessus.%s' % report_item['plugin_id']
-		vuln = Vuln.query.filter(Vuln.host == host, Vuln.xtype == xtype).one_or_none()
+		vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == xtype).one_or_none()
 		if not vuln:
 			## create refs, mimic metasploit import
 			refs = []

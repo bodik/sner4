@@ -7,7 +7,7 @@ import pytest
 
 from sner.server import db
 from sner.server.command.storage import storage_command
-from sner.server.model.storage import Host, Note, Vuln
+from sner.server.model.storage import Host, Note, Service, Vuln
 
 
 def test_import_nmap_command(runner):
@@ -21,7 +21,7 @@ def test_import_nmap_command(runner):
 	assert host
 	assert host.os == 'Linux 3.8 - 4.6'
 	assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
-	tmpnote = Note.query.filter(Note.host == host, Note.xtype == 'nmap.smtp-commands.tcp.25').one_or_none()
+	tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one_or_none()
 	assert 'PIPELINING' in json.loads(tmpnote.data)['output']
 
 
@@ -41,7 +41,7 @@ def test_import_nessus_command(runner):
 	assert host
 	assert host.os == 'Microsoft Windows Vista'
 	assert sorted([x.port for x in host.services]) == [443]
-	tmpvuln = Vuln.query.filter(Vuln.host == host, Vuln.xtype == 'nessus.104631').one_or_none()
+	tmpvuln = Vuln.query.join(Service).filter(Vuln.host == host, Service.port == 443, Vuln.xtype == 'nessus.104631').one_or_none()
 	assert tmpvuln
 	assert 'CVE-1900-0000' in tmpvuln.refs
 
