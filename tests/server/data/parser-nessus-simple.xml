@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<NessusClientData_v2>
+<Report name="fabricated test report" xmlns:cm="http://www.nessus.org/cm">
+<ReportHost name="127.128.129.130"><HostProperties>
+<tag name="LastUnauthenticatedResults">1552311726</tag>
+<tag name="Credentialed_Scan">false</tag>
+<tag name="policy-used">Web Application Tests</tag>
+<tag name="system-type">general-purpose</tag>
+<tag name="operating-system">Microsoft Windows Vista</tag>
+<tag name="host-fqdn">serverx.localdomain</tag>
+<tag name="host-rdns">serverx.localdomain</tag>
+<tag name="HOST_END_TIMESTAMP">1552311726</tag>
+<tag name="HOST_END">Mon Mar 11 14:42:06 2019</tag>
+<tag name="host-ip">127.128.129.130</tag>
+<tag name="HOST_START_TIMESTAMP">1552310596</tag>
+<tag name="HOST_START">Mon Mar 11 14:23:16 2019</tag>
+</HostProperties>
+<ReportItem port="443" svc_name="www" protocol="tcp" severity="3" pluginID="104631" pluginName="PHP 5.6.x &lt; 5.6.32 Multiple Vulnerabilities" pluginFamily="CGI abuses">
+<bid>79825</bid>
+<bid>101745</bid>
+<cpe>cpe:/a:php:php</cpe>
+<cve>CVE-2016-1283</cve>
+<cve>CVE-1900-0000</cve>
+<cve>CVE-2017-16642</cve>
+<cvss3_base_score>9.8</cvss3_base_score>
+<cvss3_temporal_score>8.8</cvss3_temporal_score>
+<cvss3_temporal_vector>CVSS:3.0/E:P/RL:O/RC:C</cvss3_temporal_vector>
+<cvss3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss3_vector>
+<cvss_base_score>7.5</cvss_base_score>
+<cvss_score_source>CVE-2016-1283</cvss_score_source>
+<cvss_temporal_score>5.9</cvss_temporal_score>
+<cvss_temporal_vector>CVSS2#E:POC/RL:OF/RC:C</cvss_temporal_vector>
+<cvss_vector>CVSS2#AV:N/AC:L/Au:N/C:P/I:P/A:P</cvss_vector>
+<dependency>php_version.nasl</dependency>
+<description>According to its banner, the version of PHP running on the remote web server is 5.6.x prior to 5.6.32. It is, therefore, affected by multiple vulnerabilities.</description>
+<exploit_available>false</exploit_available>
+<exploitability_ease>No exploit is required</exploitability_ease>
+<fname>php_5_6_32.nasl</fname>
+<patch_publication_date>2017/10/26</patch_publication_date>
+<plugin_modification_date>2018/12/07</plugin_modification_date>
+<plugin_name>PHP 5.6.x &lt; 5.6.32 Multiple Vulnerabilities</plugin_name>
+<plugin_publication_date>2017/11/16</plugin_publication_date>
+<plugin_type>remote</plugin_type>
+<required_key>www/PHP</required_key>
+<required_port>Services/www</required_port>
+<required_port>80</required_port>
+<risk_factor>High</risk_factor>
+<script_copyright>This script is Copyright (C) 2017-2018 and is owned by Tenable, Inc. or an Affiliate thereof.</script_copyright>
+<script_version>1.10</script_version>
+<see_also>http://www.php.net/ChangeLog-5.php#5.6.32</see_also>
+<solution>Upgrade to PHP version 5.6.32 or later.</solution>
+<synopsis>The version of PHP running on the remote web server is affected by multiple vulnerabilities.</synopsis>
+<vuln_publication_date>2016/10/26</vuln_publication_date>
+<plugin_output>
+  Version source    : Server: Apache/2.4.23 (Win32) OpenSSL/1.0.2j PHP/5.6.22 mod_jk/1.2.42
+  Installed version : 5.6.22
+  Fixed version     : 5.6.32
+</plugin_output>
+</ReportItem>
+</ReportHost>
+</Report>
+</NessusClientData_v2>
