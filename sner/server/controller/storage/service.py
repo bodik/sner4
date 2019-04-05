@@ -90,7 +90,11 @@ def service_edit_route(service_id):
 		db.session.commit()
 		return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
-	return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_edit_route', service_id=service_id), host=service.host)
+	return render_template(
+		'storage/service/addedit.html',
+		form=form,
+		form_url=url_for('storage.service_edit_route', service_id=service_id),
+		host=service.host)
 
 
 @blueprint.route('/service/delete/<service_id>', methods=['GET', 'POST'])

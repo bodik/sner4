@@ -1,6 +1,5 @@
 """parsers to import from agent outputs to storage"""
 
-import json
 import sys
 
 from pprint import pprint
@@ -8,14 +7,13 @@ from nessus_report_parser import parse_nessus_xml
 
 from sner.server import db
 from sner.server.parser import register_parser
-from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
+from sner.server.model.storage import Host, Service, SeverityEnum, Vuln
 
 
 @register_parser('nessus')
 class NessusParser():
 	"""nessus .nessus output parser"""
 
-#	JOB_OUTPUT_DATAFILE = 'output.xml'
 	SEVERITY_MAP = {'0': 'info', '1': 'low', '2': 'medium', '3': 'high', '4': 'critical'}
 
 
@@ -28,18 +26,19 @@ class NessusParser():
 			host = Host(address=nessushost['tags']['host-ip'])
 			db.session.add(host)
 
-		if (not host.hostname) and nessushost['tags']['host-fqdn']:
+		if (not host.hostname) and nessushost['tags'].get('host-fqdn', None):
 			host.hostname = nessushost['tags']['host-fqdn']
-			##TODO: add additional hostnames as notes??
 
-		if (not host.os) and nessushost['tags']['operating-system']:
+		if (not host.os) and nessushost['tags'].get('operating-system', None):
 			host.os = nessushost['tags']['operating-system']
-	
+
 		return host
 
 
 	@staticmethod
 	def import_report_item(host, report_item):
+		"""import nessus_v2 ReportItem 'element'"""
+
 		report_item['port'] = int(report_item['port']) #TODO: push casting to the parser itself ?
 
 		service = None

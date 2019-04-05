@@ -13,39 +13,40 @@ from sner.server.model.storage import Host, Service, Vuln
 
 @blueprint.app_template_filter()
 def url_for_ref(ref):
+	"""generate anchor url for vuln.ref"""
+
 	try:
 		rtype, rval = ref.split('-', maxsplit=1)
 	except ValueError:
 		return '#'
 
+	url = '#'
 	if rtype == 'URL':
-		return rval
+		url = rval
 	elif rtype == 'CVE':
-		return 'https://cvedetails.com/cve/CVE-%s' % rval
+		url = 'https://cvedetails.com/cve/CVE-%s' % rval
 	elif rtype == 'NSS':
-		return 'https://www.tenable.com/plugins/nessus/%s' % rval
+		url = 'https://www.tenable.com/plugins/nessus/%s' % rval
 	elif rtype == 'BID':
-		return 'http://www.securityfocus.com/bid/%s' % rval
+		url = 'http://www.securityfocus.com/bid/%s' % rval
 	elif rtype == 'CERT':
-		return 'https://www.kb.cert.org/vuls/id/%s' % rval
+		url = 'https://www.kb.cert.org/vuls/id/%s' % rval
 	elif rtype == 'EDB':
-		return 'https://www.exploit-db.com/exploits/%s' % rval.replace('ID-', '')
+		url = 'https://www.exploit-db.com/exploits/%s' % rval.replace('ID-', '')
 
-	return '#'
+	return url
 
 
 @blueprint.app_template_filter()
 def text_for_ref(ref):
+	"""generate anchor text for vuln.ref"""
+
 	try:
-		rtype, rval = ref.split('-', maxsplit=1)
+		rtype, _ = ref.split('-', maxsplit=1)
 	except ValueError:
 		return ref
 
-	if rtype == 'URL':
-		return 'URL'
-
-	return ref
-
+	return 'URL' if rtype == 'URL' else ref
 
 
 @blueprint.route('/vuln/list')
@@ -111,7 +112,12 @@ def vuln_add_route(model_name, model_id):
 		db.session.commit()
 		return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
-	return render_template('storage/vuln/addedit.html', form=form, form_url=url_for('storage.vuln_add_route', model_name=model_name, model_id=model_id), host=host, service=service)
+	return render_template(
+		'storage/vuln/addedit.html',
+		form=form,
+		form_url=url_for('storage.vuln_add_route', model_name=model_name, model_id=model_id),
+		host=host,
+		service=service)
 
 
 @blueprint.route('/vuln/edit/<vuln_id>', methods=['GET', 'POST'])
@@ -126,7 +132,12 @@ def vuln_edit_route(vuln_id):
 		db.session.commit()
 		return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
-	return render_template('storage/vuln/addedit.html', form=form, form_url=url_for('storage.vuln_edit_route', vuln_id=vuln_id), host=vuln.host, service=vuln.service)
+	return render_template(
+		'storage/vuln/addedit.html',
+		form=form,
+		form_url=url_for('storage.vuln_edit_route', vuln_id=vuln_id),
+		host=vuln.host,
+		service=vuln.service)
 
 
 @blueprint.route('/vuln/delete/<vuln_id>', methods=['GET', 'POST'])

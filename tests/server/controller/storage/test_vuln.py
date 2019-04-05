@@ -7,7 +7,7 @@ from random import random
 from flask import url_for
 
 from sner.server import db
-from sner.server.model.storage import SeverityEnum, Vuln
+from sner.server.model.storage import Vuln
 from tests.server import persist_and_detach
 from tests.server.model.storage import create_test_vuln
 

@@ -75,8 +75,9 @@ class Service(db.Model):
 
 
 class Vuln(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	"""vulnerability model; heavily inspired by metasploit; hdm rulez"""
 
+	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
 	service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
 	name = db.Column(db.String(1000), nullable=False)
