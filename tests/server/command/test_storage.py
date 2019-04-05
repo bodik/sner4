@@ -21,7 +21,7 @@ def test_import_nmap_command(runner):
 	assert host
 	assert host.os == 'Linux 3.8 - 4.6'
 	assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
-	tmpnote = Note.query.filter(Note.host == host, Note.ntype == 'nmap.smtp-commands.tcp.25').one_or_none()
+	tmpnote = Note.query.filter(Note.host == host, Note.xtype == 'nmap.smtp-commands.tcp.25').one_or_none()
 	assert 'PIPELINING' in json.loads(tmpnote.data)['output']
 
 

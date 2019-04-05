@@ -24,7 +24,7 @@ def note_list_json_route():
 
 	columns = [
 		ColumnDT(Note.id, mData='id'),
-		ColumnDT(Note.ntype, mData='ntype'),
+		ColumnDT(Note.xtype, mData='xtype'),
 		ColumnDT(Note.data, mData='data'),
 		ColumnDT(Note.comment, mData='comment')
 	]

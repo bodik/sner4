@@ -94,7 +94,7 @@ def db_initdata():
 
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
-		ntype='sner.testnote',
+		xtype='sner.testnote',
 		data='testnote data',
 		comment='test note comment'))
 

@@ -40,7 +40,7 @@ def test_note_add_route(client, test_host):
 
 
 	form = client.get(url_for('storage.note_add_route', host_id=test_note.host.id)).form
-	form['ntype'] = test_note.ntype
+	form['xtype'] = test_note.xtype
 	form['data'] = test_note.data
 	form['comment'] = test_note.comment
 	response = form.submit()
@@ -48,7 +48,7 @@ def test_note_add_route(client, test_host):
 
 	note = Note.query.filter(Note.data == test_note.data).one_or_none()
 	assert note
-	assert note.ntype == test_note.ntype
+	assert note.xtype == test_note.xtype
 	assert note.data == test_note.data
 	assert note.comment == test_note.comment
 

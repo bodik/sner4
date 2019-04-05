@@ -35,10 +35,10 @@ class NmapParser():
 				host.os = osmatch.name
 
 		for iscript in nmaphost.scripts_results:
-			ntype = 'nmap.%s' % iscript["id"]
-			note = Note.query.filter(Note.host == host, Note.ntype == ntype).one_or_none()
+			xtype = 'nmap.%s' % iscript["id"]
+			note = Note.query.filter(Note.host == host, Note.xtype == xtype).one_or_none()
 			if not note:
-				note = Note(host=host, ntype=ntype, data=json.dumps(iscript))
+				note = Note(host=host, xtype=xtype, data=json.dumps(iscript))
 				db.session.add(note)
 
 		return host
@@ -61,10 +61,10 @@ class NmapParser():
 			service.info = nmapservice.banner
 
 		for iscript in nmapservice.scripts_results:
-			ntype = 'nmap.%s.%s.%s' % (iscript["id"], service.proto, service.port)
-			note = Note.query.filter(Note.host == host, Note.ntype == ntype).one_or_none()
+			xtype = 'nmap.%s.%s.%s' % (iscript["id"], service.proto, service.port)
+			note = Note.query.filter(Note.host == host, Note.xtype == xtype).one_or_none()
 			if not note:
-				note = Note(host=host, ntype=ntype, data=json.dumps(iscript))
+				note = Note(host=host, xtype=xtype, data=json.dumps(iscript))
 				db.session.add(note)
 
 		return service

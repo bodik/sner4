@@ -67,7 +67,7 @@
 			<script type="text/javascript">
 				var datatable_host_notes = {
 					"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
-					"columns": columns_with_buttons(["id", "ntype", "data", "comment"]),
+					"columns": columns_with_buttons(["id", "xtype", "data", "comment"]),
 				};
 				$(document).ready(function() {
 					$('#datatable_host_notes').DataTable($.extend({}, datatable_ajax_options, datatable_host_notes));

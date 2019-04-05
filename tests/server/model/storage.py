@@ -50,7 +50,7 @@ def create_test_note(a_test_host):
 
 	return Note(
 		host=a_test_host,
-		ntype='testnote.ntype',
+		xtype='testnote.xtype',
 		data='test note data',
 		comment='some test note comment')
 

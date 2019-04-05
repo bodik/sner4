@@ -97,7 +97,7 @@ class Note(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
-	ntype = db.Column(db.String(500), nullable=False)
+	xtype = db.Column(db.String(500))
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)
 	created = db.Column(db.DateTime, default=datetime.utcnow)
