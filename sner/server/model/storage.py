@@ -64,8 +64,6 @@ class Service(db.Model):
 	name = db.Column(db.String(100))
 	info = db.Column(db.String(2000))
 	comment = db.Column(db.Text)
-	created = db.Column(db.DateTime, default=datetime.utcnow)
-	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	host = relationship('Host', back_populates='services')
 	vulns = relationship('Vuln', back_populates='service')
@@ -91,6 +89,9 @@ class Vuln(db.Model):
 	host = relationship('Host', back_populates='vulns')
 	service = relationship('Service', back_populates='vulns')
 
+	def __repr__(self):
+		return '<Vuln %s: %s>' % (self.id, self.xtype)
+
 
 class Note(db.Model):
 	"""host assigned note, generic data container"""
@@ -100,8 +101,6 @@ class Note(db.Model):
 	xtype = db.Column(db.String(500))
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)
-	created = db.Column(db.DateTime, default=datetime.utcnow)
-	modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 	host = relationship('Host', back_populates='notes')
 

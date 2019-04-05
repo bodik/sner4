@@ -61,8 +61,8 @@ class VulnForm(FlaskForm):
 	severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
 	descr = TextAreaField('Descr')
 	data = TextAreaField('Data')
-	comment = TextAreaField('Comment')
 	refs = LinesField('Refs')
+	comment = TextAreaField('Comment')
 
 
 class NoteForm(FlaskForm):
