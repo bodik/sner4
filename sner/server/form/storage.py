@@ -3,6 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
 
+from sner.server.form import LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
 
 
@@ -61,7 +62,7 @@ class VulnForm(FlaskForm):
 	descr = TextAreaField('Descr')
 	data = TextAreaField('Data')
 	comment = TextAreaField('Comment')
-	refs = StringField('Refs')
+	refs = LinesField('Refs')
 
 
 class NoteForm(FlaskForm):

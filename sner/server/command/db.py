@@ -89,7 +89,8 @@ def db_initdata():
 		name='test vulnerability',
 		xtype='testxtype.123',
 		severity=SeverityEnum.critical,
-		comment='a test vulnerability comment'))
+		comment='a test vulnerability comment',
+		refs=['ref1', 'ref2']))
 
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),

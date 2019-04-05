@@ -11,6 +11,43 @@ from sner.server.form.storage import VulnForm
 from sner.server.model.storage import Host, Service, Vuln
 
 
+@blueprint.app_template_filter()
+def url_for_ref(ref):
+	try:
+		rtype, rval = ref.split('-', maxsplit=1)
+	except ValueError:
+		return '#'
+
+	if rtype == 'URL':
+		return rval
+	elif rtype == 'CVE':
+		return 'https://cvedetails.com/cve/CVE-%s' % rval
+	elif rtype == 'NSS':
+		return 'https://www.tenable.com/plugins/nessus/%s' % rval
+	elif rtype == 'BID':
+		return 'http://www.securityfocus.com/bid/%s' % rval
+	elif rtype == 'CERT':
+		return 'https://www.kb.cert.org/vuls/id/%s' % rval
+	elif rtype == 'EDB':
+		return 'https://www.exploit-db.com/exploits/%s' % rval.replace('ID-', '')
+
+	return '#'
+
+
+@blueprint.app_template_filter()
+def text_for_ref(ref):
+	try:
+		rtype, rval = ref.split('-', maxsplit=1)
+	except ValueError:
+		return ref
+
+	if rtype == 'URL':
+		return 'URL'
+
+	return ref
+
+
+
 @blueprint.route('/vuln/list')
 def vuln_list_route():
 	"""list vulns"""
@@ -47,6 +84,7 @@ def vuln_list_json_route():
 			if 'host' in vuln:
 				vuln['host'] = render_columndt_host(vuln['host'])
 			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', severity=vuln['severity'])
+			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', refs=sorted(vuln['refs']))
 			vuln['_buttons'] = render_template('storage/vuln/pagepart-controls.html', vuln=vuln, button_form=button_form)
 
 	return jsonify(vulns)

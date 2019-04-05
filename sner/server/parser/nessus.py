@@ -52,6 +52,28 @@ class NessusParser():
 		xtype = 'nessus.%s' % report_item['plugin_id']
 		vuln = Vuln.query.filter(Vuln.host == host, Vuln.xtype == xtype).one_or_none()
 		if not vuln:
+			## create refs, mimic metasploit import
+			refs = []
+			for ref in report_item.get('cve', []):
+				refs.append('%s' % ref)
+
+			for ref in report_item.get('bid', []):
+				refs.append('BID-%s' % ref)
+
+			for ref in report_item.get('xref', []):
+				refs.append('%s-%s' % tuple(ref.split(':', maxsplit=1)))
+
+			if report_item.get('metasploit_name', None):
+				refs.append('MSF-%s' % report_item['metasploit_name'])
+
+			if report_item.get('see_also', None):
+				for ref in report_item['see_also'].splitlines():
+					refs.append('URL-%s' % ref)
+
+			if report_item.get('plugin_id', None):
+				refs.append('NSS-%s' % report_item['plugin_id'])
+
+			## create vulnerability
 			vuln = Vuln(
 				host=host,
 				service=service,
@@ -59,10 +81,11 @@ class NessusParser():
 				name=report_item['plugin_name'],
 				severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
 				descr="## Synopsis\n\n%s\n##Description\n\n%s" % (report_item['synopsis'], report_item['description']),
-				data=report_item['plugin_output'])
-			db.session.add(vuln)
-			#TODO: refs
+				data=report_item['plugin_output'],
+				refs=refs)
+
 			#TODO: note with full data and linked by xtype ?and refs
+			db.session.add(vuln)
 
 		return vuln
 
@@ -91,11 +114,11 @@ def debug_parser():
 	for host in report['hosts']:
 		print('# host: %s' % host["name"])
 		print('## host tags')
-		print(host["tags"])
+		pprint(host["tags"])
 		print('## host report_items')
 		for item in host["report_items"]:
 			print('### item %s' % item['plugin_name'])
-			print(item)
+			pprint(item)
 
 
 if __name__ == '__main__':

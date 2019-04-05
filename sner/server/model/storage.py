@@ -85,7 +85,7 @@ class Vuln(db.Model):
 	descr = db.Column(db.Text)
 	data = db.Column(db.Text)
 	comment = db.Column(db.Text)
-	refs = db.Column(db.Text)
+	refs = db.Column(postgresql.ARRAY(db.String, dimensions=1))
 
 	host = relationship('Host', back_populates='vulns')
 	service = relationship('Service', back_populates='vulns')
