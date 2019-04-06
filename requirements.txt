@@ -1,3 +1,4 @@
+arrow==0.13.1
 astroid==2.0.4
 atomicwrites==1.2.1
 attrs==18.2.0
@@ -21,6 +22,7 @@ lxml==4.3.3
 MarkupSafe==1.0
 mccabe==0.6.1
 more-itertools==4.3.0
+git+https://github.com/bodik/nessus-report-parser.git@latest_cummulative#egg=nessus_report_parser
 netaddr==0.7.19
 pathlib2==2.3.2
 pkg-resources==0.0.0
@@ -38,6 +40,8 @@ SQLAlchemy==1.2.12
 sqlalchemy-datatables==1.2.0
 sqlalchemy-json==0.2.3
 SQLAlchemy-Utils==0.33.11
+tapioca-nessus==0.1.5
+tapioca-wrapper==1.4.2
 typed-ast==1.1.0
 urllib3==1.24.1
 waitress==1.1.0
@@ -46,3 +50,4 @@ WebTest==2.0.32
 Werkzeug==0.14.1
 wrapt==1.10.11
 WTForms==2.2.1
+xmltodict==0.12.0

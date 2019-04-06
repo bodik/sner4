@@ -4,7 +4,7 @@ import click
 from flask.cli import with_appcontext
 from sner.server import db
 from sner.server.model.scheduler import Queue, Task, Target
-from sner.server.model.storage import Host, Service, Note
+from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 
 
 @click.group(name='db', help='sner.server db management')
@@ -71,7 +71,7 @@ def db_initdata():
 ## storage test data
 	db.session.add(Host(
 		address='127.4.4.4',
-		hostname='testhost.testdomain.test',
+		hostname='testhost.testdomain.test<script>alert(1);</script>',
 		os='Test Linux 1',
 		comment='a some unknown service server'))
 
@@ -84,9 +84,17 @@ def db_initdata():
 		info='testservice banner',
 		comment='manual testservice comment'))
 
+	db.session.add(Vuln(
+		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+		name='test vulnerability',
+		xtype='testxtype.123',
+		severity=SeverityEnum.critical,
+		comment='a test vulnerability comment',
+		refs=['ref1', 'ref2']))
+
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
-		ntype='sner.testnote',
+		xtype='sner.testnote',
 		data='testnote data',
 		comment='test note comment'))
 

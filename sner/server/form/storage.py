@@ -1,9 +1,10 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, StringField, TextAreaField, ValidationError, validators
+from wtforms import IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
 
-from sner.server.model.storage import Host
+from sner.server.form import LinesField
+from sner.server.model.storage import Host, Service, SeverityEnum
 
 
 def host_id_exists(form, field): # pylint: disable=unused-argument
@@ -11,6 +12,16 @@ def host_id_exists(form, field): # pylint: disable=unused-argument
 
 	if not Host.query.filter(Host.id == field.data).one_or_none():
 		raise ValidationError('No such host')
+
+
+def service_id_exists_and_belongs_to_host(form, field): # pylint: disable=unused-argument
+	"""validate submitted service_id"""
+
+	if field.data:
+		if not Service.query.filter(Service.id == field.data).one_or_none():
+			raise ValidationError('No such service')
+		if not Service.query.filter(Service.id == field.data, Service.host_id == form.host_id.data).one_or_none():
+			raise ValidationError('Service does not belong to the host')
 
 
 def empty_to_none(data):
@@ -40,10 +51,25 @@ class ServiceForm(FlaskForm):
 	comment = TextAreaField('Comment')
 
 
+class VulnForm(FlaskForm):
+	"""note edit form"""
+
+	host_id = IntegerField('Host_id', validators=[host_id_exists])
+	service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
+	name = StringField('Name', validators=[validators.Length(min=1, max=500)])
+	xtype = StringField('xType', validators=[validators.Length(max=500)])
+	severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
+	descr = TextAreaField('Descr')
+	data = TextAreaField('Data')
+	refs = LinesField('Refs')
+	comment = TextAreaField('Comment')
+
+
 class NoteForm(FlaskForm):
 	"""note edit form"""
 
 	host_id = IntegerField('Host_id', validators=[host_id_exists])
-	ntype = StringField('nType', validators=[validators.Length(min=1, max=500)], filters=[empty_to_none])
+	service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
+	xtype = StringField('xType', validators=[validators.Length(max=500)])
 	data = TextAreaField('Data')
 	comment = TextAreaField('Comment')

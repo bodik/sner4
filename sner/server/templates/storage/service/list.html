@@ -2,16 +2,9 @@
 
 {% block script %}
 <script type="text/javascript">
-	var host_render = function (data, type, row, meta) {
-		var [id, address, hostname] = data.split(" ");
-		return "<a href='{{ url_for('storage.host_view_route', host_id='REPLACE_ID') }}'>REPLACE_ADDRESS</a> (REPLACE_HOSTNAME)"
-			.replace("REPLACE_ID", id)
-			.replace("REPLACE_ADDRESS", address)
-			.replace("REPLACE_HOSTNAME", hostname);
-	};
 	var datatable_ajax_custom = {
 		"ajax": {"url": "{{ url_for('storage.service_list_json_route', **request.args) }}", "method": "POST"},
-		"columns": columns_with_buttons(["id", {"name": "host", "title": "host", "data": "host", "render": host_render}, "proto", "port", "name", "state", "info", "comment"])
+		"columns": columns_with_buttons(["id", column("address", null), "hostname", "proto", "port", "name", "state", "info", "comment"])
 	};
 </script>
 {% endblock %}

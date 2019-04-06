@@ -1,0 +1,3 @@
+{%- for ref in vuln.refs|sort -%}
+<a href="{{ ref | url_for_ref }}">{{ ref | text_for_ref }}</a>
+{% endfor %}

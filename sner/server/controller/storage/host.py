@@ -27,17 +27,18 @@ def host_list_json_route():
 		ColumnDT(Host.address, mData='address'),
 		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Host.os, mData='os'),
-		ColumnDT(Host.comment, mData='comment'),
 		ColumnDT(func.count(distinct(Service.id)), mData='nr_svcs', global_search=False),
-		ColumnDT(func.count(distinct(Note.id)), mData='nr_notes', global_search=False)
+		ColumnDT(func.count(distinct(Note.id)), mData='nr_notes', global_search=False),
+		ColumnDT(Host.comment, mData='comment')
 	]
 	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
 
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	if "data" in hosts:
 		button_form = ButtonForm()
-		for host in hosts["data"]:
-			host["_buttons"] = render_template('storage/host/pagepart-controls.html', host=host, button_form=button_form)
+		for host in hosts['data']:
+			host['address'] = render_template('storage/host/pagepart-address_link.html', host_id=host['id'], host_address=host['address'])
+			host['_buttons'] = render_template('storage/host/pagepart-controls.html', host=host, button_form=button_form)
 
 	return jsonify(hosts)
 

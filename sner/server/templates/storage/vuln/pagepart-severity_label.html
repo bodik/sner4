@@ -1,0 +1,10 @@
+{%-
+set color = {
+	'unknown': 'label-default',
+	'info': 'label-primary',
+	'low': 'label-success',
+	'medium': 'label-info',
+	'high': 'label-warning',
+	'critical': 'label-danger'}
+-%}
+<span class="label {{ color[vuln.severity|string] }}">{{ vuln.severity }}</span>
