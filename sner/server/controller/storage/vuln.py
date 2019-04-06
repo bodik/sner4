@@ -88,8 +88,9 @@ def vuln_list_json_route():
 		for vuln in vulns['data']:
 			if 'address' in vuln:
 				vuln['address'] = render_host_address(*vuln['address'].split(' '))
-			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', severity=vuln['severity'])
-			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', refs=sorted(vuln['refs']))
+			vuln['name'] = render_template('storage/vuln/pagepart-name_link.html', vuln=vuln)
+			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', vuln=vuln)
+			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', vuln=vuln)
 			vuln['_buttons'] = render_template('storage/vuln/pagepart-controls.html', vuln=vuln, button_form=button_form)
 
 	return jsonify(vulns)
@@ -154,3 +155,11 @@ def vuln_delete_route(vuln_id):
 		return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
 	return render_template('button-delete.html', form=form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln_id))
+
+
+@blueprint.route('/vuln/view/<vuln_id>')
+def vuln_view_route(vuln_id):
+	"""view vuln"""
+
+	vuln = Vuln.query.get(vuln_id)
+	return render_template('storage/vuln/view.html', vuln=vuln, button_form=ButtonForm())

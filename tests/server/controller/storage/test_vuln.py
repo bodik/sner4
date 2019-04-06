@@ -29,7 +29,7 @@ def test_vuln_list_json_route(client, test_vuln):
 	response = client.post(url_for('storage.vuln_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_vuln.name})
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
-	assert response_data['data'][0]['name'] == test_vuln.name
+	assert test_vuln.name in response_data['data'][0]['name']
 
 
 def test_vuln_add_route(client, test_host, test_service):
@@ -91,3 +91,17 @@ def test_vuln_delete_route(client, test_host):
 
 	vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
 	assert not vuln
+
+
+def test_vuln_view_route(client, test_vuln):
+	"""vuln view route test"""
+
+	test_vuln.data = 'view%f' % random()
+	test_vuln.xtype = 'nessus.vuln.testxtype'
+	persist_and_detach(test_vuln)
+
+
+	response = client.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id))
+	assert response.status_code == HTTPStatus.OK
+
+	assert '<pre>%s</pre>' % test_vuln.data in response

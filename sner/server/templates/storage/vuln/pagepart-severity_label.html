@@ -7,4 +7,4 @@ set color = {
 	'high': 'label-warning',
 	'critical': 'label-danger'}
 -%}
-<span class="label {{ color[severity|string] }}">{{ severity }}</span>
+<span class="label {{ color[vuln.severity|string] }}">{{ vuln.severity }}</span>

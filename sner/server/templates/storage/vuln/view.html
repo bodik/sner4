@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="Vulns">
+	<h1>Vuln {{ vuln.id }}: {{ vuln.name }} <small>{% include 'storage/vuln/pagepart-controls.html' %}</small></h1>
+
+	<div>
+		<dl class="dl-horizontal">
+		<dt>host</dt><dd>{% with host_id=vuln.host.id, host_address=vuln.host.address %}{% include "storage/host/pagepart-address_link.html" %}{% endwith %} ({{ vuln.host.hostname }})</dd>
+		<dt>service</dt><dd>{{ vuln.service }}</dd>
+		<dt>xtype</dt><dd>{{ vuln.xtype }}</dd>
+		<dt>severity</dt><dd>{% with severity=vuln.severity %}{% include 'storage/vuln/pagepart-severity_label.html' %}{% endwith %}</dd>
+		<dt>refs</dt><dd>{% include 'storage/vuln/pagepart-refs.html' %}</dd>
+		<dt>comment</dt><dd>{{ vuln.comment }}</dd>
+		</dl>
+	</div>
+
+	<h2>Description</h2>
+	<div>
+	{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}
+	</div>
+
+	<h2>Data</h2>
+	<div>
+		<pre>{{ vuln.data }}</pre>
+	</div>
+</div>
+{% endblock %}
