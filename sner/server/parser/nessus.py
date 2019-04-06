@@ -1,13 +1,29 @@
 """parsers to import from agent outputs to storage"""
 
+import datetime
+import json
 import sys
 
-from pprint import pprint
 from nessus_report_parser import parse_nessus_xml
+from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
+from pprint import pprint
 
 from sner.server import db
+from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 from sner.server.parser import register_parser
-from sner.server.model.storage import Host, Service, SeverityEnum, Vuln
+
+
+class ReportItemJSONEncoder(json.JSONEncoder):
+	"""custom encoder to handle parsed nessus report"""
+
+	def default(self, obj):
+		if isinstance(obj, nessus_report_ReportItem):
+			return obj.__dict__
+
+		if isinstance(obj, datetime.date):
+			return obj.isoformat()
+
+		return super().default(obj)
 
 
 @register_parser('nessus')
@@ -72,6 +88,16 @@ class NessusParser():
 			if report_item.get('plugin_id', None):
 				refs.append('NSS-%s' % report_item['plugin_id'])
 
+			## create note with full vulnerability data
+			note = Note(
+				host=host,
+				service=service,
+				xtype=xtype,
+				data=json.dumps(report_item, cls=ReportItemJSONEncoder))
+			db.session.add(note)
+			db.session.flush()
+			refs.append('SN-%s' % note.id)
+
 			## create vulnerability
 			vuln = Vuln(
 				host=host,
@@ -82,8 +108,6 @@ class NessusParser():
 				descr="## Synopsis\n\n%s\n##Description\n\n%s" % (report_item['synopsis'], report_item['description']),
 				data=report_item['plugin_output'],
 				refs=refs)
-
-			#TODO: note with full data and linked by xtype ?and refs
 			db.session.add(vuln)
 
 		return vuln

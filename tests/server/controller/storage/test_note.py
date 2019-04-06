@@ -88,3 +88,17 @@ def test_note_delete_route(client, test_host):
 
 	note = Note.query.filter(Note.id == test_note.id).one_or_none()
 	assert not note
+
+
+def test_note_view_route(client, test_note):
+	"""note view route test"""
+
+	test_note.data = 'view%f' % random()
+	test_note.xtype = 'nessus.note.testxtype'
+	persist_and_detach(test_note)
+
+
+	response = client.get(url_for('storage.note_view_route', note_id=test_note.id))
+	assert response.status_code == HTTPStatus.OK
+
+	assert '<pre>%s</pre>' % test_note.data in response

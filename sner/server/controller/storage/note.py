@@ -1,5 +1,7 @@
 """controller note"""
 
+import json
+
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
@@ -9,6 +11,16 @@ from sner.server.controller.storage import blueprint, render_host_address
 from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm
 from sner.server.model.storage import Host, Note, Service
+
+
+@blueprint.app_template_filter()
+def json_indent(data):
+	"""parse and format json"""
+
+	try:
+		return json.dumps(json.loads(data), sort_keys=True, indent=4)
+	except:
+		return data
 
 
 @blueprint.route('/note/list')
@@ -44,6 +56,7 @@ def note_list_json_route():
 	if 'data' in notes:
 		button_form = ButtonForm()
 		for note in notes['data']:
+			note['id'] = render_template('storage/note/pagepart-id_link.html', note=note)
 			if 'address' in note:
 				note['address'] = render_host_address(*note['address'].split(' '))
 			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
@@ -110,3 +123,11 @@ def note_delete_route(note_id):
 		return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
 	return render_template('button-delete.html', form=form, form_url=url_for('storage.note_delete_route', note_id=note_id))
+
+
+@blueprint.route('/note/view/<note_id>')
+def note_view_route(note_id):
+	"""view note"""
+
+	note = Note.query.get(note_id)
+	return render_template('storage/note/view.html', note=note, button_form=ButtonForm())

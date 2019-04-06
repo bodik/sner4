@@ -33,6 +33,8 @@ def url_for_ref(ref):
 		url = 'https://www.kb.cert.org/vuls/id/%s' % rval
 	elif rtype == 'EDB':
 		url = 'https://www.exploit-db.com/exploits/%s' % rval.replace('ID-', '')
+	elif rtype == 'SN':
+		url = url_for('storage.note_view_route', note_id=rval)
 
 	return url
 

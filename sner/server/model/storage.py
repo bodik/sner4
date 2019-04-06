@@ -66,8 +66,8 @@ class Service(db.Model):
 	comment = db.Column(db.Text)
 
 	host = relationship('Host', back_populates='services')
-	vulns = relationship('Vuln', back_populates='service')
-	notes = relationship('Note', back_populates='service')
+	vulns = relationship('Vuln', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
+	notes = relationship('Note', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
 
 	def __repr__(self):
 		return '<Service %s: %s.%d>' % (self.id, self.proto, self.port)
