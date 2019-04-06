@@ -56,7 +56,6 @@ def note_list_json_route():
 	if 'data' in notes:
 		button_form = ButtonForm()
 		for note in notes['data']:
-			note['id'] = render_template('storage/note/pagepart-id_link.html', note=note)
 			if 'address' in note:
 				note['address'] = render_host_address(*note['address'].split(' '))
 			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
