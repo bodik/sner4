@@ -28,6 +28,8 @@ def service_list_json_route():
 
 	columns = [
 		ColumnDT(Service.id, mData='id'),
+		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Service.proto, mData='proto'),
 		ColumnDT(Service.port, mData='port'),
 		ColumnDT(Service.name, mData='name'),
@@ -35,18 +37,11 @@ def service_list_json_route():
 		ColumnDT(Service.info, mData='info'),
 		ColumnDT(Service.comment, mData='comment')
 	]
-	query = db.session.query().select_from(Service)
+	query = db.session.query().select_from(Service).join(Host)
 
-	## endpoint is shared by generic service_list and host_view
+	## filtering
 	if 'host_id' in request.values:
 		query = query.filter(Service.host_id == request.values.get('host_id'))
-	else:
-		query = query.join(Host)
-		columns[1:1] = [
-			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-			ColumnDT(Host.hostname, mData='hostname')]
-
-	## port filtering is used from service_vizports
 	if 'port' in request.values:
 		query = query.filter(Service.port == request.values.get('port'))
 
@@ -54,8 +49,7 @@ def service_list_json_route():
 	if 'data' in services:
 		button_form = ButtonForm()
 		for service in services['data']:
-			if 'address' in service:
-				service['address'] = render_host_address(*service['address'].split(' '))
+			service['address'] = render_host_address(*service['address'].split(' '))
 			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, button_form=button_form)
 
 	return jsonify(services)

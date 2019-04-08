@@ -29,11 +29,10 @@
 
 	<script type="text/javascript">
 		/**
-		 * Create datatables column definition.
-		 * Optional renderfn defaults to non-html rendering; use null to enable direct html rendering.
+		 * Create datatables column definition. Defaults to non-html rendering.
 		 */
-		function column(d, renderfn = $.fn.dataTable.render.text()) {
-			return {"name": d, "title": d, "data": d, "render": renderfn};
+		function column(d, extra={}) {
+			return $.extend({"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()}, extra);
 		}
 
 		/**

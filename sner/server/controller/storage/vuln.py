@@ -64,6 +64,8 @@ def vuln_list_json_route():
 
 	columns = [
 		ColumnDT(Vuln.id, mData='id'),
+		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
 		ColumnDT(Vuln.name, mData='name'),
 		ColumnDT(Vuln.xtype, mData='xtype'),
@@ -71,23 +73,17 @@ def vuln_list_json_route():
 		ColumnDT(Vuln.refs, mData='refs'),
 		ColumnDT(Vuln.comment, mData='comment')
 	]
-	query = db.session.query().select_from(Vuln).outerjoin(Service, Vuln.service_id == Service.id)
+	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
 
-	## endpoint is shared by generic service_list and host_view
+	## filtering
 	if 'host_id' in request.values:
 		query = query.filter(Vuln.host_id == request.values.get('host_id'))
-	else:
-		query = query.join(Host, Vuln.host_id == Host.id)
-		columns[1:1] = [
-			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-			ColumnDT(Host.hostname, mData='hostname')]
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in vulns:
 		button_form = ButtonForm()
 		for vuln in vulns['data']:
-			if 'address' in vuln:
-				vuln['address'] = render_host_address(*vuln['address'].split(' '))
+			vuln['address'] = render_host_address(*vuln['address'].split(' '))
 			vuln['name'] = render_template('storage/vuln/pagepart-name_link.html', vuln=vuln)
 			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', vuln=vuln)
 			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', vuln=vuln)

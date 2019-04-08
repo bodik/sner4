@@ -36,28 +36,24 @@ def note_list_json_route():
 
 	columns = [
 		ColumnDT(Note.id, mData='id'),
+		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
+		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
 		ColumnDT(Note.xtype, mData='xtype'),
 		ColumnDT(Note.data, mData='data'),
 		ColumnDT(Note.comment, mData='comment')
 	]
-	query = db.session.query().select_from(Note).outerjoin(Service, Note.service_id == Service.id)
+	query = db.session.query().select_from(Note).join(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
 
-	## endpoint is shared by generic service_list and host_view
+	## filtering
 	if 'host_id' in request.values:
 		query = query.filter(Note.host_id == request.values.get('host_id'))
-	else:
-		query = query.join(Host, Note.host_id == Host.id)
-		columns[1:1] = [
-			ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-			ColumnDT(Host.hostname, mData='hostname')]
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in notes:
 		button_form = ButtonForm()
 		for note in notes['data']:
-			if 'address' in note:
-				note['address'] = render_host_address(*note['address'].split(' '))
+			note['address'] = render_host_address(*note['address'].split(' '))
 			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
 
 	return jsonify(notes)
