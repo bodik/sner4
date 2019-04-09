@@ -7,7 +7,7 @@
 ### Installation
 ```
 ## install packages dependencies
-apt-get install postgresql-all unzip
+apt-get install postgresql-all unzip nmap
 
 ## clone
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4
@@ -20,7 +20,7 @@ editor sner-server.cfg
 bin/make_env.sh
 . env/bin/activate
 bin/make_db.sh
-screen -S sner4-server -dm sh bin/server.sh
+screen -S sner4-server -dm sh bin/server.sh run
 
 ## run test suite
 bin/make_test.sh
