@@ -28,6 +28,36 @@
 	</style>
 
 	<script type="text/javascript">
+		// simple static static datatables
+		//
+		var datatable_static_options = {
+			"columnDefs": [ {
+				"targets": "no-sort",
+				"orderable": false,
+			} ],
+			"order": [[ 0, "asc" ]],
+			"paging": false,
+			"info" : false
+		};
+		$(document).ready(function() {
+			if (typeof datatable_static_custom !== 'undefined') {
+				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
+			}
+			$('.datatable_static').DataTable(datatable_static_options);
+		});
+
+
+
+		// tagEditor startup
+		//
+		$(document).ready(function() {
+			$(".tageditor").tagEditor({"delimiter": "\n"});
+		});
+
+
+
+		// ajaxed action enhanced datatables
+		//
 		/**
 		 * Create datatables column definition. Defaults to non-html rendering.
 		 */
@@ -42,16 +72,6 @@
 			return cols.map(function(d) { return (d instanceof Object) ? d : column(d);})
 				.concat({"name": "_buttons", "title": "_buttons", "data": "_buttons", "render": null, "orderable": false});
 		}
-
-		var datatable_static_options = {
-			"columnDefs": [ {
-				"targets": "no-sort",
-				"orderable": false,
-			} ],
-			"order": [[ 0, "asc" ]],
-			"paging": false,
-			"info" : false
-		};
 
 		var datatable_ajax_options = {
 			"serverSide": true,
@@ -74,11 +94,6 @@
 		};
 
 		$(document).ready(function() {
-			if (typeof datatable_static_custom !== 'undefined') {
-				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
-			}
-			$('.datatable_static').DataTable(datatable_static_options);
-
 			if (typeof datatable_ajax_custom !== 'undefined') {
 				datatable_ajax_options = $.extend({}, datatable_ajax_options, datatable_ajax_custom);
 			}

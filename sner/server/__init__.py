@@ -5,8 +5,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 
 
-toolbar = DebugToolbarExtension() # pylint: disable=invalid-name
 db = SQLAlchemy() # pylint: disable=invalid-name
+toolbar = DebugToolbarExtension() # pylint: disable=invalid-name
 
 
 def create_app():
@@ -15,8 +15,8 @@ def create_app():
 	app = Flask(__name__)
 	app.config.from_envvar('SNER_CONFIG')
 
-	toolbar.init_app(app)
 	db.init_app(app)
+	toolbar.init_app(app)
 
 	from sner.server.controller import scheduler
 	app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')

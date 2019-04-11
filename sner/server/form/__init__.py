@@ -5,13 +5,13 @@ from wtforms import TextAreaField
 
 
 class LinesField(TextAreaField):
-	"""textarea transparently handlink list of items"""
+	"""textarea transparently handling list of items"""
 
 	# value to form
 	def _value(self):
 		if self.data:
 			return '\n'.join(self.data)
-		return ""
+		return ''
 
 	# value from form
 	def process_formdata(self, valuelist):
