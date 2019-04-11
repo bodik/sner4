@@ -18,6 +18,10 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/jquery.dataTables.min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.js') }}"></script>
 
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tageditor/jquery.tag-editor.css') }}" />
+	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.caret.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.tag-editor.min.js') }}"></script>
+
 	<style>
 		/* menu image */
 		.navbar-brand { padding: 0px; }
@@ -25,6 +29,9 @@
 
 		/* required items on forms */
 		label.control-label.required:after { content:"*"; color:red; }
+
+		/* tag-editor same borders as other bootstraped input */
+		.tag-editor { border: 1px solid #ccc; border-radius: 4px; }
 	</style>
 
 	<script type="text/javascript">

@@ -85,6 +85,7 @@ class Vuln(db.Model):
 	descr = db.Column(db.Text)
 	data = db.Column(db.Text)
 	refs = db.Column(postgresql.ARRAY(db.String, dimensions=1))
+	tags = db.Column(postgresql.ARRAY(db.String, dimensions=1))
 	comment = db.Column(db.Text)
 
 	host = relationship('Host', back_populates='vulns')

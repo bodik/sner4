@@ -62,6 +62,7 @@ class VulnForm(FlaskForm):
 	descr = TextAreaField('Descr')
 	data = TextAreaField('Data')
 	refs = LinesField('Refs')
+	tags = LinesField('Tags')
 	comment = TextAreaField('Comment')
 
 

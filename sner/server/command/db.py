@@ -90,7 +90,8 @@ def db_initdata():
 		xtype='testxtype.123',
 		severity=SeverityEnum.critical,
 		comment='a test vulnerability comment',
-		refs=['ref1', 'ref2']))
+		refs=['ref1', 'ref2'],
+		tags=['tag1', 'tag2']))
 
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),

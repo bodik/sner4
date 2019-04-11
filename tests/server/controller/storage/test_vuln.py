@@ -46,6 +46,7 @@ def test_vuln_add_route(client, test_host, test_service):
 	form['descr'] = test_vuln.descr
 	form['data'] = test_vuln.descr
 	form['refs'] = '\n'.join(test_vuln.refs)
+	form['tags'] = '\n'.join(test_vuln.tags)
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
@@ -54,6 +55,7 @@ def test_vuln_add_route(client, test_host, test_service):
 	assert vuln.xtype == test_vuln.xtype
 	assert vuln.severity == test_vuln.severity
 	assert vuln.refs == test_vuln.refs
+	assert vuln.tags == test_vuln.tags
 
 
 	db.session.delete(vuln)
@@ -69,12 +71,14 @@ def test_vuln_edit_route(client, test_vuln):
 
 	form = client.get(url_for('storage.vuln_edit_route', vuln_id=test_vuln.id)).form
 	form['name'] = 'edited '+form['name'].value
+	form['tags'] = form['tags'].value + '\nedited'
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
 	vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
 	assert vuln
 	assert vuln.name == form['name'].value
+	assert len(vuln.tags) == 3
 
 
 def test_vuln_delete_route(client, test_host):

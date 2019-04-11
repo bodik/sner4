@@ -42,6 +42,7 @@ def create_test_vuln(a_test_host, a_test_service):
 		descr='a vulnerability description',
 		data='vuln proof',
 		refs=['URL-http://localhost/ref1', 'ref2'],
+		tags=['tag1', 'tag2'],
 		comment='some test vuln comment')
 
 

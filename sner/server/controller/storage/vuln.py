@@ -71,6 +71,7 @@ def vuln_list_json_route():
 		ColumnDT(Vuln.xtype, mData='xtype'),
 		ColumnDT(Vuln.severity, mData='severity'),
 		ColumnDT(Vuln.refs, mData='refs'),
+		ColumnDT(Vuln.tags, mData='tags'),
 		ColumnDT(Vuln.comment, mData='comment')
 	]
 	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
