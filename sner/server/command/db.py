@@ -93,6 +93,15 @@ def db_initdata():
 		refs=['ref1', 'ref2'],
 		tags=['tag1', 'tag2']))
 
+	db.session.add(Vuln(
+		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+		name='another test vulnerability',
+		xtype='testxtype.124',
+		severity=SeverityEnum.unknown,
+		comment='another vulnerability comment',
+		refs=[],
+		tags=[]))
+
 	db.session.add(Note(
 		host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
 		xtype='sner.testnote',
