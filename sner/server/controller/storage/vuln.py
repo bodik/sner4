@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 from sner.server import db
 from sner.server.controller.storage import blueprint, render_host_address
 from sner.server.form import ButtonForm
-from sner.server.form.storage import VulnForm
+from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
 
 
@@ -55,7 +55,7 @@ def text_for_ref(ref):
 def vuln_list_route():
 	"""list vulns"""
 
-	return render_template('storage/vuln/list.html')
+	return render_template('storage/vuln/list.html', button_form=ButtonForm())
 
 
 @blueprint.route('/vuln/list.json', methods=['GET', 'POST'])
@@ -63,16 +63,19 @@ def vuln_list_json_route():
 	"""list vulns, data endpoint"""
 
 	columns = [
+		ColumnDT('1', mData='_select', search_method='none', global_search=False),
 		ColumnDT(Vuln.id, mData='id'),
-		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-		ColumnDT(Host.hostname, mData='hostname'),
+		ColumnDT(Host.id, mData='host_id'),
+		ColumnDT(Host.address, mData='host_address'),
+		ColumnDT(Host.hostname, mData='host_hostname'),
 		ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
 		ColumnDT(Vuln.name, mData='name'),
 		ColumnDT(Vuln.xtype, mData='xtype'),
 		ColumnDT(Vuln.severity, mData='severity'),
 		ColumnDT(Vuln.refs, mData='refs'),
 		ColumnDT(Vuln.tags, mData='tags'),
-		ColumnDT(Vuln.comment, mData='comment')
+		ColumnDT(Vuln.comment, mData='comment'),
+		ColumnDT('1', mData='_buttons', search_method='none', global_search=False),
 	]
 	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
 
@@ -82,13 +85,8 @@ def vuln_list_json_route():
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	if 'data' in vulns:
-		button_form = ButtonForm()
 		for vuln in vulns['data']:
-			vuln['address'] = render_host_address(*vuln['address'].split(' '))
-			vuln['name'] = render_template('storage/vuln/pagepart-name_link.html', vuln=vuln)
-			vuln['severity'] = render_template('storage/vuln/pagepart-severity_label.html', vuln=vuln)
-			vuln['refs'] = render_template('storage/vuln/pagepart-refs.html', vuln=vuln)
-			vuln['_buttons'] = render_template('storage/vuln/pagepart-controls.html', vuln=vuln, button_form=button_form)
+			vuln['severity'] = str(vuln['severity'])
 
 	return jsonify(vulns)
 
@@ -160,3 +158,39 @@ def vuln_view_route(vuln_id):
 
 	vuln = Vuln.query.get(vuln_id)
 	return render_template('storage/vuln/view.html', vuln=vuln, button_form=ButtonForm())
+
+
+@blueprint.route('/vuln/delete_by_id', methods=['POST'])
+def vuln_delete_by_id_route():
+	"""delete multiple vulns route"""
+
+	form = IdsForm()
+	if form.validate_on_submit():
+		try:
+			Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
+			db.session.commit()
+			return jsonify({'status': 200})
+		except Exception as e:
+			db.session.rollback()
+			return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
+
+	return jsonify({'status': 400, 'title': 'Invalid form submitted.'}), 400
+
+
+@blueprint.route('/vuln/tag_by_id', methods=['POST'])
+def vuln_tag_by_id_route():
+	"""tag multiple route"""
+
+	form = TagByIdForm()
+	if form.validate_on_submit():
+		try:
+			tag = form.tag.data
+			for vuln in Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).all():
+				vuln.tags = list(set((vuln.tags or []) + [tag]))
+			db.session.commit()
+			return jsonify({'status': 200})
+		except Exception as e:
+			db.session.rollback()
+			return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
+
+	return jsonify({'status': 400, 'title': 'Invalid form submitted.'}), 400

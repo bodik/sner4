@@ -1,18 +1,188 @@
 {% extends "base.html" %}
 
 {% block script %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/select.dataTables.min.css') }}" />
+<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.select.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
+
+
+
+<script id="pagepart-host_link.hbs" type="text/x-handlebars-template">
+	<a href="{{ url_for('storage.host_view_route', host_id='REPLACE')|replace('REPLACE', '{{host_id}}') }}">{{'{{'}}host_address{{'}}'}}</a>
+</script>
+
+<script id="pagepart-vuln_link.hbs" type="text/x-handlebars-template">
+	<a href="{{ url_for('storage.vuln_view_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}">{{'{{'}}name{{'}}'}}</a>
+</script>
+
+<script id="pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}"><span class="glyphicon glyphicon-edit"></span></a>
+	<button type="button" class="btn btn-xs btn-danger abutton_deleterow" data-url="{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}"><span class="glyphicon glyphicon-trash"></span></button>
+</script>
+
+
 <script type="text/javascript">
-	var datatable_ajax_custom = {
-		"ajax": {"url": "{{ url_for('storage.vuln_list_json_route') }}", "method": "POST"},
-		"columns": columns_with_buttons(["id", column("address", {"render": null}), "hostname", "service", column("name", {"render": null}), "xtype", column("severity", {"render": null}), column("refs", {"render": null}), "tags", "comment"])
+	var csrf_token = '{{ button_form.csrf_token._value() }}';
+	/*
+	 * sner submit form
+	 */
+	function sner_submit_form(url, data={}) {
+		data['csrf_token'] = csrf_token;
+		return $.ajax({'url': url, 'type': 'POST', 'data': data})
+			.fail(function(xhr, status, exception) { toastr.error(xhr.responseJSON['title']); });
+	}
+
+
+
+	/*
+	 * action select all from table
+	 */
+	function action_selectall(event) {
+		event.data.dt.rows(null, {'page': 'current'}).select();
+	}
+
+	/*
+	 * action select none from dt
+	 */
+	function action_selectnone(event) {
+		event.data.dt.rows(null, {'page': 'current'}).deselect();
+	}
+
+	/*
+	 * action tag multiple items
+	 * @param {object} event - event with data {"dt": datatable instance, "tag": string}
+	 */
+	function action_tag_by_id(event) {
+		var data = {'tag': event.target.getAttribute('data-tag')};
+
+		var ids = dt_get_selected_ids(event.data.dt);
+		for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
+
+		sner_submit_form(event.data.url, data)
+			.always(function() { event.data.dt.draw(); });
+	}
+
+	/*
+	 * action delete multiple items
+	 * @param {object} event - event with data {"dt": datatable instance}
+	 */
+	function action_delete_by_id(event) {
+		if (!confirm('Really delete?')) { return; }
+
+		var data = {};
+		var ids = dt_get_selected_ids(event.data.dt);
+		for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
+
+		sner_submit_form(event.data.url, data)
+			.always(function() { event.data.dt.draw(); });
+	}
+
+
+	/*
+	 * action delete row
+	 * @param {object} event - event with data {"dt": datatable instance}
+	 */
+	function action_deleterow(event) {
+		if (!confirm('Really delete?')) { return; }
+
+		sner_submit_form(event.target.getAttribute('data-url'))
+			.always(function() { event.data.dt.draw(); });
+	}
+
+
+
+	/*
+	 * datatables select helper, returns array of selected rows/data ids
+	 * @param {object} dt - datatable instance
+	 */
+	function dt_get_selected_ids(dt) {
+		// would use .map return item[x], but it does not cleanup other row attrs
+		var ids = [];
+		dt.rows({'selected': true}).data().each(function(item) { ids.push(item['id']) });
+		return ids;
 	};
+
+	/*
+	 * datatables helper, toggles pagination if needed
+	 * @param {object} dt - datatable instance
+	 */
+	function dt_toggle_pagination(dt) {
+		var pagination = $('#'+dt.table().node().id+'_wrapper .dataTables_paginate');
+		if (dt.page.info().pages <= 1) {
+			pagination.hide();
+		} else {
+			pagination.show();
+		}
+	}
+
+
+	var pagepart_host_link = Handlebars.compile(document.getElementById('pagepart-host_link.hbs').innerHTML);
+	var pagepart_vuln_link = Handlebars.compile(document.getElementById('pagepart-vuln_link.hbs').innerHTML);
+	var pagepart_vuln_controls = Handlebars.compile(document.getElementById('pagepart-vuln_controls.hbs').innerHTML);
+
+	var dt_vuln_list_table_options = {
+		'ajax': {'url': "{{ url_for('storage.vuln_list_json_route') }}", 'method': 'POST'},
+		'columns': [
+			{'name': '_select', 'title': '', 'data': null, 'defaultContent': '', 'orderable': false, 'className': 'select-checkbox'},
+			column('id'),
+			column('host_id', {'visible': false}),
+			column('host_address', {'render': function (data, type, row, meta) { return pagepart_host_link(row); }}),
+			column('host_hostname'),
+			column('service'),
+			column('name', {'render': function (data, type, row, meta) { return pagepart_vuln_link(row); }}),
+			column('xtype'),
+			column('severity', {'render': null}),
+			column('refs', {'render': null}),
+			column('tags'),
+			column('comment'),
+			{'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return pagepart_vuln_controls(row); }},
+		],
+		'dom': '<"row"<"col-sm-6"l><"col-sm-6"f>> <"row"<"col-sm-12"p>> <"row"<"col-sm-12"rt>> <"row"<"col-sm-6"i><"col-sm-6"p>>',
+		'order': [[1, 'asc']],
+		'select': {'style': 'multi', 'selector': 'td:first-child'},
+		'drawCallback': function (settings) {
+			dt_toggle_pagination(this.api());
+			$('.abutton_deleterow').on('click', {'dt': this.api()}, action_deleterow);
+		},
+	};
+
+
+	$(document).ready(function() {
+		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, datatable_ajax_options, dt_vuln_list_table_options));
+
+		$('#vuln_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_vuln_list_table}, action_selectall);
+		$('#vuln_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_vuln_list_table}, action_selectnone);
+		$('#vuln_list_table_toolbar .abutton_tagmulti')
+			.on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_tag_by_id_route') }}"}, action_tag_by_id);
+		$('#vuln_list_table_toolbar .abutton_deletemulti')
+			.on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
+	});
 </script>
 {% endblock %}
+
 
 {% block content %}
 <div class="vulns">
 	<h1>Vulns list</h1>
 
-	<table id="vulns_table" class="datatable_ajax table table-hover table-responsive table-condensed"></table>
+
+	<div id="vuln_list_table_toolbar">
+		<button type="button" class="btn btn-xs btn-default abutton_selectall">All</button>
+		<button type="button" class="btn btn-xs btn-default abutton_selectnone">None</button>
+		<div class="btn-group">
+			<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</button>
+			<button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span class="caret"></span>
+				<span class="sr-only">Toggle Dropdown</span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a class="abutton_tagmulti" data-tag="todo" href="#">Todo</a></li>
+				<li><a class="abutton_tagmulti" data-tag="report" href="#">Report</a></li>
+			</ul>
+		</div>
+		<button type="button" class="btn btn-xs btn-danger abutton_deletemulti"><span class="glyphicon glyphicon-trash"></span></button>
+	</div>
+
+	<table id="vuln_list_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
 {% endblock %}

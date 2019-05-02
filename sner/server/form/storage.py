@@ -1,7 +1,7 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
+from wtforms import FieldList, IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
 
 from sner.server.form import LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
@@ -74,3 +74,16 @@ class NoteForm(FlaskForm):
 	xtype = StringField('xType', validators=[validators.Length(max=500)])
 	data = TextAreaField('Data')
 	comment = TextAreaField('Comment')
+
+
+class IdsForm(FlaskForm):
+	"""ajax; generic multi-id form"""
+
+	ids = FieldList(IntegerField(validators=[validators.DataRequired()]), min_entries=1)
+
+
+class TagByIdForm(FlaskForm):
+	"""ajax; tagmulti action"""
+
+	ids = FieldList(IntegerField(validators=[validators.DataRequired()]), min_entries=1)
+	tag = StringField(validators=[validators.DataRequired()])
