@@ -22,14 +22,13 @@
 
 
 <script type="text/javascript">
-	var csrf_token = '{{ button_form.csrf_token._value() }}';
 	/*
 	 * sner submit form
 	 */
 	function sner_submit_form(url, data={}) {
-		data['csrf_token'] = csrf_token;
-		return $.ajax({'url': url, 'type': 'POST', 'data': data})
-			.fail(function(xhr, status, exception) { toastr.error(xhr.responseJSON['title']); });
+		data['csrf_token'] = $('meta[name="csrf-token"]').attr('content');
+		return $.ajax({"url": url,"type": "POST", "data": data})
+			.fail(function(xhr, status, exception) { toastr.error(xhr.responseJSON["title"]); });
 	}
 
 

@@ -55,7 +55,7 @@ def text_for_ref(ref):
 def vuln_list_route():
 	"""list vulns"""
 
-	return render_template('storage/vuln/list.html', button_form=ButtonForm())
+	return render_template('storage/vuln/list.html')
 
 
 @blueprint.route('/vuln/list.json', methods=['GET', 'POST'])

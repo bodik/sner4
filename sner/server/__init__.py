@@ -3,6 +3,7 @@
 from flask import flash, Flask, render_template
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import generate_csrf
 
 
 db = SQLAlchemy() # pylint: disable=invalid-name
@@ -44,5 +45,9 @@ def create_app():
 		if value is None:
 			return ""
 		return value.strftime(fmt)
+
+	# globaly enable flask_wtf csrf token helper
+	# least intrusive way to pass token into every view without enforcing csrf on all routes
+	app.jinja_env.globals['csrf_token'] = generate_csrf
 
 	return app
