@@ -17,7 +17,7 @@
 
 	<h2>Description</h2>
 	<div>
-	{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}
+	{% if vuln.descr %}{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}{% endif %}
 	</div>
 
 	<h2>Data</h2>
