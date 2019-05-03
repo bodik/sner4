@@ -6,22 +6,35 @@
 <script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
 
 
-
+{% raw %}
 <script id="pagepart-host_link.hbs" type="text/x-handlebars-template">
-	<a href="{{ url_for('storage.host_view_route', host_id='REPLACE')|replace('REPLACE', '{{host_id}}') }}">{{'{{'}}host_address{{'}}'}}</a>
+	<a href="{{> host_view_route }}">{{host_address}}</a>
 </script>
 
 <script id="pagepart-vuln_link.hbs" type="text/x-handlebars-template">
-	<a href="{{ url_for('storage.vuln_view_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}">{{'{{'}}name{{'}}'}}</a>
+	<a href="{{> vuln_view_route vuln_id=id}}">{{name}}</a>
+</script>
+
+<script id="pagepart-severity_label.hbs" type="text/x-handlebars-template">
+	<span class="label {{color_for_severity severity}}">{{severity}}</span>
+</script>
+
+<script id="pagepart-vuln_refs.hbs" type="text/x-handlebars-template">
+{{#each refs}}
+	<a href="{{url_for_ref this}}">{{text_for_ref this}}</a>
+{{/each}}
 </script>
 
 <script id="pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}"><span class="glyphicon glyphicon-edit"></span></a>
-	<button type="button" class="btn btn-xs btn-danger abutton_deleterow" data-url="{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE')|replace('REPLACE', '{{id}}') }}"><span class="glyphicon glyphicon-trash"></span></button>
+	<a class="btn btn-xs btn-primary" href="{{> vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 </script>
+{% endraw %}
 
 
 <script type="text/javascript">
+	// general sner UI helpers
+	//
 	/*
 	 * sner submit form
 	 */
@@ -33,6 +46,8 @@
 
 
 
+	// toolbar/ui actions
+	//
 	/*
 	 * action select all from table
 	 */
@@ -76,7 +91,6 @@
 			.always(function() { event.data.dt.draw(); });
 	}
 
-
 	/*
 	 * action delete row
 	 * @param {object} event - event with data {"dt": datatable instance}
@@ -84,12 +98,14 @@
 	function action_deleterow(event) {
 		if (!confirm('Really delete?')) { return; }
 
-		sner_submit_form(event.target.getAttribute('data-url'))
+		sner_submit_form(event.target.closest('a').getAttribute('data-url'))
 			.always(function() { event.data.dt.draw(); });
 	}
 
 
 
+	// datatables helpers
+	//
 	/*
 	 * datatables select helper, returns array of selected rows/data ids
 	 * @param {object} dt - datatable instance
@@ -115,10 +131,77 @@
 	}
 
 
+
+	// sner ui pageparts and helpers
+	//
+
+	/*
+	 * generate url for ref
+	 */
+	Handlebars.registerHelper('url_for_ref', function(ref) {
+		var ret = ref;
+
+		var matched = ref.match(/(.*?)\-(.*)/);
+		if (matched) {
+			var [ident, data] = [matched[1], matched[2]];
+			switch (ident) {
+				case 'URL': ret = data; break;
+				case 'CVE': ret = 'https://cvedetails.com/cve/CVE-'+data; break;
+				case 'NSS': ret = 'https://www.tenable.com/plugins/nessus/'+data; break;
+				case 'BID': ret = 'http://www.securityfocus.com/bid/'+data; break;
+				case 'CERT': ret = 'https://www.kb.cert.org/vuls/id/'+data; break;
+				case 'EDB': ret = 'https://www.exploit-db.com/exploits/'+data.replace('ID-', ''); break;
+				case 'SN': ret = "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', data); break;
+				default: ret = ref; break;
+			}
+		}
+
+		return ret;
+	});
+
+	/*
+	 * generate text for ref
+	 */
+	Handlebars.registerHelper('text_for_ref', function(ref) {
+		return (ref.startsWith('URL-')) ? 'URL' : ref;
+	});
+
+	/*
+	 * get class for severity label
+	 */
+	Handlebars.registerHelper('color_for_severity', function(severity) {
+		switch (severity) {
+			case 'unknown': return 'label-default';
+			case 'info': return 'label-primary';
+			case 'low': return 'label-success';
+			case 'medium': return 'label-info';
+			case 'high': return 'label-warning';
+			case 'critical': return 'label-danger';
+		}
+		return 'label-default';
+	});
+
+	/*
+	 * hbs partials to pass flask endpoint uri template to the template
+	 */
+	Handlebars.registerPartial('host_view_route', "{{ url_for('storage.host_view_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+	Handlebars.registerPartial('vuln_view_route', "{{ url_for('storage.vuln_view_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+	Handlebars.registerPartial('vuln_edit_route', "{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+	Handlebars.registerPartial('vuln_delete_route', "{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+
+	/*
+	 * hbs templates
+	 */
 	var pagepart_host_link = Handlebars.compile(document.getElementById('pagepart-host_link.hbs').innerHTML);
 	var pagepart_vuln_link = Handlebars.compile(document.getElementById('pagepart-vuln_link.hbs').innerHTML);
+	var pagepart_severity_label = Handlebars.compile(document.getElementById('pagepart-severity_label.hbs').innerHTML);
+	var pagepart_vuln_refs = Handlebars.compile(document.getElementById('pagepart-vuln_refs.hbs').innerHTML);
 	var pagepart_vuln_controls = Handlebars.compile(document.getElementById('pagepart-vuln_controls.hbs').innerHTML);
 
+
+
+	// current page setup
+	//
 	var dt_vuln_list_table_options = {
 		'ajax': {'url': "{{ url_for('storage.vuln_list_json_route') }}", 'method': 'POST'},
 		'columns': [
@@ -130,8 +213,8 @@
 			column('service'),
 			column('name', {'render': function (data, type, row, meta) { return pagepart_vuln_link(row); }}),
 			column('xtype'),
-			column('severity', {'render': null}),
-			column('refs', {'render': null}),
+			column('severity', {'render': function (data, type, row, meta) { return pagepart_severity_label(row); }}),
+			column('refs', {'render': function (data, type, row, meta) { return pagepart_vuln_refs(row); }}),
 			column('tags'),
 			column('comment'),
 			{'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return pagepart_vuln_controls(row); }},
@@ -144,17 +227,12 @@
 			$('.abutton_deleterow').on('click', {'dt': this.api()}, action_deleterow);
 		},
 	};
-
-
 	$(document).ready(function() {
 		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, datatable_ajax_options, dt_vuln_list_table_options));
-
 		$('#vuln_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_vuln_list_table}, action_selectall);
 		$('#vuln_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_vuln_list_table}, action_selectnone);
-		$('#vuln_list_table_toolbar .abutton_tagmulti')
-			.on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_tag_by_id_route') }}"}, action_tag_by_id);
-		$('#vuln_list_table_toolbar .abutton_deletemulti')
-			.on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
+		$('#vuln_list_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_tag_by_id_route') }}"}, action_tag_by_id);
+		$('#vuln_list_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
 	});
 </script>
 {% endblock %}
@@ -164,21 +242,14 @@
 <div class="vulns">
 	<h1>Vulns list</h1>
 
-
 	<div id="vuln_list_table_toolbar">
 		<button type="button" class="btn btn-xs btn-default abutton_selectall">All</button>
 		<button type="button" class="btn btn-xs btn-default abutton_selectnone">None</button>
-		<div class="btn-group">
-			<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</button>
-			<button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<span class="caret"></span>
-				<span class="sr-only">Toggle Dropdown</span>
-			</button>
-			<ul class="dropdown-menu">
-				<li><a class="abutton_tagmulti" data-tag="todo" href="#">Todo</a></li>
-				<li><a class="abutton_tagmulti" data-tag="report" href="#">Report</a></li>
-			</ul>
-		</div>
+
+		<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</button>
+		<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="report"><span class="glyphicon glyphicon-tag"></span> Report</button>
+		<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> TODO</button>
+
 		<button type="button" class="btn btn-xs btn-danger abutton_deletemulti"><span class="glyphicon glyphicon-trash"></span></button>
 	</div>
 
