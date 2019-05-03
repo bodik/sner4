@@ -71,7 +71,7 @@ def vuln_list_json_route():
 		ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
 		ColumnDT(Vuln.name, mData='name'),
 		ColumnDT(Vuln.xtype, mData='xtype'),
-		ColumnDT(Vuln.severity, mData='severity'),
+		ColumnDT(func.text(Vuln.severity), mData='severity'),
 		ColumnDT(Vuln.refs, mData='refs'),
 		ColumnDT(Vuln.tags, mData='tags'),
 		ColumnDT(Vuln.comment, mData='comment'),
@@ -84,10 +84,6 @@ def vuln_list_json_route():
 		query = query.filter(Vuln.host_id == request.values.get('host_id'))
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
-	if 'data' in vulns:
-		for vuln in vulns['data']:
-			vuln['severity'] = str(vuln['severity'])
-
 	return jsonify(vulns)
 
 
