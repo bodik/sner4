@@ -35,42 +35,90 @@
 
 	<div class="tab-content">
 		<div role="tabpanel" class="tab-pane" id="services">
-			<table id="datatable_host_services" class="table table-hover table-responsive table-condensed" width="100%"></table>
+			<table id="host_view_service_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
-				var datatable_host_services = {
-					"ajax": {"url": "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", "method": "POST"},
-					"columns": columns_with_buttons(["id", column("address", {"visible": false}), column("hostname", {"visible": false}), "proto", "port", "name", "state", "info", "comment"])
+				var dt_host_view_service_table_options = {
+					'ajax': {'url': "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'columns': [
+						dt_column('id'),
+						dt_column('host_id', {'visible': false}),
+						dt_column('host_address', {'visible': false}),
+						dt_column('host_hostname', {'visible': false}),
+						dt_column('proto'),
+						dt_column('port'),
+						dt_column('name'),
+						dt_column('state'),
+						dt_column('info'),
+						dt_column('comment'),
+						dt_column_buttons(pagepart_service_controls)
+					]
 				};
 				$(document).ready(function() {
-					$('#datatable_host_services').DataTable($.extend({}, datatable_ajax_options, datatable_host_services));
+					var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_service_table_options));
 				});
 			</script>
 		</div>
 
 
 		<div role="tabpanel" class="tab-pane" id="vulns">
-			<table id="datatable_host_vulns" class="table table-hover table-responsive table-condensed" width="100%"></table>
+			<div id="host_view_vuln_table_toolbar">
+				<button type="button" class="btn btn-xs btn-default abutton_selectall">All</button>
+				<button type="button" class="btn btn-xs btn-default abutton_selectnone">None</button>
+				<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</button>
+				<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="report"><span class="glyphicon glyphicon-tag"></span> Report</button>
+				<button type="button" class="btn btn-xs btn-primary abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> TODO</button>
+				<button type="button" class="btn btn-xs btn-danger abutton_deletemulti"><span class="glyphicon glyphicon-trash"></span></button>
+			</div>
+			<table id="host_view_vuln_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
-				var datatable_host_vulns = {
-					"ajax": {"url": "{{ url_for('storage.vuln_list_json_route', host_id=host.id) }}", "method": "POST"},
-					"columns": columns_with_buttons(["id", column("address", {"visible": false}), column("hostname", {"visible": false}), "service", column("name", {"render": null}), "xtype", column("severity", {"render": null}), column("refs", {"render": null}), "tags", "comment"])
+				var dt_host_view_vuln_table_options = {
+					'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'columns': [
+						dt_column_select(),
+						dt_column('id'),
+						dt_column('host_id', {'visible': false}),
+						dt_column('host_address', {'visible': false}),
+						dt_column('host_hostname', {'visible': false}),
+						dt_column('service'),
+						dt_column('name', {'render': function (data, type, row, meta) { return pagepart_vuln_link(row); }}),
+						dt_column('xtype'),
+						dt_column('severity', {'render': function (data, type, row, meta) { return pagepart_severity_label(row); }}),
+						dt_column('refs', {'render': function (data, type, row, meta) { return pagepart_vuln_refs(row); }}),
+						dt_column('tags'),
+						dt_column('comment'),
+						dt_column_buttons(pagepart_vuln_controls)
+					]
 				};
 				$(document).ready(function() {
-					$('#datatable_host_vulns').DataTable($.extend({}, datatable_ajax_options, datatable_host_vulns));
+					var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_vuln_table_options));
+					$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, action_selectall);
+					$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, action_selectnone);
+					$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_tag_by_id_route') }}"}, action_tag_by_id);
+					$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
 				});
 			</script>
 		</div>
 
 
 		<div role="tabpanel" class="tab-pane" id="notes">
-			<table id="datatable_host_notes" class="table table-hover table-responsive table-condensed" width="100%"></table>
+			<table id="host_view_note_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
-				var datatable_host_notes = {
-					"ajax": {"url": "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", "method": "POST"},
-					"columns": columns_with_buttons(["id", column("address", {"visible": false}), column("hostname", {"visible": false}), "service", "xtype", "data", "comment"])
+				var dt_host_view_note_table_options = {
+					'ajax': {'url': "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'columns': [
+						dt_column('id'),
+						dt_column('host_id', {'visible': false}),
+						dt_column('host_address', {'visible': false}),
+						dt_column('host_hostname', {'visible': false}),
+						dt_column('service'),
+						dt_column('xtype'),
+						dt_column('data'),
+						dt_column('comment'),
+						dt_column_buttons(pagepart_note_controls)
+					]
 				};
 				$(document).ready(function() {
-					$('#datatable_host_notes').DataTable($.extend({}, datatable_ajax_options, datatable_host_notes));
+					var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_note_table_options));
 				});
 			</script>
 		</div>
