@@ -75,7 +75,7 @@ def vuln_list_json_route():
 		ColumnDT(Vuln.refs, mData='refs'),
 		ColumnDT(Vuln.tags, mData='tags'),
 		ColumnDT(Vuln.comment, mData='comment'),
-		ColumnDT('1', mData='_buttons', search_method='none', global_search=False),
+		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
 	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
 
