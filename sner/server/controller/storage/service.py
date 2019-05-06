@@ -28,14 +28,16 @@ def service_list_json_route():
 
 	columns = [
 		ColumnDT(Service.id, mData='id'),
-		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-		ColumnDT(Host.hostname, mData='hostname'),
+		ColumnDT(Host.id, mData='host_id'),
+		ColumnDT(Host.address, mData='host_address'),
+		ColumnDT(Host.hostname, mData='host_hostname'),
 		ColumnDT(Service.proto, mData='proto'),
 		ColumnDT(Service.port, mData='port'),
 		ColumnDT(Service.name, mData='name'),
 		ColumnDT(Service.state, mData='state'),
 		ColumnDT(Service.info, mData='info'),
-		ColumnDT(Service.comment, mData='comment')
+		ColumnDT(Service.comment, mData='comment'),
+		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
 	query = db.session.query().select_from(Service).join(Host)
 
@@ -46,12 +48,6 @@ def service_list_json_route():
 		query = query.filter(Service.port == request.values.get('port'))
 
 	services = DataTables(request.values.to_dict(), query, columns).output_result()
-	if 'data' in services:
-		button_form = ButtonForm()
-		for service in services['data']:
-			service['address'] = render_host_address(*service['address'].split(' '))
-			service['_buttons'] = render_template('storage/service/pagepart-controls.html', service=service, button_form=button_form)
-
 	return jsonify(services)
 
 

@@ -36,12 +36,14 @@ def note_list_json_route():
 
 	columns = [
 		ColumnDT(Note.id, mData='id'),
-		ColumnDT(func.concat(Host.id, ' ', Host.address), mData='address'),
-		ColumnDT(Host.hostname, mData='hostname'),
+		ColumnDT(Host.id, mData='host_id'),
+		ColumnDT(Host.address, mData='host_address'),
+		ColumnDT(Host.hostname, mData='host_hostname'),
 		ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
 		ColumnDT(Note.xtype, mData='xtype'),
 		ColumnDT(Note.data, mData='data'),
-		ColumnDT(Note.comment, mData='comment')
+		ColumnDT(Note.comment, mData='comment'),
+		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
 	query = db.session.query().select_from(Note).join(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
 
@@ -50,12 +52,6 @@ def note_list_json_route():
 		query = query.filter(Note.host_id == request.values.get('host_id'))
 
 	notes = DataTables(request.values.to_dict(), query, columns).output_result()
-	if 'data' in notes:
-		button_form = ButtonForm()
-		for note in notes['data']:
-			note['address'] = render_host_address(*note['address'].split(' '))
-			note['_buttons'] = render_template('storage/note/pagepart-controls.html', note=note, button_form=button_form)
-
 	return jsonify(notes)
 
 

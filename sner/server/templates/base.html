@@ -7,6 +7,7 @@
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>sner4 - {% block title %}{% endblock %}</title>
 
+
 	<script type="text/javascript" src="{{ url_for('static', filename='jquery/jquery-3.2.1.min.js') }}"></script>
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" />
@@ -18,10 +19,15 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/jquery.dataTables.min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.js') }}"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/select.dataTables.min.css') }}" />
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.select.min.js') }}"></script>
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tageditor/jquery.tag-editor.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.caret.min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.tag-editor.min.js') }}"></script>
+
+	<script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
+
 
 	<style>
 		/* menu image */
@@ -34,6 +40,7 @@
 		/* tag-editor same borders as other bootstraped input */
 		.tag-editor { border: 1px solid #ccc; border-radius: 4px; }
 	</style>
+
 
 	<script type="text/javascript">
 		// simple static static datatables
@@ -61,52 +68,264 @@
 		$(document).ready(function() {
 			$(".tageditor").tagEditor({"delimiter": "\n"});
 		});
+	</script>
 
 
+	{% raw %}
+	<script id="pagepart-host_link.hbs" type="text/x-handlebars-template">
+		<a href="{{> host_view_route host_id=host_id}}">{{host_address}}</a>
+	</script>
+	<script id="pagepart-host_controls.hbs" type="text/x-handlebars-template">
+		<a class="btn btn-xs btn-default" href="{{> service_add_route host_id=id}}"><span class="glyphicon glyphicon-plus"></span> Service</a>
+		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
+		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
+		<a class="btn btn-xs btn-primary" href="{{> host_edit_route host_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+	</script>
 
-		// ajaxed action enhanced datatables
+	<script id="pagepart-service_controls.hbs" type="text/x-handlebars-template">
+		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
+		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
+		<a class="btn btn-xs btn-primary" href="{{> service_edit_route service_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+	</script>
+
+	<script id="pagepart-vuln_link.hbs" type="text/x-handlebars-template">
+		<a href="{{> vuln_view_route vuln_id=id}}">{{name}}</a>
+	</script>
+	<script id="pagepart-severity_label.hbs" type="text/x-handlebars-template">
+		<span class="label {{color_for_severity severity}}">{{severity}}</span>
+	</script>
+	<script id="pagepart-vuln_refs.hbs" type="text/x-handlebars-template">
+	{{#each refs}}
+		<a href="{{url_for_ref this}}">{{text_for_ref this}}</a>
+	{{/each}}
+	</script>
+	<script id="pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
+		<a class="btn btn-xs btn-primary" href="{{> vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+	</script>
+
+	<script id="pagepart-note_controls.hbs" type="text/x-handlebars-template">
+		<a class="btn btn-xs btn-default" href="{{> note_view_route note_id=id}}"><span class="glyphicon glyphicon-info-sign"></span></a>
+		<a class="btn btn-xs btn-primary" href="{{> note_edit_route note_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+	</script>
+	{% endraw %}
+	<script type="text/javascript">
+		// ajaxed multiaction and rendering enhanced datatables
 		//
-		/**
-		 * Create datatables column definition. Defaults to non-html rendering.
+
+		/// handlebars pageparts and helpers
+		///
+
+		/*
+		 * generate url for ref
 		 */
-		function column(d, extra={}) {
+		Handlebars.registerHelper('url_for_ref', function(ref) {
+			var ret = ref;
+
+			var matched = ref.match(/(.*?)\-(.*)/);
+			if (matched) {
+				var [ident, data] = [matched[1], matched[2]];
+				switch (ident) {
+					case 'URL': ret = data; break;
+					case 'CVE': ret = 'https://cvedetails.com/cve/CVE-'+data; break;
+					case 'NSS': ret = 'https://www.tenable.com/plugins/nessus/'+data; break;
+					case 'BID': ret = 'http://www.securityfocus.com/bid/'+data; break;
+					case 'CERT': ret = 'https://www.kb.cert.org/vuls/id/'+data; break;
+					case 'EDB': ret = 'https://www.exploit-db.com/exploits/'+data.replace('ID-', ''); break;
+					case 'SN': ret = "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', data); break;
+					default: ret = ref; break;
+				}
+			}
+
+			return ret;
+		});
+
+		/*
+		 * generate text for ref
+		 */
+		Handlebars.registerHelper('text_for_ref', function(ref) { return (ref.startsWith('URL-')) ? 'URL' : ref; });
+
+		/*
+		 * get class for severity label
+		 */
+		Handlebars.registerHelper('color_for_severity', function(severity) {
+			var colors = {'unknown': 'label-default', 'info': 'label-primary', 'low': 'label-success', 'medium': 'label-info', 'high': 'label-warning', 'critical': 'label-danger'};
+			return (severity in colors) ? colors[severity] : 'label-default';
+		});
+
+		/*
+		 * hbs partials to pass flask endpoint uris to hbs templates
+		 */
+		Handlebars.registerPartial('host_view_route', "{{ url_for('storage.host_view_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+		Handlebars.registerPartial('host_edit_route', "{{ url_for('storage.host_edit_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+		Handlebars.registerPartial('host_delete_route', "{{ url_for('storage.host_delete_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+
+		Handlebars.registerPartial('service_add_route', "{{ url_for('storage.service_add_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+		Handlebars.registerPartial('service_edit_route', "{{ url_for('storage.service_edit_route', service_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{service_id}}{%endraw%}'));
+		Handlebars.registerPartial('service_delete_route', "{{ url_for('storage.service_delete_route', service_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{service_id}}{%endraw%}'));
+
+		Handlebars.registerPartial('vuln_add_route',
+			"{{ url_for('storage.vuln_add_route', model_name='REPLACE1', model_id='REPLACE2') }}"
+				.replace('REPLACE1', '{%raw%}{{model_name}}{%endraw%}')
+				.replace('REPLACE2', '{%raw%}{{model_id}}{%endraw%}')
+		);
+		Handlebars.registerPartial('vuln_view_route', "{{ url_for('storage.vuln_view_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+		Handlebars.registerPartial('vuln_edit_route', "{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+		Handlebars.registerPartial('vuln_delete_route', "{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+
+		Handlebars.registerPartial('note_add_route',
+			"{{ url_for('storage.note_add_route', model_name='REPLACE1', model_id='REPLACE2') }}"
+				.replace('REPLACE1', '{%raw%}{{model_name}}{%endraw%}')
+				.replace('REPLACE2', '{%raw%}{{model_id}}{%endraw%}')
+		);
+		Handlebars.registerPartial('note_view_route', "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
+		Handlebars.registerPartial('note_edit_route', "{{ url_for('storage.note_edit_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
+		Handlebars.registerPartial('note_delete_route', "{{ url_for('storage.note_delete_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
+
+		/*
+		 * hbs templates
+		 */
+		var pagepart_host_link = Handlebars.compile(document.getElementById('pagepart-host_link.hbs').innerHTML);
+		var pagepart_host_controls = Handlebars.compile(document.getElementById('pagepart-host_controls.hbs').innerHTML);
+
+		var pagepart_service_controls = Handlebars.compile(document.getElementById('pagepart-service_controls.hbs').innerHTML);
+
+		var pagepart_vuln_link = Handlebars.compile(document.getElementById('pagepart-vuln_link.hbs').innerHTML);
+		var pagepart_severity_label = Handlebars.compile(document.getElementById('pagepart-severity_label.hbs').innerHTML);
+		var pagepart_vuln_refs = Handlebars.compile(document.getElementById('pagepart-vuln_refs.hbs').innerHTML);
+		var pagepart_vuln_controls = Handlebars.compile(document.getElementById('pagepart-vuln_controls.hbs').innerHTML);
+
+		var pagepart_note_controls = Handlebars.compile(document.getElementById('pagepart-note_controls.hbs').innerHTML);
+
+
+
+		/// ui helpers and callbacks
+		///
+
+		/*
+		 * sner submit form
+		 */
+		function sner_submit_form(url, data={}) {
+			data['csrf_token'] = $('meta[name="csrf-token"]').attr('content');
+			return $.ajax({"url": url,"type": "POST", "data": data})
+				.fail(function(xhr, status, exception) { toastr.error(xhr.responseJSON["title"]); });
+		}
+
+		/*
+		 * action select all from table
+		 */
+		function action_selectall(event) { event.data.dt.rows(null, {'page': 'current'}).select(); }
+
+		/*
+		 * action select none from dt
+		 */
+		function action_selectnone(event) { event.data.dt.rows(null, {'page': 'current'}).deselect(); }
+
+		/*
+		 * action tag multiple items
+		 * @param {object} event - event with data {"dt": datatable instance, "tag": string}
+		 */
+		function action_tag_by_id(event) {
+			var data = {'tag': event.target.getAttribute('data-tag')};
+
+			var ids = dt_get_selected_ids(event.data.dt);
+			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
+
+			sner_submit_form(event.data.url, data)
+				.always(function() { event.data.dt.draw(); });
+		}
+
+		/*
+		 * action delete multiple items
+		 * @param {object} event - event with data {"dt": datatable instance}
+		 */
+		function action_delete_by_id(event) {
+			if (!confirm('Really delete?')) { return; }
+
+			var data = {};
+			var ids = dt_get_selected_ids(event.data.dt);
+			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
+
+			sner_submit_form(event.data.url, data)
+				.always(function() { event.data.dt.draw(); });
+		}
+
+		/*
+		 * action delete row
+		 * @param {object} event - event with data {"dt": datatable instance}
+		 */
+		function action_deleterow(event) {
+			if (!confirm('Really delete?')) { return; }
+
+			sner_submit_form(event.target.closest('a').getAttribute('data-url'))
+				.always(function() { event.data.dt.draw(); });
+		}
+
+
+		/// datatables helpers
+		///
+		/*
+		 * datatables select helper, returns array of selected rows/data ids
+		 * @param {object} dt - datatable instance
+		 */
+		function dt_get_selected_ids(dt) {
+			// would use .map return item[x], but it does not cleanup other row attrs
+			var ids = [];
+			dt.rows({'selected': true}).data().each(function(item) { ids.push(item['id']) });
+			return ids;
+		};
+
+		/*
+		 * datatables helper, toggles pagination if needed
+		 * @param {object} dt - datatable instance
+		 */
+		function dt_toggle_pagination(dt) {
+			var pagination = $('#'+dt.table().node().id+'_wrapper .dataTables_paginate');
+			if (dt.page.info().pages <= 1) { pagination.hide(); } else { pagination.show();	}
+		}
+
+		/**
+		 * datatables helper, generate object of basic column options and non-html rendering
+		 * @param {string} d - column name
+		 * @param {object} extra - extra data to inject into column definition
+		 */
+		function dt_column(d, extra={}) {
 			return $.extend({"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()}, extra);
 		}
 
 		/**
-		 * Create array of datatables columns definitions, passthru objects with specific configuration, append buttons column.
+		 * datatables helper, generate _select column definition
 		 */
-		function columns_with_buttons(cols) {
-			return cols.map(function(d) { return (d instanceof Object) ? d : column(d);})
-				.concat({"name": "_buttons", "title": "_buttons", "data": "_buttons", "render": null, "orderable": false});
-		}
+		function dt_column_select() { return {'name': '_select', 'title': '', 'data': null, 'defaultContent': '', 'orderable': false, 'className': 'select-checkbox'}; }
 
-		var datatable_ajax_options = {
+		/**
+		 * datatables helper, generate _select column definition
+		 * @param {callback} render - function to render cell, typically compiled hbs template
+		 */
+		function dt_column_buttons(render_callback=null) { return {'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return render_callback(row); }}; }
+
+		/**
+		 * datatables helper, default ajax enhanced dt options
+		 */
+		var dt_ajax_options = {
 			"serverSide": true,
 			"processing": true,
-			"order": [[ 0, "asc" ]],
-			"dom": "<flprtip>",
-			"info": true,
 
-			"paging": true,
-			"pageLength": 10,
-			"drawCallback": function(settings) {
-				var pagination = $('#'+this.attr('id')+'_wrapper .dataTables_paginate');
-				var totalPages = this.api().page.info().pages;
-				if (totalPages <= 1) {
-					pagination.hide();
-				} else {
-					pagination.show();
-				}
+			'dom': '<"row"<"col-sm-6"l><"col-sm-6"f>> <"row"<"col-sm-12"p>> <"row"<"col-sm-12"rt>> <"row"<"col-sm-6"i><"col-sm-6"p>>',
+			'info': true,
+			'order': [[ 1, 'asc' ]],
+			'paging': true,
+			'pageLength': 10,
+			'select': {'style': 'multi', 'selector': 'td:first-child'},
+
+			"drawCallback": function (settings) {
+				dt_toggle_pagination(this.api());
+				this.find('.abutton_deleterow').on('click', {'dt': this.api()}, action_deleterow);
 			}
 		};
-
-		$(document).ready(function() {
-			if (typeof datatable_ajax_custom !== 'undefined') {
-				datatable_ajax_options = $.extend({}, datatable_ajax_options, datatable_ajax_custom);
-			}
-			$('.datatable_ajax').DataTable(datatable_ajax_options);
-		});
 	</script>
 
 	{% block style %}{% endblock %}

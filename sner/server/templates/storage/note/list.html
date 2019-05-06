@@ -2,10 +2,23 @@
 
 {% block script %}
 <script type="text/javascript">
-	var datatable_ajax_custom = {
-		"ajax": {"url": "{{ url_for('storage.note_list_json_route') }}", "method": "POST"},
-		"columns": columns_with_buttons(["id", column("address", {"render": null}), "hostname", "service", "xtype", "data", "comment"])
+	var dt_note_list_table_options = {
+		'ajax': {'url': "{{ url_for('storage.note_list_json_route') }}", 'method': 'POST'},
+		'columns': [
+			dt_column('id'),
+			dt_column('host_id', {'visible': false}),
+			dt_column('host_address', {'render': function (data, type, row, meta) { return pagepart_host_link(row); }}),
+			dt_column('host_hostname'),
+			dt_column('service'),
+			dt_column('xtype'),
+			dt_column('data', {'width': '70%'}),
+			dt_column('comment'),
+			dt_column_buttons(pagepart_note_controls)
+		]
 	};
+	$(document).ready(function() {
+		var dt_note_list_table = $('#note_list_table').DataTable($.extend({}, dt_ajax_options, dt_note_list_table_options));
+	});
 </script>
 {% endblock %}
 
@@ -13,6 +26,6 @@
 <div class="notes">
 	<h1>Notes list</h1>
 
-	<table id="notes_table" class="datatable_ajax table table-hover table-responsive table-condensed"></table>
+	<table id="note_list_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
 {% endblock %}
