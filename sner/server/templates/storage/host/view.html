@@ -9,6 +9,10 @@
 		var activeTab = localStorage.getItem("host_view_activeTab");
 		if (!activeTab) { activeTab = $("a[data-toggle='tab']").first().attr("href"); }
 		$("#host_view a[href='" + activeTab + "']").tab("show");
+
+		$("a[data-toggle='tab']").on("shown.bs.tab", function(e) {
+			$.fn.dataTable.tables({visible: true, api: true}).columns.adjust();
+		});
 	});
 </script>
 {% endblock %}
