@@ -122,4 +122,4 @@ def test_host_view_route(client, test_host):
 	response = client.get(url_for('storage.host_view_route', host_id=test_host.id))
 	assert response.status_code == HTTPStatus.OK
 
-	assert '<h1>Host %s (%s)' % (test_host.address, test_host.hostname) in response
+	assert 'Host %d: %s (%s)' % (test_host.id, test_host.address, test_host.hostname) in response

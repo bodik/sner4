@@ -2,11 +2,18 @@
 
 {% block content %}
 <div class="notes">
-	<h1>Note {{ note.id }} <small>{% include 'storage/note/pagepart-controls.html' %}</small></h1>
+	<h1>
+		Note {{ note.id }}
+		<small>
+			<a class="btn btn-xs btn-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
+			{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
+		</small>
+	</h1>
 
 	<div>
 		<dl class="dl-horizontal">
-		<dt>host</dt><dd>{% with host_id=note.host.id, host_address=note.host.address %}{% include "storage/host/pagepart-address_link.html" %}{% endwith %} ({{ note.host.hostname }})</dd>
+		<dt>host address</dt><dd class="render_hbs" data-hbs="pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</dd>
+		<dt>host hostname</dt><dd>{{ note.host.hostname }}</dd>
 		<dt>service</dt><dd>{{ note.service }}</dd>
 		<dt>xtype</dt><dd>{{ note.xtype }}</dd>
 		<dt>comment</dt><dd>{{ note.comment }}</dd>

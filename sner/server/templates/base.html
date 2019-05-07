@@ -47,35 +47,6 @@
 	</style>
 
 
-	<script type="text/javascript">
-		// simple static static datatables
-		//
-		var datatable_static_options = {
-			"columnDefs": [ {
-				"targets": "no-sort",
-				"orderable": false,
-			} ],
-			"order": [[ 0, "asc" ]],
-			"paging": false,
-			"info" : false
-		};
-		$(document).ready(function() {
-			if (typeof datatable_static_custom !== 'undefined') {
-				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
-			}
-			$('.datatable_static').DataTable(datatable_static_options);
-		});
-
-
-
-		// tagEditor startup
-		//
-		$(document).ready(function() {
-			$(".tageditor").tagEditor({"delimiter": "\n"});
-		});
-	</script>
-
-
 	{% raw %}
 	<script id="pagepart-host_link.hbs" type="text/x-handlebars-template">
 		<a href="{{> host_view_route host_id=host_id}}">{{host_address}}</a>
@@ -85,14 +56,14 @@
 		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
 		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
 		<a class="btn btn-xs btn-primary" href="{{> host_edit_route host_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-danger abutton_delete_by_url" data-url="{{> host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 	</script>
 
 	<script id="pagepart-service_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
 		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
 		<a class="btn btn-xs btn-primary" href="{{> service_edit_route service_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-danger abutton_delete_by_url" data-url="{{> service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 	</script>
 
 	<script id="pagepart-vuln_link.hbs" type="text/x-handlebars-template">
@@ -108,13 +79,13 @@
 	</script>
 	<script id="pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-primary" href="{{> vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-danger abutton_delete_by_url" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 	</script>
 
 	<script id="pagepart-note_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-default" href="{{> note_view_route note_id=id}}"><span class="glyphicon glyphicon-info-sign"></span></a>
 		<a class="btn btn-xs btn-primary" href="{{> note_edit_route note_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-danger abutton_deleterow" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-danger abutton_delete_by_url" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 	</script>
 	{% endraw %}
 	<script type="text/javascript">
@@ -211,6 +182,18 @@
 		///
 
 		/*
+		 * will rerender element with hbs acording to data attributes
+		 *  - data-hbs (hbs compiled template)
+		 *  - data-hbs_context (json context for the template)
+		 * @param {DOMElement} elem - element to rerender
+		 */
+		function render_hbs(elem) {
+			var hbs = elem.getAttribute('data-hbs');
+			var context = JSON.parse(elem.getAttribute('data-hbs_context'));
+			elem.innerHTML = window[hbs](context);
+		}
+
+		/*
 		 * sner submit form
 		 */
 		function sner_submit_form(url, data={}) {
@@ -231,7 +214,7 @@
 
 		/*
 		 * action tag multiple items
-		 * @param {object} event - event with data {"dt": datatable instance, "tag": string}
+		 * @param {object} event - event with data {'dt': datatable instance, 'tag': string}
 		 */
 		function action_tag_by_id(event) {
 			var data = {'tag': event.target.getAttribute('data-tag')};
@@ -245,7 +228,7 @@
 
 		/*
 		 * action delete multiple items
-		 * @param {object} event - event with data {"dt": datatable instance}
+		 * @param {object} event - event with data {'dt': datatable instance}
 		 */
 		function action_delete_by_id(event) {
 			if (!confirm('Really delete?')) { return; }
@@ -259,10 +242,10 @@
 		}
 
 		/*
-		 * action delete row
-		 * @param {object} event - event with data {"dt": datatable instance}
+		 * action delete by url
+		 * @param {object} event - optional; event with data {'dt': datatable instance}
 		 */
-		function action_deleterow(event) {
+		function action_delete_by_url(event) {
 			if (!confirm('Really delete?')) { return; }
 
 			sner_submit_form(event.target.closest('a').getAttribute('data-url'))
@@ -310,7 +293,9 @@
 		 * datatables helper, generate _select column definition
 		 * @param {callback} render - function to render cell, typically compiled hbs template
 		 */
-		function dt_column_buttons(render_callback=null) { return {'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return render_callback(row); }}; }
+		function dt_column_buttons(render_callback=null, extra={}) {
+			return $.extend({'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return render_callback(row); }}, extra);
+		}
 
 		/**
 		 * datatables helper, default ajax enhanced dt options
@@ -328,10 +313,41 @@
 
 			"drawCallback": function (settings) {
 				dt_toggle_pagination(this.api());
-				this.find('.abutton_deleterow').on('click', {'dt': this.api()}, action_deleterow);
+				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api()}, action_delete_by_url);
 			}
 		};
 	</script>
+
+
+	<script type="text/javascript">
+		// simple static static datatables
+		//
+		var datatable_static_options = {
+			'columnDefs': [ {
+				'targets': 'no-sort',
+				'orderable': false,
+			} ],
+			'order': [[ 0, 'asc' ]],
+			'paging': false,
+			'info': false
+		};
+		$(document).ready(function() {
+			if (typeof datatable_static_custom !== 'undefined') {
+				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
+			}
+			$('.datatable_static').DataTable(datatable_static_options);
+		});
+
+
+
+		// common startups
+		//
+		$(document).ready(function() {
+			$('.tageditor').tagEditor({'delimiter': '\n'});
+			$('.render_hbs').each(function(index, elem) { render_hbs(elem); });
+		});
+	</script>
+
 
 	{% block style %}{% endblock %}
 	{% block script %}{% endblock %}

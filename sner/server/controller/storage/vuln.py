@@ -5,50 +5,10 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint, render_host_address
+from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
-
-
-@blueprint.app_template_filter()
-def url_for_ref(ref):
-	"""generate anchor url for vuln.ref"""
-
-	try:
-		rtype, rval = ref.split('-', maxsplit=1)
-	except ValueError:
-		return '#'
-
-	url = '#'
-	if rtype == 'URL':
-		url = rval
-	elif rtype == 'CVE':
-		url = 'https://cvedetails.com/cve/CVE-%s' % rval
-	elif rtype == 'NSS':
-		url = 'https://www.tenable.com/plugins/nessus/%s' % rval
-	elif rtype == 'BID':
-		url = 'http://www.securityfocus.com/bid/%s' % rval
-	elif rtype == 'CERT':
-		url = 'https://www.kb.cert.org/vuls/id/%s' % rval
-	elif rtype == 'EDB':
-		url = 'https://www.exploit-db.com/exploits/%s' % rval.replace('ID-', '')
-	elif rtype == 'SN':
-		url = url_for('storage.note_view_route', note_id=rval)
-
-	return url
-
-
-@blueprint.app_template_filter()
-def text_for_ref(ref):
-	"""generate anchor text for vuln.ref"""
-
-	try:
-		rtype, _ = ref.split('-', maxsplit=1)
-	except ValueError:
-		return ref
-
-	return 'URL' if rtype == 'URL' else ref
 
 
 @blueprint.route('/vuln/list')

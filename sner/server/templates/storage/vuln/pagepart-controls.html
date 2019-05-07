@@ -1,2 +1,0 @@
-<a class="btn btn-xs btn-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}

@@ -7,7 +7,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.sql import func
 
 from sner.server import db
-from sner.server.controller.storage import blueprint, render_host_address
+from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm
 from sner.server.model.storage import Host, Note, Service
