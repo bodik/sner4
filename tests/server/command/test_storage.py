@@ -13,7 +13,7 @@ from sner.server.model.storage import Host, Note, Service, Vuln
 def test_import_nmap_command(runner):
 	"""test nmap parser"""
 
-	result = runner.invoke(storage_command, ['import', 'tests/server/data/parser-nmap-output.xml'])
+	result = runner.invoke(storage_command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
 	assert result.exit_code == 0
 
 	host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
@@ -32,8 +32,7 @@ def test_import_nmap_command(runner):
 def test_import_nessus_command(runner):
 	"""test nessus parser"""
 
-	#TODO: remove forcing parser type after implementing autodetection
-	result = runner.invoke(storage_command, ['import', 'tests/server/data/parser-nessus-simple.xml', '--parser', 'nessus'])
+	result = runner.invoke(storage_command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
 	assert result.exit_code == 0
 
 	host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')

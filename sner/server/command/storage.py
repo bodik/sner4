@@ -21,8 +21,8 @@ def storage_command():
 
 @storage_command.command(name='import', help='import data from files')
 @with_appcontext
+@click.argument('parser')
 @click.argument('path', nargs=-1)
-@click.option('--parser', default='nmap')
 def storage_import(path, parser):
 	"""import data"""
 
