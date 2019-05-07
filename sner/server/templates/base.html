@@ -41,9 +41,11 @@
 		.tag-editor { border: 1px solid #ccc; border-radius: 4px; }
 
 		/* note data may contain very long unwrapable data */
-		.forcewrap {
-			word-wrap: break-word; word-break: break-all; white-space: normal;
-		}
+		.forcewrap { word-wrap: break-word; word-break: break-all; white-space: normal; }
+
+		/* dt styling */
+		.dataTables_wrapper, .dt_toolbar { margin-top: 5px; margin-bottom: 5px; }
+		td.dt-nowrap { white-space: nowrap; }
 	</style>
 
 
@@ -83,7 +85,7 @@
 	</script>
 
 	<script id="pagepart-note_controls.hbs" type="text/x-handlebars-template">
-		<a class="btn btn-xs btn-default" href="{{> note_view_route note_id=id}}"><span class="glyphicon glyphicon-info-sign"></span></a>
+		<a class="btn btn-xs btn-default" href="{{> note_view_route note_id=id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
 		<a class="btn btn-xs btn-default" href="{{> note_edit_route note_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
 		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
 	</script>
@@ -112,7 +114,7 @@
 					case 'CERT': ret = 'https://www.kb.cert.org/vuls/id/'+data; break;
 					case 'EDB': ret = 'https://www.exploit-db.com/exploits/'+data.replace('ID-', ''); break;
 					case 'SN': ret = "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', data); break;
-					default: ret = ref; break;
+					default: ret = '#'; break;
 				}
 			}
 
@@ -294,7 +296,7 @@
 		 * @param {callback} render - function to render cell, typically compiled hbs template
 		 */
 		function dt_column_buttons(render_callback=null, extra={}) {
-			return $.extend({'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'render': function (data, type, row, meta) { return render_callback(row); }}, extra);
+			return $.extend({'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'className': 'dt-nowrap', 'render': function (data, type, row, meta) { return render_callback(row); }}, extra);
 		}
 
 		/**
