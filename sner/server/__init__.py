@@ -48,6 +48,6 @@ def create_app():
 
 	# globaly enable flask_wtf csrf token helper
 	# least intrusive way to pass token into every view without enforcing csrf on all routes
-	app.jinja_env.globals['csrf_token'] = generate_csrf
+	app.add_template_global(name='csrf_token', f=generate_csrf)
 
 	return app

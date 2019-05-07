@@ -3,10 +3,10 @@
 import datetime
 import json
 import sys
+from pprint import pprint
 
 from nessus_report_parser import parse_nessus_xml
 from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
-from pprint import pprint
 
 from sner.server import db
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
@@ -16,14 +16,14 @@ from sner.server.parser import register_parser
 class ReportItemJSONEncoder(json.JSONEncoder):
 	"""custom encoder to handle parsed nessus report"""
 
-	def default(self, obj):
-		if isinstance(obj, nessus_report_ReportItem):
-			return obj.__dict__
+	def default(self, o): # pylint: disable=method-hidden
+		if isinstance(o, nessus_report_ReportItem):
+			return o.__dict__
 
-		if isinstance(obj, datetime.date):
-			return obj.isoformat()
+		if isinstance(o, datetime.date):
+			return o.isoformat()
 
-		return super().default(obj)
+		return super().default(o)
 
 
 @register_parser('nessus')
@@ -55,7 +55,7 @@ class NessusParser():
 	def import_report_item(host, report_item):
 		"""import nessus_v2 ReportItem 'element'"""
 
-		report_item['port'] = int(report_item['port']) #TODO: push casting to the parser itself ?
+		report_item['port'] = int(report_item['port'])
 
 		service = None
 		if report_item['port']:

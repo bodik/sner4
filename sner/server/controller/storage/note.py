@@ -19,7 +19,7 @@ def json_indent(data):
 
 	try:
 		return json.dumps(json.loads(data), sort_keys=True, indent=4)
-	except:
+	except Exception:
 		return data
 
 
