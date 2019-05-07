@@ -46,6 +46,7 @@
 		/* dt styling */
 		.dataTables_wrapper, .dt_toolbar { margin-top: 5px; margin-bottom: 5px; }
 		td.dt-nowrap { white-space: nowrap; }
+		.text-alert { color: red; }
 	</style>
 
 
@@ -58,14 +59,14 @@
 		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
 		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='host' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
 		<a class="btn btn-xs btn-default" href="{{> host_edit_route host_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 	</script>
 
 	<script id="pagepart-service_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-default" href="{{> vuln_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
 		<a class="btn btn-xs btn-default" href="{{> note_add_route model_name='service' model_id=id}}"><span class="glyphicon glyphicon-plus"></span> Note</a>
 		<a class="btn btn-xs btn-default" href="{{> service_edit_route service_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 	</script>
 
 	<script id="pagepart-vuln_link.hbs" type="text/x-handlebars-template">
@@ -81,13 +82,13 @@
 	</script>
 	<script id="pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-default" href="{{> vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 	</script>
 
 	<script id="pagepart-note_controls.hbs" type="text/x-handlebars-template">
 		<a class="btn btn-xs btn-default" href="{{> note_view_route note_id=id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
 		<a class="btn btn-xs btn-default" href="{{> note_edit_route note_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash"></span></a>
+		<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 	</script>
 	{% endraw %}
 	<script type="text/javascript">
