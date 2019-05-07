@@ -105,7 +105,7 @@ class NessusParser():
 				xtype=xtype,
 				name=report_item['plugin_name'],
 				severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
-				descr="## Synopsis\n\n%s\n\n##Description\n\n%s" % (report_item['synopsis'], report_item['description']),
+				descr='## Synopsis\n\n%s\n\n ##Description\n\n%s' % (report_item['synopsis'], report_item['description']),
 				data=report_item['plugin_output'],
 				refs=refs)
 			db.session.add(vuln)
