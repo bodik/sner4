@@ -12,12 +12,12 @@
 
 	<div>
 		<dl class="dl-horizontal">
-		<dt>host address</dt><dd class="render_hbs" data-hbs="pagepart_host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</dd>
+		<dt>host address</dt><dd class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</dd>
 		<dt>host hostname</dt><dd>{{ vuln.host.hostname }}</dd>
 		<dt>service</dt><dd>{{ vuln.service }}</dd>
 		<dt>xtype</dt><dd>{{ vuln.xtype }}</dd>
-		<dt>severity</dt><dd class="render_hbs" data-hbs="pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</dd>
-		<dt>refs</dt><dd class="render_hbs" data-hbs="pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</dd>
+		<dt>severity</dt><dd class="render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</dd>
+		<dt>refs</dt><dd class="render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</dd>
 		<dt>comment</dt><dd>{{ vuln.comment }}</dd>
 		</dl>
 	</div>

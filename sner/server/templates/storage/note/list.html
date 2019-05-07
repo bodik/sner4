@@ -7,13 +7,13 @@
 		'columns': [
 			dt_column('id'),
 			dt_column('host_id', {'visible': false}),
-			dt_column('host_address', {'render': function (data, type, row, meta) { return pagepart_host_link(row); }}),
+			dt_column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
 			dt_column('host_hostname'),
 			dt_column('service'),
 			dt_column('xtype'),
 			dt_column('data', {'className': 'forcewrap'}),
 			dt_column('comment'),
-			dt_column_buttons(pagepart_note_controls)
+			dt_column_buttons(storage_pagepart_note_controls)
 		]
 	};
 	$(document).ready(function() {

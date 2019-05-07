@@ -63,7 +63,7 @@
 						dt_column('state'),
 						dt_column('info'),
 						dt_column('comment'),
-						dt_column_buttons(pagepart_service_controls)
+						dt_column_buttons(storage_pagepart_service_controls)
 					]
 				};
 				$(document).ready(function() {
@@ -93,13 +93,13 @@
 						dt_column('host_address', {'visible': false}),
 						dt_column('host_hostname', {'visible': false}),
 						dt_column('service'),
-						dt_column('name', {'render': function (data, type, row, meta) { return pagepart_vuln_link(row); }}),
+						dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
 						dt_column('xtype'),
-						dt_column('severity', {'render': function (data, type, row, meta) { return pagepart_severity_label(row); }}),
-						dt_column('refs', {'render': function (data, type, row, meta) { return pagepart_vuln_refs(row); }}),
+						dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
+						dt_column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
 						dt_column('tags'),
 						dt_column('comment'),
-						dt_column_buttons(pagepart_vuln_controls)
+						dt_column_buttons(storage_pagepart_vuln_controls)
 					]
 				};
 				$(document).ready(function() {
@@ -127,7 +127,7 @@
 						dt_column('xtype'),
 						dt_column('data', {'className': 'forcewrap'}),
 						dt_column('comment'),
-						dt_column_buttons(pagepart_note_controls)
+						dt_column_buttons(storage_pagepart_note_controls)
 					]
 				};
 				$(document).ready(function() {

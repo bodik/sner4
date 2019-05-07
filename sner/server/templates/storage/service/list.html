@@ -7,7 +7,7 @@
 		'columns': [
 			dt_column('id'),
 			dt_column('host_id', {'visible': false}),
-			dt_column('host_address', {'render': function (data, type, row, meta) { return pagepart_host_link(row); }}),
+			dt_column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
 			dt_column('host_hostname'),
 			dt_column('proto'),
 			dt_column('port'),
@@ -15,7 +15,7 @@
 			dt_column('state'),
 			dt_column('info'),
 			dt_column('comment'),
-			dt_column_buttons(pagepart_service_controls)
+			dt_column_buttons(storage_pagepart_service_controls)
 		]
 	};
 	$(document).ready(function() {

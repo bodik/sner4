@@ -6,13 +6,13 @@
 		'ajax': {'url': "{{ url_for('storage.host_list_json_route') }}", 'method': 'POST'},
 		'columns': [
 			dt_column('id'),
-			dt_column('address', {'render': function (data, type, row, meta) { return pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
+			dt_column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
 			dt_column('hostname'),
 			dt_column('os'),
 			dt_column('nr_svcs'),
 			dt_column('nr_notes'),
 			dt_column('comment'),
-			dt_column_buttons(pagepart_host_controls)
+			dt_column_buttons(storage_pagepart_host_controls)
 		]
 	};
 	$(document).ready(function() {
