@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="queues">
-	<h1>Queues list <a class="btn btn-xs btn-success" href="{{ url_for('scheduler.queue_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+	<h1>Queues list <a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
 	<table id="queues_table" class="datatable_static table table-hover table-responsive">
 	<thead>
@@ -30,7 +30,7 @@
 			<td>
 				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_enqueue_route', queue_id=queue.id) }}"> Enqueue</a>
 				{% with form=button_form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue.id), button_caption='Flush' %}{% include 'button-generic.html' %}{% endwith %}
-				<a class="btn btn-xs btn-primary" href="{{ url_for('scheduler.queue_edit_route', queue_id=queue.id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_edit_route', queue_id=queue.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
 				{% with form=button_form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue.id) %}{% include 'button-delete.html' %}{% endwith %}
 			</td>
 		</tr>
