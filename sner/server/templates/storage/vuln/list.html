@@ -18,7 +18,8 @@
 			dt_column('tags'),
 			dt_column('comment'),
 			dt_column_buttons(storage_pagepart_vuln_controls)
-		]
+		],
+		'select': {'style': 'multi', 'selector': 'td:first-child'}
 	};
 	$(document).ready(function() {
 		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, dt_ajax_options, dt_vuln_list_table_options));

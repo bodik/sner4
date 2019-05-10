@@ -43,7 +43,6 @@ def vuln_list_json_route():
 	if 'filter' in request.values:
 		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
 
-
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(vulns)
 
