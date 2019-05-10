@@ -3,7 +3,7 @@
 {% block script %}
 <script type="text/javascript">
 	var dt_vuln_grouped_table_options = {
-		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route') }}", 'method': 'POST'},
+		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link(row); }}),
 			dt_column('tags'),
@@ -21,6 +21,15 @@
 {% block content %}
 <div class="vulns">
 	<h1>Vulns grouped</h1>
+
+	<div id="vuln_grouped_table_toolbar" class="dt_toolbar">
+		<div class="btn-group" role="group">
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags is_null ""') }}">Not tagged</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags is_not_null ""') }}">Tagged</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags is_null "" OR (Vuln.tags not_all "report" AND Vuln.tags not_all "info")') }}">Exclude reviewed</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags any "report"') }}">Only <span class="glyphicon glyphicon-tag"></span> Report</a>
+		</div>
+	</div>
 
 	<table id="vuln_grouped_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
