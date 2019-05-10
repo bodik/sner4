@@ -2,13 +2,16 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy.sql import distinct, func
+from sqlalchemy import distinct, func
+from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
+from sner.server.sqlafilter import filter_parser
+
 
 
 VIZPORTS_LOW = 10.0
@@ -40,12 +43,8 @@ def service_list_json_route():
 		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
 	query = db.session.query().select_from(Service).join(Host)
-
-	## filtering
-	if 'host_id' in request.values:
-		query = query.filter(Service.host_id == request.values.get('host_id'))
-	if 'port' in request.values:
-		query = query.filter(Service.port == request.values.get('port'))
+	if 'filter' in request.values:
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
 
 	services = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(services)

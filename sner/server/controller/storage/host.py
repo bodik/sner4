@@ -3,12 +3,14 @@
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import distinct, func
+from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
-from sner.server.model.storage import Host, Note, Service
+from sner.server.model.storage import Host, Note, Service, Vuln
+from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/host/list')
@@ -28,11 +30,14 @@ def host_list_json_route():
 		ColumnDT(Host.hostname, mData='hostname'),
 		ColumnDT(Host.os, mData='os'),
 		ColumnDT(func.count(distinct(Service.id)), mData='nr_svcs', global_search=False),
+		ColumnDT(func.count(distinct(Vuln.id)), mData='nr_vulns', global_search=False),
 		ColumnDT(func.count(distinct(Note.id)), mData='nr_notes', global_search=False),
 		ColumnDT(Host.comment, mData='comment'),
 		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
-	query = db.session.query().select_from(Host).outerjoin(Service).outerjoin(Note).group_by(Host.id)
+	query = db.session.query().select_from(Host).outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id).group_by(Host.id)
+	if 'filter' in request.values:
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
 
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(hosts)

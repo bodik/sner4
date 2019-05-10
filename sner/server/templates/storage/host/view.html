@@ -51,7 +51,7 @@
 			<table id="host_view_service_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
 				var dt_host_view_service_table_options = {
-					'ajax': {'url': "{{ url_for('storage.service_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
 						dt_column('id'),
 						dt_column('host_id', {'visible': false}),
@@ -85,7 +85,7 @@
 			<table id="host_view_vuln_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
 				var dt_host_view_vuln_table_options = {
-					'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
 						dt_column_select(),
 						dt_column('id'),
@@ -117,7 +117,7 @@
 			<table id="host_view_note_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 			<script type="text/javascript">
 				var dt_host_view_note_table_options = {
-					'ajax': {'url': "{{ url_for('storage.note_list_json_route', host_id=host.id) }}", 'method': 'POST'},
+					'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
 						dt_column('id'),
 						dt_column('host_id', {'visible': false}),

@@ -31,6 +31,11 @@ def test_service_list_json_route(client, test_service):
 	response_data = json.loads(response.body.decode('utf-8'))
 	assert response_data["data"][0]["info"] == test_service.info
 
+	response = client.post(url_for('storage.service_list_json_route', filter='Service.info=="%s"' % test_service.info), {'draw': 1, 'start': 0, 'length': 1})
+	assert response.status_code == HTTPStatus.OK
+	response_data = json.loads(response.body.decode('utf-8'))
+	assert response_data["data"][0]["info"] == test_service.info
+
 
 def test_service_add_route(client, test_host):
 	"""service add route test"""

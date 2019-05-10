@@ -19,7 +19,7 @@
 <div class="row">
 	<div class="col-md-8">
 	{% for tmp in data %}
-		<a class="portmap_item" href="{{ url_for('storage.service_list_route', port=tmp['port']) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
+		<a class="portmap_item" href="{{ url_for('storage.service_list_route', filter='Service.port=="%s"'|format(tmp['port'])) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
 	{% endfor %}
 	</div>
 

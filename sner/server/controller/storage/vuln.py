@@ -2,13 +2,15 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy.sql import func
+from sqlalchemy import func
+from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
+from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/vuln/list')
@@ -38,10 +40,9 @@ def vuln_list_json_route():
 		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
 	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
+	if 'filter' in request.values:
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
 
-	## filtering
-	if 'host_id' in request.values:
-		query = query.filter(Vuln.host_id == request.values.get('host_id'))
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(vulns)

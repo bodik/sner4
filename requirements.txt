@@ -39,6 +39,7 @@ requests==2.21.0
 six==1.11.0
 SQLAlchemy==1.3.3
 sqlalchemy-datatables==1.2.0
+git+https://github.com/bodik/sqlalchemy-filters@latest_cummulative#egg=sqlalchemy_filters
 sqlalchemy-json==0.2.3
 SQLAlchemy-Utils==0.33.11
 tapioca-nessus==0.1.5
