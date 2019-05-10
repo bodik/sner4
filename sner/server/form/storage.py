@@ -61,8 +61,8 @@ class VulnForm(FlaskForm):
 	severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
 	descr = TextAreaField('Descr')
 	data = TextAreaField('Data')
-	refs = LinesField('Refs')
-	tags = LinesField('Tags')
+	refs = LinesField('Refs', filters=[empty_to_none])
+	tags = LinesField('Tags', filters=[empty_to_none])
 	comment = TextAreaField('Comment')
 
 
