@@ -6,6 +6,7 @@
 		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link(row); }}),
+			dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
 			dt_column('tags'),
 			dt_column('nr_vulns')
 		],
