@@ -165,9 +165,10 @@ def vuln_grouped_json_route():
 
 	columns = [
 		ColumnDT(Vuln.name, mData='name'),
-		ColumnDT(func.count(Vuln.id), mData='nr_vulns'),
+		ColumnDT(Vuln.tags, mData='tags'),
+		ColumnDT(func.count(Vuln.id), mData='nr_vulns', global_search=False),
 	]
-	query = db.session.query().select_from(Vuln).group_by(Vuln.name)
+	query = db.session.query().select_from(Vuln).group_by(Vuln.name, Vuln.tags)
 	if 'filter' in request.values:
 		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
 
