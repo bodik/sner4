@@ -32,6 +32,9 @@
 	<a class="btn btn-xs btn-default" href="{{> storage.vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
+<script id="storage.pagepart-vuln_list_filter_name_link.hbs" type="text/x-handlebars-template">
+	<a href='{{> storage.vuln_list_route_filter_name filter_value=name}}'>{{name}}</a>
+</script>
 
 <script id="storage.pagepart-note_controls.hbs" type="text/x-handlebars-template">
 	<a class="btn btn-xs btn-default" href="{{> storage.note_view_route note_id=id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
@@ -97,6 +100,7 @@
 			.replace('REPLACE1', '{%raw%}{{model_name}}{%endraw%}')
 			.replace('REPLACE2', '{%raw%}{{model_id}}{%endraw%}')
 	);
+	Handlebars.registerPartial('storage.vuln_list_route_filter_name', "{{ url_for('storage.vuln_list_route', filter='REPLACE') }}".replace('REPLACE', '{%raw%}Vuln.name=="{{filter_value}}"{%endraw%}'));
 	Handlebars.registerPartial('storage.vuln_view_route', "{{ url_for('storage.vuln_view_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
 	Handlebars.registerPartial('storage.vuln_edit_route', "{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
 	Handlebars.registerPartial('storage.vuln_delete_route', "{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
@@ -122,6 +126,7 @@
 	var storage_pagepart_severity_label = Handlebars.compile(document.getElementById('storage.pagepart-severity_label.hbs').innerHTML);
 	var storage_pagepart_vuln_refs = Handlebars.compile(document.getElementById('storage.pagepart-vuln_refs.hbs').innerHTML);
 	var storage_pagepart_vuln_controls = Handlebars.compile(document.getElementById('storage.pagepart-vuln_controls.hbs').innerHTML);
+	var storage_pagepart_vuln_list_filter_name_link = Handlebars.compile(document.getElementById('storage.pagepart-vuln_list_filter_name_link.hbs').innerHTML);
 
 	var storage_pagepart_note_controls = Handlebars.compile(document.getElementById('storage.pagepart-note_controls.hbs').innerHTML);
 </script>

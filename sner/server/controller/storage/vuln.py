@@ -150,3 +150,26 @@ def vuln_tag_by_id_route():
 			return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
 
 	return jsonify({'status': 400, 'title': 'Invalid form submitted.'}), 400
+
+
+@blueprint.route('/vuln/grouped')
+def vuln_grouped_route():
+	"""view grouped vulns"""
+
+	return render_template('storage/vuln/grouped.html')
+
+
+@blueprint.route('/vuln/grouped.json', methods=['GET', 'POST'])
+def vuln_grouped_json_route():
+	"""view grouped vulns, data endpoint"""
+
+	columns = [
+		ColumnDT(Vuln.name, mData='name'),
+		ColumnDT(func.count(Vuln.id), mData='nr_vulns'),
+	]
+	query = db.session.query().select_from(Vuln).group_by(Vuln.name)
+	if 'filter' in request.values:
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
+
+	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
+	return jsonify(vulns)
