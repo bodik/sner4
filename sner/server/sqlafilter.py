@@ -19,7 +19,7 @@ SEARCH_GRAMMAR = r"""
 
 	criteria: COLSPEC OP VALUE
 	COLSPEC: /[a-z]+\.[a-z]+/i
-	OP: "==" | "!="
+	OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "is_null" | "is_not_null" | "any" | "not_all"
 	VALUE: ESCAPED_STRING
 
 	%import common.ESCAPED_STRING
