@@ -31,7 +31,9 @@ def test_host_list_json_route(client, test_host):
 	response_data = json.loads(response.body.decode('utf-8'))
 	assert response_data["data"][0]["hostname"] == test_host.hostname
 
-	response = client.post(url_for('storage.host_list_json_route', filter='Host.hostname=="%s"' % test_host.hostname), {'draw': 1, 'start': 0, 'length': 1})
+	response = client.post(
+		url_for('storage.host_list_json_route', filter='Host.hostname=="%s"' % test_host.hostname),
+		{'draw': 1, 'start': 0, 'length': 1})
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
 	assert response_data["data"][0]["hostname"] == test_host.hostname

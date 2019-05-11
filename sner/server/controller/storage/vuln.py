@@ -1,8 +1,11 @@
 """controller vuln"""
 
+from http import HTTPStatus
+
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -125,12 +128,12 @@ def vuln_delete_by_id_route():
 		try:
 			Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
 			db.session.commit()
-			return jsonify({'status': 200})
-		except Exception as e:
+			return jsonify({'status': HTTPStatus.OK})
+		except SQLAlchemyError as e:
 			db.session.rollback()
-			return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
+			return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
 
-	return jsonify({'status': 400, 'title': 'Invalid form submitted.'}), 400
+	return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/vuln/tag_by_id', methods=['POST'])
@@ -145,7 +148,7 @@ def vuln_tag_by_id_route():
 				vuln.tags = list(set((vuln.tags or []) + [tag]))
 			db.session.commit()
 			return jsonify({'status': 200})
-		except Exception as e:
+		except SQLAlchemyError as e:
 			db.session.rollback()
 			return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
 

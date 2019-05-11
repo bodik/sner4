@@ -1,6 +1,7 @@
 """job controler"""
 
 import base64
+import binascii
 import json
 import os
 import time
@@ -9,7 +10,8 @@ from datetime import datetime
 from http import HTTPStatus
 
 import jsonschema
-from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
+from flask import current_app, jsonify, redirect, render_template, request, url_for
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 
 import sner.agent.protocol
@@ -45,7 +47,7 @@ def job_assign_route(queue_id=None):
 			try:
 				db.session.execute('LOCK TABLE %s' % table)
 				break
-			except Exception:
+			except SQLAlchemyError:
 				db.session.rollback()
 				time.sleep(0.01)
 
@@ -90,8 +92,8 @@ def job_output_route():
 		job_id = request.json['id']
 		retval = request.json['retval']
 		output = base64.b64decode(request.json['output'])
-	except Exception:
-		return Response(status=HTTPStatus.BAD_REQUEST)
+	except (jsonschema.exceptions.ValidationError, binascii.Error):
+		return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
 
 	with open(job_output_filename(job_id), 'wb') as ftmp:
 		ftmp.write(output)
@@ -101,7 +103,7 @@ def job_output_route():
 	job.time_end = datetime.utcnow()
 	db.session.commit()
 
-	return Response(status=HTTPStatus.OK)
+	return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
 
 
 @blueprint.route('/job/delete/<job_id>', methods=['GET', 'POST'])

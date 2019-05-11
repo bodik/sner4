@@ -35,7 +35,9 @@ def host_list_json_route():
 		ColumnDT(Host.comment, mData='comment'),
 		ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
 	]
-	query = db.session.query().select_from(Host).outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id).group_by(Host.id)
+	query = db.session.query().select_from(Host) \
+		.outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
+		.group_by(Host.id)
 	if 'filter' in request.values:
 		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 

@@ -54,7 +54,7 @@ class Base():
 		if self.process.returncode is None:
 			try:
 				os.kill(self.process.pid, signal.SIGTERM)
-			except Exception as e:
+			except OSError as e:
 				self.log.error(e)
 
 @register_module('dummy')
