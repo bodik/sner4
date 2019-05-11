@@ -146,3 +146,28 @@ def test_tag_by_id_route(client, test_vuln):
 
 	vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
 	assert 'testtag' in vuln.tags
+
+
+def test_vuln_grouped_route(client):
+	"""vuln grouped route test"""
+
+	response = client.get(url_for('storage.vuln_grouped_route'))
+	assert response.status_code == HTTPStatus.OK
+	assert '<h1>Vulns grouped' in response
+
+
+def test_vuln_grouped_json_route(client, test_vuln):
+	"""vuln grouped json route test"""
+
+	test_vuln.name = 'test vuln grouped json %f' % random()
+	persist_and_detach(test_vuln)
+
+	response = client.post(url_for('storage.vuln_grouped_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_vuln.name})
+	assert response.status_code == HTTPStatus.OK
+	response_data = json.loads(response.body.decode('utf-8'))
+	assert test_vuln.name in response_data['data'][0]['name']
+
+	response = client.post(url_for('storage.vuln_grouped_json_route', filter='Vuln.name=="%s"' % test_vuln.name), {'draw': 1, 'start': 0, 'length': 1})
+	assert response.status_code == HTTPStatus.OK
+	response_data = json.loads(response.body.decode('utf-8'))
+	assert test_vuln.name in response_data['data'][0]['name']
