@@ -6,9 +6,10 @@ from random import random
 
 from flask import url_for
 
+
 from sner.server import db
 from sner.server.model.storage import Vuln
-from tests.server import persist_and_detach
+from tests.server import get_csrf_token, persist_and_detach
 from tests.server.model.storage import create_test_vuln
 
 
@@ -114,3 +115,34 @@ def test_vuln_view_route(client, test_vuln):
 	assert response.status_code == HTTPStatus.OK
 
 	assert '<pre>%s</pre>' % test_vuln.data in response
+
+
+def test_delete_by_id_route(client, test_host):
+	"""vuln multi delete route for ajaxed toolbars test"""
+
+	test_vuln = create_test_vuln(test_host, None)
+	test_vuln.name = 'test vuln delete by id %f' % random()
+	persist_and_detach(test_vuln)
+
+
+	data = {'ids-0': test_vuln.id,	'csrf_token': get_csrf_token(client)}
+	response = client.post(url_for('storage.vuln_delete_by_id_route'), data)
+	assert response.status_code == HTTPStatus.OK
+
+	vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+	assert not vuln
+
+
+def test_tag_by_id_route(client, test_vuln):
+	"""vuln multi tag route for ajaxed toolbars test"""
+
+	test_vuln.name = 'test vuln tag by id %f' % random()
+	persist_and_detach(test_vuln)
+
+
+	data = {'tag': 'testtag', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(client)}
+	response = client.post(url_for('storage.vuln_tag_by_id_route'), data)
+	assert response.status_code == HTTPStatus.OK
+
+	vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+	assert 'testtag' in vuln.tags
