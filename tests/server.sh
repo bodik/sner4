@@ -2,4 +2,4 @@
 set -e
 
 export SNER_CONFIG="../../sner-server.cfg"
-python -m pytest -p no:cacheprovider $@
+python -m pytest $@
