@@ -21,7 +21,7 @@
 
 {% block content %}
 <div class="vulns">
-	<h1>Vulns grouped</h1>
+	<h1>Vulns grouped{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.vuln_grouped_route') }}">unfilter</a></small>{% endif %}</h1>
 
 	<div id="vuln_grouped_table_toolbar" class="dt_toolbar">
 		<div class="btn-group" role="group">

@@ -171,7 +171,7 @@ def vuln_grouped_json_route():
 	]
 	query = db.session.query().select_from(Vuln).group_by(Vuln.name, Vuln.severity, Vuln.tags)
 	if 'filter' in request.values:
-		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(vulns)
