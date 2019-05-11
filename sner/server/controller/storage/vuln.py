@@ -41,7 +41,7 @@ def vuln_list_json_route():
 	]
 	query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
 	if 'filter' in request.values:
-		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(vulns)

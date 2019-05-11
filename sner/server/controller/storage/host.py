@@ -37,7 +37,7 @@ def host_list_json_route():
 	]
 	query = db.session.query().select_from(Host).outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id).group_by(Host.id)
 	if 'filter' in request.values:
-		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
 	hosts = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(hosts)

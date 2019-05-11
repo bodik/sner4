@@ -44,7 +44,7 @@ def service_list_json_route():
 	]
 	query = db.session.query().select_from(Service).join(Host)
 	if 'filter' in request.values:
-		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), auto_join=False)
+		query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
 	services = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(services)
