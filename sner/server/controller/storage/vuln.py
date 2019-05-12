@@ -1,14 +1,16 @@
 """controller vuln"""
 
+from datetime import datetime
 from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
+from sner.server.command.storage import vuln_report
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
@@ -178,3 +180,13 @@ def vuln_grouped_json_route():
 
 	vulns = DataTables(request.values.to_dict(), query, columns).output_result()
 	return jsonify(vulns)
+
+
+@blueprint.route('/vuln/report')
+def vuln_report_route():
+	"""generate vulns report"""
+
+	return Response(
+		vuln_report(request.values.get('filter')),
+		mimetype='text/csv',
+		headers={'Content-Disposition': 'attachment; filename=report-%s.csv' % datetime.now().isoformat()})

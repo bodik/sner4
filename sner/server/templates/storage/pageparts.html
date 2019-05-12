@@ -48,27 +48,25 @@
 	///
 
 	/*
-	 * generate url for ref
+	 * generate url for ref; python version used during export must remain in sync
 	 */
 	Handlebars.registerHelper('url_for_ref', function(ref) {
-		var ret = ref;
-
-		var matched = ref.match(/(.*?)\-(.*)/);
-		if (matched) {
-			var [ident, data] = [matched[1], matched[2]];
-			switch (ident) {
-				case 'URL': ret = data; break;
-				case 'CVE': ret = 'https://cvedetails.com/cve/CVE-'+data; break;
-				case 'NSS': ret = 'https://www.tenable.com/plugins/nessus/'+data; break;
-				case 'BID': ret = 'http://www.securityfocus.com/bid/'+data; break;
-				case 'CERT': ret = 'https://www.kb.cert.org/vuls/id/'+data; break;
-				case 'EDB': ret = 'https://www.exploit-db.com/exploits/'+data.replace('ID-', ''); break;
-				case 'SN': ret = "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', data); break;
-				default: ret = '#'; break;
-			}
+		var refgen = {
+			'URL': (d) => d,
+			'CVE': (d) => 'https://cvedetails.com/cve/CVE-' + d,
+			'NSS': (d) => 'https://www.tenable.com/plugins/nessus/' + d,
+			'BID': (d) => 'http://www.securityfocus.com/bid/' + d,
+			'CERT': (d) => 'https://www.kb.cert.org/vuls/id/' + d,
+			'EDB': (d) => 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
+			'SN': (d) => "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', d)
 		}
-
-		return ret;
+		try {
+			var matched = ref.match(/(.*?)\-(.*)/);
+			return refgen[matched[1]](matched[2])
+		} catch (err) {
+			//pass
+		}
+		return '#';
 	});
 
 	/*

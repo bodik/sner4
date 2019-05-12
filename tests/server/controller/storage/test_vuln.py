@@ -171,3 +171,15 @@ def test_vuln_grouped_json_route(client, test_vuln):
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
 	assert test_vuln.name in response_data['data'][0]['name']
+
+
+def test_vuln_report_route(client, test_vuln):
+	"""vuln report route test"""
+
+	test_vuln.name += ' report %f' % random()
+	persist_and_detach(test_vuln)
+
+
+	response = client.get(url_for('storage.vuln_report_route', filter='Vuln.id=="%d"' % test_vuln.id))
+	assert response.status_code == HTTPStatus.OK
+	assert ',"%s",' % test_vuln.name in response.body.decode('utf-8')

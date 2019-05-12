@@ -52,6 +52,10 @@
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags is_null "" OR (Vuln.tags not_all "report" AND Vuln.tags not_all "info")') }}">Exclude reviewed</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only <span class="glyphicon glyphicon-tag"></span> Report</a>
 		</div>
+
+		<div class="btn-group" role="group">
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
+		</div>
 	</div>
 
 	<table id="vuln_list_table" class="table table-hover table-responsive table-condensed"></table>

@@ -2,12 +2,15 @@
 
 import json
 import re
+from random import random
 
 import pytest
 
 from sner.server import db
 from sner.server.command.storage import storage_command
 from sner.server.model.storage import Host, Note, Service, Vuln
+
+from tests.server import persist_and_detach
 
 
 def test_import_nmap_command(runner):
@@ -53,3 +56,15 @@ def test_import_nessus_command(runner):
 def test_flush_command():
 	"""flush storage database; no separate test db, test not implemented"""
 	pass
+
+
+def test_report_command(runner, test_vuln):
+	"""test vuln report command"""
+
+	test_vuln.name += ' report %f' % random()
+	persist_and_detach(test_vuln)
+
+
+	result = runner.invoke(storage_command, ['report', 'Vuln.id=="%d"' % test_vuln.id])
+	assert result.exit_code == 0
+	assert ',"%s",' % test_vuln.name in result.output
