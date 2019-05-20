@@ -20,18 +20,15 @@ sleep 3
 
 pgrep --full "127.126.125.124"
 if [ $? -eq 0 ]; then
+	testserver_cleanup
 	rreturn 1 "child process left running"
 fi
 ps -p ${PID} 1>/dev/null
 if [ $? -eq 0 ]; then
+	testserver_cleanup
 	rreturn 1 "agent still running"
 fi
 
 
-# cleanup test data 
-JOBID=$(bin/server scheduler job_list | grep ${TESTID} | awk '{print $1}')
-bin/server scheduler job_delete ${JOBID}
-bin/server scheduler queue_delete ${TESTID}
-bin/server scheduler task_delete ${TESTID}
-
+testserver_cleanup
 rreturn 0 $0
