@@ -23,8 +23,6 @@ def test_queue_add_route(client, test_task):
 	"""queue add route test"""
 
 	test_queue = create_test_queue(test_task)
-	test_queue.name += ' add %f' % random()
-
 
 	form = client.get(url_for('scheduler.queue_add_route')).form
 	form['name'] = test_queue.name
@@ -39,16 +37,8 @@ def test_queue_add_route(client, test_task):
 	assert queue.name == test_queue.name
 
 
-	db.session.delete(queue)
-	db.session.commit()
-
-
 def test_queue_edit_route(client, test_queue):
 	"""queue edit route test"""
-
-	test_queue.name += ' edit %f' % random()
-	persist_and_detach(test_queue)
-
 
 	form = client.get(url_for('scheduler.queue_edit_route', queue_id=test_queue.id)).form
 	form['name'] = form['name'].value+' edited'
@@ -62,10 +52,7 @@ def test_queue_edit_route(client, test_queue):
 def test_queue_enqueue_route(client, test_queue):
 	"""queue enqueue route test"""
 
-	test_queue.name += ' enqueue %f' % random()
-	persist_and_detach(test_queue)
 	test_target = create_test_target(test_queue)
-
 
 	form = client.get(url_for('scheduler.queue_enqueue_route', queue_id=test_queue.id)).form
 	form['targets'] = test_target.target
@@ -76,34 +63,21 @@ def test_queue_enqueue_route(client, test_queue):
 	assert queue.targets[0].target == test_target.target
 
 
-	db.session.delete(queue.targets[0])
-	db.session.commit()
-
-
-def test_queue_flush_route(client, test_queue):
+def test_queue_flush_route(client, test_target):
 	"""queue flush route test"""
 
-	test_queue.name += ' flush %f' % random()
-	persist_and_detach(test_queue)
-	test_target = create_test_target(test_queue)
-	persist_and_detach(test_target)
+	test_queue_id = test_target.queue_id
 
-
-	form = client.get(url_for('scheduler.queue_flush_route', queue_id=test_queue.id)).form
+	form = client.get(url_for('scheduler.queue_flush_route', queue_id=test_queue_id)).form
 	response = form.submit()
 	assert response.status_code == HTTPStatus.FOUND
 
-	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+	queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
 	assert not queue.targets
 
 
-def test_queue_delete_route(client, test_task):
+def test_queue_delete_route(client, test_queue):
 	"""queue delete route test"""
-
-	test_queue = create_test_queue(test_task)
-	test_queue.name += ' delete %f' % random()
-	persist_and_detach(test_queue)
-
 
 	form = client.get(url_for('scheduler.queue_delete_route', queue_id=test_queue.id)).form
 	response = form.submit()

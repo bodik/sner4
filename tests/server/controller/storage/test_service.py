@@ -23,9 +23,6 @@ def test_service_list_route(client):
 def test_service_list_json_route(client, test_service):
 	"""service list_json route test"""
 
-	test_service.info = 'test service list json %f' % random()
-	persist_and_detach(test_service)
-
 	response = client.post(url_for('storage.service_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_service.info})
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
@@ -43,8 +40,6 @@ def test_service_add_route(client, test_host):
 	"""service add route test"""
 
 	test_service = create_test_service(test_host)
-	test_service.info = 'test service add %f' % random()
-
 
 	form = client.get(url_for('storage.service_add_route', host_id=test_service.host.id)).form
 	form['proto'] = test_service.proto
@@ -64,16 +59,8 @@ def test_service_add_route(client, test_host):
 	assert service.comment == test_service.comment
 
 
-	db.session.delete(service)
-	db.session.commit()
-
-
 def test_service_edit_route(client, test_service):
 	"""service edit route test"""
-
-	test_service.info = 'test service edit %f' % random()
-	persist_and_detach(test_service)
-
 
 	form = client.get(url_for('storage.service_edit_route', service_id=test_service.id)).form
 	form['state'] = 'down'
@@ -87,13 +74,8 @@ def test_service_edit_route(client, test_service):
 	assert service.info == form['info'].value
 
 
-def test_service_delete_route(client, test_host):
+def test_service_delete_route(client, test_service):
 	"""service delete route test"""
-
-	test_service = create_test_service(test_host)
-	test_service.info = 'test service delete %f' % random()
-	persist_and_detach(test_service)
-
 
 	form = client.get(url_for('storage.service_delete_route', service_id=test_service.id)).form
 	response = form.submit()
@@ -106,9 +88,6 @@ def test_service_delete_route(client, test_host):
 def test_service_vizports_route(client, test_service):
 	"""service vizports route test"""
 
-	test_service.port = int(random()*65535)
-	persist_and_detach(test_service)
-
 	response = client.get(url_for('storage.service_vizports_route'))
 	assert response.status_code == HTTPStatus.OK
 
@@ -118,9 +97,6 @@ def test_service_vizports_route(client, test_service):
 
 def test_service_portstat_route(client, test_service):
 	"""service portstat route test"""
-
-	test_service.info = 'test service banner %f' % random()
-	persist_and_detach(test_service)
 
 	response = client.get(url_for('storage.service_portstat_route', port=test_service.port))
 	assert response.status_code == HTTPStatus.OK

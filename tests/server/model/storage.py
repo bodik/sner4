@@ -57,45 +57,29 @@ def create_test_note(a_test_host, a_test_service):
 		comment='some test note comment')
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_host():
 	"""persistent test host"""
 
-	tmp_host = persist_and_detach(create_test_host())
-	tmp_id = tmp_host.id
-	yield tmp_host
-	db.session.delete(Host.query.get(tmp_id))
-	db.session.commit()
+	yield persist_and_detach(create_test_host())
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_service(test_host): # pylint: disable=redefined-outer-name
 	"""persistent test service"""
 
-	tmp_service = persist_and_detach(create_test_service(test_host))
-	tmp_id = tmp_service.id
-	yield tmp_service
-	db.session.delete(Service.query.get(tmp_id))
-	db.session.commit()
+	yield persist_and_detach(create_test_service(test_host))
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_vuln(test_host, test_service): # pylint: disable=redefined-outer-name
 	"""persistent test vuln"""
 
-	tmp_vuln = persist_and_detach(create_test_vuln(test_host, test_service))
-	tmp_id = tmp_vuln.id
-	yield tmp_vuln
-	db.session.delete(Vuln.query.get(tmp_id))
-	db.session.commit()
+	yield persist_and_detach(create_test_vuln(test_host, test_service))
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_note(test_host, test_service): # pylint: disable=redefined-outer-name
 	"""persistent test note"""
 
-	tmp_note = persist_and_detach(create_test_note(test_host, test_service))
-	tmp_id = tmp_note.id
-	yield tmp_note
-	db.session.delete(Note.query.get(tmp_id))
-	db.session.commit()
+	yield persist_and_detach(create_test_note(test_host, test_service))

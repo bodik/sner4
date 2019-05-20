@@ -28,10 +28,6 @@ def test_import_nmap_command(runner):
 	assert 'PIPELINING' in json.loads(tmpnote.data)['output']
 
 
-	db.session.delete(host)
-	db.session.commit()
-
-
 def test_import_nessus_command(runner):
 	"""test nessus parser"""
 
@@ -48,10 +44,6 @@ def test_import_nessus_command(runner):
 	assert 'CVE-1900-0000' in tmpvuln.refs
 
 
-	db.session.delete(host)
-	db.session.commit()
-
-
 @pytest.mark.skip(reason='would note test flushing database')
 def test_flush_command():
 	"""flush storage database; no separate test db, test not implemented"""
@@ -60,10 +52,6 @@ def test_flush_command():
 
 def test_report_command(runner, test_vuln):
 	"""test vuln report command"""
-
-	test_vuln.name += ' report %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	result = runner.invoke(storage_command, ['report', 'Vuln.id=="%d"' % test_vuln.id])
 	assert result.exit_code == 0

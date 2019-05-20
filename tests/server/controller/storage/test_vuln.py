@@ -24,9 +24,6 @@ def test_vuln_list_route(client):
 def test_vuln_list_json_route(client, test_vuln):
 	"""vuln list_json route test"""
 
-	test_vuln.name = 'test vuln list json %f' % random()
-	persist_and_detach(test_vuln)
-
 	response = client.post(url_for('storage.vuln_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_vuln.name})
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
@@ -42,8 +39,6 @@ def test_vuln_add_route(client, test_host, test_service):
 	"""vuln add route test"""
 
 	test_vuln = create_test_vuln(test_host, test_service)
-	test_vuln.name = 'test vuln add %f' % random()
-
 
 	form = client.get(url_for('storage.vuln_add_route', model_name='service', model_id=test_vuln.service.id)).form
 	form['name'] = test_vuln.name
@@ -64,16 +59,8 @@ def test_vuln_add_route(client, test_host, test_service):
 	assert vuln.tags == test_vuln.tags
 
 
-	db.session.delete(vuln)
-	db.session.commit()
-
-
 def test_vuln_edit_route(client, test_vuln):
 	"""vuln edit route test"""
-
-	test_vuln.name = 'test vuln edit %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	form = client.get(url_for('storage.vuln_edit_route', vuln_id=test_vuln.id)).form
 	form['name'] = 'edited '+form['name'].value
@@ -87,13 +74,8 @@ def test_vuln_edit_route(client, test_vuln):
 	assert len(vuln.tags) == 3
 
 
-def test_vuln_delete_route(client, test_host):
+def test_vuln_delete_route(client, test_vuln):
 	"""vuln delete route test"""
-
-	test_vuln = create_test_vuln(test_host, None)
-	test_vuln.name = 'test vuln delete %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	form = client.get(url_for('storage.vuln_delete_route', vuln_id=test_vuln.id)).form
 	response = form.submit()
@@ -106,24 +88,14 @@ def test_vuln_delete_route(client, test_host):
 def test_vuln_view_route(client, test_vuln):
 	"""vuln view route test"""
 
-	test_vuln.data = 'view%f' % random()
-	test_vuln.xtype = 'nessus.vuln.testxtype'
-	persist_and_detach(test_vuln)
-
-
 	response = client.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id))
 	assert response.status_code == HTTPStatus.OK
 
 	assert '<pre>%s</pre>' % test_vuln.data in response
 
 
-def test_delete_by_id_route(client, test_host):
+def test_delete_by_id_route(client, test_vuln):
 	"""vuln multi delete route for ajaxed toolbars test"""
-
-	test_vuln = create_test_vuln(test_host, None)
-	test_vuln.name = 'test vuln delete by id %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	data = {'ids-0': test_vuln.id,	'csrf_token': get_csrf_token(client)}
 	response = client.post(url_for('storage.vuln_delete_by_id_route'), data)
@@ -135,10 +107,6 @@ def test_delete_by_id_route(client, test_host):
 
 def test_tag_by_id_route(client, test_vuln):
 	"""vuln multi tag route for ajaxed toolbars test"""
-
-	test_vuln.name = 'test vuln tag by id %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	data = {'tag': 'testtag', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(client)}
 	response = client.post(url_for('storage.vuln_tag_by_id_route'), data)
@@ -159,9 +127,6 @@ def test_vuln_grouped_route(client):
 def test_vuln_grouped_json_route(client, test_vuln):
 	"""vuln grouped json route test"""
 
-	test_vuln.name = 'test vuln grouped json %f' % random()
-	persist_and_detach(test_vuln)
-
 	response = client.post(url_for('storage.vuln_grouped_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_vuln.name})
 	assert response.status_code == HTTPStatus.OK
 	response_data = json.loads(response.body.decode('utf-8'))
@@ -175,10 +140,6 @@ def test_vuln_grouped_json_route(client, test_vuln):
 
 def test_vuln_report_route(client, test_vuln):
 	"""vuln report route test"""
-
-	test_vuln.name += ' report %f' % random()
-	persist_and_detach(test_vuln)
-
 
 	response = client.get(url_for('storage.vuln_report_route', filter='Vuln.id=="%d"' % test_vuln.id))
 	assert response.status_code == HTTPStatus.OK

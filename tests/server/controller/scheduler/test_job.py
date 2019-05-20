@@ -23,32 +23,21 @@ def test_job_list_route(client):
 	assert '<h1>Jobs list' in response
 
 
-def test_job_assign_route(client, test_queue):
+def test_job_assign_route(client, test_target):
 	"""job assign route test"""
 
-	test_target = create_test_target(test_queue)
-	test_target.target += 'job assign %f' % random()
-	persist_and_detach(test_target)
+	test_queue_id = test_target.queue_id
 
-
-	response = client.get(url_for('scheduler.job_assign_route', queue_id=test_queue.id))
+	response = client.get(url_for('scheduler.job_assign_route', queue_id=test_queue_id))
 	assert response.status_code == HTTPStatus.OK
 	assert isinstance(json.loads(response.body.decode('utf-8')), dict)
 
-	queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+	queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
 	assert len(queue.jobs) == 1
-
-
-	db.session.delete(queue.jobs[0])
-	db.session.commit()
 
 
 def test_job_output_route(client, test_job):
 	"""job output route test"""
-
-	test_job.assignment = json.dumps('{"module": "job outpu %f"}' % random())
-	persist_and_detach(test_job)
-
 
 	response = client.post_json(
 		url_for('scheduler.job_output_route'),
@@ -61,16 +50,8 @@ def test_job_output_route(client, test_job):
 		assert ftmp.read() == 'a-test-file-contents'
 
 
-	os.remove(job_output_filename(test_job.id))
-
-
-def test_job_delete_route(client, test_queue):
+def test_job_delete_route(client, test_job):
 	"""delete route test"""
-
-	test_job = create_test_job(test_queue)
-	test_job.assignment = json.dumps('{"module": "job delete %f"}' % random())
-	persist_and_detach(test_job)
-
 
 	form = client.get(url_for('scheduler.job_delete_route', job_id=test_job.id)).form
 	response = form.submit()

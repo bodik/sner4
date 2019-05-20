@@ -23,8 +23,6 @@ def test_task_add_route(client):
 	"""task add route test"""
 
 	test_task = create_test_task()
-	test_task.name += ' add %f' % random()
-
 
 	form = client.get(url_for('scheduler.task_add_route')).form
 	form['name'] = test_task.name
@@ -40,16 +38,8 @@ def test_task_add_route(client):
 	assert task.params == test_task.params
 
 
-	db.session.delete(task)
-	db.session.commit()
-
-
 def test_task_edit_route(client, test_task):
 	"""task edit route test"""
-
-	test_task.name += ' edit %f' % random()
-	persist_and_detach(test_task)
-
 
 	form = client.get(url_for('scheduler.task_edit_route', task_id=test_task.id)).form
 	form['name'] = form['name'].value+' edited'
@@ -63,13 +53,8 @@ def test_task_edit_route(client, test_task):
 	assert 'added_parameter' in task.params
 
 
-def test_task_delete_route(client):
+def test_task_delete_route(client, test_task):
 	"""task delete route test"""
-
-	test_task = create_test_task()
-	test_task.name += ' delete %f' % random()
-	persist_and_detach(test_task)
-
 
 	form = client.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
 	response = form.submit()
