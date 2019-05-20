@@ -1,17 +1,16 @@
 #!/bin/sh
 
 . tests/agent/lib.sh
-TESTID="agent_test_processhandling_$(date +%s)"
 testserver_create
 
 
 # add task, queue and target
-bin/server scheduler task_add nmap --name ${TESTID} --params '-Pn --reason -sU --max-rate 1'
-bin/server scheduler queue_add ${TESTID} --name ${TESTID}
-bin/server scheduler queue_enqueue ${TESTID} "127.126.125.124"
+bin/server scheduler task_add nmap --name test_task --params '-Pn --reason -sU --max-rate 1'
+bin/server scheduler queue_add test_task --name test_queue
+bin/server scheduler queue_enqueue test_queue "127.126.125.124"
 
 
-bin/agent --server 'http://localhost:19000' --debug --queue ${TESTID} --oneshot &
+bin/agent --server 'http://localhost:19000' --debug --queue test_queue --oneshot &
 PID=$!
 sleep 1
 
