@@ -1,15 +1,16 @@
 #!/bin/sh
 
-. tests/common.sh
+. tests/agent/lib.sh
 TESTID="agent_test_nmap_$(date +%s)"
+testserver_create
 
-# add test task, queue and target
+
 bin/server scheduler task_add nmap --name ${TESTID} --params '-sL'
 bin/server scheduler queue_add ${TESTID} --name ${TESTID}
 bin/server scheduler queue_enqueue ${TESTID} "127.0.0.1"
 
 
-bin/agent --debug --queue ${TESTID} --oneshot
+bin/agent --server 'http://localhost:19000' --debug --queue ${TESTID} --oneshot
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent failed'
 fi

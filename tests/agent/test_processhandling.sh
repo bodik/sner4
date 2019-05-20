@@ -1,7 +1,8 @@
 #!/bin/sh
 
-. tests/common.sh
+. tests/agent/lib.sh
 TESTID="agent_test_processhandling_$(date +%s)"
+testserver_create
 
 
 # add task, queue and target
@@ -10,7 +11,7 @@ bin/server scheduler queue_add ${TESTID} --name ${TESTID}
 bin/server scheduler queue_enqueue ${TESTID} "127.126.125.124"
 
 
-bin/agent --debug --queue ${TESTID} --oneshot &
+bin/agent --server 'http://localhost:19000' --debug --queue ${TESTID} --oneshot &
 PID=$!
 sleep 1
 

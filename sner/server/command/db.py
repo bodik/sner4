@@ -129,3 +129,11 @@ def db_initdata():
 
 
 	db.session.commit()
+
+
+@db_command.command(name='remove', help='remove database (including var content)')
+@with_appcontext
+def db_remove_command():
+	"""db remove command stub"""
+
+	db_remove()

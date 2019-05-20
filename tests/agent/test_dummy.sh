@@ -1,16 +1,16 @@
 #!/bin/sh
 
-. tests/common.sh
+. tests/agent/lib.sh
 TESTID="agent_test_dummy_$(date +%s)"
+testserver_create
 
 
-# add dummy task, dummy queue
 bin/server scheduler task_add dummy --name ${TESTID} --params '--dummyparam 1'
 bin/server scheduler queue_add ${TESTID} --name ${TESTID}
 bin/server scheduler queue_enqueue ${TESTID} "${TESTID}_target"
 
 
-bin/agent --debug --queue ${TESTID} --oneshot
+bin/agent --server 'http://localhost:19000' --debug --queue ${TESTID} --oneshot
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent failed'
 fi
