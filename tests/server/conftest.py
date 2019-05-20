@@ -4,7 +4,7 @@ import pytest
 from webtest import TestApp
 from sner.server import create_app
 
-## import other fixtures to have them available in other tests
+## import all fixtures here; they will be available in all tests, import on module specific level would trigger redefined-outer-name
 from tests.server.model.scheduler import test_job, test_queue, test_task # pylint: disable=unused-import
 from tests.server.model.storage import test_host, test_note, test_service, test_vuln # pylint: disable=unused-import
 

@@ -62,7 +62,7 @@ class Agent():
 		retval = 0
 		while self.loop:
 			## get assignment
-			assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s'%queue if queue else '')).json()
+			assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s'%queue if queue else ''), timeout=60).json()
 			self.log.debug('got assignment: %s', assignment)
 
 			if assignment:
@@ -73,7 +73,7 @@ class Agent():
 				## upload output
 				jobdir = assignment['id']
 				output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
-				response = requests.post('%s/scheduler/job/output' % server, json=output)
+				response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
 				if response.status_code == HTTPStatus.OK:
 					shutil.rmtree(jobdir)
 				else:
