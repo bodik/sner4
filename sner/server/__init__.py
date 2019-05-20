@@ -51,3 +51,11 @@ def create_app():
 	app.add_template_global(name='csrf_token', f=generate_csrf)
 
 	return app
+
+
+def cli():
+	os.environ['FLASK_APP'] = 'sner.server'
+	os.environ['FLASK_ENV'] = 'development'
+	os.environ['FLASK_RUN_PORT'] = '18000'
+	os.environ['FLASK_RUN_HOST'] = '0.0.0.0'
+	return flask.cli.main()
