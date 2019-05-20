@@ -20,7 +20,7 @@ editor sner-server.cfg
 bin/make_env.sh
 . env/bin/activate
 bin/make_db.sh
-screen -S sner4-server -dm sh bin/server.sh run
+screen -S sner4-server -dm sh bin/server run
 
 ## run test suite
 bin/make_test.sh
@@ -28,8 +28,8 @@ bin/make_test.sh
 
 ### Basic dns recon
 ```
-bin/server.sh scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
-bin/server.sh scheduler enumips 192.0.2.0/24 | sh bin/server.sh scheduler queue_enqueue 'example_dns_recon' --file -
+bin/server scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
+bin/server scheduler enumips 192.0.2.0/24 | sh bin/server scheduler queue_enqueue 'example_dns_recon' --file -
 bin/agent --debug --queue 'example_dns_recon'
 ```
 

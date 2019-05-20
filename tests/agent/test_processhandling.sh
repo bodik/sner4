@@ -5,9 +5,9 @@ TESTID="agent_test_processhandling_$(date +%s)"
 
 
 # add task, queue and target
-bin/server.sh scheduler task_add nmap --name ${TESTID} --params '-Pn --reason -sU --max-rate 1'
-bin/server.sh scheduler queue_add ${TESTID} --name ${TESTID}
-bin/server.sh scheduler queue_enqueue ${TESTID} "127.126.125.124"
+bin/server scheduler task_add nmap --name ${TESTID} --params '-Pn --reason -sU --max-rate 1'
+bin/server scheduler queue_add ${TESTID} --name ${TESTID}
+bin/server scheduler queue_enqueue ${TESTID} "127.126.125.124"
 
 
 bin/agent --debug --queue ${TESTID} --oneshot &
@@ -28,9 +28,9 @@ fi
 
 
 # cleanup test data 
-JOBID=$(bin/server.sh scheduler job_list | grep ${TESTID} | awk '{print $1}')
-bin/server.sh scheduler job_delete ${JOBID}
-bin/server.sh scheduler queue_delete ${TESTID}
-bin/server.sh scheduler task_delete ${TESTID}
+JOBID=$(bin/server scheduler job_list | grep ${TESTID} | awk '{print $1}')
+bin/server scheduler job_delete ${JOBID}
+bin/server scheduler queue_delete ${TESTID}
+bin/server scheduler task_delete ${TESTID}
 
 rreturn 0 $0
