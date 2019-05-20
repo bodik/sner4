@@ -109,4 +109,4 @@ class Note(db.Model):
 	service = relationship('Service', back_populates='notes')
 
 	def __repr__(self):
-		return '<Note %s: %s>' % (self.id, self.ntype)
+		return '<Note %s: %s>' % (self.id, self.xtype)
