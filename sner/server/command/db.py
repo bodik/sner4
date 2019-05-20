@@ -1,10 +1,29 @@
 """db commands"""
 
+import os
+import shutil
+
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 from sner.server import db
 from sner.server.model.scheduler import Queue, Task, Target
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
+
+
+def db_remove():
+	"""remove database artefacts (including var content)"""
+
+	db.session.close()
+	db.drop_all()
+
+	path = current_app.config['SNER_VAR']
+	for file_object in os.listdir(path):
+		file_object_path = os.path.join(path, file_object)
+		if os.path.isdir(file_object_path):
+			shutil.rmtree(file_object_path)
+		else:
+			os.unlink(file_object_path)
 
 
 @click.group(name='db', help='sner.server db management')
@@ -26,7 +45,7 @@ def db_init():
 def db_initdata():
 	"""put initial data to database"""
 
-## scheduler test data
+	## scheduler test data
 	### dummy testing task and queue
 	db.session.add(Task(
 		name='dummy',
@@ -68,7 +87,7 @@ def db_initdata():
 		db.session.add(Target(target='10.0.0.%d'%target, queue=queue))
 
 
-## storage test data
+	## storage test data
 	db.session.add(Host(
 		address='127.4.4.4',
 		hostname='testhost.testdomain.test<script>alert(1);</script>',
