@@ -184,17 +184,17 @@ def job_list():
 			return None
 		return value.strftime(fmt)
 
-	headers = ['id', 'queue', 'assignment', 'retval', 'time_start', 'time_end']
-	fmt = '%-36s %-20s %-25s %6s %-20s %-20s'
+	headers = ['id', 'queue', 'retval', 'time_start', 'time_end', 'output_filename']
+	fmt = '%-36s %-40s %6s %-20s %-20s %-40s'
 	print(fmt % tuple(headers))
 	for job in Job.query.all():
 		print(fmt % (
 			job.id,
 			json.dumps(job.queue.name if job.queue else ''),
-			json.dumps(job.assignment[:17]+'...'),
 			job.retval,
 			format_datetime(job.time_start),
-			format_datetime(job.time_end)))
+			format_datetime(job.time_end),
+			job_output_filename(job.id) if job.retval is not None else ''))
 
 
 @scheduler_command.command(name='job_delete', help='delete job')

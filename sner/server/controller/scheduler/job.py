@@ -23,7 +23,7 @@ from sner.server.model.scheduler import Job, Queue, Target
 
 def job_output_filename(job_id):
 	"""helper, returns path to job datafile, would go to (doctrine)Repository if sqlalchemy had one"""
-	return os.path.join(current_app.config['SNER_OUTPUT_DIRECTORY'], 'scheduler', job_id)
+	return os.path.join(current_app.config['SNER_VAR'], 'scheduler', job_id)
 
 
 @blueprint.route('/job/list')
@@ -95,7 +95,9 @@ def job_output_route():
 	except (jsonschema.exceptions.ValidationError, binascii.Error):
 		return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
 
-	with open(job_output_filename(job_id), 'wb') as ftmp:
+	job_filename = job_output_filename(job_id)
+	os.makedirs(os.path.dirname(job_filename), exist_ok=True)
+	with open(job_filename, 'wb') as ftmp:
 		ftmp.write(output)
 
 	job = Job.query.filter(Job.id == job_id).one_or_none()

@@ -14,14 +14,15 @@ if [ $? -ne 0 ]; then
 	rreturn 1 'agent failed'
 fi
 
-JOBID=$(bin/server scheduler job_list | grep ${TESTID} | awk '{print $1}')
-unzip -p var/scheduler/${JOBID} output.gnmap | grep -q 'Host: 127.0.0.1 (localhost)'
+OUTPUT_FILENAME=$(bin/server scheduler job_list | grep ${TESTID} | awk '{print $6}')
+unzip -p ${OUTPUT_FILENAME} output.gnmap | grep -q 'Host: 127.0.0.1 (localhost)'
 if [ $? -ne 0 ]; then
 	rreturn 1 'agent output failed'
 fi
 
 
 # cleanup test data 
+JOBID=$(bin/server scheduler job_list | grep ${TESTID} | awk '{print $1}')
 bin/server scheduler job_delete ${JOBID}
 bin/server scheduler queue_delete ${TESTID}
 bin/server scheduler task_delete ${TESTID}
