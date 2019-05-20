@@ -1,13 +1,9 @@
 """scheduler commands tests"""
 
-import json
-from random import random
-from sner.server import db
 from sner.server.command.scheduler import scheduler_command
 from sner.server.model.scheduler import Job, Queue, Task
 
-from tests.server import persist_and_detach
-from tests.server.model.scheduler import create_test_job, create_test_queue, create_test_target, create_test_task
+from tests.server.model.scheduler import create_test_queue, create_test_target, create_test_task
 
 
 ## misc commands tests

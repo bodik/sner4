@@ -2,7 +2,6 @@
 
 import pytest
 
-from sner.server import db
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 from tests.server import persist_and_detach
 

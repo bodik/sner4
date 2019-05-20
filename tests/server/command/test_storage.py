@@ -2,15 +2,11 @@
 
 import json
 import re
-from random import random
 
 import pytest
 
-from sner.server import db
 from sner.server.command.storage import storage_command
 from sner.server.model.storage import Host, Note, Service, Vuln
-
-from tests.server import persist_and_detach
 
 
 def test_import_nmap_command(runner):

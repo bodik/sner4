@@ -1,13 +1,10 @@
 """controller queue tests"""
 
 from http import HTTPStatus
-from random import random
 
 from flask import url_for
 
-from sner.server import db
 from sner.server.model.scheduler import Queue
-from tests.server import persist_and_detach
 from tests.server.model.scheduler import create_test_queue, create_test_target
 
 

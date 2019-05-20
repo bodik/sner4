@@ -36,7 +36,7 @@ def config_from_yaml(filename):
 		parts = path.split('.')
 		if len(parts) == 1:
 			return data.get(parts[0])
-		elif parts[0] in data:
+		if parts[0] in data:
 			return get_dotted(data[parts[0]], '.'.join(parts[1:]))
 		return None
 
@@ -47,7 +47,7 @@ def config_from_yaml(filename):
 			'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
 			'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
 			'SNER_VAR': get_dotted(config_dict, 'server.var')}
-		config = {k:v for k,v in config.items() if v is not None}
+		config = {k:v for k, v in config.items() if v is not None}
 		return config
 
 	return {}
@@ -100,6 +100,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
 
 def cli():
+	"""server command wrapper"""
+
 	os.environ['FLASK_APP'] = 'sner.server'
 	os.environ['FLASK_ENV'] = 'development'
 	os.environ['FLASK_RUN_PORT'] = '18000'
