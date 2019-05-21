@@ -28,7 +28,7 @@ testserver_create() {
 	bin/server db init
 	bin/server run --port 19000 1>/dev/null 2>/dev/null & 
 	export SNER_TEST_SERVER_PID=$!
-	trap testserver_cleanup INT
+	trap "exit_status=$?; testserver_cleanup; exit $exit_status" INT
 
 	curl --silent --fail --retry-connrefused --retry 3 --max-time 30 'http://localhost:19000' 1>/dev/null
 	if [ $? -ne 0 ]; then
