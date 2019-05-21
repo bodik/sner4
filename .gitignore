@@ -1,5 +1,3 @@
-env/
+venv/
 __pycache__/
 *.swp
-sner-server.cfg
-var/

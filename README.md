@@ -6,24 +6,24 @@
 
 ### Installation
 ```
-## install packages dependencies
-apt-get install postgresql-all unzip nmap
-
-## clone
-git clone https://gitlab.flab.cesnet.cz/bodik/sner4
-cd sner4
+## clone and tune repository
+git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
+cd /opt/sner || exit 1
 ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
 
-## configure, create env, database and run server
-cp sner-server.cfg.example sner-server.cfg
-editor sner-server.cfg
-bin/make_env.sh
-. env/bin/activate
-bin/make_db.sh
-screen -S sner4-server -dm sh bin/server run
+## install packages dependencies and create python virtual environment
+make install-deps
+make venv
 
-## run test suite
-bin/make_test.sh
+## activate venv and run tests
+. venv/bin/activate
+make pylint
+make test
+
+## activate venv and run dev server
+. venv/bin/activate
+make db
+screen -S sner4-server -dm sh bin/server run
 ```
 
 ### Basic dns recon
