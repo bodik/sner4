@@ -19,12 +19,12 @@ db: db-create-default
 
 
 db-create-default:
-	su -c 'bin/database-create.sh sner' postgres
+	su -c "bin/database_create.sh sner ${USER}" postgres
 	mkdir -p /var/sner
 
 
 db-create-test:
-	su -c 'bin/database-create.sh sner_test' postgres
+	su -c "bin/database_create.sh sner_test ${USER}" postgres
 	mkdir -p /tmp/sner_test_var
 
 

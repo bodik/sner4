@@ -1,11 +1,16 @@
 #!/bin/sh
 # postgres helper
 
-ROLE="${USER}"
 DBNAME="sner"
 if [ -n "$1" ]; then
 	DBNAME="$1"
 fi
+
+ROLE="${USER}"
+if [ -n "$2" ]; then
+	ROLE="$2"
+fi
+
 
 psql --dbname postgres --command "
 	DO \$\$
