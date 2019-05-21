@@ -11,7 +11,7 @@ apt-get install -y git make
 
 ## clone and tune repository
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
-cd /opt/sner || exit 1
+cd /opt/sner
 ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
 
 ## install packages dependencies and create python virtual environment
@@ -20,7 +20,7 @@ make venv
 
 ## activate venv and run tests
 . venv/bin/activate
-make pylint
+make lint
 make test
 
 ## activate venv and run dev server

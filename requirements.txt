@@ -7,7 +7,9 @@ blinker==1.4
 certifi==2018.11.29
 chardet==3.0.4
 Click==7.0
+entrypoints==0.3
 file-magic==0.4.0
+flake8==3.7.7
 Flask==1.0.2
 Flask-DebugToolbar==0.10.1
 Flask-SQLAlchemy==2.4.0
@@ -30,6 +32,8 @@ pkg-resources==0.0.0
 pluggy==0.7.1
 psycopg2-binary==2.7.6.1
 py==1.6.0
+pycodestyle==2.5.0
+pyflakes==2.1.1
 pylint==2.1.1
 pyrsistent==0.14.11
 pytest==3.8.2

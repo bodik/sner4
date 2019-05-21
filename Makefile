@@ -28,6 +28,11 @@ db-create-test:
 	mkdir -p /tmp/sner_test_var
 
 
+lint: flake8 pylint
+
+flake8:
+	python -m flake8 sner bin/agent bin/server tests
+
 pylint:
 	python -m pylint sner bin/agent bin/server tests
 
