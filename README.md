@@ -6,6 +6,9 @@
 
 ### Installation
 ```
+## install basic utils
+apt-get install -y git make
+
 ## clone and tune repository
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
 cd /opt/sner || exit 1
@@ -23,7 +26,7 @@ make test
 ## activate venv and run dev server
 . venv/bin/activate
 make db
-screen -S sner4-server -dm sh bin/server run
+screen -S sner4-server -dm bin/server run
 ```
 
 ### Basic dns recon
