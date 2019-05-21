@@ -1,7 +1,6 @@
 """scheduler commands"""
 
 import json
-import os
 
 import click
 from flask import current_app
@@ -10,7 +9,7 @@ from netaddr import IPNetwork
 from sqlalchemy import func
 
 from sner.server import db
-from sner.server.controller.scheduler.job import job_output_filename
+from sner.server.controller.scheduler.job import job_output_filename, job_delete
 from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
@@ -197,17 +196,12 @@ def job_list():
 @scheduler_command.command(name='job_delete', help='delete job')
 @click.argument('job_id')
 @with_appcontext
-def job_delete(job_id):
-    """delete queue"""
+def job_delete_command(job_id):
+    """job delete command stub"""
 
     job = Job.query.filter(Job.id == job_id).one_or_none()
     if not job:
         current_app.logger.error('no such job')
         return 1
 
-    output_file = job_output_filename(job_id)
-    if os.path.exists(output_file):
-        os.remove(output_file)
-    db.session.delete(job)
-    db.session.commit()
-    return 0
+    return job_delete(job)

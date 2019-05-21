@@ -11,7 +11,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.command.storage import vuln_report
-from sner.server.controller.storage import blueprint
+from sner.server.controller.storage import blueprint, get_related_models
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
@@ -56,12 +56,7 @@ def vuln_list_json_route():
 def vuln_add_route(model_name, model_id):
     """add vuln to host or service"""
 
-    (host, service) = (None, None)
-    if model_name == 'host':
-        host = Host.query.get(model_id)
-    elif model_name == 'service':
-        service = Service.query.get(model_id)
-        host = service.host
+    host, service = get_related_models(model_name, model_id)
     form = VulnForm(host_id=host.id, service_id=(service.id if service else None))
 
     if form.validate_on_submit():

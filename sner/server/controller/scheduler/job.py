@@ -26,6 +26,17 @@ def job_output_filename(job_id):
     return os.path.join(current_app.config['SNER_VAR'], 'scheduler', job_id)
 
 
+def job_delete(job):
+    """job delete; used by controller and respoctive command"""
+
+    output_file = job_output_filename(job.id)
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    db.session.delete(job)
+    db.session.commit()
+    return 0
+
+
 @blueprint.route('/job/list')
 def job_list_route():
     """list jobs"""
@@ -116,11 +127,7 @@ def job_delete_route(job_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        output_file = job_output_filename(job_id)
-        if os.path.exists(output_file):
-            os.remove(output_file)
-        db.session.delete(job)
-        db.session.commit()
+        job_delete(job)
         return redirect(url_for('scheduler.job_list_route'))
 
     return render_template('button-delete.html', form=form, form_url=url_for('scheduler.job_delete_route', job_id=job_id))
