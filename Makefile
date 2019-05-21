@@ -29,7 +29,7 @@ db-create-test:
 
 
 pylint:
-	python -m pylint sner tests
+	python -m pylint sner bin/agent bin/server tests
 
 
 test: test-server test-agent
