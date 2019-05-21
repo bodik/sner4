@@ -16,9 +16,9 @@ class LinesField(TextAreaField):
     # value from form
     def process_formdata(self, valuelist):
         if valuelist:
-            self.data = valuelist[0].splitlines() # pylint: disable=attribute-defined-outside-init
+            self.data = valuelist[0].splitlines()  # pylint: disable=attribute-defined-outside-init
         else:
-            self.data = [] # pylint: disable=attribute-defined-outside-init
+            self.data = []  # pylint: disable=attribute-defined-outside-init
 
 
 class ButtonForm(FlaskForm):

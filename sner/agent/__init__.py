@@ -4,7 +4,6 @@
 import json
 import logging
 import os
-import re
 import shutil
 import signal
 import sys
@@ -23,7 +22,7 @@ import sner.agent.protocol
 from sner.agent.modules import registered_modules
 
 
-logger = logging.getLogger('sner.agent') # pylint: disable=invalid-name
+logger = logging.getLogger('sner.agent')  # pylint: disable=invalid-name
 logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
 
@@ -35,7 +34,6 @@ class Agent():
         self.log = logging.getLogger('sner.agent')
         self.loop = True
         self.module_instance = None
-
 
     def run(self, server, queue, oneshot=False):
         """fetch and process assignment from server"""
@@ -51,26 +49,24 @@ class Agent():
                         output_zip.write(filepath, arcname)
             return b64encode(buf.getvalue()).decode('utf-8')
 
-
-        ### setup signal handlers
+        # setup signal handlers
         original_signal_handlers = {}
         for isig, ihan in [(signal.SIGTERM, self.terminate), (signal.SIGINT, self.terminate), (signal.SIGUSR1, self.shutdown)]:
             original_signal_handlers[isig] = signal.getsignal(isig)
             signal.signal(isig, ihan)
 
-
         retval = 0
         while self.loop:
-            ## get assignment
-            assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s'%queue if queue else ''), timeout=60).json()
+            # get assignment
+            assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
             self.log.debug('got assignment: %s', assignment)
 
             if assignment:
-                ## process it
+                # process it
                 retval = self.process_assignment(assignment)
                 self.log.debug('processed, retval=%d', retval)
 
-                ## upload output
+                # upload output
                 jobdir = assignment['id']
                 output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
                 response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
@@ -81,36 +77,32 @@ class Agent():
                     retval = 1
                     self.loop = False
             elif not oneshot:
-                ## wait for assignment if not in oneshot mode
+                # wait for assignment if not in oneshot mode
                 sleep(10)
 
-            ## end if requested
+            # end if requested
             if oneshot:
                 self.loop = False
 
-
-        ### restore signal handlers
+        # restore signal handlers
         for isig, ihan in original_signal_handlers.items():
             signal.signal(isig, ihan)
 
         return retval
 
-
-    def shutdown(self, signum=None, frame=None): # pylint: disable=unused-argument
+    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
         """wait for current assignment to finish"""
 
         self.log.info('shutdown')
         self.loop = False
 
-
-    def terminate(self, signum=None, frame=None): # pylint: disable=unused-argument
+    def terminate(self, signum=None, frame=None):  # pylint: disable=unused-argument
         """terminate at once"""
 
         self.log.info('terminate')
         self.loop = False
         if self.module_instance:
             self.module_instance.terminate()
-
 
     def process_assignment(self, assignment):
         """process assignment"""
@@ -153,13 +145,13 @@ def main():
         logger.setLevel(logging.DEBUG)
     logger.debug(args)
 
-    ## agent process management helpers
+    # agent process management helpers
     if args.shutdown:
         return os.kill(args.shutdown, signal.SIGUSR1)
     if args.terminate:
         return os.kill(args.terminate, signal.SIGTERM)
 
-    ## agent with custom assignment
+    # agent with custom assignment
     os.chdir(args.workdir)
     if args.assignment:
         tmp = json.loads(args.assignment)
@@ -167,7 +159,7 @@ def main():
             tmp['id'] = str(uuid4())
         return Agent().process_assignment(tmp)
 
-    ## standard agent
+    # standard agent
     return Agent().run(args.server, args.queue, args.oneshot)
 
 

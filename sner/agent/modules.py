@@ -8,7 +8,9 @@ import signal
 import subprocess
 
 
-registered_modules = {} # pylint: disable=invalid-name
+registered_modules = {}  # pylint: disable=invalid-name
+
+
 def register_module(name):
     """register module class to registry"""
 
@@ -26,14 +28,12 @@ class Base():
         self.log = logging.getLogger('sner.agent.module.%s' % __class__)
         self.process = None
 
-
-    def run(self, assignment): # pylint: disable=no-self-use
+    def run(self, assignment):  # pylint: disable=no-self-use
         """run the agent"""
 
         with open('assignment.json', 'w+') as ftmp:
             ftmp.write(json.dumps(assignment))
         return 0
-
 
     def execute(self, cmd, output_file='output'):
         """execute command and capture output"""
@@ -43,7 +43,6 @@ class Base():
             retval = self.process.wait()
             self.process = None
         return retval
-
 
     def terminate(self):
         """terminate executed command"""
@@ -56,6 +55,7 @@ class Base():
                 os.kill(self.process.pid, signal.SIGTERM)
             except OSError as e:
                 self.log.error(e)
+
 
 @register_module('dummy')
 class Dummy(Base):

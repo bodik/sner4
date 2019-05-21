@@ -13,7 +13,6 @@ from sner.server.model.storage import Host, Service
 from sner.server.sqlafilter import filter_parser
 
 
-
 VIZPORTS_LOW = 10.0
 VIZPORTS_HIGH = 100.0
 
@@ -109,7 +108,7 @@ def service_vizports_route():
     for port, count in db.session.query(Service.port, func.count(Service.id)).order_by(Service.port).group_by(Service.port).all():
         data.append({'port': port, 'count': count})
 
-    ## compute sizing for rendered element
+    # compute sizing for rendered element
     lowest = min(data, key=lambda x: x['count'])['count']
     highest = max(data, key=lambda x: x['count'])['count']
     coef = (VIZPORTS_HIGH-VIZPORTS_LOW) / max(1, (highest-lowest))
@@ -130,8 +129,8 @@ def service_portstat_route(port):
     infos = db.session.query(distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
     comments = db.session.query(distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
     hosts = db.session \
-            .query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
-            .select_from(Service).join(Host) \
-            .filter(Service.port == port).all()
+        .query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
+        .select_from(Service).join(Host) \
+        .filter(Service.port == port).all()
 
     return render_template('storage/service/portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)

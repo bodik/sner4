@@ -7,14 +7,14 @@ from sner.server.form import LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
 
 
-def host_id_exists(form, field): # pylint: disable=unused-argument
+def host_id_exists(form, field):  # pylint: disable=unused-argument
     """validate submitted host_id"""
 
     if not Host.query.filter(Host.id == field.data).one_or_none():
         raise ValidationError('No such host')
 
 
-def service_id_exists_and_belongs_to_host(form, field): # pylint: disable=unused-argument
+def service_id_exists_and_belongs_to_host(form, field):  # pylint: disable=unused-argument
     """validate submitted service_id"""
 
     if field.data:

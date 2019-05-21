@@ -64,21 +64,21 @@ def test_host():
 
 
 @pytest.fixture
-def test_service(test_host): # pylint: disable=redefined-outer-name
+def test_service(test_host):  # pylint: disable=redefined-outer-name
     """persistent test service"""
 
     yield persist_and_detach(create_test_service(test_host))
 
 
 @pytest.fixture
-def test_vuln(test_host, test_service): # pylint: disable=redefined-outer-name
+def test_vuln(test_host, test_service):  # pylint: disable=redefined-outer-name
     """persistent test vuln"""
 
     yield persist_and_detach(create_test_vuln(test_host, test_service))
 
 
 @pytest.fixture
-def test_note(test_host, test_service): # pylint: disable=redefined-outer-name
+def test_note(test_host, test_service):  # pylint: disable=redefined-outer-name
     """persistent test note"""
 
     yield persist_and_detach(create_test_note(test_host, test_service))

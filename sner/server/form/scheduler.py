@@ -20,7 +20,7 @@ class QueueForm(FlaskForm):
     """queue edit form"""
 
     name = StringField(label='Name', validators=[validators.Length(max=1000)])
-    task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False) # pylint: disable=unnecessary-lambda
+    task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False)  # pylint: disable=unnecessary-lambda
     group_size = IntegerField(label='Group size', default=1)
     priority = IntegerField(label='Priority', default=0)
     active = BooleanField(label='Active')

@@ -16,7 +16,6 @@ class NmapParser():
 
     JOB_OUTPUT_DATAFILE = 'output.xml'
 
-
     @staticmethod
     def import_host(nmaphost):
         """pull host to storage"""
@@ -28,7 +27,7 @@ class NmapParser():
 
         if (not host.hostname) and nmaphost.hostnames:
             host.hostname = nmaphost.hostnames[0]
-            ##TODO: add additional hostnames as notes??
+            # TODO: add additional hostnames as notes??
 
         for osmatch in nmaphost.os_match_probabilities():
             if (osmatch.accuracy == 100) and (not host.os):
@@ -42,7 +41,6 @@ class NmapParser():
                 db.session.add(note)
 
         return host
-
 
     @staticmethod
     def import_service(host, nmapservice):
@@ -68,7 +66,6 @@ class NmapParser():
                 db.session.add(note)
 
         return service
-
 
     @staticmethod
     def data_to_storage(data):
@@ -106,6 +103,7 @@ def debug_parser():
             print(tmp.get_dict())
             print('#### service scripts_results')
             print(json.dumps(tmp.scripts_results, indent=2))
+
 
 if __name__ == '__main__':
     debug_parser()

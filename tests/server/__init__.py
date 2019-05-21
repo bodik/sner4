@@ -14,6 +14,7 @@ def persist_and_detach(model):
     db.session.expunge(model)
     return model
 
+
 def get_csrf_token(client):
     """fetch index and parse csrf token"""
 

@@ -38,8 +38,7 @@ def scheduler_command():
     pass
 
 
-
-## misc commands
+# misc commands
 
 @scheduler_command.command(name='enumips', help='enumerate ip address range')
 @click.argument('targets', nargs=-1)
@@ -55,8 +54,7 @@ def enumips(targets, **kwargs):
             print(tmp)
 
 
-
-## task commands
+# task commands
 
 @scheduler_command.command(name='task_list', help='tasks listing')
 @with_appcontext
@@ -94,7 +92,7 @@ def task_delete(task_id):
     db.session.commit()
 
 
-## queue commands
+# queue commands
 
 @scheduler_command.command(name='queue_list', help='queues listing')
 @with_appcontext
@@ -170,15 +168,14 @@ def queue_delete(queue_id):
     db.session.commit()
 
 
-
-## job commands
+# job commands
 
 @scheduler_command.command(name='job_list', help='jobs listing')
 @with_appcontext
 def job_list():
     """list jobs"""
 
-    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"): # pylint: disable=unused-variable
+    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"):  # pylint: disable=unused-variable
         """Format a datetime"""
         if value is None:
             return None

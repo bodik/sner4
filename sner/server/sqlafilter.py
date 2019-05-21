@@ -27,28 +27,29 @@ SEARCH_GRAMMAR = r"""
     %ignore WS
 """
 
+
 class TreeToSAFilter(Transformer):
     """grammar tree to filters transformer"""
 
-    def expression(self, args): # pylint: disable=no-self-use
+    def expression(self, args):  # pylint: disable=no-self-use
         """transform disjunction"""
         if len(args) > 1:
             return {"or": args}
         return args[0]
 
-    def term(self, args): # pylint: disable=no-self-use
+    def term(self, args):  # pylint: disable=no-self-use
         """transform conjunction"""
 
         if len(args) > 1:
             return {"and": args}
         return args[0]
 
-    def criteria(self, args): # pylint: disable=no-self-use
+    def criteria(self, args):  # pylint: disable=no-self-use
         """transform criteria"""
         return dict(zip(['model', 'field', 'op', 'value'], args[0].value.split('.')+[args[1].value, args[2].value.lstrip('\"').rstrip('\"')]))
 
 
-filter_parser = Lark(SEARCH_GRAMMAR, parser='lalr', lexer='standard', transformer=TreeToSAFilter()) # pylint: disable=invalid-name
+filter_parser = Lark(SEARCH_GRAMMAR, parser='lalr', lexer='standard', transformer=TreeToSAFilter())  # pylint: disable=invalid-name
 
 
 def test(testcase, expected):
@@ -66,7 +67,7 @@ def test_all():
     test('A.a=="a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a'})
     test(
         'A.a=="a" AND B.b=="b"',
-        {'and':[
+        {'and': [
             {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a'},
             {'model': 'B', 'field': 'b', 'op': '==', 'value': 'b'}
         ]}

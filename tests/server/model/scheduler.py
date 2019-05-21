@@ -57,21 +57,21 @@ def test_task():
 
 
 @pytest.fixture
-def test_queue(test_task): # pylint: disable=redefined-outer-name
+def test_queue(test_task):  # pylint: disable=redefined-outer-name
     """persistent test queue"""
 
     yield persist_and_detach(create_test_queue(test_task))
 
 
 @pytest.fixture
-def test_target(test_queue): # pylint: disable=redefined-outer-name
+def test_target(test_queue):  # pylint: disable=redefined-outer-name
     """persistent test queue"""
 
     yield persist_and_detach(create_test_target(test_queue))
 
 
 @pytest.fixture
-def test_job(test_queue): # pylint: disable=redefined-outer-name
+def test_job(test_queue):  # pylint: disable=redefined-outer-name
     """persistent test job"""
 
     yield persist_and_detach(create_test_job(test_queue))

@@ -6,7 +6,7 @@ from sner.server.model.scheduler import Job, Queue, Task
 from tests.server.model.scheduler import create_test_queue, create_test_target, create_test_task
 
 
-## misc commands tests
+# misc commands tests
 
 def test_enumips_command(runner):
     """basic enumerator test"""
@@ -17,8 +17,7 @@ def test_enumips_command(runner):
     assert '127.0.0.130' in result.output
 
 
-
-## task commands tests
+# task commands tests
 
 def test_task_list_command(runner, test_task):
     """task list command test"""
@@ -51,8 +50,7 @@ def test_task_delete_command(runner, test_task):
     assert not task
 
 
-
-## queue commands tests
+# queue commands tests
 
 def test_queue_list_command(runner, test_queue):
     """queue list command test"""
@@ -95,7 +93,6 @@ def test_queue_flush_command(runner, test_target):
     result = runner.invoke(scheduler_command, ['queue_flush', str(test_queue_id)])
     assert result.exit_code == 0
 
-
     queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
     assert not queue.targets
 
@@ -110,8 +107,7 @@ def test_queue_delete_command(runner, test_queue):
     assert not queue
 
 
-
-## job commands tests
+# job commands tests
 
 def test_job_list_command(runner, test_job):
     """job list command test"""

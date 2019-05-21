@@ -103,7 +103,7 @@ def host_vizdns_route():
 def host_vizdns_json_route():
     """dns hierarchy tree visualization data generator"""
 
-    ## from all hostnames we know, create tree structure dict-of-dicts
+    # from all hostnames we know, create tree structure dict-of-dicts
     def to_tree(node, items):
         if not items:
             return {}
@@ -112,7 +112,7 @@ def host_vizdns_json_route():
         node[items[0]] = to_tree(node[items[0]], items[1:])
         return node
 
-    ## walk through the tree and generate list of nodes and links
+    # walk through the tree and generate list of nodes and links
     def to_graph_data(parentid, treedata, nodes, links):
         for node in treedata:
             nodeid = len(nodes)

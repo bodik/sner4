@@ -25,8 +25,8 @@ DEFAULT_CONFIG = {
     'SNER_VAR': '/var/sner'
 }
 
-db = SQLAlchemy() # pylint: disable=invalid-name
-toolbar = DebugToolbarExtension() # pylint: disable=invalid-name
+db = SQLAlchemy()  # pylint: disable=invalid-name
+toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 
 
 def config_from_yaml(filename):
@@ -47,7 +47,7 @@ def config_from_yaml(filename):
             'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
             'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
             'SNER_VAR': get_dotted(config_dict, 'server.var')}
-        config = {k:v for k, v in config.items() if v is not None}
+        config = {k: v for k, v in config.items() if v is not None}
         return config
 
     return {}
@@ -78,7 +78,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.cli.add_command(storage_command)
 
     @app.route('/')
-    def index_route(): # pylint: disable=unused-variable
+    def index_route():  # pylint: disable=unused-variable
         flash('info', 'info')
         flash('success', 'success')
         flash('warning', 'warning')
@@ -86,7 +86,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
         return render_template('index.html')
 
     @app.template_filter('datetime')
-    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"): # pylint: disable=unused-variable
+    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"):  # pylint: disable=unused-variable
         """Format a datetime"""
         if value is None:
             return ""

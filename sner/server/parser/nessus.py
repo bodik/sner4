@@ -16,7 +16,7 @@ from sner.server.parser import register_parser
 class ReportItemJSONEncoder(json.JSONEncoder):
     """custom encoder to handle parsed nessus report"""
 
-    def default(self, o): # pylint: disable=method-hidden
+    def default(self, o):  # pylint: disable=method-hidden
         if isinstance(o, nessus_report_ReportItem):
             return o.__dict__
 
@@ -31,7 +31,6 @@ class NessusParser():
     """nessus .nessus output parser"""
 
     SEVERITY_MAP = {'0': 'info', '1': 'low', '2': 'medium', '3': 'high', '4': 'critical'}
-
 
     @staticmethod
     def import_host(nessushost):
@@ -50,7 +49,6 @@ class NessusParser():
 
         return host
 
-
     @staticmethod
     def import_report_item(host, report_item):
         """import nessus_v2 ReportItem 'element'"""
@@ -59,15 +57,23 @@ class NessusParser():
 
         service = None
         if report_item['port']:
-            service = Service.query.filter(Service.host == host, Service.proto == report_item['protocol'], Service.port == report_item['port']).one_or_none()
+            service = Service.query.filter(
+                Service.host == host,
+                Service.proto == report_item['protocol'],
+                Service.port == report_item['port']).one_or_none()
             if not service:
-                service = Service(host=host, proto=report_item['protocol'], port=report_item['port'], name=report_item['service_name'], state='nessus')
+                service = Service(
+                    host=host,
+                    proto=report_item['protocol'],
+                    port=report_item['port'],
+                    name=report_item['service_name'],
+                    state='nessus')
                 db.session.add(service)
 
         xtype = 'nessus.%s' % report_item['plugin_id']
         vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == xtype).one_or_none()
         if not vuln:
-            ## create refs, mimic metasploit import
+            # create refs, mimic metasploit import
             refs = []
             for ref in report_item.get('cve', []):
                 refs.append('%s' % ref)
@@ -88,7 +94,7 @@ class NessusParser():
             if report_item.get('plugin_id', None):
                 refs.append('NSS-%s' % report_item['plugin_id'])
 
-            ## create note with full vulnerability data
+            # create note with full vulnerability data
             note = Note(
                 host=host,
                 service=service,
@@ -98,7 +104,7 @@ class NessusParser():
             db.session.flush()
             refs.append('SN-%s' % note.id)
 
-            ## create vulnerability
+            # create vulnerability
             vuln = Vuln(
                 host=host,
                 service=service,
@@ -111,7 +117,6 @@ class NessusParser():
             db.session.add(vuln)
 
         return vuln
-
 
     @staticmethod
     def data_to_storage(data):

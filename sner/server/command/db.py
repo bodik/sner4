@@ -45,15 +45,13 @@ def db_init():
 def db_initdata():
     """put initial data to database"""
 
-    ## scheduler test data
-    ### dummy testing task and queue
+    # scheduler test data
     db.session.add(Task(
         name='dummy',
         module='dummy',
         params='--dummyparam 1'))
 
-
-    ### basic nmap module scanning
+    # basic nmap module scanning
     db.session.add(Task(
         name='dns recon',
         module='nmap',
@@ -74,8 +72,7 @@ def db_initdata():
         module='nmap',
         params='-Pn --reason   -sU -sV   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
-
-    ### development queues with default targets
+    # development queues with default targets
     queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
     db.session.add(queue)
     for target in range(100):
@@ -84,10 +81,9 @@ def db_initdata():
     queue = Queue(name='fulltcp netx', task=Task.query.filter(Task.name == 'dns recon').one(), group_size=16, priority=10, active=False)
     db.session.add(queue)
     for target in range(100):
-        db.session.add(Target(target='10.0.0.%d'%target, queue=queue))
+        db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
-
-    ## storage test data
+    # storage test data
     db.session.add(Host(
         address='127.4.4.4',
         hostname='testhost.testdomain.test<script>alert(1);</script>',
@@ -126,7 +122,6 @@ def db_initdata():
         xtype='sner.testnote',
         data='testnote data',
         comment='test note comment'))
-
 
     db.session.commit()
 

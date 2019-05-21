@@ -1,7 +1,8 @@
 """sner parsers"""
 
+registered_parsers = {}  # pylint: disable=invalid-name
 
-registered_parsers = {} # pylint: disable=invalid-name
+
 def register_parser(name):
     """register parser class to registry"""
 
@@ -12,5 +13,5 @@ def register_parser(name):
     return register_parser_real
 
 
-import sner.server.parser.nmap # pylint: disable=wrong-import-position
-import sner.server.parser.nessus # pylint: disable=wrong-import-position
+import sner.server.parser.nmap  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.parser.nessus  # noqa: E402,F401  pylint: disable=wrong-import-position

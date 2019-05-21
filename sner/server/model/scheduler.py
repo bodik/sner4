@@ -40,7 +40,6 @@ class Queue(db.Model):
         return '<Queue %d: %s>' % (self.id, self.name)
 
 
-
 class Target(db.Model):
     """single target of the task"""
 
@@ -52,7 +51,6 @@ class Target(db.Model):
 
     def __repr__(self):
         return '<Target %d: %s>' % (self.id, self.target)
-
 
 
 class Job(db.Model):

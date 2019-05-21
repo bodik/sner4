@@ -41,7 +41,6 @@ def vuln_report(filter_string=None):
             pass
         return ref
 
-
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
     endpoint_hostname = func.concat_ws(':', Host.hostname, Service.port)
     query = db.session \
@@ -51,7 +50,7 @@ def vuln_report(filter_string=None):
             Vuln.tags,
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_agg(func.distinct(Vuln.refs)).label('references') #TODO: lateral unnest ?
+            func.array_agg(func.distinct(Vuln.refs)).label('references')  # TODO: lateral unnest ?
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
