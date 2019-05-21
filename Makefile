@@ -2,11 +2,11 @@
 
 
 install-deps:
-	apt-get install postgresql-all unzip nmap
+	apt-get -y install postgresql-all unzip nmap
 
 
 venv:
-	apt-get install python-virtualenv python3-virtualenv
+	apt-get -y install python-virtualenv python3-virtualenv
 	virtualenv -p python3 venv
 	venv/bin/pip install -r requirements.txt
 
