@@ -12,23 +12,23 @@ from tests.server.model.storage import test_host, test_note, test_service, test_
 
 @pytest.fixture
 def app():
-	"""yield application as pytest fixture"""
+    """yield application as pytest fixture"""
 
-	_app = create_app(config_file='tests/sner.yaml')
-	with _app.test_request_context():
-		db_remove()
-		db.create_all()
-		yield _app
-		db_remove()
+    _app = create_app(config_file='tests/sner.yaml')
+    with _app.test_request_context():
+        db_remove()
+        db.create_all()
+        yield _app
+        db_remove()
 
 
 @pytest.fixture
 def client(app): # pylint: disable=redefined-outer-name
-	"""create webtest testapp client"""
-	return TestApp(app)
+    """create webtest testapp client"""
+    return TestApp(app)
 
 
 @pytest.fixture
 def runner(app): # pylint: disable=redefined-outer-name
-	"""create cli test runner"""
-	return app.test_cli_runner()
+    """create cli test runner"""
+    return app.test_cli_runner()

@@ -12,95 +12,95 @@ from sner.server.model.scheduler import Queue, Target, Task
 
 @blueprint.route('/queue/list', methods=['GET'])
 def queue_list_route():
-	"""list queues"""
+    """list queues"""
 
-	queues = Queue.query.all()
-	count_targets = {}
-	for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
-		count_targets[queue_id] = count
+    queues = Queue.query.all()
+    count_targets = {}
+    for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
+        count_targets[queue_id] = count
 
-	return render_template(
-		'scheduler/queue/list.html',
-		queues=queues,
-		count_targets=count_targets,
-		button_form=ButtonForm())
+    return render_template(
+        'scheduler/queue/list.html',
+        queues=queues,
+        count_targets=count_targets,
+        button_form=ButtonForm())
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
 @blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'])
 def queue_add_route(task_id=None):
-	"""queue add"""
+    """queue add"""
 
-	form = QueueForm(task=Task.query.filter(Task.id == task_id).one_or_none())
+    form = QueueForm(task=Task.query.filter(Task.id == task_id).one_or_none())
 
-	if form.validate_on_submit():
-		queue = Queue()
-		form.populate_obj(queue)
-		db.session.add(queue)
-		db.session.commit()
-		return redirect(url_for('scheduler.queue_list_route'))
+    if form.validate_on_submit():
+        queue = Queue()
+        form.populate_obj(queue)
+        db.session.add(queue)
+        db.session.commit()
+        return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_add_route'))
+    return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_add_route'))
 
 
 @blueprint.route('/queue/edit/<queue_id>', methods=['GET', 'POST'])
 def queue_edit_route(queue_id):
-	"""queue edit"""
+    """queue edit"""
 
-	queue = Queue.query.get(queue_id)
-	form = QueueForm(obj=queue)
+    queue = Queue.query.get(queue_id)
+    form = QueueForm(obj=queue)
 
-	if form.validate_on_submit():
-		form.populate_obj(queue)
-		db.session.commit()
-		return redirect(url_for('scheduler.queue_list_route'))
+    if form.validate_on_submit():
+        form.populate_obj(queue)
+        db.session.commit()
+        return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_edit_route', queue_id=queue_id))
+    return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_edit_route', queue_id=queue_id))
 
 
 @blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
 def queue_enqueue_route(queue_id):
-	"""queue enqueue"""
+    """queue enqueue"""
 
-	queue = Queue.query.get(queue_id)
-	form = QueueEnqueueForm()
+    queue = Queue.query.get(queue_id)
+    form = QueueEnqueueForm()
 
-	if form.validate_on_submit():
-		targets = []
-		for target in form.data["targets"]:
-			targets.append({'target': target, 'queue_id': queue.id})
-		db.session.bulk_insert_mappings(Target, targets)
-		db.session.commit()
-		return redirect(url_for('scheduler.queue_list_route'))
+    if form.validate_on_submit():
+        targets = []
+        for target in form.data["targets"]:
+            targets.append({'target': target, 'queue_id': queue.id})
+        db.session.bulk_insert_mappings(Target, targets)
+        db.session.commit()
+        return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('scheduler/queue/enqueue.html', form=form, form_url=url_for('scheduler.queue_enqueue_route', queue_id=queue_id))
+    return render_template('scheduler/queue/enqueue.html', form=form, form_url=url_for('scheduler.queue_enqueue_route', queue_id=queue_id))
 
 
 @blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
 def queue_flush_route(queue_id):
-	"""queue flush"""
+    """queue flush"""
 
-	queue = Queue.query.get(queue_id)
-	form = ButtonForm()
+    queue = Queue.query.get(queue_id)
+    form = ButtonForm()
 
-	if form.validate_on_submit():
-		db.session.query(Target).filter(Target.queue_id == queue.id).delete()
-		db.session.commit()
-		return redirect(url_for('scheduler.queue_list_route'))
+    if form.validate_on_submit():
+        db.session.query(Target).filter(Target.queue_id == queue.id).delete()
+        db.session.commit()
+        return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('button-generic.html', form=form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id), button_caption='Flush')
+    return render_template('button-generic.html', form=form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id), button_caption='Flush')
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
 def queue_delete_route(queue_id):
-	"""queue delete"""
+    """queue delete"""
 
-	queue = Queue.query.get(queue_id)
-	form = ButtonForm()
+    queue = Queue.query.get(queue_id)
+    form = ButtonForm()
 
-	if form.validate_on_submit():
-		db.session.delete(queue)
-		db.session.commit()
-		return redirect(url_for('scheduler.queue_list_route'))
+    if form.validate_on_submit():
+        db.session.delete(queue)
+        db.session.commit()
+        return redirect(url_for('scheduler.queue_list_route'))
 
-	return render_template('button-delete.html', form=form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue_id))
+    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue_id))

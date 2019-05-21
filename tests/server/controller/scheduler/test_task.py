@@ -9,53 +9,53 @@ from tests.server.model.scheduler import create_test_task
 
 
 def test_task_list_route(client):
-	"""task list route test"""
+    """task list route test"""
 
-	response = client.get(url_for('scheduler.task_list_route'))
-	assert response.status_code == HTTPStatus.OK
-	assert '<h1>Tasks list' in response
+    response = client.get(url_for('scheduler.task_list_route'))
+    assert response.status_code == HTTPStatus.OK
+    assert '<h1>Tasks list' in response
 
 
 def test_task_add_route(client):
-	"""task add route test"""
+    """task add route test"""
 
-	test_task = create_test_task()
+    test_task = create_test_task()
 
-	form = client.get(url_for('scheduler.task_add_route')).form
-	form['name'] = test_task.name
-	form['module'] = test_task.module
-	form['params'] = test_task.params
-	response = form.submit()
-	assert response.status_code == HTTPStatus.FOUND
+    form = client.get(url_for('scheduler.task_add_route')).form
+    form['name'] = test_task.name
+    form['module'] = test_task.module
+    form['params'] = test_task.params
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
 
-	task = Task.query.filter(Task.name == test_task.name).one_or_none()
-	assert task
-	assert task.name == test_task.name
-	assert task.module == test_task.module
-	assert task.params == test_task.params
+    task = Task.query.filter(Task.name == test_task.name).one_or_none()
+    assert task
+    assert task.name == test_task.name
+    assert task.module == test_task.module
+    assert task.params == test_task.params
 
 
 def test_task_edit_route(client, test_task):
-	"""task edit route test"""
+    """task edit route test"""
 
-	form = client.get(url_for('scheduler.task_edit_route', task_id=test_task.id)).form
-	form['name'] = form['name'].value+' edited'
-	form['params'] = form['params'].value+' added_parameter'
-	response = form.submit()
-	assert response.status_code == HTTPStatus.FOUND
+    form = client.get(url_for('scheduler.task_edit_route', task_id=test_task.id)).form
+    form['name'] = form['name'].value+' edited'
+    form['params'] = form['params'].value+' added_parameter'
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
 
-	task = Task.query.filter(Task.id == test_task.id).one_or_none()
-	assert task
-	assert task.name == form['name'].value
-	assert 'added_parameter' in task.params
+    task = Task.query.filter(Task.id == test_task.id).one_or_none()
+    assert task
+    assert task.name == form['name'].value
+    assert 'added_parameter' in task.params
 
 
 def test_task_delete_route(client, test_task):
-	"""task delete route test"""
+    """task delete route test"""
 
-	form = client.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
-	response = form.submit()
-	assert response.status_code == HTTPStatus.FOUND
+    form = client.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
 
-	task = Task.query.filter(Task.id == test_task.id).one_or_none()
-	assert not task
+    task = Task.query.filter(Task.id == test_task.id).one_or_none()
+    assert not task

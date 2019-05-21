@@ -15,27 +15,27 @@ from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
 def taskbyx(taskid):
-	"""get task by id or name"""
-	if taskid.isnumeric():
-		task = Task.query.filter(Task.id == int(taskid)).one_or_none()
-	else:
-		task = Task.query.filter(Task.name == taskid).one_or_none()
-	return task
+    """get task by id or name"""
+    if taskid.isnumeric():
+        task = Task.query.filter(Task.id == int(taskid)).one_or_none()
+    else:
+        task = Task.query.filter(Task.name == taskid).one_or_none()
+    return task
 
 
 def queuebyx(queueid):
-	"""get queue by id or name"""
-	if queueid.isnumeric():
-		queue = Queue.query.filter(Queue.id == int(queueid)).one_or_none()
-	else:
-		queue = Queue.query.filter(Queue.name == queueid).one_or_none()
-	return queue
+    """get queue by id or name"""
+    if queueid.isnumeric():
+        queue = Queue.query.filter(Queue.id == int(queueid)).one_or_none()
+    else:
+        queue = Queue.query.filter(Queue.name == queueid).one_or_none()
+    return queue
 
 
 @click.group(name='scheduler', help='sner.server scheduler management')
 def scheduler_command():
-	"""scheduler commands click group/container"""
-	pass
+    """scheduler commands click group/container"""
+    pass
 
 
 
@@ -45,14 +45,14 @@ def scheduler_command():
 @click.argument('targets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 def enumips(targets, **kwargs):
-	"""enumerate ip address range"""
+    """enumerate ip address range"""
 
-	targets = list(targets)
-	if kwargs["file"]:
-		targets += kwargs["file"].read().splitlines()
-	for item in targets:
-		for tmp in IPNetwork(item).iter_hosts():
-			print(tmp)
+    targets = list(targets)
+    if kwargs["file"]:
+        targets += kwargs["file"].read().splitlines()
+    for item in targets:
+        for tmp in IPNetwork(item).iter_hosts():
+            print(tmp)
 
 
 
@@ -61,13 +61,13 @@ def enumips(targets, **kwargs):
 @scheduler_command.command(name='task_list', help='tasks listing')
 @with_appcontext
 def task_list():
-	"""list tasks"""
+    """list tasks"""
 
-	headers = ['id', 'name', 'module', 'params']
-	fmt = '%-4s %-20s %-10s %s'
-	print(fmt % tuple(headers))
-	for task in Task.query.all():
-		print(fmt % (task.id, task.name, task.module, json.dumps(task.params)))
+    headers = ['id', 'name', 'module', 'params']
+    fmt = '%-4s %-20s %-10s %s'
+    print(fmt % tuple(headers))
+    for task in Task.query.all():
+        print(fmt % (task.id, task.name, task.module, json.dumps(task.params)))
 
 
 @scheduler_command.command(name='task_add', help='add a new task')
@@ -76,22 +76,22 @@ def task_list():
 @click.option('--params', default='')
 @with_appcontext
 def task_add(module, **kwargs):
-	"""add new task"""
+    """add new task"""
 
-	task = Task(module=module, name=kwargs["name"], params=kwargs["params"])
-	db.session.add(task)
-	db.session.commit()
+    task = Task(module=module, name=kwargs["name"], params=kwargs["params"])
+    db.session.add(task)
+    db.session.commit()
 
 
 @scheduler_command.command(name='task_delete', help='delete task')
 @click.argument('task_id')
 @with_appcontext
 def task_delete(task_id):
-	"""delete task"""
+    """delete task"""
 
-	task = taskbyx(task_id)
-	db.session.delete(task)
-	db.session.commit()
+    task = taskbyx(task_id)
+    db.session.delete(task)
+    db.session.commit()
 
 
 ## queue commands
@@ -99,17 +99,17 @@ def task_delete(task_id):
 @scheduler_command.command(name='queue_list', help='queues listing')
 @with_appcontext
 def queue_list():
-	"""list queues"""
+    """list queues"""
 
-	count_targets = {}
-	for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
-		count_targets[queue_id] = count
+    count_targets = {}
+    for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
+        count_targets[queue_id] = count
 
-	headers = ['id', 'name', 'task', 'targets']
-	fmt = '%-4s %-20s %-40s %-8s'
-	print(fmt % tuple(headers))
-	for queue in Queue.query.all():
-		print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
+    headers = ['id', 'name', 'task', 'targets']
+    fmt = '%-4s %-20s %-40s %-8s'
+    print(fmt % tuple(headers))
+    for queue in Queue.query.all():
+        print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
 
 
 @scheduler_command.command(name='queue_add', help='add a new queue')
@@ -120,12 +120,12 @@ def queue_list():
 @click.option('--active', is_flag=True)
 @with_appcontext
 def queue_add(task_id, **kwargs):
-	"""add new queue"""
+    """add new queue"""
 
-	task = taskbyx(task_id)
-	queue = Queue(name=kwargs["name"], task=task, group_size=kwargs["group_size"], priority=kwargs["priority"], active=kwargs["active"])
-	db.session.add(queue)
-	db.session.commit()
+    task = taskbyx(task_id)
+    queue = Queue(name=kwargs["name"], task=task, group_size=kwargs["group_size"], priority=kwargs["priority"], active=kwargs["active"])
+    db.session.add(queue)
+    db.session.commit()
 
 
 @scheduler_command.command(name='queue_enqueue', help='add targets to queue')
@@ -134,40 +134,40 @@ def queue_add(task_id, **kwargs):
 @click.option('--file', type=click.File('r'))
 @with_appcontext
 def queue_enqueue(queue_id, argtargets, **kwargs):
-	"""enqueue targets to queue"""
+    """enqueue targets to queue"""
 
-	queue = queuebyx(queue_id)
-	argtargets = list(argtargets)
-	if kwargs["file"]:
-		argtargets += kwargs["file"].read().splitlines()
+    queue = queuebyx(queue_id)
+    argtargets = list(argtargets)
+    if kwargs["file"]:
+        argtargets += kwargs["file"].read().splitlines()
 
-	targets = []
-	for target in argtargets:
-		targets.append({'target': target, 'queue_id': queue.id})
-	db.session.bulk_insert_mappings(Target, targets)
-	db.session.commit()
+    targets = []
+    for target in argtargets:
+        targets.append({'target': target, 'queue_id': queue.id})
+    db.session.bulk_insert_mappings(Target, targets)
+    db.session.commit()
 
 
 @scheduler_command.command(name='queue_flush', help='flush all targets from queue')
 @click.argument('queue_id')
 @with_appcontext
 def queue_flush(queue_id):
-	"""flush targets from queue"""
+    """flush targets from queue"""
 
-	queue = queuebyx(queue_id)
-	db.session.query(Target).filter(Target.queue_id == queue.id).delete()
-	db.session.commit()
+    queue = queuebyx(queue_id)
+    db.session.query(Target).filter(Target.queue_id == queue.id).delete()
+    db.session.commit()
 
 
 @scheduler_command.command(name='queue_delete', help='delete queue')
 @click.argument('queue_id')
 @with_appcontext
 def queue_delete(queue_id):
-	"""delete queue"""
+    """delete queue"""
 
-	queue = queuebyx(queue_id)
-	db.session.delete(queue)
-	db.session.commit()
+    queue = queuebyx(queue_id)
+    db.session.delete(queue)
+    db.session.commit()
 
 
 
@@ -176,41 +176,41 @@ def queue_delete(queue_id):
 @scheduler_command.command(name='job_list', help='jobs listing')
 @with_appcontext
 def job_list():
-	"""list jobs"""
+    """list jobs"""
 
-	def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"): # pylint: disable=unused-variable
-		"""Format a datetime"""
-		if value is None:
-			return None
-		return value.strftime(fmt)
+    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"): # pylint: disable=unused-variable
+        """Format a datetime"""
+        if value is None:
+            return None
+        return value.strftime(fmt)
 
-	headers = ['id', 'queue', 'retval', 'time_start', 'time_end', 'output_filename']
-	fmt = '%-36s %-40s %6s %-20s %-20s %-40s'
-	print(fmt % tuple(headers))
-	for job in Job.query.all():
-		print(fmt % (
-			job.id,
-			json.dumps(job.queue.name if job.queue else ''),
-			job.retval,
-			format_datetime(job.time_start),
-			format_datetime(job.time_end),
-			job_output_filename(job.id) if job.retval is not None else ''))
+    headers = ['id', 'queue', 'retval', 'time_start', 'time_end', 'output_filename']
+    fmt = '%-36s %-40s %6s %-20s %-20s %-40s'
+    print(fmt % tuple(headers))
+    for job in Job.query.all():
+        print(fmt % (
+            job.id,
+            json.dumps(job.queue.name if job.queue else ''),
+            job.retval,
+            format_datetime(job.time_start),
+            format_datetime(job.time_end),
+            job_output_filename(job.id) if job.retval is not None else ''))
 
 
 @scheduler_command.command(name='job_delete', help='delete job')
 @click.argument('job_id')
 @with_appcontext
 def job_delete(job_id):
-	"""delete queue"""
+    """delete queue"""
 
-	job = Job.query.filter(Job.id == job_id).one_or_none()
-	if not job:
-		current_app.logger.error('no such job')
-		return 1
+    job = Job.query.filter(Job.id == job_id).one_or_none()
+    if not job:
+        current_app.logger.error('no such job')
+        return 1
 
-	output_file = job_output_filename(job_id)
-	if os.path.exists(output_file):
-		os.remove(output_file)
-	db.session.delete(job)
-	db.session.commit()
-	return 0
+    output_file = job_output_filename(job_id)
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    db.session.delete(job)
+    db.session.commit()
+    return 0

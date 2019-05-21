@@ -9,63 +9,63 @@ from sner.server import db
 
 
 class Task(db.Model):
-	"""holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
+    """holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
-	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(1000), unique=True)
-	module = db.Column(db.String(100), nullable=False)
-	params = db.Column(db.Text)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1000), unique=True)
+    module = db.Column(db.String(100), nullable=False)
+    params = db.Column(db.Text)
 
-	queues = relationship('Queue', back_populates='task')
+    queues = relationship('Queue', back_populates='task')
 
-	def __repr__(self):
-		return '<Task %d: %s>' % (self.id, self.name)
+    def __repr__(self):
+        return '<Task %d: %s>' % (self.id, self.name)
 
 
 class Queue(db.Model):
-	"""task assignment for specific targets"""
+    """task assignment for specific targets"""
 
-	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(1000))
-	task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-	group_size = db.Column(db.Integer, nullable=False)
-	priority = db.Column(db.Integer, nullable=False)
-	active = db.Column(db.Boolean)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1000))
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+    group_size = db.Column(db.Integer, nullable=False)
+    priority = db.Column(db.Integer, nullable=False)
+    active = db.Column(db.Boolean)
 
-	task = relationship('Task', back_populates='queues')
-	targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
-	jobs = relationship('Job', back_populates='queue')
+    task = relationship('Task', back_populates='queues')
+    targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
+    jobs = relationship('Job', back_populates='queue')
 
-	def __repr__(self):
-		return '<Queue %d: %s>' % (self.id, self.name)
+    def __repr__(self):
+        return '<Queue %d: %s>' % (self.id, self.name)
 
 
 
 class Target(db.Model):
-	"""single target of the task"""
+    """single target of the task"""
 
-	id = db.Column(db.Integer, primary_key=True)
-	target = db.Column(db.Text)
-	queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    target = db.Column(db.Text)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'), nullable=False)
 
-	queue = relationship('Queue', back_populates='targets')
+    queue = relationship('Queue', back_populates='targets')
 
-	def __repr__(self):
-		return '<Target %d: %s>' % (self.id, self.target)
+    def __repr__(self):
+        return '<Target %d: %s>' % (self.id, self.target)
 
 
 
 class Job(db.Model):
-	"""assigned job"""
+    """assigned job"""
 
-	id = db.Column(db.String(100), primary_key=True)
-	queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
-	assignment = db.Column(db.Text)
-	retval = db.Column(db.Integer)
-	time_start = db.Column(db.DateTime, default=datetime.utcnow)
-	time_end = db.Column(db.DateTime)
+    id = db.Column(db.String(100), primary_key=True)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    assignment = db.Column(db.Text)
+    retval = db.Column(db.Integer)
+    time_start = db.Column(db.DateTime, default=datetime.utcnow)
+    time_end = db.Column(db.DateTime)
 
-	queue = relationship('Queue', back_populates='jobs')
+    queue = relationship('Queue', back_populates='jobs')
 
-	def __repr__(self):
-		return '<Job %d>' % self.id
+    def __repr__(self):
+        return '<Job %d>' % self.id

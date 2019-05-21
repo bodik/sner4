@@ -10,53 +10,53 @@ from sner.server.model.scheduler import Task
 
 @blueprint.route('/task/list')
 def task_list_route():
-	"""list tasks"""
+    """list tasks"""
 
-	tasks = Task.query.all()
-	return render_template('scheduler/task/list.html', tasks=tasks, button_form=ButtonForm())
+    tasks = Task.query.all()
+    return render_template('scheduler/task/list.html', tasks=tasks, button_form=ButtonForm())
 
 
 @blueprint.route('/task/add', methods=['GET', 'POST'])
 def task_add_route():
-	"""add task"""
+    """add task"""
 
-	form = TaskForm()
+    form = TaskForm()
 
-	if form.validate_on_submit():
-		task = Task()
-		form.populate_obj(task)
-		db.session.add(task)
-		db.session.commit()
-		return redirect(url_for('scheduler.task_list_route'))
+    if form.validate_on_submit():
+        task = Task()
+        form.populate_obj(task)
+        db.session.add(task)
+        db.session.commit()
+        return redirect(url_for('scheduler.task_list_route'))
 
-	return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_add_route'))
+    return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_add_route'))
 
 
 @blueprint.route('/task/edit/<task_id>', methods=['GET', 'POST'])
 def task_edit_route(task_id):
-	"""edit task"""
+    """edit task"""
 
-	task = Task.query.get(task_id)
-	form = TaskForm(obj=task)
+    task = Task.query.get(task_id)
+    form = TaskForm(obj=task)
 
-	if form.validate_on_submit():
-		form.populate_obj(task)
-		db.session.commit()
-		return redirect(url_for('scheduler.task_list_route'))
+    if form.validate_on_submit():
+        form.populate_obj(task)
+        db.session.commit()
+        return redirect(url_for('scheduler.task_list_route'))
 
-	return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_edit_route', task_id=task_id))
+    return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_edit_route', task_id=task_id))
 
 
 @blueprint.route('/task/delete/<task_id>', methods=['GET', 'POST'])
 def task_delete_route(task_id):
-	"""delete task"""
+    """delete task"""
 
-	task = Task.query.get(task_id)
-	form = ButtonForm()
+    task = Task.query.get(task_id)
+    form = ButtonForm()
 
-	if form.validate_on_submit():
-		db.session.delete(task)
-		db.session.commit()
-		return redirect(url_for('scheduler.task_list_route'))
+    if form.validate_on_submit():
+        db.session.delete(task)
+        db.session.commit()
+        return redirect(url_for('scheduler.task_list_route'))
 
-	return render_template('button-delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))
+    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))

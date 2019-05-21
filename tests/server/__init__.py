@@ -6,16 +6,16 @@ from sner.server import db
 
 
 def persist_and_detach(model):
-	"""would persist entity/model and detach. used mainly for testing"""
+    """would persist entity/model and detach. used mainly for testing"""
 
-	db.session.add(model)
-	db.session.commit()
-	db.session.refresh(model)
-	db.session.expunge(model)
-	return model
+    db.session.add(model)
+    db.session.commit()
+    db.session.refresh(model)
+    db.session.expunge(model)
+    return model
 
 def get_csrf_token(client):
-	"""fetch index and parse csrf token"""
+    """fetch index and parse csrf token"""
 
-	response = client.get(url_for('index_route'))
-	return response.lxml.xpath('//meta[@name="csrf-token"]/@content')[0]
+    response = client.get(url_for('index_route'))
+    return response.lxml.xpath('//meta[@name="csrf-token"]/@content')[0]
