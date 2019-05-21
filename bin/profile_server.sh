@@ -1,4 +1,5 @@
 #!/bin/sh
+# run sner server and profile the execution
 
 python -m profile -o /tmp/sner_server_last.profile bin/server $@
 

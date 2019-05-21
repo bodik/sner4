@@ -1,5 +1,5 @@
 #!/bin/sh
-# postgres helper
+# postgres helper; disconnect all users/connections from database
 
 DBNAME="sner"
 if [ -n "$1" ]; then

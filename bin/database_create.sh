@@ -1,5 +1,5 @@
 #!/bin/sh
-# postgres helper
+# postgres helper; create role and database
 
 DBNAME="sner"
 if [ -n "$1" ]; then
