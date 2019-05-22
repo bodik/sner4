@@ -3,7 +3,7 @@
 import pytest
 
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
-from tests.server import persist_and_detach
+from tests import persist_and_detach
 
 
 def create_test_host():

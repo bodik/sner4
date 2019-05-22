@@ -6,7 +6,7 @@ from libnmap.parser import NmapParserException
 from sner.server.parser.nmap import NmapParser
 
 
-def test_xxe(app):
+def test_xxe():
     """check if parser raises exception on xxe input"""
 
     with open('tests/server/data/parser-nmap-xxe.xml') as ftmp:
