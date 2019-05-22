@@ -126,12 +126,11 @@ class Agent():
         return retval
 
 
-def main():
+def main(argv=None):
     """sner agent main"""
 
     parser = ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='show debug output')
-    parser.add_argument('--workdir', default='/tmp', help='workdir')
     parser.add_argument('--server', default='http://localhost:18000', help='server uri')
     parser.add_argument('--queue', help='select specific queue to work on')
     parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
@@ -140,7 +139,7 @@ def main():
     parser.add_argument('--shutdown', type=int, help='request gracefull shutdown of the agent specified by PID')
     parser.add_argument('--terminate', type=int, help='request immediate termination of the agent specified by PID')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.debug:
         logger.setLevel(logging.DEBUG)
     logger.debug(args)
@@ -152,7 +151,6 @@ def main():
         return os.kill(args.terminate, signal.SIGTERM)
 
     # agent with custom assignment
-    os.chdir(args.workdir)
     if args.assignment:
         tmp = json.loads(args.assignment)
         if 'id' not in tmp:
