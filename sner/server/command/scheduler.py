@@ -71,6 +71,10 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     """enqueue targets to queue"""
 
     queue = queuebyx(queue_id)
+    if not queue:
+        current_app.logger.error('no such queue')
+        return 1
+
     argtargets = list(argtargets)
     if kwargs["file"]:
         argtargets += kwargs["file"].read().splitlines()
@@ -80,6 +84,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
         targets.append({'target': target, 'queue_id': queue.id})
     db.session.bulk_insert_mappings(Target, targets)
     db.session.commit()
+    return 0
 
 
 @scheduler_command.command(name='queue_flush', help='flush all targets from queue')
@@ -89,8 +94,13 @@ def queue_flush(queue_id):
     """flush targets from queue"""
 
     queue = queuebyx(queue_id)
+    if not queue:
+        current_app.logger.error('no such queue')
+        return 1
+
     db.session.query(Target).filter(Target.queue_id == queue.id).delete()
     db.session.commit()
+    return 0
 
 
 # job commands

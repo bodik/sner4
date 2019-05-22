@@ -113,6 +113,10 @@ def storage_import(path, parser):
                 data = ifile.read()
         return data.decode('utf-8')
 
+    if parser not in registered_parsers:
+        current_app.logger.error('no such parser')
+        return 1
+
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
@@ -120,6 +124,7 @@ def storage_import(path, parser):
                 parser_impl.data_to_storage(data_from_file(item, parser_impl))
             except Exception as e:
                 current_app.logger.error('import \'%s\' failed: %s', item, e)
+    return 0
 
 
 @storage_command.command(name='flush', help='flush all objects from storage')
