@@ -10,16 +10,7 @@ from sqlalchemy import func
 
 from sner.server import db
 from sner.server.controller.scheduler.job import job_output_filename, job_delete
-from sner.server.model.scheduler import Job, Queue, Target, Task
-
-
-def taskbyx(taskid):
-    """get task by id or name"""
-    if taskid.isnumeric():
-        task = Task.query.filter(Task.id == int(taskid)).one_or_none()
-    else:
-        task = Task.query.filter(Task.name == taskid).one_or_none()
-    return task
+from sner.server.model.scheduler import Job, Queue, Target
 
 
 def queuebyx(queueid):
@@ -53,44 +44,6 @@ def enumips(targets, **kwargs):
             print(tmp)
 
 
-# task commands
-
-@scheduler_command.command(name='task_list', help='tasks listing')
-@with_appcontext
-def task_list():
-    """list tasks"""
-
-    headers = ['id', 'name', 'module', 'params']
-    fmt = '%-4s %-20s %-10s %s'
-    print(fmt % tuple(headers))
-    for task in Task.query.all():
-        print(fmt % (task.id, task.name, task.module, json.dumps(task.params)))
-
-
-@scheduler_command.command(name='task_add', help='add a new task')
-@click.argument('module')
-@click.option('--name')
-@click.option('--params', default='')
-@with_appcontext
-def task_add(module, **kwargs):
-    """add new task"""
-
-    task = Task(module=module, name=kwargs["name"], params=kwargs["params"])
-    db.session.add(task)
-    db.session.commit()
-
-
-@scheduler_command.command(name='task_delete', help='delete task')
-@click.argument('task_id')
-@with_appcontext
-def task_delete(task_id):
-    """delete task"""
-
-    task = taskbyx(task_id)
-    db.session.delete(task)
-    db.session.commit()
-
-
 # queue commands
 
 @scheduler_command.command(name='queue_list', help='queues listing')
@@ -107,22 +60,6 @@ def queue_list():
     print(fmt % tuple(headers))
     for queue in Queue.query.all():
         print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
-
-
-@scheduler_command.command(name='queue_add', help='add a new queue')
-@click.argument('task_id')
-@click.option('--name')
-@click.option('--group_size', type=int, default=5)
-@click.option('--priority', type=int, default=10)
-@click.option('--active', is_flag=True)
-@with_appcontext
-def queue_add(task_id, **kwargs):
-    """add new queue"""
-
-    task = taskbyx(task_id)
-    queue = Queue(name=kwargs["name"], task=task, group_size=kwargs["group_size"], priority=kwargs["priority"], active=kwargs["active"])
-    db.session.add(queue)
-    db.session.commit()
 
 
 @scheduler_command.command(name='queue_enqueue', help='add targets to queue')
@@ -153,17 +90,6 @@ def queue_flush(queue_id):
 
     queue = queuebyx(queue_id)
     db.session.query(Target).filter(Target.queue_id == queue.id).delete()
-    db.session.commit()
-
-
-@scheduler_command.command(name='queue_delete', help='delete queue')
-@click.argument('queue_id')
-@with_appcontext
-def queue_delete(queue_id):
-    """delete queue"""
-
-    queue = queuebyx(queue_id)
-    db.session.delete(queue)
     db.session.commit()
 
 
