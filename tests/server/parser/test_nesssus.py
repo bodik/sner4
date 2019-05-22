@@ -1,7 +1,5 @@
 """nessus output parser tests"""
 
-import pytest
-
 from sner.server.model.storage import Note
 from sner.server.parser.nessus import NessusParser
 

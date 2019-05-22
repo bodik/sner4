@@ -40,7 +40,7 @@ pylint:
 test: test-server test-agent
 
 test-agent: test-server
-	python -m pytest tests/agent
+	python -m pytest -v tests/agent
 
 test-server: db-create-test
-	python -m pytest tests/server
+	python -m pytest -v tests/server
