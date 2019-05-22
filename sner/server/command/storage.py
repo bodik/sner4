@@ -103,12 +103,12 @@ def storage_command():
 def storage_import(path, parser):
     """import data"""
 
-    def data_from_file(filename, pparser):
+    def data_from_file(filename, job_output_datafile):
         with open(filename, 'rb') as ifile:
             mime_type = magic.detect_from_fobj(ifile).mime_type
             if mime_type == 'application/zip':
                 with ZipFile(ifile, 'r') as ftmp:
-                    data = ftmp.read(pparser.JOB_OUTPUT_DATAFILE)
+                    data = ftmp.read(job_output_datafile)
             else:
                 data = ifile.read()
         return data.decode('utf-8')
@@ -121,7 +121,7 @@ def storage_import(path, parser):
     for item in path:
         if os.path.isfile(item):
             try:
-                parser_impl.data_to_storage(data_from_file(item, parser_impl))
+                parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
             except Exception as e:
                 current_app.logger.error('import \'%s\' failed: %s', item, e)
     return 0

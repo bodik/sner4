@@ -78,10 +78,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     argtargets = list(argtargets)
     if kwargs["file"]:
         argtargets += kwargs["file"].read().splitlines()
-
-    targets = []
-    for target in argtargets:
-        targets.append({'target': target, 'queue_id': queue.id})
+    targets = [{'target': target, 'queue_id': queue.id} for target in argtargets]
     db.session.bulk_insert_mappings(Target, targets)
     db.session.commit()
     return 0

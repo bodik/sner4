@@ -30,6 +30,7 @@ class ReportItemJSONEncoder(json.JSONEncoder):
 class NessusParser():
     """nessus .nessus output parser"""
 
+    JOB_OUTPUT_DATAFILE = None
     SEVERITY_MAP = {'0': 'info', '1': 'low', '2': 'medium', '3': 'high', '4': 'critical'}
 
     @staticmethod
