@@ -1,4 +1,4 @@
-"""agent pytest config and fixtures"""
+"""sner pytest config and fixtures"""
 
 import pytest
 

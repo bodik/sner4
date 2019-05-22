@@ -7,7 +7,7 @@ import uuid
 import pytest
 
 from sner.server.model.scheduler import Job, Queue, Target, Task
-from tests.server import persist_and_detach
+from tests import persist_and_detach
 
 
 def create_test_task():
