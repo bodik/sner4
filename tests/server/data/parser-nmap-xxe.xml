@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun [
+<!ENTITY xmlentity SYSTEM "/etc/resolv.conf">
+]>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.40 scan initiated Mon Mar 11 19:36:11 2019 as: nmap -A -oA output localhost -->
+<nmaprun scanner="nmap" args="nmap -A -oA output localhost" start="1552329371" startstr="Mon Mar 11 19:36:11 2019" version="7.40" xmloutputversion="1.04">
+	<scaninfo type="syn" protocol="tcp" numservices="1000" services="22"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1552329372" endtime="1552329387"><status state="up" reason="localhost-response" reason_ttl="0"/>
+<address addr="127.0.0.1" addrtype="ipv4"/>
+<hostnames>
+<hostname name="localhost" type="user"/>
+<hostname name="localhost" type="PTR"/>
+</hostnames>
+<ports><extraports state="closed" count="995">
+<extrareasons reason="resets" count="995"/>
+</extraports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="7.4p1 Debian 10+deb9u4" extrainfo="protocol 2.0" ostype="Linux" method="probed" conf="10"><cpe>cpe:/a:openbsd:openssh:7.4p1</cpe><cpe>cpe:/o:linux:linux_kernel</cpe></service><script id="ssh-hostkey" output="&#xa;  2048 aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa (RSA)&#xa;  256 aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa (ECDSA)"><table>
+<elem key="key">AAAA &xmlentity;</elem>
+</table>
+</script></port>
+</ports>
+</host>
+<runstats><finished time="1552329387" timestr="Mon Mar 11 19:36:27 2019" elapsed="16.49" summary="Nmap done at Mon Mar 11 19:36:27 2019; 1 IP address (1 host up) scanned in 16.49 seconds" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>
