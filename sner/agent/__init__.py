@@ -116,7 +116,7 @@ class Agent():
             os.chdir(jobdir)
             self.module_instance = registered_modules[assignment['module']]()
             retval = self.module_instance.run(assignment)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
             self.log.error(e)
             retval = 1
         finally:

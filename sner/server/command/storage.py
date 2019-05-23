@@ -116,10 +116,7 @@ def storage_import(path, parser):
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
-            try:
-                parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
-            except Exception as e:
-                current_app.logger.error('import \'%s\' failed: %s', item, e)
+            parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
     return 0
 
 
