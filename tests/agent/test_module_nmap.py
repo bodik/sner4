@@ -1,35 +1,30 @@
 """agent module dummy tests"""
 
-from zipfile import ZipFile
+import json
+import os
+import shutil
+from uuid import uuid4
 
 import pytest
 
 from sner.agent import main
-from sner.server.controller.scheduler.job import job_output_filename
-from sner.server.model.scheduler import Job, Queue, Target, Task
-from tests import persist_and_detach
 
 
 @pytest.fixture
-def test_nmap_target():
-    """queue target fixture"""
+def test_nmap_assignment():
+    """nmap module assignment"""
 
-    task = Task(name='test task', module='nmap', params='-sL')
-    persist_and_detach(task)
-    queue = Queue(name='test queue', task=task, group_size=1, priority=10)
-    persist_and_detach(queue)
-    target = Target(target='127.0.0.1', queue=queue)
-    yield persist_and_detach(target)
+    assignment = {'id': str(uuid4()), 'module': 'nmap', 'params': '-sL', 'targets': ['127.0.0.1']}
+    yield assignment
+    if os.path.exists(assignment['id']):
+        shutil.rmtree(assignment['id'])
 
 
-def test_basic(live_server, test_nmap_target):  # pylint: disable=redefined-outer-name
+def test_basic(test_nmap_assignment):  # pylint: disable=redefined-outer-name
     """nmap module execution test"""
 
-    result = main(['--server', live_server.url(), '--debug', '--queue', str(test_nmap_target.queue_id), '--oneshot'])
+    result = main(['--assignment', json.dumps(test_nmap_assignment), '--debug'])
     assert result == 0
-
-    job = Job.query.filter(Job.queue_id == test_nmap_target.queue_id).one_or_none()
-    assert job
-    with ZipFile(job_output_filename(job.id)) as ftmp_zip:
-        with ftmp_zip.open('output.gnmap') as ftmp:
-            assert 'Host: 127.0.0.1 (localhost)' in ftmp.read().decode('utf-8')
+    assert os.path.exists('%s/output.gnmap' % test_nmap_assignment['id'])
+    with open('%s/output.gnmap' % test_nmap_assignment['id'], 'r') as ftmp:
+        assert 'Host: 127.0.0.1 (localhost)' in ftmp.read()

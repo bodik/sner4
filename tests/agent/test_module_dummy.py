@@ -1,35 +1,30 @@
 """agent module dummy tests"""
 
-from zipfile import ZipFile
+import json
+import os
+import shutil
+from uuid import uuid4
 
 import pytest
 
 from sner.agent import main
-from sner.server.controller.scheduler.job import job_output_filename
-from sner.server.model.scheduler import Job, Queue, Target, Task
-from tests import persist_and_detach
 
 
 @pytest.fixture
-def test_dummy_target():
-    """queue target fixture"""
+def test_dummy_assignment():
+    """dummy module assignment"""
 
-    task = Task(name='test_task', module='dummy', params='--someargument argvalue')
-    persist_and_detach(task)
-    queue = Queue(name='test_queue', task=task, group_size=1, priority=10)
-    persist_and_detach(queue)
-    target = Target(target='testtarget', queue=queue)
-    yield persist_and_detach(target)
+    assignment = {'id': str(uuid4()), 'module': 'dummy', 'params': '--static_assignment', 'targets': ['target1']}
+    yield assignment
+    if os.path.exists(assignment['id']):
+        shutil.rmtree(assignment['id'])
 
 
-def test_basic(live_server, test_dummy_target):  # pylint: disable=redefined-outer-name
+def test_basic(test_dummy_assignment):  # pylint: disable=redefined-outer-name
     """dummy module execution test"""
 
-    result = main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
+    result = main(['--assignment', json.dumps(test_dummy_assignment), '--debug'])
     assert result == 0
-
-    job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()
-    assert job
-    with ZipFile(job_output_filename(job.id)) as ftmp_zip:
-        with ftmp_zip.open('assignment.json') as ftmp:
-            assert test_dummy_target.target in ftmp.read().decode('utf-8')
+    assert os.path.exists('%s/assignment.json' % test_dummy_assignment['id'])
+    with open('%s/assignment.json' % test_dummy_assignment['id'], 'r') as ftmp:
+        assert test_dummy_assignment['targets'][0] in ftmp.read()
