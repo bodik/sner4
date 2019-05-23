@@ -11,15 +11,13 @@ import magic
 from flask import current_app
 from flask.cli import with_appcontext
 from sqlalchemy import func
-from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.parser import registered_parsers
-from sner.server.sqlafilter import filter_parser
 
 
-def vuln_report(filter_string=None):
+def vuln_report():
     """generate report from storage data"""
 
     def url_for_ref(ref):
@@ -54,8 +52,6 @@ def vuln_report(filter_string=None):
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
-    if filter_string:
-        query = apply_filters(query, filter_parser.parse(filter_string), do_auto_join=False)
 
     output_buffer = StringIO()
     fieldnames = [
@@ -138,8 +134,7 @@ def storage_flush():
 
 @storage_command.command(name='report', help='generate vuln report')
 @with_appcontext
-@click.argument('filter_string', required=False)
-def storage_report(filter_string):
+def storage_report():
     """generate vuln report"""
 
-    print(vuln_report(filter_string))
+    print(vuln_report())

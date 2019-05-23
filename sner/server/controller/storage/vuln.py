@@ -182,6 +182,6 @@ def vuln_report_route():
     """generate vulns report"""
 
     return Response(
-        vuln_report(request.values.get('filter')),
+        vuln_report(),
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=report-%s.csv' % datetime.now().isoformat()})

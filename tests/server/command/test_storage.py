@@ -49,6 +49,6 @@ def test_flush_command():
 def test_report_command(runner, test_vuln):
     """test vuln report command"""
 
-    result = runner.invoke(storage_command, ['report', 'Vuln.id=="%d"' % test_vuln.id])
+    result = runner.invoke(storage_command, ['report'])
     assert result.exit_code == 0
     assert ',"%s",' % test_vuln.name in result.output

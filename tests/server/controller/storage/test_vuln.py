@@ -140,6 +140,6 @@ def test_vuln_grouped_json_route(client, test_vuln):
 def test_vuln_report_route(client, test_vuln):
     """vuln report route test"""
 
-    response = client.get(url_for('storage.vuln_report_route', filter='Vuln.id=="%d"' % test_vuln.id))
+    response = client.get(url_for('storage.vuln_report_route'))
     assert response.status_code == HTTPStatus.OK
     assert ',"%s",' % test_vuln.name in response.body.decode('utf-8')
