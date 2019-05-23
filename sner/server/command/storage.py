@@ -48,7 +48,7 @@ def vuln_report():
             Vuln.tags,
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_agg(func.distinct(Vuln.refs)).label('references')  # TODO: lateral unnest ?
+            func.array_agg(func.distinct(Vuln.refs)).label('references')
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
