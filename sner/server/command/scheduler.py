@@ -10,7 +10,7 @@ from sqlalchemy import func
 
 from sner.server import db
 from sner.server.controller.scheduler.job import job_output_filename, job_delete
-from sner.server.model.scheduler import Job, Queue, Target
+from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
 def queuebyx(queueid):
@@ -51,15 +51,13 @@ def enumips(targets, **kwargs):
 def queue_list():
     """list queues"""
 
-    count_targets = {}
-    for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
-        count_targets[queue_id] = count
-
+    listing = db.session.query(Queue.id, Queue.name, Task, func.count(Target.id)) \
+        .join(Task).outerjoin(Target).group_by(Queue.id, Queue.name, Task).all()
     headers = ['id', 'name', 'task', 'targets']
     fmt = '%-4s %-20s %-40s %-8s'
     print(fmt % tuple(headers))
-    for queue in Queue.query.all():
-        print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
+    for row in listing:
+        print(fmt % row)
 
 
 @scheduler_command.command(name='queue_enqueue', help='add targets to queue')
