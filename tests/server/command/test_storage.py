@@ -3,8 +3,6 @@
 import json
 import re
 
-import pytest
-
 from sner.server.command.storage import storage_command
 from sner.server.model.storage import Host, Note, Service, Vuln
 
@@ -40,15 +38,21 @@ def test_import_nessus_command(runner):
     assert 'CVE-1900-0000' in tmpvuln.refs
 
 
-@pytest.mark.skip(reason='would note test flushing database')
-def test_flush_command():
-    """flush storage database; no separate test db, test not implemented"""
-    pass
+def test_flush_command(runner, test_service, test_vuln, test_note):
+    """flush storage database"""
+
+    result = runner.invoke(storage_command, ['flush'])
+    assert result.exit_code == 0
+
+    assert not Host.query.all()
+    assert not Service.query.all()
+    assert not Vuln.query.all()
+    assert not Note.query.all()
 
 
 def test_report_command(runner, test_vuln):
     """test vuln report command"""
 
-    result = runner.invoke(storage_command, ['report', 'Vuln.id=="%d"' % test_vuln.id])
+    result = runner.invoke(storage_command, ['report'])
     assert result.exit_code == 0
     assert ',"%s",' % test_vuln.name in result.output

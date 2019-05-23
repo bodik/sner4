@@ -27,7 +27,6 @@ class NmapParser():
 
         if (not host.hostname) and nmaphost.hostnames:
             host.hostname = nmaphost.hostnames[0]
-            # TODO: add additional hostnames as notes??
 
         for osmatch in nmaphost.os_match_probabilities():
             if (osmatch.accuracy == 100) and (not host.os):

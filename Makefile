@@ -37,10 +37,5 @@ pylint:
 	python -m pylint sner bin/agent bin/server tests
 
 
-test: test-server test-agent
-
-test-agent: test-server
-	python -m pytest -v tests/agent
-
-test-server: db-create-test
-	python -m pytest -v tests/server
+test: db-create-test
+	python -m pytest -v tests/server tests/agent

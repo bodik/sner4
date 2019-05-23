@@ -45,7 +45,6 @@ def job_list_route():
     return render_template('scheduler/job/list.html', jobs=jobs, button_form=ButtonForm())
 
 
-# TODO: post? csfr protection?
 @blueprint.route('/job/assign')
 @blueprint.route('/job/assign/<queue_id>')
 def job_assign_route(queue_id=None):
@@ -53,7 +52,6 @@ def job_assign_route(queue_id=None):
 
     def wait_for_lock(table):
         """wait for database lock"""
-        # TODO: passive wait for lock
         while True:
             try:
                 db.session.execute('LOCK TABLE %s' % table)

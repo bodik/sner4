@@ -11,15 +11,13 @@ import magic
 from flask import current_app
 from flask.cli import with_appcontext
 from sqlalchemy import func
-from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.parser import registered_parsers
-from sner.server.sqlafilter import filter_parser
 
 
-def vuln_report(filter_string=None):
+def vuln_report():
     """generate report from storage data"""
 
     def url_for_ref(ref):
@@ -50,12 +48,10 @@ def vuln_report(filter_string=None):
             Vuln.tags,
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_agg(func.distinct(Vuln.refs)).label('references')  # TODO: lateral unnest ?
+            func.array_agg(func.distinct(Vuln.refs)).label('references')
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
-    if filter_string:
-        query = apply_filters(query, filter_parser.parse(filter_string), do_auto_join=False)
 
     output_buffer = StringIO()
     fieldnames = [
@@ -103,23 +99,28 @@ def storage_command():
 def storage_import(path, parser):
     """import data"""
 
-    def data_from_file(filename, pparser):
+    def data_from_file(filename, job_output_datafile):
         with open(filename, 'rb') as ifile:
             mime_type = magic.detect_from_fobj(ifile).mime_type
             if mime_type == 'application/zip':
                 with ZipFile(ifile, 'r') as ftmp:
-                    data = ftmp.read(pparser.JOB_OUTPUT_DATAFILE)
+                    data = ftmp.read(job_output_datafile)
             else:
                 data = ifile.read()
         return data.decode('utf-8')
+
+    if parser not in registered_parsers:
+        current_app.logger.error('no such parser')
+        return 1
 
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
             try:
-                parser_impl.data_to_storage(data_from_file(item, parser_impl))
+                parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
             except Exception as e:
                 current_app.logger.error('import \'%s\' failed: %s', item, e)
+    return 0
 
 
 @storage_command.command(name='flush', help='flush all objects from storage')
@@ -133,8 +134,7 @@ def storage_flush():
 
 @storage_command.command(name='report', help='generate vuln report')
 @with_appcontext
-@click.argument('filter_string', required=False)
-def storage_report(filter_string):
+def storage_report():
     """generate vuln report"""
 
-    print(vuln_report(filter_string))
+    print(vuln_report())

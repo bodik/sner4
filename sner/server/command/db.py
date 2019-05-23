@@ -72,6 +72,11 @@ def db_initdata():
         module='nmap',
         params='-Pn --reason   -sU -sV   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
+    db.session.add(Task(
+        name='userspace tcp',
+        module='nmap',
+        params='-Pn --reason   -sT -A   --min-hostgroup 16 --min-rate 100 --max-rate 200'))
+
     # development queues with default targets
     queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
     db.session.add(queue)

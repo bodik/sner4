@@ -10,7 +10,7 @@ from sqlalchemy import func
 
 from sner.server import db
 from sner.server.controller.scheduler.job import job_output_filename, job_delete
-from sner.server.model.scheduler import Job, Queue, Target
+from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
 def queuebyx(queueid):
@@ -51,15 +51,13 @@ def enumips(targets, **kwargs):
 def queue_list():
     """list queues"""
 
-    count_targets = {}
-    for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
-        count_targets[queue_id] = count
-
+    listing = db.session.query(Queue.id, Queue.name, Task, func.count(Target.id)) \
+        .join(Task).outerjoin(Target).group_by(Queue.id, Queue.name, Task).all()
     headers = ['id', 'name', 'task', 'targets']
     fmt = '%-4s %-20s %-40s %-8s'
     print(fmt % tuple(headers))
-    for queue in Queue.query.all():
-        print(fmt % (queue.id, queue.name, queue.task, count_targets.get(queue.id, 0)))
+    for row in listing:
+        print(fmt % row)
 
 
 @scheduler_command.command(name='queue_enqueue', help='add targets to queue')
@@ -71,15 +69,17 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     """enqueue targets to queue"""
 
     queue = queuebyx(queue_id)
+    if not queue:
+        current_app.logger.error('no such queue')
+        return 1
+
     argtargets = list(argtargets)
     if kwargs["file"]:
         argtargets += kwargs["file"].read().splitlines()
-
-    targets = []
-    for target in argtargets:
-        targets.append({'target': target, 'queue_id': queue.id})
+    targets = [{'target': target, 'queue_id': queue.id} for target in argtargets]
     db.session.bulk_insert_mappings(Target, targets)
     db.session.commit()
+    return 0
 
 
 @scheduler_command.command(name='queue_flush', help='flush all targets from queue')
@@ -89,8 +89,13 @@ def queue_flush(queue_id):
     """flush targets from queue"""
 
     queue = queuebyx(queue_id)
+    if not queue:
+        current_app.logger.error('no such queue')
+        return 1
+
     db.session.query(Target).filter(Target.queue_id == queue.id).delete()
     db.session.commit()
+    return 0
 
 
 # job commands
