@@ -37,4 +37,4 @@ test: db-create-test
 
 coverage: db-create-test
 	coverage run --source sner -m pytest tests -x -vv
-	coverage report --show-missing --fail-under 90
+	coverage report --show-missing --fail-under 95
