@@ -47,7 +47,7 @@ def note_list_json_route():
         ColumnDT(Note.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
-    query = db.session.query().select_from(Note).join(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
+    query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 

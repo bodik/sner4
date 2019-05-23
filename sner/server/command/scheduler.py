@@ -52,7 +52,7 @@ def queue_list():
     """list queues"""
 
     listing = db.session.query(Queue.id, Queue.name, Task, func.count(Target.id)) \
-        .join(Task).outerjoin(Target).group_by(Queue.id, Queue.name, Task).all()
+        .outerjoin(Task).outerjoin(Target).group_by(Queue.id, Queue.name, Task).all()
     headers = ['id', 'name', 'task', 'targets']
     fmt = '%-4s %-20s %-40s %-8s'
     print(fmt % tuple(headers))

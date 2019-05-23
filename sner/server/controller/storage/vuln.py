@@ -44,7 +44,7 @@ def vuln_list_json_route():
         ColumnDT(Vuln.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
-    query = db.session.query().select_from(Vuln).join(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
+    query = db.session.query().select_from(Vuln).outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 

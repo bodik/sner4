@@ -41,7 +41,7 @@ def service_list_json_route():
         ColumnDT(Service.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
-    query = db.session.query().select_from(Service).join(Host)
+    query = db.session.query().select_from(Service).outerjoin(Host)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
@@ -130,7 +130,7 @@ def service_portstat_route(port):
     comments = db.session.query(distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
     hosts = db.session \
         .query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
-        .select_from(Service).join(Host) \
+        .select_from(Service).outerjoin(Host) \
         .filter(Service.port == port).all()
 
     return render_template('storage/service/portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)
