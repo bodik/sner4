@@ -1,8 +1,11 @@
 """agent processhandling tests"""
 
+import json
 import multiprocessing
 import os
+import shutil
 import time
+from uuid import uuid4
 
 import pytest
 
@@ -23,7 +26,27 @@ def test_longrun_target():
     yield persist_and_detach(target)
 
 
-def test_agent_process_management(live_server, test_longrun_target):  # pylint: disable=redefined-outer-name
+@pytest.fixture
+def test_assignment():
+    """generate static assignment and cleanup on test fail"""
+
+    assignment = {'id': str(uuid4()), 'module': 'dummy', 'params': '--static_assignment', 'targets': ['target1']}
+    yield assignment
+    if os.path.exists(assignment['id']):
+        shutil.rmtree(assignment['id'])
+
+
+@pytest.fixture
+def test_assignment_invalid():
+    """invalid assignment to test agent module call exception handling"""
+
+    assignment = {'id': str(uuid4()), 'module': 'notexist', 'params': '', 'targets': []}
+    yield assignment
+    if os.path.exists(assignment['id']):
+        shutil.rmtree(assignment['id'])
+
+
+def test_terminate(live_server, test_longrun_target):  # pylint: disable=redefined-outer-name
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(
@@ -44,3 +67,20 @@ def test_agent_process_management(live_server, test_longrun_target):  # pylint: 
     assert 'MARKEDPROCESS' not in procs_list
     assert not proc_agent.is_alive()
     proc_agent.join()
+
+
+def test_commandline_assignment(test_assignment):
+    """test custom assignment passed from command line"""
+
+    result = main(['--assignment', json.dumps(test_assignment)])
+    assert result == 0
+    assert os.path.exists(test_assignment['id'])
+    assert os.path.exists('%s/assignment.json' % test_assignment['id'])
+
+
+def test_exception_in_module(test_assignment_invalid):
+    """test exception handling during agent module execution"""
+
+    result = main(['--assignment', json.dumps(test_assignment_invalid)])
+    assert result == 1
+    assert os.path.exists(test_assignment_invalid['id'])
