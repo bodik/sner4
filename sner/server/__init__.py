@@ -29,16 +29,19 @@ db = SQLAlchemy()  # pylint: disable=invalid-name
 toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 
 
+def get_dotted(data, path):
+    """access nested dict by dotted helper"""
+
+    parts = path.split('.')
+    if len(parts) == 1:
+        return data.get(parts[0])
+    if (parts[0] in data) and isinstance(data[parts[0]], dict):
+        return get_dotted(data[parts[0]], '.'.join(parts[1:]))
+    return None
+
+
 def config_from_yaml(filename):
     """pull config variables from config file"""
-
-    def get_dotted(data, path):
-        parts = path.split('.')
-        if len(parts) == 1:
-            return data.get(parts[0])
-        if parts[0] in data:
-            return get_dotted(data[parts[0]], '.'.join(parts[1:]))
-        return None
 
     if filename:
         with open(filename, 'r') as ftmp:
@@ -62,7 +65,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.config.update(config_from_yaml(os.environ.get(config_env)))
 
     db.init_app(app)
-    if app.config['DEBUG']:
+    if app.config['DEBUG']:  # pragma: no cover
         toolbar.init_app(app)
 
     from sner.server.controller import scheduler
