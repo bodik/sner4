@@ -3,7 +3,9 @@
 import json
 import multiprocessing
 import os
+import re
 import shutil
+import signal
 import time
 from uuid import uuid4
 from zipfile import ZipFile
@@ -49,6 +51,14 @@ def test_dummy_target():
 
 
 @pytest.fixture
+def test_longrun_assignment():
+    assignment = {'id': str(uuid4()), 'module': 'nmap', 'params': '-Pn --reason -sU --max-rate 1 --data-string MARKEDPROCESS', 'targets': ['127.0.0.127']}
+    yield assignment
+    if os.path.exists(assignment['id']):
+        shutil.rmtree(assignment['id'])
+
+
+@pytest.fixture
 def test_longrun_target():
     """queue target fixture"""
 
@@ -58,6 +68,18 @@ def test_longrun_target():
     persist_and_detach(queue)
     target = Target(target='127.0.0.127', queue=queue)
     yield persist_and_detach(target)
+
+
+@pytest.fixture
+def cleanup_markedprocess():
+    """will cleanup markedprocess from failed testcase"""
+
+    yield
+    procs_list = os.popen('ps -f').read().splitlines()
+    marked_procs = list(filter(lambda x: 'MARKEDPROCESS' in x, procs_list))
+    marked_procs_pids = list(map(lambda x: int(re.split(r' +', x, maxsplit=7)[1]), marked_procs))
+    for pid in marked_procs_pids:
+        os.kill(pid, signal.SIGTERM)
 
 
 def test_commandline_assignment(test_assignment):  # pylint: disable=redefined-outer-name
@@ -77,7 +99,7 @@ def test_exception_in_module(test_assignment_exception):  # pylint: disable=rede
     assert os.path.exists(test_assignment_exception['id'])
 
 
-def test_standard_run(live_server, test_dummy_target):  # pylint: disable=redefined-outer-name
+def test_run_with_liveserver(live_server, test_dummy_target):  # pylint: disable=redefined-outer-name
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
     result = agent_main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
@@ -90,11 +112,30 @@ def test_standard_run(live_server, test_dummy_target):  # pylint: disable=redefi
             assert test_dummy_target.target in ftmp.read().decode('utf-8')
 
 
-def test_terminate(live_server, test_longrun_target):  # pylint: disable=redefined-outer-name
+def test_terminate_with_assignment(test_longrun_assignment, cleanup_markedprocess):  # pylint: disable=redefined-outer-name
+    """agent's external process handling test"""
+
+    proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_assignment), '--debug',],))
+    proc_agent.start()
+
+    time.sleep(1)
+    assert proc_agent.pid
+    assert proc_agent.is_alive()
+
+    agent_main(['--terminate', str(proc_agent.pid)])
+
+    time.sleep(3)
+    procs_list = os.popen('ps -f').read()
+    assert 'MARKEDPROCESS' not in procs_list
+    assert not proc_agent.is_alive()
+    proc_agent.join()
+
+
+def test_terminate_with_liveserver(live_server, test_longrun_target, cleanup_markedprocess):  # pylint: disable=redefined-outer-name
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(
-        target=main,
+        target=agent_main,
         args=(['--server', live_server.url(), '--debug', '--queue', str(test_longrun_target.queue_id), '--oneshot'],))
     proc_agent.start()
 
@@ -102,9 +143,7 @@ def test_terminate(live_server, test_longrun_target):  # pylint: disable=redefin
     assert proc_agent.pid
     assert proc_agent.is_alive()
 
-    proc_mngr = multiprocessing.Process(target=main, args=(['--terminate', str(proc_agent.pid)],))
-    proc_mngr.start()
-    proc_mngr.join()
+    agent_main(['--terminate', str(proc_agent.pid)])
 
     time.sleep(3)
     procs_list = os.popen('ps -f').read()
