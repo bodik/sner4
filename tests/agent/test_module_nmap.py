@@ -2,29 +2,18 @@
 
 import json
 import os
-import shutil
 from uuid import uuid4
-
-import pytest
 
 from sner.agent import main as agent_main
 
 
-@pytest.fixture
-def test_nmap_assignment():
-    """nmap module assignment"""
-
-    assignment = {'id': str(uuid4()), 'module': 'nmap', 'params': '-sL', 'targets': ['127.0.0.1']}
-    yield assignment
-    if os.path.exists(assignment['id']):
-        shutil.rmtree(assignment['id'])
-
-
-def test_basic(test_nmap_assignment):  # pylint: disable=redefined-outer-name
+def test_basic(tmpworkdir):
     """nmap module execution test"""
 
-    result = agent_main(['--assignment', json.dumps(test_nmap_assignment), '--debug'])
+    test_a = {'id': str(uuid4()), 'module': 'nmap', 'params': '-sL', 'targets': ['127.0.0.1']}
+
+    result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0
-    assert os.path.exists('%s/output.gnmap' % test_nmap_assignment['id'])
-    with open('%s/output.gnmap' % test_nmap_assignment['id'], 'r') as ftmp:
+    assert os.path.exists('%s/output.gnmap' % test_a['id'])
+    with open('%s/output.gnmap' % test_a['id'], 'r') as ftmp:
         assert 'Host: 127.0.0.1 (localhost)' in ftmp.read()
