@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """sner agent"""
 
+import abc
 import json
 import logging
 import os
@@ -27,68 +28,31 @@ logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
 
 
-class Agent():
-    """agent class to fetch and execute assignments from central job server"""
+class BaseAgent():
+    """base agent impl containing main (sub)process handling code"""
 
     def __init__(self):
         self.log = logging.getLogger('sner.agent')
         self.loop = True
         self.module_instance = None
+        self.original_signal_handlers = {}
 
-    def run(self, server, queue, oneshot=False):
-        """fetch and process assignment from server"""
+    @abc.abstractmethod
+    def run(self, **kwargs):
+        pass
 
-        def zipdir(path):
-            """pack directory to in memory zipfile"""
-            buf = BytesIO()
-            with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
-                for root, _dirs, files in os.walk(path):
-                    for fname in files:
-                        filepath = os.path.join(root, fname)
-                        arcname = os.path.join(*(filepath.split(os.path.sep)[1:]))
-                        output_zip.write(filepath, arcname)
-            return b64encode(buf.getvalue()).decode('utf-8')
+    def register_handlers(self):
+        """register signal handlers"""
 
-        # setup signal handlers
-        original_signal_handlers = {}
         for isig, ihan in [(signal.SIGTERM, self.terminate), (signal.SIGINT, self.terminate), (signal.SIGUSR1, self.shutdown)]:
-            original_signal_handlers[isig] = signal.getsignal(isig)
+            self.original_signal_handlers[isig] = signal.getsignal(isig)
             signal.signal(isig, ihan)
 
-        retval = 0
-        while self.loop:
-            # get assignment
-            assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
-            self.log.debug('got assignment: %s', assignment)
+    def restore_handlers(self):
+        """restore signal handlers"""
 
-            if assignment:
-                # process it
-                retval = self.process_assignment(assignment)
-                self.log.debug('processed, retval=%d', retval)
-
-                # upload output
-                jobdir = assignment['id']
-                output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
-                response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
-                if response.status_code == HTTPStatus.OK:
-                    shutil.rmtree(jobdir)
-                else:
-                    self.log.error('output upload failed')
-                    retval = 1
-                    self.loop = False
-            elif not oneshot:
-                # wait for assignment if not in oneshot mode
-                sleep(10)
-
-            # end if requested
-            if oneshot:
-                self.loop = False
-
-        # restore signal handlers
-        for isig, ihan in original_signal_handlers.items():
+        for isig, ihan in self.original_signal_handlers.items():
             signal.signal(isig, ihan)
-
-        return retval
 
     def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
         """wait for current assignment to finish"""
@@ -126,6 +90,85 @@ class Agent():
         return retval
 
 
+class ServerableAgent(BaseAgent):
+    """agent to fetch and execute assignments from central job server"""
+
+    def run(self, **kwargs):
+        """fetch, process and upload output for assignment given by server"""
+
+        def zipdir(path):
+            """pack directory to in memory zipfile"""
+            buf = BytesIO()
+            with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
+                for root, _dirs, files in os.walk(path):
+                    for fname in files:
+                        filepath = os.path.join(root, fname)
+                        arcname = os.path.join(*(filepath.split(os.path.sep)[1:]))
+                        output_zip.write(filepath, arcname)
+            return b64encode(buf.getvalue()).decode('utf-8')
+
+        server = kwargs['server']
+        queue = kwargs['queue']
+        oneshot = kwargs.get('oneshot', False)
+
+        self.register_handlers()
+
+        retval = 0
+        while self.loop:
+            # get assignment
+            assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
+            self.log.debug('got assignment: %s', assignment)
+
+            if assignment:
+                # process it
+                retval = self.process_assignment(assignment)
+                self.log.debug('processed, retval=%d', retval)
+
+                # upload output
+                jobdir = assignment['id']
+                output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
+                response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
+                if response.status_code == HTTPStatus.OK:
+                    shutil.rmtree(jobdir)
+                else:
+                    self.log.error('output upload failed')
+                    retval = 1
+                    self.loop = False
+            elif not oneshot:
+                # wait for assignment if not in oneshot mode
+                sleep(10)
+
+            # end if requested
+            if oneshot:
+                self.loop = False
+
+        self.restore_handlers()
+
+        return retval
+
+
+class AssignableAgent(BaseAgent):
+    """agent to execute assignments supplied from command line"""
+
+    def run(self, **kwargs):
+        """process user supplied assignment"""
+
+        assignment = json.loads(kwargs['assignment'])
+        if 'id' not in assignment:
+            assignment['id'] = str(uuid4())
+
+        self.register_handlers()
+        retval = self.process_assignment(assignment)
+        self.log.debug('processed, retval=%d', retval)
+        self.restore_handlers()
+        return retval
+
+    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
+        """assignableagent does not perform repeating processing"""
+
+        self.log.warning('shutdown on AssignableAgent requested')
+
+
 def main(argv=None):
     """sner agent main"""
 
@@ -152,13 +195,10 @@ def main(argv=None):
 
     # agent with custom assignment
     if args.assignment:
-        tmp = json.loads(args.assignment)
-        if 'id' not in tmp:
-            tmp['id'] = str(uuid4())
-        return Agent().process_assignment(tmp)
+        return AssignableAgent().run(assignment=args.assignment)
 
     # standard agent
-    return Agent().run(args.server, args.queue, args.oneshot)
+    return ServerableAgent().run(server=args.server, queue=args.queue, oneshot=args.oneshot)
 
 
 if __name__ == '__main__':
