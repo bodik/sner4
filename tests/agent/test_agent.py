@@ -52,7 +52,13 @@ def test_dummy_target():
 
 @pytest.fixture
 def test_longrun_assignment():
-    assignment = {'id': str(uuid4()), 'module': 'nmap', 'params': '-Pn --reason -sU --max-rate 1 --data-string MARKEDPROCESS', 'targets': ['127.0.0.127']}
+    """assignment used by process handling tests"""
+
+    assignment = {
+        'id': str(uuid4()),
+        'module': 'nmap',
+        'params': '-Pn --reason -sU --max-rate 1 --data-string MARKEDPROCESS',
+        'targets': ['127.0.0.127']}
     yield assignment
     if os.path.exists(assignment['id']):
         shutil.rmtree(assignment['id'])
@@ -115,7 +121,7 @@ def test_run_with_liveserver(live_server, test_dummy_target):  # pylint: disable
 def test_terminate_with_assignment(test_longrun_assignment, cleanup_markedprocess):  # pylint: disable=redefined-outer-name
     """agent's external process handling test"""
 
-    proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_assignment), '--debug',],))
+    proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_assignment), '--debug'],))
     proc_agent.start()
 
     time.sleep(1)

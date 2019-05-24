@@ -39,6 +39,7 @@ class BaseAgent():
 
     @abc.abstractmethod
     def run(self, **kwargs):
+        """abstract run method; must be implemented by specific agent"""
         pass
 
     def register_handlers(self):
