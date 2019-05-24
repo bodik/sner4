@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from sner.agent import main
+from sner.agent import main as agent_main
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def test_nmap_assignment():
 def test_basic(test_nmap_assignment):  # pylint: disable=redefined-outer-name
     """nmap module execution test"""
 
-    result = main(['--assignment', json.dumps(test_nmap_assignment), '--debug'])
+    result = agent_main(['--assignment', json.dumps(test_nmap_assignment), '--debug'])
     assert result == 0
     assert os.path.exists('%s/output.gnmap' % test_nmap_assignment['id'])
     with open('%s/output.gnmap' % test_nmap_assignment['id'], 'r') as ftmp:

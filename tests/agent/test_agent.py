@@ -10,7 +10,7 @@ from zipfile import ZipFile
 
 import pytest
 
-from sner.agent import main
+from sner.agent import main as agent_main
 from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue, Target, Task
 from tests import persist_and_detach
@@ -63,7 +63,7 @@ def test_longrun_target():
 def test_commandline_assignment(test_assignment):  # pylint: disable=redefined-outer-name
     """test custom assignment passed from command line"""
 
-    result = main(['--assignment', json.dumps(test_assignment)])
+    result = agent_main(['--assignment', json.dumps(test_assignment)])
     assert result == 0
     assert os.path.exists(test_assignment['id'])
     assert os.path.exists('%s/assignment.json' % test_assignment['id'])
@@ -72,7 +72,7 @@ def test_commandline_assignment(test_assignment):  # pylint: disable=redefined-o
 def test_exception_in_module(test_assignment_exception):  # pylint: disable=redefined-outer-name
     """test exception handling during agent module execution"""
 
-    result = main(['--assignment', json.dumps(test_assignment_exception)])
+    result = agent_main(['--assignment', json.dumps(test_assignment_exception)])
     assert result == 1
     assert os.path.exists(test_assignment_exception['id'])
 
@@ -80,7 +80,7 @@ def test_exception_in_module(test_assignment_exception):  # pylint: disable=rede
 def test_standard_run(live_server, test_dummy_target):  # pylint: disable=redefined-outer-name
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
-    result = main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
+    result = agent_main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
     assert result == 0
 
     job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()

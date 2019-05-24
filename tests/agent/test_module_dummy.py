@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from sner.agent import main
+from sner.agent import main as agent_main
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def test_dummy_assignment():
 def test_basic(test_dummy_assignment):  # pylint: disable=redefined-outer-name
     """dummy module execution test"""
 
-    result = main(['--assignment', json.dumps(test_dummy_assignment), '--debug'])
+    result = agent_main(['--assignment', json.dumps(test_dummy_assignment), '--debug'])
     assert result == 0
     assert os.path.exists('%s/assignment.json' % test_dummy_assignment['id'])
     with open('%s/assignment.json' % test_dummy_assignment['id'], 'r') as ftmp:
