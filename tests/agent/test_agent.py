@@ -15,7 +15,7 @@ def test_commandline_assignment(tmpworkdir, test_dummy_a):
 
     result = agent_main(['--assignment', json.dumps(test_dummy_a)])
     assert result == 0
-    assert os.path.exists(test_dummy_a['id'])
+    assert os.path.exists('%s.zip' % test_dummy_a['id'])
 
 
 def test_exception_in_module(tmpworkdir):
@@ -25,7 +25,7 @@ def test_exception_in_module(tmpworkdir):
 
     result = agent_main(['--assignment', json.dumps(test_a)])
     assert result == 1
-    assert os.path.exists(test_a['id'])
+    assert os.path.exists('%s.zip' % test_a['id'])
 
 
 def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):
@@ -36,6 +36,4 @@ def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):
 
     job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()
     assert job
-    with ZipFile(job_output_filename(job.id)) as ftmp_zip:
-        with ftmp_zip.open('assignment.json') as ftmp:
-            assert test_dummy_target.target in ftmp.read().decode('utf-8')
+    assert test_dummy_target.target in file_from_zip(job_output_filename(job.id), 'assignment.json').decode('utf-8')

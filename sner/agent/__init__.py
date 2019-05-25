@@ -28,6 +28,18 @@ logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
 
 
+def zipdir(path, zipto):
+    """pack directory to in zipfile"""
+
+    with open(zipto, 'wb', 0o600) as output_file:
+        with ZipFile(output_file, 'w', ZIP_DEFLATED) as output_zip:
+            for root, _dirs, files in os.walk(path):
+                for fname in files:
+                    filepath = os.path.join(root, fname)
+                    arcname = os.path.join(*(filepath.split(os.path.sep)[1:]))
+                    output_zip.write(filepath, arcname)
+
+
 class BaseAgent():
     """base agent impl containing main (sub)process handling code"""
 
@@ -73,9 +85,10 @@ class BaseAgent():
 
         jobdir = assignment['id']
         oldcwd = os.getcwd()
+        os.makedirs(jobdir, mode=0o700)
+        os.chdir(jobdir)
+
         try:
-            os.makedirs(jobdir, mode=0o700)
-            os.chdir(jobdir)
             self.module_instance = registered_modules[assignment['module']]()
             retval = self.module_instance.run(assignment)
         except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
@@ -83,7 +96,10 @@ class BaseAgent():
             retval = 1
         finally:
             self.module_instance = None
-            os.chdir(oldcwd)
+
+        os.chdir(oldcwd)
+        zipdir(jobdir, '%s.zip' % jobdir)
+        shutil.rmtree(jobdir)
 
         return retval
 
@@ -93,17 +109,6 @@ class ServerableAgent(BaseAgent):
 
     def run(self, **kwargs):
         """fetch, process and upload output for assignment given by server"""
-
-        def zipdir(path):
-            """pack directory to in memory zipfile"""
-            buf = BytesIO()
-            with ZipFile(buf, 'w', ZIP_DEFLATED) as output_zip:
-                for root, _dirs, files in os.walk(path):
-                    for fname in files:
-                        filepath = os.path.join(root, fname)
-                        arcname = os.path.join(*(filepath.split(os.path.sep)[1:]))
-                        output_zip.write(filepath, arcname)
-            return b64encode(buf.getvalue()).decode('utf-8')
 
         server = kwargs['server']
         queue = kwargs['queue']
@@ -128,8 +133,8 @@ class ServerableAgent(BaseAgent):
                 self.log.debug('processed, retval=%d', retval)
 
                 # upload output
-                jobdir = assignment['id']
-                output = {'id': assignment['id'], 'retval': retval, 'output': zipdir(jobdir)}
+                with open('%s.zip' % assignment['id'], 'rb') as ftmp:
+                    output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
                 response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
                 if response.status_code == HTTPStatus.OK:
                     shutil.rmtree(jobdir)
