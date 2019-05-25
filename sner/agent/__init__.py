@@ -71,9 +71,7 @@ class BaseAgent():
     def process_assignment(self, assignment):
         """process assignment"""
 
-        jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
         jobdir = assignment['id']
-
         oldcwd = os.getcwd()
         try:
             os.makedirs(jobdir, mode=0o700)
@@ -117,7 +115,12 @@ class ServerableAgent(BaseAgent):
         while self.loop:
             # get assignment
             assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
-            self.log.debug('got assignment: %s', assignment)
+            try:
+                jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+                self.log.debug('got assignment: %s', assignment)
+            except jsonschema.exception.ValidationError:
+                assignment = None
+                self.log.error('invalid assignment: %s', assignment)
 
             if assignment:
                 # process it
@@ -153,9 +156,9 @@ class AssignableAgent(BaseAgent):
     def run(self, **kwargs):
         """process user supplied assignment"""
 
-        assignment = json.loads(kwargs['assignment'])
-        if 'id' not in assignment:
-            assignment['id'] = str(uuid4())
+        assignment = {'id': 'output'}
+        assignment.update(json.loads(kwargs['assignment']))
+        jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 
         self.register_handlers()
         retval = self.process_assignment(assignment)
