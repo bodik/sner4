@@ -40,7 +40,6 @@ class BaseAgent():
     @abc.abstractmethod
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
-        pass
 
     def register_handlers(self):
         """register signal handlers"""
@@ -164,11 +163,6 @@ class AssignableAgent(BaseAgent):
         self.restore_handlers()
         return retval
 
-    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
-        """assignableagent does not perform repeating processing"""
-
-        self.log.warning('shutdown on AssignableAgent requested')
-
 
 def main(argv=None):
     """sner agent main"""
@@ -202,5 +196,5 @@ def main(argv=None):
     return ServerableAgent().run(server=args.server, queue=args.queue, oneshot=args.oneshot)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     sys.exit(main())
