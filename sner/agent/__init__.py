@@ -10,6 +10,7 @@ import signal
 import sys
 from argparse import ArgumentParser
 from base64 import b64encode
+from contextlib import contextmanager
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
@@ -45,32 +46,12 @@ class BaseAgent():
 
     def __init__(self):
         self.log = logging.getLogger('sner.agent')
-        self.loop = True
         self.module_instance = None
         self.original_signal_handlers = {}
 
     @abc.abstractmethod
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
-
-    def register_handlers(self):
-        """register signal handlers"""
-
-        for isig, ihan in [(signal.SIGTERM, self.terminate), (signal.SIGINT, self.terminate), (signal.SIGUSR1, self.shutdown)]:
-            self.original_signal_handlers[isig] = signal.getsignal(isig)
-            signal.signal(isig, ihan)
-
-    def restore_handlers(self):
-        """restore signal handlers"""
-
-        for isig, ihan in self.original_signal_handlers.items():
-            signal.signal(isig, ihan)
-
-    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
-        """wait for current assignment to finish"""
-
-        self.log.info('shutdown')
-        self.loop = False
 
     def terminate(self, signum=None, frame=None):  # pylint: disable=unused-argument
         """terminate at once"""
@@ -80,6 +61,18 @@ class BaseAgent():
         if self.module_instance:
             self.module_instance.terminate()
 
+    @contextmanager
+    def terminate_context(self):
+        """terminate context manager; should restore handlers despite underlying code exceptions"""
+
+        self.original_signal_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self.terminate)
+        self.original_signal_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self.terminate)
+        try:
+            yield
+        finally:
+            signal.signal(signal.SIGINT, self.original_signal_handlers[signal.SIGINT])
+            signal.signal(signal.SIGTERM, self.original_signal_handlers[signal.SIGTERM])
+
     def process_assignment(self, assignment):
         """process assignment"""
 
@@ -88,14 +81,15 @@ class BaseAgent():
         os.makedirs(jobdir, mode=0o700)
         os.chdir(jobdir)
 
-        try:
-            self.module_instance = registered_modules[assignment['module']]()
-            retval = self.module_instance.run(assignment)
-        except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
-            self.log.exception(e)
-            retval = 1
-        finally:
-            self.module_instance = None
+        with self.terminate_context():
+            try:
+                self.module_instance = registered_modules[assignment['module']]()
+                retval = self.module_instance.run(assignment)
+            except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
+                self.log.exception(e)
+                retval = 1
+            finally:
+                self.module_instance = None
 
         os.chdir(oldcwd)
         zipdir(jobdir, '%s.zip' % jobdir)
@@ -107,6 +101,25 @@ class BaseAgent():
 class ServerableAgent(BaseAgent):
     """agent to fetch and execute assignments from central job server"""
 
+    def __init__(self):
+        super().__init__()
+        self.loop = True
+
+    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
+        """wait for current assignment to finish"""
+        self.log.info('shutdown')
+        self.loop = False
+
+    @contextmanager
+    def shutdown_context(self):
+        """shutdown context manager; should restore handlers despite underlying code exceptions"""
+
+        self.original_signal_handlers[signal.SIGUSR1] = signal.signal(signal.SIGUSR1, self.shutdown)
+        try:
+            yield
+        finally:
+            signal.signal(signal.SIGUSR1, self.original_signal_handlers[signal.SIGUSR1])
+
     def run(self, **kwargs):
         """fetch, process and upload output for assignment given by server"""
 
@@ -114,43 +127,40 @@ class ServerableAgent(BaseAgent):
         queue = kwargs['queue']
         oneshot = kwargs.get('oneshot', False)
 
-        self.register_handlers()
-
         retval = 0
-        while self.loop:
-            # get assignment
-            assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
-            try:
-                jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
-                self.log.debug('got assignment: %s', assignment)
-            except jsonschema.exception.ValidationError:
-                assignment = None
-                self.log.error('invalid assignment: %s', assignment)
+        with self.shutdown_context():
+            while self.loop:
+                # get assignment
+                assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
+                try:
+                    jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+                    self.log.debug('got assignment: %s', assignment)
+                except jsonschema.exception.ValidationError:
+                    assignment = None
+                    self.log.error('invalid assignment: %s', assignment)
 
-            if assignment:
-                # process it
-                retval = self.process_assignment(assignment)
-                self.log.debug('processed, retval=%d', retval)
+                if assignment:
+                    # process it
+                    retval = self.process_assignment(assignment)
+                    self.log.debug('processed, retval=%d', retval)
 
-                # upload output
-                with open('%s.zip' % assignment['id'], 'rb') as ftmp:
-                    output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
-                response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
-                if response.status_code == HTTPStatus.OK:
-                    shutil.rmtree(jobdir)
-                else:
-                    self.log.error('output upload failed')
-                    retval = 1
+                    # upload output
+                    with open('%s.zip' % assignment['id'], 'rb') as ftmp:
+                        output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
+                    response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
+                    if response.status_code == HTTPStatus.OK:
+                        shutil.rmtree(jobdir)
+                    else:
+                        self.log.error('output upload failed')
+                        retval = 1
+                        self.loop = False
+                elif not oneshot:
+                    # wait for assignment if not in oneshot mode
+                    sleep(10)
+
+                # end if requested
+                if oneshot:
                     self.loop = False
-            elif not oneshot:
-                # wait for assignment if not in oneshot mode
-                sleep(10)
-
-            # end if requested
-            if oneshot:
-                self.loop = False
-
-        self.restore_handlers()
 
         return retval
 
@@ -165,10 +175,8 @@ class AssignableAgent(BaseAgent):
         assignment.update(json.loads(kwargs['assignment']))
         jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 
-        self.register_handlers()
         retval = self.process_assignment(assignment)
         self.log.debug('processed, retval=%d', retval)
-        self.restore_handlers()
         return retval
 
 
