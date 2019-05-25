@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from sner.agent import main as agent_main
 from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job
+from tests.agent import file_from_zip
 
 
 def test_commandline_assignment(tmpworkdir, test_dummy_a):

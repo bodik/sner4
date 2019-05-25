@@ -149,7 +149,7 @@ class ServerableAgent(BaseAgent):
                         output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
                     response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
                     if response.status_code == HTTPStatus.OK:
-                        shutil.rmtree(jobdir)
+                        os.remove('%s.zip' % assignment['id'])
                     else:
                         self.log.error('output upload failed')
                         retval = 1
