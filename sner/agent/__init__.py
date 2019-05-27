@@ -45,12 +45,13 @@ class BaseAgent():
         self.log = logging.getLogger('sner.agent')
         self.module_instance = None
         self.original_signal_handlers = {}
+        self.loop = None
 
     @abc.abstractmethod
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
 
-    def terminate(self, signum=None, frame=None):  # pylint: disable=unused-argument
+    def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument
         """terminate at once"""
 
         self.log.info('terminate')
@@ -98,12 +99,22 @@ class BaseAgent():
 class ServerableAgent(BaseAgent):
     """agent to fetch and execute assignments from central job server"""
 
-    def __init__(self):
-        super().__init__()
-        self.loop = True
+    BACKOFF_TIME = 5
 
-    def shutdown(self, signum=None, frame=None):  # pylint: disable=unused-argument
+    def __init__(self, server, queue, oneshot=False):
+        super().__init__()
+
+        self.server = server
+        self.queue = queue
+        self.oneshot = oneshot
+
+        self.loop = True
+        self.get_assignment_url = '%s/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
+        self.upload_output_url = '%s/scheduler/job/output' % self.server
+
+    def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument
         """wait for current assignment to finish"""
+
         self.log.info('shutdown')
         self.loop = False
 
@@ -117,46 +128,58 @@ class ServerableAgent(BaseAgent):
         finally:
             signal.signal(signal.SIGUSR1, self.original_signal_handlers[signal.SIGUSR1])
 
+    def get_assignment(self):
+        """get assignment from server"""
+
+        assignment = None
+        while self.loop and not assignment:
+            try:
+                assignment = requests.get(self.get_assignment_url, timeout=10).json()
+                if not assignment:  # response-nowork
+                    self.log.debug('get_assignment response-nowork')
+                    sleep(self.BACKOFF_TIME)
+                    continue
+                jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+                self.log.debug('got assignment: %s', assignment)
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as e:
+                assignment = None
+                self.log.warning('get_assignment error: %s', e)
+                sleep(self.BACKOFF_TIME)
+
+        return assignment
+
+    def upload_output(self, output):
+        """upload assignment output to the server"""
+
+        uploaded = False
+        while not uploaded:
+            try:
+                response = requests.post(self.upload_output_url, json=output, timeout=10)
+                response.raise_for_status()
+                uploaded = True
+            except requests.exceptions.RequestException as e:
+                self.log.warning('upload_output error: %s', e)
+                sleep(self.BACKOFF_TIME)
+
     def run(self, **kwargs):
         """fetch, process and upload output for assignment given by server"""
-
-        server = kwargs['server']
-        queue = kwargs['queue']
-        oneshot = kwargs.get('oneshot', False)
 
         retval = 0
         with self.shutdown_context():
             while self.loop:
-                # get assignment
-                assignment = requests.get('%s/scheduler/job/assign%s' % (server, '/%s' % queue if queue else ''), timeout=60).json()
-                try:
-                    jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
-                    self.log.debug('got assignment: %s', assignment)
-                except jsonschema.exception.ValidationError:
-                    assignment = None
-                    self.log.error('invalid assignment: %s', assignment)
+                assignment = self.get_assignment()
 
                 if assignment:
-                    # process it
                     retval = self.process_assignment(assignment)
                     self.log.debug('processed, retval=%d', retval)
 
-                    # upload output
-                    with open('%s.zip' % assignment['id'], 'rb') as ftmp:
+                    assignment_output_file = '%s.zip' % assignment['id']
+                    with open(assignment_output_file, 'rb') as ftmp:
                         output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
-                    response = requests.post('%s/scheduler/job/output' % server, json=output, timeout=60)
-                    if response.status_code == HTTPStatus.OK:
-                        os.remove('%s.zip' % assignment['id'])
-                    else:
-                        self.log.error('output upload failed')
-                        retval = 1
-                        self.loop = False
-                elif not oneshot:
-                    # wait for assignment if not in oneshot mode
-                    sleep(10)
+                    self.upload_output(output)
+                    os.remove(assignment_output_file)
 
-                # end if requested
-                if oneshot:
+                if self.oneshot:
                     self.loop = False
 
         return retval
@@ -169,7 +192,7 @@ class AssignableAgent(BaseAgent):
         """process user supplied assignment"""
 
         assignment = {'id': 'output'}
-        assignment.update(json.loads(kwargs['assignment']))
+        assignment.update(json.loads(kwargs['input_a']))
         jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 
         retval = self.process_assignment(assignment)
@@ -185,6 +208,7 @@ def main(argv=None):
     parser.add_argument('--server', default='http://localhost:18000', help='server uri')
     parser.add_argument('--queue', help='select specific queue to work on')
     parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
+
     parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
 
     parser.add_argument('--shutdown', type=int, help='request gracefull shutdown of the agent specified by PID')
@@ -203,10 +227,10 @@ def main(argv=None):
 
     # agent with custom assignment
     if args.assignment:
-        return AssignableAgent().run(assignment=args.assignment)
+        return AssignableAgent().run(input_a=args.assignment)
 
     # standard agent
-    return ServerableAgent().run(server=args.server, queue=args.queue, oneshot=args.oneshot)
+    return ServerableAgent(args.server, args.queue, args.oneshot).run()
 
 
 if __name__ == '__main__':  # pragma: no cover
