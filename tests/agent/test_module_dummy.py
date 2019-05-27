@@ -6,7 +6,7 @@ from sner.agent import main as agent_main
 from tests.agent import file_from_zip
 
 
-def test_basic(tmpworkdir, test_dummy_a):
+def test_basic(tmpworkdir, test_dummy_a):  # pylint: disable=unused-argument
     """dummy module execution test"""
 
     result = agent_main(['--assignment', json.dumps(test_dummy_a), '--debug'])

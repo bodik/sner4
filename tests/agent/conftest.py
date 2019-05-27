@@ -48,7 +48,7 @@ def test_dummy_a():
 
 
 @pytest.fixture
-def test_dummy_target(test_dummy_a):
+def test_dummy_target(test_dummy_a):  # pylint: disable=redefined-outer-name
     """dummy target fixture"""
 
     task = Task(name='test_task', module=test_dummy_a['module'], params=test_dummy_a['params'])
@@ -61,6 +61,8 @@ def test_dummy_target(test_dummy_a):
 
 @pytest.fixture
 def test_longrun_a():
+    """longrun assignment fixture"""
+
     yield {
         'id': str(uuid4()),
         'module': 'nmap',
@@ -69,7 +71,7 @@ def test_longrun_a():
 
 
 @pytest.fixture
-def test_longrun_target(test_longrun_a):
+def test_longrun_target(test_longrun_a):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
     task = Task(name='test_task', module=test_longrun_a['module'], params=test_longrun_a['params'])

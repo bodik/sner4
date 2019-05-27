@@ -8,7 +8,7 @@ import time
 from sner.agent import main as agent_main
 
 
-def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longrun_a):
+def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longrun_a):  # pylint: disable=unused-argument
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_a), '--debug'],))
@@ -24,7 +24,7 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longr
     proc_agent.join()
 
 
-def test_terminate_with_liveserver(tmpworkdir, live_server, cleanup_markedprocess, test_longrun_target):
+def test_terminate_with_liveserver(tmpworkdir, live_server, cleanup_markedprocess, test_longrun_target):  # pylint: disable=unused-argument
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(

@@ -7,7 +7,7 @@ from sner.agent import main as agent_main
 from tests.agent import file_from_zip
 
 
-def test_basic(tmpworkdir):
+def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """nmap module execution test"""
 
     test_a = {'id': str(uuid4()), 'module': 'nmap', 'params': '-sL', 'targets': ['127.0.0.1']}

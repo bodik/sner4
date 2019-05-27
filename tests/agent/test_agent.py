@@ -3,7 +3,6 @@
 import json
 import os
 from uuid import uuid4
-from zipfile import ZipFile
 
 from sner.agent import main as agent_main
 from sner.server.controller.scheduler.job import job_output_filename
@@ -11,7 +10,7 @@ from sner.server.model.scheduler import Job
 from tests.agent import file_from_zip
 
 
-def test_commandline_assignment(tmpworkdir, test_dummy_a):
+def test_commandline_assignment(tmpworkdir, test_dummy_a):  # pylint: disable=unused-argument
     """test custom assignment passed from command line"""
 
     result = agent_main(['--assignment', json.dumps(test_dummy_a)])
@@ -19,7 +18,7 @@ def test_commandline_assignment(tmpworkdir, test_dummy_a):
     assert os.path.exists('%s.zip' % test_dummy_a['id'])
 
 
-def test_exception_in_module(tmpworkdir):
+def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
     """test exception handling during agent module execution"""
 
     test_a = {'id': str(uuid4()), 'module': 'notexist', 'params': '', 'targets': []}
@@ -29,7 +28,7 @@ def test_exception_in_module(tmpworkdir):
     assert os.path.exists('%s.zip' % test_a['id'])
 
 
-def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):
+def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):  # pylint: disable=unused-argument
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
     result = agent_main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])

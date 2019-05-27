@@ -11,10 +11,7 @@ import sys
 from argparse import ArgumentParser
 from base64 import b64encode
 from contextlib import contextmanager
-from http import HTTPStatus
-from io import BytesIO
 from time import sleep
-from uuid import uuid4
 from zipfile import ZipFile, ZIP_DEFLATED
 
 import jsonschema
