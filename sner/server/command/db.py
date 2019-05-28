@@ -29,12 +29,11 @@ def db_remove():
 @click.group(name='db', help='sner.server db management')
 def db_command():
     """db command group/container"""
-    pass
 
 
 @db_command.command(name='init', help='initialize database schema')
 @with_appcontext
-def db_init():
+def db_init():  # pragma: no cover
     """initialize database schema"""
 
     db.create_all()
