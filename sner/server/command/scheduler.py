@@ -1,6 +1,7 @@
 """scheduler commands"""
 
 import json
+import sys
 
 import click
 from flask import current_app
@@ -25,7 +26,6 @@ def queuebyx(queueid):
 @click.group(name='scheduler', help='sner.server scheduler management')
 def scheduler_command():
     """scheduler commands click group/container"""
-    pass
 
 
 # misc commands
@@ -71,7 +71,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     queue = queuebyx(queue_id)
     if not queue:
         current_app.logger.error('no such queue')
-        return 1
+        sys.exit(1)
 
     argtargets = list(argtargets)
     if kwargs["file"]:
@@ -79,7 +79,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     targets = [{'target': target, 'queue_id': queue.id} for target in argtargets]
     db.session.bulk_insert_mappings(Target, targets)
     db.session.commit()
-    return 0
+    sys.exit(0)
 
 
 @scheduler_command.command(name='queue_flush', help='flush all targets from queue')
@@ -91,11 +91,11 @@ def queue_flush(queue_id):
     queue = queuebyx(queue_id)
     if not queue:
         current_app.logger.error('no such queue')
-        return 1
+        sys.exit(1)
 
     db.session.query(Target).filter(Target.queue_id == queue.id).delete()
     db.session.commit()
-    return 0
+    sys.exit(0)
 
 
 # job commands
@@ -105,12 +105,6 @@ def queue_flush(queue_id):
 def job_list():
     """list jobs"""
 
-    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"):  # pylint: disable=unused-variable
-        """Format a datetime"""
-        if value is None:
-            return None
-        return value.strftime(fmt)
-
     headers = ['id', 'queue', 'retval', 'time_start', 'time_end', 'output_filename']
     fmt = '%-36s %-40s %6s %-20s %-20s %-40s'
     print(fmt % tuple(headers))
@@ -119,8 +113,8 @@ def job_list():
             job.id,
             json.dumps(job.queue.name if job.queue else ''),
             job.retval,
-            format_datetime(job.time_start),
-            format_datetime(job.time_end),
+            current_app.jinja_env.filters['datetime'](job.time_start),
+            current_app.jinja_env.filters['datetime'](job.time_end),
             job_output_filename(job.id) if job.retval is not None else ''))
 
 
@@ -133,6 +127,6 @@ def job_delete_command(job_id):
     job = Job.query.filter(Job.id == job_id).one_or_none()
     if not job:
         current_app.logger.error('no such job')
-        return 1
+        sys.exit(1)
 
-    return job_delete(job)
+    sys.exit(job_delete(job))

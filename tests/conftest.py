@@ -1,5 +1,9 @@
 """sner pytest config and fixtures"""
 
+import os
+import shutil
+from tempfile import mkdtemp
+
 import pytest
 
 from sner.server import db, create_app
@@ -16,3 +20,18 @@ def app():
         db.create_all()
         yield _app
         db_remove()
+
+
+@pytest.fixture
+def tmpworkdir():
+    """
+    self cleaning temporary workdir
+    pytest tmpdir fixture has issues https://github.com/pytest-dev/pytest/issues/1120
+    """
+
+    cwd = os.getcwd()
+    tmpdir = mkdtemp(prefix='sner_agent_test-')
+    os.chdir(tmpdir)
+    yield tmpdir
+    os.chdir(cwd)
+    shutil.rmtree(tmpdir)

@@ -14,21 +14,6 @@ from tests import persist_and_detach
 
 
 @pytest.fixture
-def tmpworkdir():
-    """
-    self cleaning temporary workdir
-    pytest tmpdir fixture has issues https://github.com/pytest-dev/pytest/issues/1120
-    """
-
-    cwd = os.getcwd()
-    tmpdir = mkdtemp(prefix='sner_agent_test-')
-    os.chdir(tmpdir)
-    yield tmpdir
-    os.chdir(cwd)
-    shutil.rmtree(tmpdir)
-
-
-@pytest.fixture
 def cleanup_markedprocess():
     """will cleanup markedprocess from failed testcase"""
 
