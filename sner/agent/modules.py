@@ -44,13 +44,10 @@ class Base():
             self.process = None
         return retval
 
-    def terminate(self):
+    def terminate(self):  # pragma: no cover  ; running as signal handler
         """terminate executed command"""
 
-        if not self.process:
-            return
-        self.process.poll()
-        if self.process.returncode is None:
+        if self.process and (self.process.poll() is None):
             try:
                 os.kill(self.process.pid, signal.SIGTERM)
             except OSError as e:
