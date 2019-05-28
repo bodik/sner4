@@ -231,7 +231,3 @@ def main(argv=None):
 
     # standard agent
     return ServerableAgent(args.server, args.queue, args.oneshot).run()
-
-
-if __name__ == '__main__':  # pragma: no cover
-    sys.exit(main())
