@@ -4,10 +4,10 @@ import base64
 import binascii
 import json
 import os
-import time
 import uuid
 from datetime import datetime
 from http import HTTPStatus
+from time import sleep
 
 import jsonschema
 from flask import current_app, jsonify, redirect, render_template, request, url_for
@@ -58,7 +58,7 @@ def job_assign_route(queue_id=None):
                 break
             except SQLAlchemyError:
                 db.session.rollback()
-                time.sleep(0.01)
+                sleep(0.01)
 
     assignment = {}
     wait_for_lock(Target.__tablename__)
