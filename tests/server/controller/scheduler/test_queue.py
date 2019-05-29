@@ -8,7 +8,7 @@ from sner.server.model.scheduler import Queue
 from tests.server.model.scheduler import create_test_queue, create_test_target
 
 
-def test_queue_list_route(client):
+def test_queue_list_route(client, test_target):
     """queue list route test"""
 
     response = client.get(url_for('scheduler.queue_list_route'))

@@ -27,7 +27,7 @@ def job_output_filename(job_id):
 
 
 def job_delete(job):
-    """job delete; used by controller and respoctive command"""
+    """job delete; used by controller and respective command"""
 
     output_file = job_output_filename(job.id)
     if os.path.exists(output_file):
@@ -56,7 +56,7 @@ def job_assign_route(queue_id=None):
             try:
                 db.session.execute('LOCK TABLE %s' % table)
                 break
-            except SQLAlchemyError:
+            except SQLAlchemyError:  # pragma: no cover  ; unable to test
                 db.session.rollback()
                 sleep(0.01)
 

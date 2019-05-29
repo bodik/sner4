@@ -2,10 +2,13 @@
 
 import datetime
 import json
+import os
 import uuid
+from zipfile import ZipFile
 
 import pytest
 
+from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue, Target, Task
 from tests import persist_and_detach
 
@@ -74,4 +77,10 @@ def test_target(test_queue):  # pylint: disable=redefined-outer-name
 def test_job(test_queue):  # pylint: disable=redefined-outer-name
     """persistent test job"""
 
-    yield persist_and_detach(create_test_job(test_queue))
+    job = create_test_job(test_queue)
+    output_filename = job_output_filename(job.id)
+    os.makedirs(os.path.dirname(output_filename))
+    with open(output_filename, 'wb') as job_file:
+        with ZipFile(job_file, 'w') as zip_file:
+            zip_file.writestr(json.dumps(job.assignment), 'assignment.json')
+    yield persist_and_detach(job)
