@@ -97,9 +97,11 @@ def test_delete_by_id_route(client, test_vuln):
     data = {'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(client)}
     response = client.post(url_for('storage.vuln_delete_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
-
     vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
     assert not vuln
+
+    response = client.post(url_for('storage.vuln_delete_by_id_route'), {}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_tag_by_id_route(client, test_vuln):
@@ -108,9 +110,11 @@ def test_tag_by_id_route(client, test_vuln):
     data = {'tag': 'testtag', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(client)}
     response = client.post(url_for('storage.vuln_tag_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
-
     vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
     assert 'testtag' in vuln.tags
+
+    response = client.post(url_for('storage.vuln_tag_by_id_route'), {}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_vuln_grouped_route(client):

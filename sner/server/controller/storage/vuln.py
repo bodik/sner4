@@ -126,7 +126,7 @@ def vuln_delete_by_id_route():
             Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
             db.session.commit()
             return jsonify({'status': HTTPStatus.OK})
-        except SQLAlchemyError as e:
+        except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
             db.session.rollback()
             return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
 
@@ -145,7 +145,7 @@ def vuln_tag_by_id_route():
                 vuln.tags = list(set((vuln.tags or []) + [tag]))
             db.session.commit()
             return jsonify({'status': 200})
-        except SQLAlchemyError as e:
+        except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
             db.session.rollback()
             return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
 
