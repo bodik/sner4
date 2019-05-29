@@ -15,6 +15,7 @@ def fail_server(request, monkeypatch, pytestconfig):
     """errors injection server used to test edge-cases in agent's codebase"""
 
     class Xflask(Flask):
+        """error injecting flask app"""
         def __init__(self, import_name):
             super().__init__(import_name)
             self.nr_assign = 0
@@ -27,7 +28,7 @@ def fail_server(request, monkeypatch, pytestconfig):
             current_app.nr_assign += 1
             return jsonify({})
 
-        elif current_app.nr_assign < 2:
+        if current_app.nr_assign < 2:
             current_app.nr_assign += 1
             return jsonify({'response': 'invalid'})
 

@@ -6,7 +6,7 @@ from flask import current_app
 
 from sner.server import db
 from sner.server.command.db import db_command
-from sner.server.model.scheduler import Target 
+from sner.server.model.scheduler import Target
 from sner.server.model.storage import Vuln
 
 

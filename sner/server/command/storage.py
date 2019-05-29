@@ -42,7 +42,10 @@ def vuln_report():
 
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
     endpoint_hostname = func.concat_ws(':', Host.hostname, Service.port)
-    # unnesting refs should be implemented as `SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE GROUP BY vuln.name;`
+    # unnesting refs should be implemented as
+    # SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln
+    #   LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE
+    # GROUP BY vuln.name;`
     # but could not construct appropriate sqla expression `.label('x(y)')` always rendered as string instead of 'table with column'
     unnested_refs = db.session.query(Vuln.id, func.unnest(Vuln.refs).label('ref')).subquery()
     query = db.session \
@@ -54,7 +57,9 @@ def vuln_report():
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
             func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references')
         ) \
-        .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id).outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
+        .outerjoin(Host, Vuln.host_id == Host.id) \
+        .outerjoin(Service, Vuln.service_id == Service.id) \
+        .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
 
     output_buffer = StringIO()

@@ -3,13 +3,13 @@
 import json
 import multiprocessing
 import os
-from flask import Flask, jsonify
 from http import HTTPStatus
-from pytest_flask.fixtures import live_server
 from time import sleep
 from uuid import uuid4
 
 import pytest
+from flask import Flask, jsonify
+from pytest_flask.fixtures import live_server
 
 from sner.agent import main as agent_main
 
@@ -29,7 +29,7 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longr
     assert 'MARKEDPROCESS' not in os.popen('ps -f').read()
 
 
-def test_terminate_with_liveserver(tmpworkdir, live_server, cleanup_markedprocess, test_longrun_target):  # pylint: disable=unused-argument
+def test_terminate_with_liveserver(tmpworkdir, live_server, cleanup_markedprocess, test_longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(
@@ -63,7 +63,7 @@ def simple_server(request, monkeypatch, pytestconfig):
     yield live_server(request, app, monkeypatch, pytestconfig)
 
 
-def test_shutdown(tmpworkdir, simple_server):
+def test_shutdown(tmpworkdir, simple_server):  # pylint: disable=unused-argument,redefined-outer-name
     """test no-work, continuous job assignment and shutdown signal handling"""
 
     proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', simple_server.url(), '--debug'],))

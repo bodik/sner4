@@ -2,7 +2,9 @@
 
 from sner.server.controller.storage import get_related_models
 
+
 def test_get_related_models(app, test_service):  # pylint: disable=unused-argument
+    """test function used to link new vuln/note to corresponding models"""
 
     host, service = get_related_models('host', test_service.host_id)
     assert host.id == test_service.host_id

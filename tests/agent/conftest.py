@@ -2,9 +2,7 @@
 
 import re
 import os
-import shutil
 import signal
-from tempfile import mkdtemp
 from uuid import uuid4
 
 import pytest
