@@ -41,6 +41,9 @@ def vuln_report():
 
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
     endpoint_hostname = func.concat_ws(':', Host.hostname, Service.port)
+    # unnesting refs should be implemented as `SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE GROUP BY vuln.name;`
+    # but could not construct appropriate sqla expression `.label('x(y)')` always rendered as string instead of 'table with column'
+    unnested_refs = db.session.query(Vuln.id, func.unnest(Vuln.refs).label('ref')).subquery()
     query = db.session \
         .query(
             Vuln.name.label('vulnerability'),
@@ -48,9 +51,9 @@ def vuln_report():
             Vuln.tags,
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_agg(func.distinct(Vuln.refs)).label('references')
+            func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references')
         ) \
-        .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id) \
+        .outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id).outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
 
     output_buffer = StringIO()
@@ -73,13 +76,9 @@ def vuln_report():
 
         # cast array cols to lines
         for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
-            if rdata[col]:
-                rdata[col] = '\n'.join(rdata[col])
+            rdata[col] = '\n'.join(rdata[col] or [])
 
-        # unnest and uniq for tags
-        if rdata['references']:
-            refs = sorted({item for sublist in rdata['references'] for item in sublist})
-            rdata['references'] = '\n'.join([url_for_ref(ref) for ref in refs])
+        rdata['references'] = '\n'.join([url_for_ref(ref) for ref in rdata['references'] or []])
 
         output.writerow(rdata)
 
