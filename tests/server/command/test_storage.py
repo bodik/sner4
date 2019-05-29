@@ -8,6 +8,24 @@ from sner.server.command.storage import storage_command
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 
 
+def test_import_invalidparser(runner):
+    """test invalid parser"""
+
+    result = runner.invoke(storage_command, ['import', 'invalid', '/nonexistent'])
+    assert result.exit_code == 1
+
+
+def test_import_job_output(runner):
+    """test import from job output parser"""
+
+    result = runner.invoke(storage_command, ['import', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
+    assert result.exit_code == 0
+
+    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
+    host = Host.query.filter(Host.id == host_id).one_or_none()
+    assert host
+
+
 def test_import_nmap_command(runner):
     """test nmap parser"""
 

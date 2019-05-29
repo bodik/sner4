@@ -2,6 +2,7 @@
 
 import os
 import re
+import sys
 from csv import DictWriter, QUOTE_ALL
 from io import StringIO
 from zipfile import ZipFile
@@ -110,13 +111,13 @@ def storage_import(path, parser):
 
     if parser not in registered_parsers:
         current_app.logger.error('no such parser')
-        return 1
+        sys.exit(1)
 
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
             parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
-    return 0
+    sys.exit(0)
 
 
 @storage_command.command(name='flush', help='flush all objects from storage')
