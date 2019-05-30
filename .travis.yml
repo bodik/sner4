@@ -1,0 +1,13 @@
+dist: xenial
+language: python
+python: 3.7
+
+services:
+    - postgresql
+
+install:
+    - sudo apt-get update
+    - make install-deps
+
+script:
+    - make

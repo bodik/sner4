@@ -6,34 +6,33 @@
 
 ### Installation
 ```
-## install basic utils
-apt-get install -y git make
-
-## clone and tune repository
+# clone and tune repository
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
 cd /opt/sner
 ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
 
-## install packages dependencies and create python virtual environment
-make install-deps
+# OPTIONAL, create and activate virtualenv
 make venv
-
-## activate venv and run tests
 . venv/bin/activate
-make lint
+
+# install dependencies
+make install-deps
+
+# run just tests
 make test
+# or run full coverage
+make coverage
 
-## activate venv and run dev server
-. venv/bin/activate
+# activate venv and run dev server
 make db
 screen -S sner4-server -dm bin/server run
 ```
 
 ### Basic dns recon
 ```
-bin/server scheduler queue_add 'dns recon' --name 'example_dns_recon' --priority 20 --active
-bin/server scheduler enumips 192.0.2.0/24 | sh bin/server scheduler queue_enqueue 'example_dns_recon' --file -
-bin/agent --debug --queue 'example_dns_recon'
+bin/server scheduler queue_add dns_recon --name example_dns_recon --priority 20 --active
+bin/server scheduler enumips 192.0.2.0/24 | sh bin/server scheduler queue_enqueue example_dns_recon --file -
+bin/agent --debug --queue example_dns_recon
 ```
 
 

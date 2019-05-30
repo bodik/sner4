@@ -1,22 +1,29 @@
-.PHONY: all install-deps venv db-create-default db-create-test db lint flake8 pylint test coverage
+.PHONY: all venv install-deps freeze db-create-default db-create-test db lint flake8 pylint test coverage
 
 all: lint coverage
 
 
-install-deps:
-	apt-get -y install postgresql-all unzip nmap
-
 venv:
-	apt-get -y install python-virtualenv python3-virtualenv
+	# development target
+	sudo apt-get -y install python-virtualenv python3-virtualenv
 	virtualenv -p python3 venv
-	venv/bin/pip install -r requirements.txt
+
+
+install-deps:
+	which psql || sudo apt-get -y install postgres-all
+	sudo apt-get -y install unzip nmap
+	pip install -r requirements.txt
+
+freeze:
+	pip freeze | grep -v '^pkg-resources=' > requirements.txt
+
 
 db-create-default:
-	su -c "bin/database_create.sh sner ${USER}" postgres
+	sudo -u postgres bin/database_create.sh sner ${USER}
 	mkdir -p /var/sner
 
 db-create-test:
-	su -c "bin/database_create.sh sner_test ${USER}" postgres
+	sudo -u postgres bin/database_create.sh sner_test ${USER}
 	mkdir -p /tmp/sner_test_var
 
 db: db-create-default
