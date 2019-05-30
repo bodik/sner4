@@ -14,7 +14,9 @@ class DummyPostData(dict):
     """used for testing edge-cases on forms processing"""
 
     def getlist(self, key):
-        v = self[key]
+        """accessor; taken from wtforms testsuite"""
+
+        v = self[key]  # pylint: disable=invalid-name
         if not isinstance(v, (list, tuple)):
-            v = [v]
+            v = [v]  # pylint: disable=invalid-name
         return v

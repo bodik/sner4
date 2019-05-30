@@ -20,8 +20,8 @@ def test_get_related_models(app, test_service):  # pylint: disable=unused-argume
 def test_json_indent_filter(app):  # pylint: disable=unused-argument
     """test indenting filter"""
 
-    assert app.jinja_env.filters['json_indent']('"xxx"') ==  '"xxx"'
-    assert app.jinja_env.filters['json_indent']('xxx') ==  'xxx'
+    assert app.jinja_env.filters['json_indent']('"xxx"') == '"xxx"'
+    assert app.jinja_env.filters['json_indent']('xxx') == 'xxx'
 
 
 def test_forms_models_relations(app, test_service):
