@@ -3,6 +3,7 @@
 import os
 import sys
 from datetime import datetime
+from io import StringIO
 from unittest.mock import patch
 
 import pytest
@@ -35,3 +36,21 @@ def test_cli():
                 cli()
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+
+def test_shell():
+    """test shell context imports"""
+
+    buf_stdin = StringIO('print(db.session)\n')
+    buf_stdout = StringIO()
+
+    patch_argv = patch.object(sys, 'argv', ['bin/server', 'shell'])
+    patch_environ = patch.object(os, 'environ', {})
+    patch_stdin = patch.object(sys, 'stdin', buf_stdin)
+    path_stdout = patch.object(sys, 'stdout', buf_stdout)
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        with patch_argv, patch_environ, patch_stdin, path_stdout:
+            cli()
+
+    assert pytest_wrapped_e.value.code == 0
+    assert 'sqlalchemy.orm.scoping.scoped_session' in buf_stdout.getvalue()

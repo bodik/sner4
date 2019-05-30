@@ -99,6 +99,15 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     # least intrusive way to pass token into every view without enforcing csrf on all routes
     app.add_template_global(name='csrf_token', f=generate_csrf)
 
+    @app.shell_context_processor
+    def make_shell_context():  # pylint: disable=unused-variable
+        from sner.server.model.scheduler import Job, Queue, Target, Task
+        from sner.server.model.storage import Host, Note, Service, Vuln
+        return {
+            'app': app, 'db': db,
+            'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
+            'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln}
+
     return app
 
 
