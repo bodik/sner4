@@ -23,7 +23,7 @@ class ReportItemJSONEncoder(json.JSONEncoder):
         if isinstance(o, datetime.date):
             return o.isoformat()
 
-        return super().default(o)
+        return super().default(o)  # pragma: no cover  ; no such elements in real-world reports, but impl has to be complete
 
 
 @register_parser('nessus')
@@ -134,7 +134,7 @@ class NessusParser():
         db.session.commit()
 
 
-def debug_parser():
+def debug_parser():  # pragma: no cover
     """cli helper, pull data from report and display"""
 
     with open(sys.argv[1], 'r') as ftmp:
@@ -150,5 +150,5 @@ def debug_parser():
             pprint(item)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     debug_parser()

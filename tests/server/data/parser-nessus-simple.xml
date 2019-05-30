@@ -22,6 +22,8 @@
 <cve>CVE-2016-1283</cve>
 <cve>CVE-1900-0000</cve>
 <cve>CVE-2017-16642</cve>
+<xref>CERT:836068</xref>
+<metasploit_name>Testcase metasploit module name</metasploit_name>
 <cvss3_base_score>9.8</cvss3_base_score>
 <cvss3_temporal_score>8.8</cvss3_temporal_score>
 <cvss3_temporal_vector>CVSS:3.0/E:P/RL:O/RC:C</cvss3_temporal_vector>

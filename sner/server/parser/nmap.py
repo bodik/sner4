@@ -81,7 +81,7 @@ class NmapParser():
         db.session.commit()
 
 
-def debug_parser():
+def debug_parser():  # pragma: no cover
     """cli helper, pull data from report and display"""
 
     with open(sys.argv[1], 'r') as ftmp:
@@ -104,5 +104,5 @@ def debug_parser():
             print(json.dumps(tmp.scripts_results, indent=2))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     debug_parser()
