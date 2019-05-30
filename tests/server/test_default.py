@@ -19,3 +19,21 @@ def test_linesfield(app):  # pylint: disable=unused-argument
     form = Xform(DummyPostData())
     assert isinstance(form.a.data, list)
     assert not form.a.data
+
+
+def test_models_scheduler_repr(app, test_task, test_queue, test_target, test_job):  # pylint: disable=unused-argument
+    """test models repr methods"""
+
+    assert repr(test_task)
+    assert repr(test_queue)
+    assert repr(test_target)
+    assert repr(test_job)
+
+
+def test_models_storage_repr(app, test_host, test_service, test_vuln, test_note):  # pylint: disable=unused-argument
+    """test models repr methods"""
+
+    assert repr(test_host)
+    assert repr(test_service)
+    assert repr(test_vuln)
+    assert repr(test_note)

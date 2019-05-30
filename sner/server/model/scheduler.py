@@ -66,4 +66,4 @@ class Job(db.Model):
     queue = relationship('Queue', back_populates='jobs')
 
     def __repr__(self):
-        return '<Job %d>' % self.id
+        return '<Job %s>' % self.id
