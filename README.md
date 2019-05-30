@@ -1,5 +1,7 @@
 # sner -- slow network recon
 
+[![Build Status](https://travis-ci.org/bodik/sner4.svg?branch=master)](https://travis-ci.org/bodik/sner4)
+
 
 ## Quick start
 
