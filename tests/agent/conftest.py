@@ -49,7 +49,7 @@ def test_longrun_a():
     yield {
         'id': str(uuid4()),
         'module': 'nmap',
-        'params': '-Pn --reason -sU --max-rate 1 --data-string MARKEDPROCESS',
+        'params': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS',
         'targets': ['127.0.0.127']}
 
 

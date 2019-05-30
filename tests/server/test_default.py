@@ -10,6 +10,7 @@ def test_linesfield(app):  # pylint: disable=unused-argument
     """tests linefield custom form field"""
 
     class Xform(FlaskForm):
+        """form test instance"""
         a = LinesField()
 
     form = Xform(DummyPostData({'a': 'a\nb'}))
