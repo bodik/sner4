@@ -15,7 +15,7 @@ install-deps:
 	pip install -r requirements.txt
 
 freeze:
-	pip freeze | grep -v '^pkg-resources=' > requirements.txt
+	@pip freeze | grep -v '^pkg-resources='
 
 
 db-create-default:
