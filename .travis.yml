@@ -5,9 +5,14 @@ python: 3.7
 services:
     - postgresql
 
+addons:
+    firefox: "latest-esr"
+
 install:
     - sudo apt-get update
     - make install-deps
+    - make install-extra
+    - make db-create-test
 
 script:
     - make
