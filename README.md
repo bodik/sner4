@@ -20,14 +20,19 @@ make venv
 # install dependencies
 make install-deps
 
-# run just tests
+# run just tests or full coverage
+make db-create-test
 make test
-# or run full coverage
 make coverage
 
+# OPTIONAL, install extras and run even larger test-suite
+make install-extra
+make test-extra
+
 # activate venv and run dev server
+make db-create-default
 make db
-screen -S sner4-server -dm bin/server run
+bin/server run
 ```
 
 ### Basic dns recon
