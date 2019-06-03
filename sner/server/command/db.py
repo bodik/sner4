@@ -88,14 +88,15 @@ def db_initdata():
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
     # storage test data
-    db.session.add(Host(
+    host = Host(
         address='127.4.4.4',
         hostname='testhost.testdomain.test<script>alert(1);</script>',
         os='Test Linux 1',
-        comment='a some unknown service server'))
+        comment='a some unknown service server')
+    db.session.add(host)
 
     db.session.add(Service(
-        host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+        host=host,
         proto='tcp',
         port=12345,
         state='open:testreason',
@@ -104,7 +105,7 @@ def db_initdata():
         comment='manual testservice comment'))
 
     db.session.add(Vuln(
-        host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+        host=host,
         name='test vulnerability',
         xtype='testxtype.123',
         severity=SeverityEnum.critical,
@@ -113,16 +114,29 @@ def db_initdata():
         tags=['tag1', 'tag2']))
 
     db.session.add(Vuln(
-        host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+        host=host,
         name='another test vulnerability',
         xtype='testxtype.124',
         severity=SeverityEnum.unknown,
         comment='another vulnerability comment',
-        refs=[],
-        tags=[]))
+        tags=None))
+
+    db.session.add(Vuln(
+        host=host,
+        name='vulnerability1',
+        xtype='testxtype.124',
+        severity=SeverityEnum.unknown,
+        tags=['info']))
+
+    db.session.add(Vuln(
+        host=host,
+        name='vulnerability2',
+        xtype='testxtype.124',
+        severity=SeverityEnum.unknown,
+        tags=['report']))
 
     db.session.add(Note(
-        host=Host.query.filter(Host.address == '127.4.4.4').one_or_none(),
+        host=host,
         xtype='sner.testnote',
         data='testnote data',
         comment='test note comment'))
