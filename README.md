@@ -37,11 +37,9 @@ bin/server run
 
 ### Basic dns recon
 ```
-bin/server scheduler queue_add dns_recon --name example_dns_recon --priority 20 --active
-bin/server scheduler enumips 192.0.2.0/24 | sh bin/server scheduler queue_enqueue example_dns_recon --file -
-bin/agent --debug --queue example_dns_recon
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file -
+bin/agent --debug --queue 'dns recon'
 ```
-
 
 
 ## Project description

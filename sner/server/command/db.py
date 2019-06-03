@@ -82,7 +82,7 @@ def db_initdata():
     for target in range(100):
         db.session.add(Target(target=target, queue=queue))
 
-    queue = Queue(name='fulltcp netx', task=Task.query.filter(Task.name == 'dns recon').one(), group_size=16, priority=10, active=False)
+    queue = Queue(name='dns recon', task=Task.query.filter(Task.name == 'dns recon').one(), group_size=16, priority=10, active=False)
     db.session.add(queue)
     for target in range(100):
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
