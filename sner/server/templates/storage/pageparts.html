@@ -85,32 +85,24 @@
 	/*
 	 * hbs partials to pass flask endpoint uris to hbs templates
 	 */
-	Handlebars.registerPartial('storage.host_view_route', "{{ url_for('storage.host_view_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.host_edit_route', "{{ url_for('storage.host_edit_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.host_delete_route', "{{ url_for('storage.host_delete_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
+	Handlebars.registerPartial('storage.host_view_route', Flask.url_for('storage.host_view_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.host_edit_route', Flask.url_for('storage.host_edit_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.host_delete_route', Flask.url_for('storage.host_delete_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
 
-	Handlebars.registerPartial('storage.service_add_route', "{{ url_for('storage.service_add_route', host_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{host_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.service_edit_route', "{{ url_for('storage.service_edit_route', service_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{service_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.service_delete_route', "{{ url_for('storage.service_delete_route', service_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{service_id}}{%endraw%}'));
+	Handlebars.registerPartial('storage.service_add_route', Flask.url_for('storage.service_add_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.service_edit_route', Flask.url_for('storage.service_edit_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.service_delete_route', Flask.url_for('storage.service_delete_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
 
-	Handlebars.registerPartial('storage.vuln_add_route',
-		"{{ url_for('storage.vuln_add_route', model_name='REPLACE1', model_id='REPLACE2') }}"
-			.replace('REPLACE1', '{%raw%}{{model_name}}{%endraw%}')
-			.replace('REPLACE2', '{%raw%}{{model_id}}{%endraw%}')
-	);
-	Handlebars.registerPartial('storage.vuln_list_route_filter_name', "{{ url_for('storage.vuln_list_route', filter='REPLACE') }}".replace('REPLACE', '{%raw%}Vuln.name=="{{filter_value}}"{%endraw%}'));
-	Handlebars.registerPartial('storage.vuln_view_route', "{{ url_for('storage.vuln_view_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.vuln_edit_route', "{{ url_for('storage.vuln_edit_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.vuln_delete_route', "{{ url_for('storage.vuln_delete_route', vuln_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{vuln_id}}{%endraw%}'));
+	Handlebars.registerPartial('storage.vuln_add_route', Flask.url_for('storage.vuln_add_route', {'model_name': '{%raw%}{{model_name}}{%endraw%}', 'model_id': '{%raw%}{{model_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.vuln_list_route_filter_name', Flask.url_for('storage.vuln_list_route', {'filter': '{%raw%}Vuln.name=="{{filter_value}}"{%endraw%}'}));
+	Handlebars.registerPartial('storage.vuln_view_route', Flask.url_for('storage.vuln_view_route', {'vuln_id': '{%raw%}{{vuln_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.vuln_edit_route', Flask.url_for('storage.vuln_edit_route', {'vuln_id': '{%raw%}{{vuln_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.vuln_delete_route', Flask.url_for('storage.vuln_delete_route', {'vuln_id': '{%raw%}{{vuln_id}}{%endraw%}'}));
 
-	Handlebars.registerPartial('storage.note_add_route',
-		"{{ url_for('storage.note_add_route', model_name='REPLACE1', model_id='REPLACE2') }}"
-			.replace('REPLACE1', '{%raw%}{{model_name}}{%endraw%}')
-			.replace('REPLACE2', '{%raw%}{{model_id}}{%endraw%}')
-	);
-	Handlebars.registerPartial('storage.note_view_route', "{{ url_for('storage.note_view_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.note_edit_route', "{{ url_for('storage.note_edit_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
-	Handlebars.registerPartial('storage.note_delete_route', "{{ url_for('storage.note_delete_route', note_id='REPLACE') }}".replace('REPLACE', '{%raw%}{{note_id}}{%endraw%}'));
+	Handlebars.registerPartial('storage.note_add_route', Flask.url_for('storage.note_add_route', {'model_name': '{%raw%}{{model_name}}{%endraw%}', 'model_id': '{%raw%}{{model_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.note_view_route', Flask.url_for('storage.note_view_route', {'note_id': '{%raw%}{{note_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.note_edit_route', Flask.url_for('storage.note_edit_route', {'note_id': '{%raw%}{{note_id}}{%endraw%}'}));
+	Handlebars.registerPartial('storage.note_delete_route', Flask.url_for('storage.note_delete_route', {'note_id': '{%raw%}{{note_id}}{%endraw%}'}));
 
 	/*
 	 * hbs templates

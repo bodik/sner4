@@ -5,6 +5,7 @@ import os
 import flask.cli
 from flask import flash, Flask, render_template
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_jsglue import JSGlue
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
 import yaml
@@ -26,6 +27,7 @@ DEFAULT_CONFIG = {
 }
 
 db = SQLAlchemy()  # pylint: disable=invalid-name
+jsglue = JSGlue()  # pylint: disable=invalid-name
 toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 
 
@@ -65,6 +67,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.config.update(config_from_yaml(os.environ.get(config_env)))
 
     db.init_app(app)
+    jsglue.init_app(app)
     if app.config['DEBUG']:  # pragma: no cover
         toolbar.init_app(app)
 
