@@ -1,5 +1,6 @@
 """controller profile tests"""
 
+import json
 from http import HTTPStatus
 
 from flask import url_for
@@ -14,6 +15,22 @@ def test_task_list_route(client):
     response = client.get(url_for('scheduler.task_list_route'))
     assert response.status_code == HTTPStatus.OK
     assert '<h1>Tasks list' in response
+
+
+def test_task_list_json_route(client, test_task):
+    """task list_json route test"""
+
+    response = client.post(url_for('scheduler.task_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_task.name})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['name'] == test_task.name
+
+    response = client.post(
+        url_for('scheduler.task_list_json_route', filter='Task.name=="%s"' % test_task.name),
+        {'draw': 1, 'start': 0, 'length': 1})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['name'] == test_task.name
 
 
 def test_task_add_route(client):

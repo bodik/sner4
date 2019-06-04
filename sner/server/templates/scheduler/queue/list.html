@@ -1,41 +1,41 @@
 {% extends "base.html" %}
 
+{% block script %}
+<script type="text/javascript">
+	function action_queueflush_by_url(event) {
+		if (!confirm('Really flush?')) { return; }
+		sner_submit_form(event.target.closest('a').getAttribute('data-url'))
+			.always(function() { event.data.dt.draw(); });
+	}
+
+	var dt_queue_list_table_options = {
+		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
+		'columns': [
+			dt_column('id'),
+			dt_column('name'),
+			dt_column('task_id', {'visible': false}),
+			dt_column('task_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_task_reference(row);}}),
+			dt_column('group_size'),
+			dt_column('priority'),
+			dt_column('active'),
+			dt_column('nr_targets'),
+			dt_column_buttons(scheduler_pagepart_queue_controls)
+		],
+		'drawCallback': function (settings) {
+			dt_ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api()}, action_queueflush_by_url);
+		}
+	};
+	$(document).ready(function() {
+		var dt_queue_list_table = $('#queue_list_table').DataTable($.extend({}, dt_ajax_options, dt_queue_list_table_options));
+	});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="queues">
 	<h1>Queues list <a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
 
-	<table id="queues_table" class="datatable_static table table-hover table-responsive">
-	<thead>
-		<tr>
-			<th>id</th>
-			<th>name</th>
-			<th>task</th>
-			<th>group_size</th>
-			<th>priority</th>
-			<th>active</th>
-			<th>targets</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for queue in queues %}
-		<tr>
-			<td>{{ queue.id }}</td>
-			<td>{{ queue.name }}</td>
-			<td>{{ queue.task }}</td>
-			<td>{{ queue.group_size }}</td>
-			<td>{{ queue.priority }}</td>
-			<td>{{ queue.active }}</td>
-			<td>{{ count_targets[queue.id]|default(0) }}</td>
-			<td>
-				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_enqueue_route', queue_id=queue.id) }}"> Enqueue</a>
-				{% with form=button_form, form_url=url_for('scheduler.queue_flush_route', queue_id=queue.id), button_caption='Flush' %}{% include 'button-generic.html' %}{% endwith %}
-				<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_edit_route', queue_id=queue.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
-				{% with form=button_form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue.id) %}{% include 'button-delete.html' %}{% endwith %}
-			</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-	</table>
+	<table id="queue_list_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
 {% endblock %}

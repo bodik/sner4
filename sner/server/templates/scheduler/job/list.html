@@ -1,38 +1,30 @@
 {% extends "base.html" %}
 
+{% block script %}
+<script type="text/javascript">
+	var dt_job_list_table_options = {
+		'ajax': {'url': "{{ url_for('scheduler.job_list_json_route', **request.args) }}", 'method': 'POST'},
+		'columns': [
+			dt_column('id'),
+			dt_column('queue_id', {'visible': false}),
+			dt_column('queue_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_queue_reference(row);}}),
+			dt_column('assignment'),
+			dt_column('retval'),
+			dt_column('time_start'),
+			dt_column('time_end'),
+			dt_column_buttons(scheduler_pagepart_job_controls)
+		],
+	};
+	$(document).ready(function() {
+		var dt_job_list_table = $('#job_list_table').DataTable($.extend({}, dt_ajax_options, dt_job_list_table_options));
+	});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="jobs">
-	<h1>Jobs list <a class="btn btn-xs btn-default" href="{{ url_for('scheduler.job_assign_route') }}"> Assign</a></h1>
+	<h1>Jobs list</h1>
 
-	<table id="jobs_table" class="datatable_static table table-hover table-responsive">
-	<thead>
-		<tr>
-			<th>id</th>
-			<th>queue</th>
-			<th>assignment</th>
-			<th>retval</th>
-			<th>output</th>
-			<th>time_start</th>
-			<th>time_end</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for job in jobs %}
-		<tr>
-			<td>{{ job.id }}</td>
-			<td>{{ job.queue }}</td>
-			<td>{{ job.assignment }}</td>
-			<td>{{ job.retval }}</td>
-			<td>{{ job.output }}</td>
-			<td>{{ job.time_start|datetime }}</td>
-			<td>{{ job.time_end|datetime }}</td>
-			<td>
-				{% with form=button_form, form_url=url_for('scheduler.job_delete_route', job_id=job.id) %}{% include 'button-delete.html' %}{% endwith %}
-			</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-	</table>
+	<table id="job_list_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
 {% endblock %}

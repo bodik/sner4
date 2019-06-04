@@ -1,29 +1,48 @@
 """controller queue"""
 
-from flask import redirect, render_template, url_for
+from datatables import ColumnDT, DataTables
+from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func
+from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
 from sner.server.model.scheduler import Queue, Target, Task
+from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/queue/list', methods=['GET'])
 def queue_list_route():
     """list queues"""
 
-    queues = Queue.query.all()
-    count_targets = {}
-    for queue_id, count in db.session.query(Target.queue_id, func.count(Target.id)).group_by(Target.queue_id).all():
-        count_targets[queue_id] = count
+    return render_template('scheduler/queue/list.html')
 
-    return render_template(
-        'scheduler/queue/list.html',
-        queues=queues,
-        count_targets=count_targets,
-        button_form=ButtonForm())
+
+@blueprint.route('/queue/list.json', methods=['GET', 'POST'])
+def queue_list_json_route():
+    """list queues, data endpoint"""
+
+    columns = [
+        ColumnDT(Queue.id, mData='id'),
+        ColumnDT(Queue.name, mData='name'),
+        ColumnDT(Task.id, mData='task_id'),
+        ColumnDT(Task.name, mData='task_name'),
+        ColumnDT(Queue.group_size, mData='group_size'),
+        ColumnDT(Queue.priority, mData='priority'),
+        ColumnDT(Queue.active, mData='active'),
+        ColumnDT(func.count(func.distinct(Target.id)), mData='nr_targets', global_search=False),
+        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+    ]
+    query = db.session.query().select_from(Queue) \
+        .outerjoin(Task, Queue.task_id == Task.id).outerjoin(Target, Queue.id == Target.queue_id) \
+        .group_by(Queue.id, Task.id)
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+
+    queues = DataTables(request.values.to_dict(), query, columns).output_result()
+    return jsonify(queues)
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])

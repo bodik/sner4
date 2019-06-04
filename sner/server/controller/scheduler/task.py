@@ -1,19 +1,41 @@
 """controller task"""
 
-from flask import redirect, render_template, url_for
+from datatables import ColumnDT, DataTables
+from flask import jsonify, redirect, render_template, request, url_for
+from sqlalchemy_filters import apply_filters
+
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import TaskForm
 from sner.server.model.scheduler import Task
+from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/task/list')
 def task_list_route():
     """list tasks"""
 
-    tasks = Task.query.all()
-    return render_template('scheduler/task/list.html', tasks=tasks, button_form=ButtonForm())
+    return render_template('scheduler/task/list.html')
+
+
+@blueprint.route('/task/list.json', methods=['GET', 'POST'])
+def task_list_json_route():
+    """list tasks, data endpoint"""
+
+    columns = [
+        ColumnDT(Task.id, mData='id'),
+        ColumnDT(Task.name, mData='name'),
+        ColumnDT(Task.module, mData='module'),
+        ColumnDT(Task.params, mData='params'),
+        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+    ]
+    query = db.session.query().select_from(Task)
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+
+    tasks = DataTables(request.values.to_dict(), query, columns).output_result()
+    return jsonify(tasks)
 
 
 @blueprint.route('/task/add', methods=['GET', 'POST'])

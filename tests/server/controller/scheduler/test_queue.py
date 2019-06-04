@@ -1,5 +1,6 @@
 """controller queue tests"""
 
+import json
 from http import HTTPStatus
 
 from flask import url_for
@@ -14,6 +15,22 @@ def test_queue_list_route(client, test_target):
     response = client.get(url_for('scheduler.queue_list_route'))
     assert response.status_code == HTTPStatus.OK
     assert '<h1>Queues list' in response
+
+
+def test_queue_list_json_route(client, test_queue):
+    """queue list_json route test"""
+
+    response = client.post(url_for('scheduler.queue_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_queue.name})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['name'] == test_queue.name
+
+    response = client.post(
+        url_for('scheduler.queue_list_json_route', filter='Queue.name=="%s"' % test_queue.name),
+        {'draw': 1, 'start': 0, 'length': 1})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['name'] == test_queue.name
 
 
 def test_queue_add_route(client, test_task):

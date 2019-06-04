@@ -4,21 +4,24 @@ import base64
 import binascii
 import json
 import os
-import uuid
 from datetime import datetime
 from http import HTTPStatus
 from time import sleep
+from uuid import uuid4
 
 import jsonschema
+from datatables import ColumnDT, DataTables
 from flask import current_app, jsonify, redirect, render_template, request, url_for
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
+from sqlalchemy_filters import apply_filters
 
 import sner.agent.protocol
 from sner.server import db
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
+from sner.server.sqlafilter import filter_parser
 
 
 def job_output_filename(job_id):
@@ -41,8 +44,29 @@ def job_delete(job):
 def job_list_route():
     """list jobs"""
 
-    jobs = Job.query.all()
-    return render_template('scheduler/job/list.html', jobs=jobs, button_form=ButtonForm())
+    return render_template('scheduler/job/list.html')
+
+
+@blueprint.route('/job/list.json', methods=['GET', 'POST'])
+def job_list_json_route():
+    """list jobs, data endpoint"""
+
+    columns = [
+        ColumnDT(Job.id, mData='id'),
+        ColumnDT(Queue.id, mData='queue_id'),
+        ColumnDT(Queue.name, mData='queue_name'),
+        ColumnDT(Job.assignment, mData='assignment'),
+        ColumnDT(Job.retval, mData='retval'),
+        ColumnDT(Job.time_start, mData='time_start'),
+        ColumnDT(Job.time_end, mData='time_end'),
+        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+    ]
+    query = db.session.query().select_from(Job).outerjoin(Queue)
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+
+    jobs = DataTables(request.values.to_dict(), query, columns).output_result()
+    return jsonify(jobs)
 
 
 @blueprint.route('/job/assign')
@@ -80,7 +104,7 @@ def job_assign_route(queue_id=None):
 
         if assigned_targets:
             assignment = {
-                "id": str(uuid.uuid4()),
+                "id": str(uuid4()),
                 "module": queue.task.module,
                 "params": queue.task.params,
                 "targets": assigned_targets}

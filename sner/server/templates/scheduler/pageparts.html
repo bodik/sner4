@@ -1,0 +1,46 @@
+{% raw %}
+<script id="scheduler.pagepart-task_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_add_route task_id=id}}"><span class="glyphicon glyphicon-plus"></span> Queue</a>
+	<a class="btn btn-xs btn-default" href="{{> scheduler.task_edit_route task_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.task_delete_route task_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+</script>
+<script id="scheduler.pagepart-queue_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_enqueue_route queue_id=id}}">Enqueue</a>
+	<a class="btn btn-xs btn-default abutton_queueflush_by_url" data-url="{{> scheduler.queue_flush_route queue_id=id}}">Flush</a>
+	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_edit_route queue_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.queue_delete_route queue_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+</script>
+<script id="scheduler.pagepart-job_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.job_delete_route job_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+</script>
+{% endraw %}
+<script type="text/javascript">
+
+	/// handlebars pageparts and helpers
+	///
+
+	/*
+	 * hbs partials to pass flask endpoint uris to hbs templates
+	 */
+	Handlebars.registerPartial('scheduler.task_edit_route', Flask.url_for('scheduler.task_edit_route', {'task_id': '{%raw%}{{task_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.task_delete_route', Flask.url_for('scheduler.task_delete_route', {'task_id': '{%raw%}{{task_id}}{%endraw%}'}));
+
+	Handlebars.registerPartial('scheduler.queue_add_route', Flask.url_for('scheduler.queue_add_route', {'task_id': '{%raw%}{{task_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.queue_edit_route', Flask.url_for('scheduler.queue_edit_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.queue_enqueue_route', Flask.url_for('scheduler.queue_enqueue_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.queue_flush_route', Flask.url_for('scheduler.queue_flush_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.queue_delete_route', Flask.url_for('scheduler.queue_delete_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
+
+	Handlebars.registerPartial('scheduler.job_delete_route', Flask.url_for('scheduler.job_delete_route', {'job_id': '{%raw%}{{job_id}}{%endraw%}'}));
+
+	/*
+	 * hbs templates
+	 */
+	var scheduler_pagepart_task_reference = Handlebars.compile('{%raw%}&lt;Task {{task_id}}: {{task_name}}&gt;{%endraw%}');
+	var scheduler_pagepart_task_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-task_controls.hbs').innerHTML);
+
+	var scheduler_pagepart_queue_reference = Handlebars.compile('{%raw%}&lt;Queue {{queue_id}}: {{queue_name}}&gt;{%endraw%}');
+	var scheduler_pagepart_queue_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-queue_controls.hbs').innerHTML);
+
+	var scheduler_pagepart_job_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-job_controls.hbs').innerHTML);
+</script>

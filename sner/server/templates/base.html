@@ -28,8 +28,6 @@
 
 	<script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
 
-	{{ JSGlue.include() }}
-
 	<style>
 		/* menu image */
 		.navbar-brand { padding: 0px; }
@@ -50,6 +48,8 @@
 		.text-alert { color: red; }
 	</style>
 
+
+	{{ JSGlue.include() }}
 
 	<script type="text/javascript">
 		// ui helpers and callbacks
@@ -220,6 +220,7 @@
 	</script>
 
 
+	{% include 'scheduler/pageparts.html' %}
 	{% include 'storage/pageparts.html' %}
 
 	{% block style %}{% endblock %}

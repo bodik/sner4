@@ -20,6 +20,22 @@ def test_job_list_route(client):
     assert '<h1>Jobs list' in response
 
 
+def test_job_list_json_route(client, test_job):
+    """job list_json route test"""
+
+    response = client.post(url_for('scheduler.job_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_job.id})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['id'] == test_job.id
+
+    response = client.post(
+        url_for('scheduler.job_list_json_route', filter='Job.id=="%s"' % test_job.id),
+        {'draw': 1, 'start': 0, 'length': 1})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['id'] == test_job.id
+
+
 def test_job_assign_route(client, test_queue):
     """job assign route test"""
 
