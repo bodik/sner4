@@ -45,6 +45,8 @@ def fail_server(request, monkeypatch, pytestconfig):
     yield live_server(request, app, monkeypatch, pytestconfig)
 
 
+# using direct call to supply custom app for live_server
+@pytest.mark.filterwarnings('ignore:Fixture "live_server" called directly:DeprecationWarning')
 def test_fail_server_communication(tmpworkdir, fail_server):  # pylint: disable=unused-argument,redefined-outer-name
     """tests failure handling while retrieving assignment or uploading output"""
 

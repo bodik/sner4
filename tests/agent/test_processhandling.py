@@ -63,6 +63,8 @@ def simple_server(request, monkeypatch, pytestconfig):
     yield live_server(request, app, monkeypatch, pytestconfig)
 
 
+# using direct call to supply custom app for live_server
+@pytest.mark.filterwarnings('ignore:Fixture "live_server" called directly:DeprecationWarning')
 def test_shutdown(tmpworkdir, simple_server):  # pylint: disable=unused-argument,redefined-outer-name
     """test no-work, continuous job assignment and shutdown signal handling"""
 

@@ -27,7 +27,6 @@ db-create-test:
 	mkdir -p /tmp/sner_test_var
 
 db:
-	#su -c 'bin/database-disconnect.sh sner' postgres
 	bin/server db remove
 	bin/server db init
 	bin/server db initdata

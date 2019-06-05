@@ -7,44 +7,7 @@ from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing
 from tests.selenium.storage import check_select_rows, check_vulns_multiactions
 
 
-def test_list(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
-    """simple test ajaxed datatable rendering"""
-
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    dt_rendered(selenium, 'vuln_list_table', test_vuln.comment)
-
-
-def test_list_inrow_delete(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
-    """delete vuln inrow button"""
-
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    dt_inrow_delete(selenium, 'vuln_list_table')
-    assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-
-
-def test_grouped(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
-    """test grouped vulns view"""
-
-    selenium.get(url_for('storage.vuln_grouped_route', _external=True))
-    dt_wait_processing(selenium, 'vuln_grouped_table')
-    assert len(selenium.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 1
-
-
-def test_list_selectrows(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
-    """test dt selection and selection buttons"""
-
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_select_rows(selenium, 'vuln_list_table')
-
-
-def test_list_multiactions(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
-    """test vulns multiactions"""
-
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_vulns_multiactions(selenium, 'vuln_list_table')
-
-
-def check_vuln_filtering(selenium, dt_id):
+def check_vulns_filtering(selenium, dt_id):
     """test vuln views filtering functions"""
 
     toolbar_id = '%s_toolbar' % dt_id
@@ -84,15 +47,52 @@ def check_vuln_filtering(selenium, dt_id):
     assert len(dt_elem.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 4
 
 
-def test_list_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_list_route(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+    """simple test ajaxed datatable rendering"""
+
+    selenium.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(selenium, 'vuln_list_table', test_vuln.comment)
+
+
+def test_vuln_list_route_inrow_delete(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+    """delete vuln inrow button"""
+
+    selenium.get(url_for('storage.vuln_list_route', _external=True))
+    dt_inrow_delete(selenium, 'vuln_list_table')
+    assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+
+
+def test_vuln_list_route_selectrows(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    selenium.get(url_for('storage.vuln_list_route', _external=True))
+    check_select_rows(selenium, 'vuln_list_table')
+
+
+def test_vuln_list_route_multiactions(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
+    """test vulns multiactions"""
+
+    selenium.get(url_for('storage.vuln_list_route', _external=True))
+    check_vulns_multiactions(selenium, 'vuln_list_table')
+
+
+def test_vuln_list_route_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
     """test list vulns view filtering features"""
 
     selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_vuln_filtering(selenium, 'vuln_list_table')
+    check_vulns_filtering(selenium, 'vuln_list_table')
 
 
-def test_grouped_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_grouped_route(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+    """test grouped vulns view"""
+
+    selenium.get(url_for('storage.vuln_grouped_route', _external=True))
+    dt_wait_processing(selenium, 'vuln_grouped_table')
+    assert len(selenium.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 1
+
+
+def test_vuln_grouped_route_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
     """test grouped vulns view filtering features"""
 
     selenium.get(url_for('storage.vuln_grouped_route', _external=True))
-    check_vuln_filtering(selenium, 'vuln_grouped_table')
+    check_vulns_filtering(selenium, 'vuln_grouped_table')

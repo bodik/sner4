@@ -2,7 +2,7 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import distinct, func
+from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -29,9 +29,9 @@ def host_list_json_route():
         ColumnDT(Host.address, mData='address'),
         ColumnDT(Host.hostname, mData='hostname'),
         ColumnDT(Host.os, mData='os'),
-        ColumnDT(func.count(distinct(Service.id)), mData='nr_svcs', global_search=False),
-        ColumnDT(func.count(distinct(Vuln.id)), mData='nr_vulns', global_search=False),
-        ColumnDT(func.count(distinct(Note.id)), mData='nr_notes', global_search=False),
+        ColumnDT(func.count(func.distinct(Service.id)), mData='nr_svcs', global_search=False),
+        ColumnDT(func.count(func.distinct(Vuln.id)), mData='nr_vulns', global_search=False),
+        ColumnDT(func.count(func.distinct(Note.id)), mData='nr_notes', global_search=False),
         ColumnDT(Host.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]

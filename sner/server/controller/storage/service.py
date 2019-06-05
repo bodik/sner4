@@ -2,7 +2,7 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import distinct, func
+from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -126,8 +126,8 @@ def service_portstat_route(port):
     query = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port).order_by(Service.proto).group_by(Service.proto)
     for proto, count in query.all():
         stats[proto] = count
-    infos = db.session.query(distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
-    comments = db.session.query(distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
+    infos = db.session.query(func.distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
+    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
     hosts = db.session \
         .query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
         .select_from(Service).outerjoin(Host) \

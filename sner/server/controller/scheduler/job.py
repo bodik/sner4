@@ -26,6 +26,7 @@ from sner.server.sqlafilter import filter_parser
 
 def job_output_filename(job_id):
     """helper, returns path to job datafile, would go to (doctrine)Repository if sqlalchemy had one"""
+
     return os.path.join(current_app.config['SNER_VAR'], 'scheduler', job_id)
 
 
@@ -104,11 +105,11 @@ def job_assign_route(queue_id=None):
 
         if assigned_targets:
             assignment = {
-                "id": str(uuid4()),
-                "module": queue.task.module,
-                "params": queue.task.params,
-                "targets": assigned_targets}
-            job = Job(id=assignment["id"], assignment=json.dumps(assignment), queue=queue)
+                'id': str(uuid4()),
+                'module': queue.task.module,
+                'params': queue.task.params,
+                'targets': assigned_targets}
+            job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
             db.session.add(job)
 
     # at least, we have to clear the lock

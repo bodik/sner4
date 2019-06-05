@@ -23,14 +23,14 @@ def test_service_list_json_route(client, test_service):
     response = client.post(url_for('storage.service_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_service.info})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data["data"][0]["info"] == test_service.info
+    assert response_data['data'][0]['info'] == test_service.info
 
     response = client.post(
         url_for('storage.service_list_json_route', filter='Service.info=="%s"' % test_service.info),
         {'draw': 1, 'start': 0, 'length': 1})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data["data"][0]["info"] == test_service.info
+    assert response_data['data'][0]['info'] == test_service.info
 
 
 def test_service_add_route(client, test_host):
@@ -88,7 +88,7 @@ def test_service_vizports_route(client, test_service):
     response = client.get(url_for('storage.service_vizports_route'))
     assert response.status_code == HTTPStatus.OK
 
-    elems = response.lxml.xpath("//a[@class='portmap_item' and @data-port='%d']" % test_service.port)
+    elems = response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
     assert elems
 
 
@@ -98,4 +98,4 @@ def test_service_portstat_route(client, test_service):
     response = client.get(url_for('storage.service_portstat_route', port=test_service.port))
     assert response.status_code == HTTPStatus.OK
 
-    assert response.lxml.xpath("//li[text()='%s']" % test_service.info)
+    assert response.lxml.xpath('//li[text()="%s"]' % test_service.info)
