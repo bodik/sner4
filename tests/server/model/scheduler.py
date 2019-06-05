@@ -1,14 +1,13 @@
 """scheduler test models"""
 
-import datetime
 import json
 import os
 import uuid
+from datetime import datetime
 from zipfile import ZipFile
 
 import pytest
 
-from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue, Target, Task
 from tests import persist_and_detach
 
@@ -42,14 +41,13 @@ def create_test_target(a_test_queue):
 
 
 def create_test_job(a_test_queue):
-    """test job data"""
+    """test job data; only assigned"""
 
     return Job(
         id=str(uuid.uuid4()),
         queue=a_test_queue,
         assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
-        time_start=datetime.datetime.now(),
-        time_end=datetime.datetime.now())
+        time_start=datetime.now())
 
 
 @pytest.fixture
@@ -75,12 +73,21 @@ def test_target(test_queue):  # pylint: disable=redefined-outer-name
 
 @pytest.fixture
 def test_job(test_queue):  # pylint: disable=redefined-outer-name
-    """persistent test job"""
+    """persistent test job assigned"""
+
+    yield persist_and_detach(create_test_job(test_queue))
+
+
+@pytest.fixture
+def test_job_completed(test_queue):  # pylint: disable=redefined-outer-name
+    """persistent test job completed"""
 
     job = create_test_job(test_queue)
-    output_filename = job_output_filename(job.id)
-    os.makedirs(os.path.dirname(output_filename))
-    with open(output_filename, 'wb') as job_file:
+    job.retval = 0
+    job.output = os.path.join('scheduler', 'queue-%s' % job.queue_id, job.id)
+    os.makedirs(os.path.dirname(job.output_abspath))
+    with open(job.output_abspath, 'wb') as job_file:
         with ZipFile(job_file, 'w') as zip_file:
             zip_file.writestr(json.dumps(job.assignment), 'assignment.json')
+    job.time_end = datetime.utcnow()
     yield persist_and_detach(job)

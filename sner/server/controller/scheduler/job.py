@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import jsonschema
 from datatables import ColumnDT, DataTables
-from flask import current_app, jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 from sqlalchemy_filters import apply_filters
@@ -24,18 +24,11 @@ from sner.server.model.scheduler import Job, Queue, Target
 from sner.server.sqlafilter import filter_parser
 
 
-def job_output_filename(job_id):
-    """helper, returns path to job datafile, would go to (doctrine)Repository if sqlalchemy had one"""
-
-    return os.path.join(current_app.config['SNER_VAR'], 'scheduler', job_id)
-
-
 def job_delete(job):
     """job delete; used by controller and respective command"""
 
-    output_file = job_output_filename(job.id)
-    if os.path.exists(output_file):
-        os.remove(output_file)
+    if job.output and os.path.exists(job.output_abspath):
+        os.remove(job.output_abspath)
     db.session.delete(job)
     db.session.commit()
     return 0
@@ -58,6 +51,7 @@ def job_list_json_route():
         ColumnDT(Queue.name, mData='queue_name'),
         ColumnDT(Job.assignment, mData='assignment'),
         ColumnDT(Job.retval, mData='retval'),
+        ColumnDT(Job.output, mData='output'),
         ColumnDT(Job.time_start, mData='time_start'),
         ColumnDT(Job.time_end, mData='time_end'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
@@ -129,15 +123,16 @@ def job_output_route():
     except (jsonschema.exceptions.ValidationError, binascii.Error):
         return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
 
-    job_filename = job_output_filename(job_id)
-    os.makedirs(os.path.dirname(job_filename), exist_ok=True)
-    with open(job_filename, 'wb') as ftmp:
-        ftmp.write(output)
-
     job = Job.query.filter(Job.id == job_id).one_or_none()
-    job.retval = retval
-    job.time_end = datetime.utcnow()
-    db.session.commit()
+    if job and (job.output is None):
+        # requests for invalid, deleted, repeated or clashing job ids are discarded, agent should delete the output on it's side as well
+        job.retval = retval
+        job.output = os.path.join('scheduler', 'queue-%s' % job.queue_id if job.queue_id else 'lostandfound', job.id)
+        os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
+        with open(job.output_abspath, 'wb') as ftmp:
+            ftmp.write(output)
+        job.time_end = datetime.utcnow()
+        db.session.commit()
 
     return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
 

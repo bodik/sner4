@@ -2,11 +2,11 @@
 
 import base64
 import json
+import os
 from http import HTTPStatus
 
 from flask import url_for
 
-from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job, Queue
 from tests import persist_and_detach
 from tests.server.model.scheduler import create_test_target
@@ -84,19 +84,20 @@ def test_job_output_route(client, test_job):
 
     job = Job.query.filter(Job.id == test_job.id).one_or_none()
     assert job.retval == 12345
-    with open(job_output_filename(test_job.id), 'r') as ftmp:
+    with open(job.output_abspath, 'r') as ftmp:
         assert ftmp.read() == 'a-test-file-contents'
 
     response = client.post_json(url_for('scheduler.job_output_route'), {'invalid': 'output'}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_job_delete_route(client, test_job):
+def test_job_delete_route(client, test_job_completed):
     """delete route test"""
 
-    form = client.get(url_for('scheduler.job_delete_route', job_id=test_job.id)).form
+    form = client.get(url_for('scheduler.job_delete_route', job_id=test_job_completed.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    job = Job.query.filter(Job.id == test_job.id).one_or_none()
+    job = Job.query.filter(Job.id == test_job_completed.id).one_or_none()
     assert not job
+    assert not os.path.exists(test_job_completed.output_abspath)

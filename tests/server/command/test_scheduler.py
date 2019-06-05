@@ -1,5 +1,7 @@
 """scheduler commands tests"""
 
+import os
+
 from sner.server.command.scheduler import scheduler_command
 from sner.server.model.scheduler import Job, Queue
 
@@ -76,14 +78,15 @@ def test_job_list_command(runner, test_job):
     assert test_job.id in result.output
 
 
-def test_job_delete_command(runner, test_job):
+def test_job_delete_command(runner, test_job_completed):
     """job delete command test"""
 
     result = runner.invoke(scheduler_command, ['job_delete', str(666)])
     assert result.exit_code == 1
 
-    result = runner.invoke(scheduler_command, ['job_delete', test_job.id])
+    result = runner.invoke(scheduler_command, ['job_delete', test_job_completed.id])
     assert result.exit_code == 0
 
-    job = Job.query.filter(Job.id == test_job.id).one_or_none()
+    job = Job.query.filter(Job.id == test_job_completed.id).one_or_none()
     assert not job
+    assert not os.path.exists(test_job_completed.output_abspath)

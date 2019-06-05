@@ -5,7 +5,6 @@ import os
 from uuid import uuid4
 
 from sner.agent import main as agent_main
-from sner.server.controller.scheduler.job import job_output_filename
 from sner.server.model.scheduler import Job
 from tests.agent import file_from_zip
 
@@ -36,4 +35,4 @@ def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):  # pyl
 
     job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()
     assert job
-    assert test_dummy_target.target in file_from_zip(job_output_filename(job.id), 'assignment.json').decode('utf-8')
+    assert test_dummy_target.target in file_from_zip(job.output_abspath, 'assignment.json').decode('utf-8')

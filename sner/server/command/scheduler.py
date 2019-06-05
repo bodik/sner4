@@ -10,7 +10,7 @@ from netaddr import IPNetwork
 from sqlalchemy import func
 
 from sner.server import db
-from sner.server.controller.scheduler.job import job_output_filename, job_delete
+from sner.server.controller.scheduler.job import job_delete
 from sner.server.model.scheduler import Job, Queue, Target, Task
 
 
@@ -115,7 +115,7 @@ def job_list():
             job.retval,
             current_app.jinja_env.filters['datetime'](job.time_start),
             current_app.jinja_env.filters['datetime'](job.time_end),
-            job_output_filename(job.id) if job.retval is not None else ''))
+            job.output))
 
 
 @scheduler_command.command(name='job_delete', help='delete job')

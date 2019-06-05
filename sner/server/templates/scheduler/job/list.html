@@ -10,6 +10,7 @@
 			dt_column('queue_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_queue_reference(row);}}),
 			dt_column('assignment'),
 			dt_column('retval'),
+			dt_column('output'),
 			dt_column('time_start'),
 			dt_column('time_end'),
 			dt_column_buttons(scheduler_pagepart_job_controls)

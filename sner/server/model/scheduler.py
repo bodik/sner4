@@ -1,8 +1,10 @@
 """sqlalchemy models"""
 # pylint: disable=too-few-public-methods,abstract-method
 
+import os
 from datetime import datetime
 
+from flask import current_app
 from sqlalchemy.orm import relationship
 
 from sner.server import db
@@ -60,6 +62,7 @@ class Job(db.Model):
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
     assignment = db.Column(db.Text)
     retval = db.Column(db.Integer)
+    output = db.Column(db.String(4096))
     time_start = db.Column(db.DateTime, default=datetime.utcnow)
     time_end = db.Column(db.DateTime)
 
@@ -67,3 +70,9 @@ class Job(db.Model):
 
     def __repr__(self):
         return '<Job %s>' % self.id
+
+    @property
+    def output_abspath(self):
+        """return absolute path to the output data file acording to current app config"""
+
+        return os.path.join(current_app.config['SNER_VAR'], self.output) if self.output else None
