@@ -15,6 +15,7 @@
 			dt_column('time_end'),
 			dt_column_buttons(scheduler_pagepart_job_controls)
 		],
+		'order': [[6, 'desc'], [7, 'desc']]
 	};
 	$(document).ready(function() {
 		var dt_job_list_table = $('#job_list_table').DataTable($.extend({}, dt_ajax_options, dt_job_list_table_options));

@@ -10,8 +10,7 @@
 			dt_column('module'),
 			dt_column('params'),
 			dt_column_buttons(scheduler_pagepart_task_controls)
-		],
-		'order': [[ 0, 'asc' ]]
+		]
 	};
 	$(document).ready(function() {
 		var dt_task_list_table = $('#task_list_table').DataTable($.extend({}, dt_ajax_options, dt_task_list_table_options));

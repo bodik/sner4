@@ -9,8 +9,7 @@
 			dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
 			dt_column('tags'),
 			dt_column('nr_vulns')
-		],
-		'order': [[ 1, 'desc' ]]
+		]
 	};
 	$(document).ready(function() {
 		var dt_vuln_grouped_table = $('#vuln_grouped_table').DataTable($.extend({}, dt_ajax_options, dt_vuln_grouped_table_options));

@@ -64,7 +64,8 @@
 						dt_column('info'),
 						dt_column('comment'),
 						dt_column_buttons(storage_pagepart_service_controls)
-					]
+					],
+					'order': [[5, 'asc']]
 				};
 				$(document).ready(function() {
 					var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_service_table_options));
@@ -101,6 +102,7 @@
 						dt_column('comment'),
 						dt_column_buttons(storage_pagepart_vuln_controls)
 					],
+					'order': [[1, 'asc']],
 					'select': {'style': 'multi', 'selector': 'td:first-child'}
 				};
 				$(document).ready(function() {
