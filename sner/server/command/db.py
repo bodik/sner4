@@ -117,7 +117,7 @@ def db_initdata():
         host=host,
         name='another test vulnerability',
         xtype='testxtype.124',
-        severity=SeverityEnum.unknown,
+        severity=SeverityEnum.high,
         comment='another vulnerability comment',
         tags=None))
 
@@ -125,12 +125,26 @@ def db_initdata():
         host=host,
         name='vulnerability1',
         xtype='testxtype.124',
-        severity=SeverityEnum.unknown,
+        severity=SeverityEnum.medium,
         tags=['info']))
 
     db.session.add(Vuln(
         host=host,
         name='vulnerability2',
+        xtype='testxtype.124',
+        severity=SeverityEnum.low,
+        tags=['report']))
+
+    db.session.add(Vuln(
+        host=host,
+        name='vulnerability2',
+        xtype='testxtype.124',
+        severity=SeverityEnum.info,
+        tags=['info']))
+
+    db.session.add(Vuln(
+        host=host,
+        name='vulnerability3',
         xtype='testxtype.124',
         severity=SeverityEnum.unknown,
         tags=['report']))
