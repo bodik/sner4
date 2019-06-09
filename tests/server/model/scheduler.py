@@ -51,12 +51,21 @@ def create_test_job(a_test_queue):
 
 
 def create_test_excl_network():
-    """test exclusion data"""
+    """test network exclusion data"""
 
     return Excl(
         family=ExclFamily.network,
         value='127.66.66.0/26',
         comment='blocked test netrange, no traffic should go there')
+
+
+def create_test_excl_regex():
+    """test regex exclusion data"""
+
+    return Excl(
+        family=ExclFamily.regex,
+        value='notarget[012]',
+        comment='targets blocked by regex')
 
 
 @pytest.fixture
@@ -103,7 +112,14 @@ def test_job_completed(test_queue):  # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
-def test_excl_network():  # pylint: disable=redefined-outer-name
+def test_excl_network():
     """persistent test network exclusion"""
 
     yield persist_and_detach(create_test_excl_network())
+
+
+@pytest.fixture
+def test_excl_regex():
+    """persistent test regex exclusion"""
+
+    yield persist_and_detach(create_test_excl_regex())

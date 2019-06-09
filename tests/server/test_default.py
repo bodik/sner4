@@ -1,10 +1,13 @@
 """misc server components tests"""
 
+from ipaddress import ip_network
+
 import pytest
 from flask_wtf import FlaskForm
 
 from sner.server.form import LinesField
 from sner.server.model.scheduler import Excl, ExclFamily
+from sner.server.utils import ExclMatcher
 from tests.server import DummyPostData
 
 
@@ -70,3 +73,18 @@ def test_model_excl_validation():
     test_excl = Excl(family=ExclFamily.regex)
     with pytest.raises(ValueError):
         test_excl.value = 'invalid('
+
+
+def test_excl_matcher(app, test_excl_network, test_excl_regex):  # pylint: disable=unused-argument
+    """test matcher"""
+
+    matcher = ExclMatcher()
+    test_network = ip_network(test_excl_network.value)
+
+    assert matcher.match(str(test_network.network_address))
+    assert matcher.match(str(test_network.broadcast_address))
+    assert not matcher.match(str(test_network.network_address-1))
+    assert not matcher.match(str(test_network.broadcast_address+1))
+
+    assert matcher.match('notarget1')
+    assert not matcher.match('notarget3')

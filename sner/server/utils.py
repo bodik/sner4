@@ -1,8 +1,77 @@
 """misc utils used in server"""
 
+import abc
 import json
+import re
+from ipaddress import ip_address, ip_network
 
-from sner.server.model.scheduler import ExclFamily
+from sner.server.model.scheduler import Excl, ExclFamily
+
+
+class ExclMatcher():
+    """object matching value againts set of exclusions/rules"""
+
+    MATCHERS = {}
+
+    @staticmethod
+    def register(family):
+        """register matcher class to the excl.family"""
+
+        def register_real(cls):
+            if cls not in ExclMatcher.MATCHERS:
+                ExclMatcher.MATCHERS[family] = cls
+            return cls
+        return register_real
+
+    def __init__(self):
+        self.excls = []
+        for excl in Excl.query.all():
+            self.excls.append(ExclMatcher.MATCHERS[excl.family](excl.value))
+
+    def match(self, value):
+        """match value against all exclusions/matchers"""
+
+        for excl in self.excls:
+            if excl.match(value):
+                return True
+        return False
+
+
+class ExclMatcherImplInterface(abc.ABC):  # pylint: disable=too-few-public-methods
+    """base interface which must  be implemented by all available matchers"""
+
+    @abc.abstractmethod
+    def __init__(self, match_to):
+        """constructor"""
+
+    @abc.abstractmethod
+    def match(self, value):
+        """returns bool if value matches the initialized match_to"""
+
+
+@ExclMatcher.register(ExclFamily.network)  # pylint: disable=too-few-public-methods
+class ExclNetworkMatcher(ExclMatcherImplInterface):
+    """network matcher"""
+
+    def __init__(self, match_to):  # pylint: disable=super-init-not-called
+        self.match_to = ip_network(match_to)
+
+    def match(self, value):
+        try:
+            return ip_address(value) in self.match_to
+        except ValueError:
+            return False
+
+
+@ExclMatcher.register(ExclFamily.regex)  # pylint: disable=too-few-public-methods
+class ExclRegexMatcher(ExclMatcherImplInterface):
+    """regex matcher"""
+
+    def __init__(self, match_to):  # pylint: disable=super-init-not-called
+        self.match_to = re.compile(match_to)
+
+    def match(self, value):
+        return bool(self.match_to.search(value))
 
 
 class SnerJSONEncoder(json.JSONEncoder):

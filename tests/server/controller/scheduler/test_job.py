@@ -4,10 +4,11 @@ import base64
 import json
 import os
 from http import HTTPStatus
+from ipaddress import ip_network
 
 from flask import url_for
 
-from sner.server.model.scheduler import Job, Queue
+from sner.server.model.scheduler import Job, Queue, Target
 from tests import persist_and_detach
 from tests.server.model.scheduler import create_test_target
 
@@ -53,6 +54,10 @@ def test_job_assign_route(client, test_queue):
     queue = Queue.query.filter(Queue.name == test_queue.name).one_or_none()
     assert len(queue.jobs) == 2
 
+    response = client.get(url_for('scheduler.job_assign_route', queue_id='notexist'))  # should return response-nowork
+    assert response.status_code == HTTPStatus.OK
+    assert not json.loads(response.body.decode('utf-8'))
+
 
 def test_job_assign_highest_priority_route(client, test_task):
     """job assign route test"""
@@ -72,6 +77,27 @@ def test_job_assign_highest_priority_route(client, test_task):
     assert len(queue.jobs) == 0
     queue = Queue.query.filter(Queue.id == queue2.id).one_or_none()
     assert len(queue.jobs) == 1
+
+
+def test_job_assign_with_blacklist(client, test_queue, test_excl_network):
+    """job assign route test cleaning up excluded hosts"""
+
+    persist_and_detach(create_test_target(test_queue))
+    persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
+
+    response = client.get(url_for('scheduler.job_assign_route'))
+    assert response.status_code == HTTPStatus.OK
+    assignment = json.loads(response.body.decode('utf-8'))
+
+    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+    assert len(queue.jobs) == 1
+    assert not Target.query.all()
+    assert len(assignment['targets']) == 1
+
+    persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
+    response = client.get(url_for('scheduler.job_assign_route'))  # shoudl return response-nowork
+    assert response.status_code == HTTPStatus.OK
+    assert not json.loads(response.body.decode('utf-8'))
 
 
 def test_job_output_route(client, test_job):

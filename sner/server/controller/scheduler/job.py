@@ -22,6 +22,7 @@ from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
 from sner.server.sqlafilter import filter_parser
+from sner.server.utils import ExclMatcher
 
 
 def job_delete(job):
@@ -79,34 +80,52 @@ def job_assign_route(queue_id=None):
                 db.session.rollback()
                 sleep(0.01)
 
-    assignment = {}
     wait_for_lock(Target.__tablename__)
 
+    # select active queue; by id or highest priority queue with targets
+    query = Queue.query.filter(Queue.active)
     if queue_id:
         if queue_id.isnumeric():
-            queue = Queue.query.filter(Queue.active, Queue.id == int(queue_id)).one_or_none()
+            queue = query.filter(Queue.id == int(queue_id)).one_or_none()
         else:
-            queue = Queue.query.filter(Queue.active, Queue.name == queue_id).one_or_none()
+            queue = query.filter(Queue.name == queue_id).order_by(Queue.priority.desc()).first()
     else:
-        # select highest priority active task with some targets
-        queue = Queue.query.filter(Queue.active, Queue.targets.any()).order_by(Queue.priority.desc()).first()
+        queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 
-    if queue:
-        assigned_targets = []
-        for target in Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size):
-            assigned_targets.append(target.target)
+    if not queue:
+        # release lock and return response-nowork
+        db.session.commit()
+        return jsonify({})
+
+    # draw until group_size number of targets are selected or no targets left in queue
+    # blacklisted/excluded targets are discarded from queue in the process
+    # queue is drawed for queue.group_size each time for performance reasons
+    assigned_targets = []
+    blacklist = ExclMatcher()
+    while True:
+        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size).all()
+        if not targets:
+            break
+
+        for target in targets:
             db.session.delete(target)
+            if blacklist.match(target.target):
+                continue
+            assigned_targets.append(target.target)
+            if len(assigned_targets) == queue.group_size:
+                break
 
-        if assigned_targets:
-            assignment = {
-                'id': str(uuid4()),
-                'module': queue.task.module,
-                'params': queue.task.params,
-                'targets': assigned_targets}
-            job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
-            db.session.add(job)
+        if len(assigned_targets) == queue.group_size:
+            break
 
-    # at least, we have to clear the lock
+    if not assigned_targets:
+        # all targets might got blacklisted, release lock and return response-nowork
+        db.session.commit()
+        return jsonify({})
+
+    assignment = {'id': str(uuid4()), 'module': queue.task.module, 'params': queue.task.params, 'targets': assigned_targets}
+    job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
+    db.session.add(job)
     db.session.commit()
     return jsonify(assignment)
 
