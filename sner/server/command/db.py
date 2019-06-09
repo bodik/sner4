@@ -6,8 +6,9 @@ import shutil
 import click
 from flask import current_app
 from flask.cli import with_appcontext
+
 from sner.server import db
-from sner.server.model.scheduler import Queue, Task, Target
+from sner.server.model.scheduler import Excl, ExclFamily, Queue, Task, Target
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 
 
@@ -45,6 +46,16 @@ def db_initdata():
     """put initial data to database"""
 
     # scheduler test data
+    db.session.add(Excl(
+        family=ExclFamily.network,
+        value='127.66.66.0/26',
+        comment='blacklist 1'))
+
+    db.session.add(Excl(
+        family=ExclFamily.regex,
+        value=r'.*donotscan.*',
+        comment='blacklist 2'))
+
     db.session.add(Task(
         name='dummy',
         module='dummy',

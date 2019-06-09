@@ -1,8 +1,10 @@
 """misc server components tests"""
 
+import pytest
 from flask_wtf import FlaskForm
 
 from sner.server.form import LinesField
+from sner.server.model.scheduler import Excl, ExclFamily
 from tests.server import DummyPostData
 
 
@@ -22,13 +24,14 @@ def test_linesfield(app):  # pylint: disable=unused-argument
     assert not form.a.data
 
 
-def test_models_scheduler_repr(app, test_task, test_queue, test_target, test_job):  # pylint: disable=unused-argument
+def test_models_scheduler_repr(app, test_task, test_queue, test_target, test_job, test_excl_network):  # noqa: E501  pylint: disable=unused-argument,too-many-arguments
     """test models repr methods"""
 
     assert repr(test_task)
     assert repr(test_queue)
     assert repr(test_target)
     assert repr(test_job)
+    assert repr(test_excl_network)
 
 
 def test_models_storage_repr(app, test_host, test_service, test_vuln, test_note):  # pylint: disable=unused-argument
@@ -38,3 +41,32 @@ def test_models_storage_repr(app, test_host, test_service, test_vuln, test_note)
     assert repr(test_service)
     assert repr(test_vuln)
     assert repr(test_note)
+
+
+def test_model_excl_validation():
+    """test excl model validation"""
+
+    with pytest.raises(ValueError) as pytest_wrapped_e:
+        Excl(family='invalid')
+    assert str(pytest_wrapped_e.value) == 'Invalid family'
+
+    with pytest.raises(ValueError) as pytest_wrapped_e:
+        Excl(family=ExclFamily.network, value='invalid')
+    assert str(pytest_wrapped_e.value) == "'invalid' does not appear to be an IPv4 or IPv6 network"
+
+    with pytest.raises(ValueError) as pytest_wrapped_e:
+        Excl(family=ExclFamily.regex, value='invalid(')
+    assert str(pytest_wrapped_e.value) == 'Invalid regex'
+
+    test_excl = Excl(value='invalid(')
+    with pytest.raises(ValueError):
+        test_excl.family = ExclFamily.network
+    with pytest.raises(ValueError):
+        test_excl.family = ExclFamily.regex
+
+    test_excl = Excl(family=ExclFamily.network)
+    with pytest.raises(ValueError):
+        test_excl.value = 'invalid('
+    test_excl = Excl(family=ExclFamily.regex)
+    with pytest.raises(ValueError):
+        test_excl.value = 'invalid('

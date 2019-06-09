@@ -8,9 +8,10 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 
 from sner.server import db
+from sner.server.model import SelectableMixin
 
 
-class SeverityEnum(Enum):
+class SeverityEnum(SelectableMixin, Enum):
     """severity enum"""
 
     unknown = 'unknown'
@@ -19,19 +20,6 @@ class SeverityEnum(Enum):
     medium = 'medium'
     high = 'high'
     critical = 'critical'
-
-    @classmethod
-    def choices(cls):
-        """from self/class generates list for SelectField"""
-        return [(choice, choice.name) for choice in cls]
-
-    @classmethod
-    def coerce(cls, item):
-        """casts input from submitted form back to the corresponding python object"""
-        return cls(item) if not isinstance(item, cls) else item
-
-    def __str__(self):
-        return self.name
 
 
 class Host(db.Model):

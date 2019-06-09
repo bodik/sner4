@@ -13,6 +13,10 @@
 <script id="scheduler.pagepart-job_controls.hbs" type="text/x-handlebars-template">
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.job_delete_route job_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
+<script id="scheduler.pagepart-excl_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-default" href="{{> scheduler.excl_edit_route excl_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+</script>
 {% endraw %}
 <script type="text/javascript">
 
@@ -33,6 +37,9 @@
 
 	Handlebars.registerPartial('scheduler.job_delete_route', Flask.url_for('scheduler.job_delete_route', {'job_id': '{%raw%}{{job_id}}{%endraw%}'}));
 
+	Handlebars.registerPartial('scheduler.excl_edit_route', Flask.url_for('scheduler.excl_edit_route', {'excl_id': '{%raw%}{{excl_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.excl_delete_route', Flask.url_for('scheduler.excl_delete_route', {'excl_id': '{%raw%}{{excl_id}}{%endraw%}'}));
+
 	/*
 	 * hbs templates
 	 */
@@ -43,4 +50,6 @@
 	var scheduler_pagepart_queue_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-queue_controls.hbs').innerHTML);
 
 	var scheduler_pagepart_job_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-job_controls.hbs').innerHTML);
+
+	var scheduler_pagepart_excl_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-excl_controls.hbs').innerHTML);
 </script>

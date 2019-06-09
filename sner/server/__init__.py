@@ -104,11 +104,11 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable
-        from sner.server.model.scheduler import Job, Queue, Target, Task
+        from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task
         from sner.server.model.storage import Host, Note, Service, Vuln
         return {
             'app': app, 'db': db,
-            'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
+            'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
             'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln}
 
     return app

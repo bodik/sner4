@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_excl_list_table_options = {
+		'ajax': {'url': "{{ url_for('scheduler.excl_list_json_route') }}", 'method': 'POST'},
+		'columns': [
+			dt_column('id'),
+			dt_column('family'),
+			dt_column('value'),
+			dt_column('comment'),
+			dt_column_buttons(scheduler_pagepart_excl_controls)
+		]
+	};
+	$(document).ready(function() {
+		var dt_excl_list_table = $('#excl_list_table').DataTable($.extend({}, dt_ajax_options, dt_excl_list_table_options));
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="excl">
+	<h1>
+		Exclusions list
+		<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.excl_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a>
+		<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.excl_import_route') }}">Import</a>
+		<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.excl_export_route') }}">Export</a>
+	</h1>
+
+	<table id="excl_list_table" class="table table-hover table-responsive table-condensed"></table>
+</div>
+{% endblock %}

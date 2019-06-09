@@ -8,7 +8,7 @@ from zipfile import ZipFile
 
 import pytest
 
-from sner.server.model.scheduler import Job, Queue, Target, Task
+from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task
 from tests import persist_and_detach
 
 
@@ -48,6 +48,15 @@ def create_test_job(a_test_queue):
         queue=a_test_queue,
         assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
         time_start=datetime.now())
+
+
+def create_test_excl_network():
+    """test exclusion data"""
+
+    return Excl(
+        family=ExclFamily.network,
+        value='127.66.66.0/26',
+        comment='blocked test netrange, no traffic should go there')
 
 
 @pytest.fixture
@@ -91,3 +100,10 @@ def test_job_completed(test_queue):  # pylint: disable=redefined-outer-name
             zip_file.writestr(json.dumps(job.assignment), 'assignment.json')
     job.time_end = datetime.utcnow()
     yield persist_and_detach(job)
+
+
+@pytest.fixture
+def test_excl_network():  # pylint: disable=redefined-outer-name
+    """persistent test network exclusion"""
+
+    yield persist_and_detach(create_test_excl_network())
