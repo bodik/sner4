@@ -29,7 +29,7 @@ def create_test_queue(a_test_task):
         task=a_test_task,
         group_size=2,
         priority=10,
-        active=False)
+        active=True)
 
 
 def create_test_target(a_test_queue):

@@ -84,9 +84,9 @@ def job_assign_route(queue_id=None):
 
     if queue_id:
         if queue_id.isnumeric():
-            queue = Queue.query.filter(Queue.id == int(queue_id)).one_or_none()
+            queue = Queue.query.filter(Queue.active, Queue.id == int(queue_id)).one_or_none()
         else:
-            queue = Queue.query.filter(Queue.name == queue_id).one_or_none()
+            queue = Queue.query.filter(Queue.active, Queue.name == queue_id).one_or_none()
     else:
         # select highest priority active task with some targets
         queue = Queue.query.filter(Queue.active, Queue.targets.any()).order_by(Queue.priority.desc()).first()
