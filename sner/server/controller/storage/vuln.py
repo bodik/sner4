@@ -15,20 +15,9 @@ from sner.server.command.storage import vuln_report
 from sner.server.controller.storage import blueprint, get_related_models
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
-from sner.server.model.storage import Host, Service, SeverityEnum, Vuln
+from sner.server.model.storage import Host, Service, Vuln
 from sner.server.sqlafilter import filter_parser
-
-
-class VulnJSONEncoder(json.JSONEncoder):
-    """Custom encoder to handle vuln listing serialization. SeverityEnum not natively serializable,
-    but type usage is required during query for sorting
-    """
-
-    def default(self, o):  # pylint: disable=method-hidden
-        if isinstance(o, SeverityEnum):
-            return str(o)
-
-        return super().default(o)  # pragma: no cover  ; no elements to trigger this branch are serialized
+from sner.server.utils import SnerJSONEncoder
 
 
 @blueprint.route('/vuln/list')
@@ -62,7 +51,7 @@ def vuln_list_json_route():
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
-    return Response(json.dumps(vulns, cls=VulnJSONEncoder), mimetype='application/json')
+    return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 @blueprint.route('/vuln/add/<model_name>/<model_id>', methods=['GET', 'POST'])
@@ -187,7 +176,7 @@ def vuln_grouped_json_route():
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
-    return Response(json.dumps(vulns, cls=VulnJSONEncoder), mimetype='application/json')
+    return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 @blueprint.route('/vuln/report')

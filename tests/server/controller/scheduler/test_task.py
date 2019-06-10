@@ -1,4 +1,4 @@
-"""controller profile tests"""
+"""controller scheduler.task tests"""
 
 import json
 from http import HTTPStatus

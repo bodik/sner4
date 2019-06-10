@@ -20,22 +20,10 @@
 		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.xtype, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.severity, horizontal=True) }}
-		<div class="form-group">
-			{{ form.descr.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.descr(class="form-control", rows="5")|safe }}</div>
-		</div>
-		<div class="form-group">
-			{{ form.data.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.data(class="form-control", rows="5")|safe }}</div>
-		</div>
-		<div class="form-group">
-			{{ form.refs.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.refs(class="form-control", rows="5")|safe }}</div>
-		</div>
-		<div class="form-group">
-			{{ form.tags.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.tags(class="form-control tageditor") }}</div>
-		</div>
+		{{ b_wtf.bootstrap_field(form.descr, horizontal=True) }}
+		{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
+		{{ b_wtf.bootstrap_field(form.refs, horizontal=True) }}
+		{{ b_wtf.bootstrap_field(form.tags, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
 		<div class="form-group">
 			<label class="col-sm-2 control-label"></label>

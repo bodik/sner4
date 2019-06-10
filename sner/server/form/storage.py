@@ -59,10 +59,10 @@ class VulnForm(FlaskForm):
     name = StringField('Name', validators=[validators.Length(min=1, max=500)])
     xtype = StringField('xType', validators=[validators.Length(max=500)])
     severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
-    descr = TextAreaField('Descr')
-    data = TextAreaField('Data')
-    refs = LinesField('Refs', filters=[empty_to_none])
-    tags = LinesField('Tags', filters=[empty_to_none])
+    descr = TextAreaField('Descr', render_kw={'rows': '5'})
+    data = TextAreaField('Data', render_kw={'rows': '5'})
+    refs = LinesField('Refs', render_kw={'rows': '5'}, filters=[empty_to_none])
+    tags = LinesField('Tags', render_kw={'class': 'form-control tageditor'}, filters=[empty_to_none])
     comment = TextAreaField('Comment')
 
 
@@ -72,7 +72,7 @@ class NoteForm(FlaskForm):
     host_id = IntegerField('Host_id', validators=[host_id_exists])
     service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
     xtype = StringField('xType', validators=[validators.Length(max=500)])
-    data = TextAreaField('Data')
+    data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
 
 

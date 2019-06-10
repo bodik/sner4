@@ -51,7 +51,7 @@ class BaseAgent():
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
 
-    def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running as signal handler
+    def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""
 
         self.log.info('terminate')
@@ -112,7 +112,7 @@ class ServerableAgent(BaseAgent):
         self.get_assignment_url = '%s/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
         self.upload_output_url = '%s/scheduler/job/output' % self.server
 
-    def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; runing as signal handler
+    def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """wait for current assignment to finish"""
 
         self.log.info('shutdown')

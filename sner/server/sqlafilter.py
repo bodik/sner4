@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """parsing simple boolean enabled filter expressions into sqlalchemy-filters tree"""
 
 from lark import Lark, Transformer

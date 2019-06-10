@@ -38,7 +38,7 @@ class TaskForm(FlaskForm):
 
     name = StringField(label='Name', validators=[validators.Length(max=1000)])
     module = StringField(label='Module', validators=[validators.Length(max=100)])
-    params = TextAreaField(label='Parameters')
+    params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
 
 
 class QueueForm(FlaskForm):

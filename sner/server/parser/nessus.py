@@ -1,29 +1,15 @@
 """parsers to import from agent outputs to storage"""
 
-import datetime
 import json
 import sys
 from pprint import pprint
 
 from nessus_report_parser import parse_nessus_xml
-from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
 
 from sner.server import db
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 from sner.server.parser import register_parser
-
-
-class ReportItemJSONEncoder(json.JSONEncoder):
-    """custom encoder to handle parsed nessus report"""
-
-    def default(self, o):  # pylint: disable=method-hidden
-        if isinstance(o, nessus_report_ReportItem):
-            return o.__dict__
-
-        if isinstance(o, datetime.date):
-            return o.isoformat()
-
-        return super().default(o)  # pragma: no cover  ; no such elements in real-world reports, but impl has to be complete
+from sner.server.utils import SnerJSONEncoder
 
 
 @register_parser('nessus')
@@ -100,7 +86,7 @@ class NessusParser():
                 host=host,
                 service=service,
                 xtype=xtype,
-                data=json.dumps(report_item, cls=ReportItemJSONEncoder))
+                data=json.dumps(report_item, cls=SnerJSONEncoder))
             db.session.add(note)
             db.session.flush()
             refs.append('SN-%s' % note.id)

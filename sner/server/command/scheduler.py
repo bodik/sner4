@@ -2,11 +2,11 @@
 
 import json
 import sys
+from ipaddress import ip_network
 
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from netaddr import IPNetwork
 from sqlalchemy import func
 
 from sner.server import db
@@ -40,7 +40,7 @@ def enumips(targets, **kwargs):
     if kwargs["file"]:
         targets += kwargs["file"].read().splitlines()
     for item in targets:
-        for tmp in IPNetwork(item).iter_hosts():
+        for tmp in ip_network(item).hosts():
             print(tmp)
 
 

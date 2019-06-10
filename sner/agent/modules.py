@@ -44,7 +44,7 @@ class Base():
             self.process = None
         return retval
 
-    def terminate(self):  # pragma: no cover  ; running as signal handler
+    def terminate(self):  # pragma: no cover  ; running over multiprocessing
         """terminate executed command"""
 
         if self.process and (self.process.poll() is None):

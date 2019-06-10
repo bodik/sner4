@@ -1,11 +1,15 @@
 """misc utils used in server"""
 
 import abc
+import datetime
 import json
 import re
 from ipaddress import ip_address, ip_network
 
+from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
+
 from sner.server.model.scheduler import Excl, ExclFamily
+from sner.server.model.storage import SeverityEnum
 
 
 class ExclMatcher():
@@ -78,7 +82,13 @@ class SnerJSONEncoder(json.JSONEncoder):
     """Custom encoder to handle serializations of various types used within the project"""
 
     def default(self, o):  # pylint: disable=method-hidden
-        if isinstance(o, ExclFamily):
+        if isinstance(o, (ExclFamily, SeverityEnum)):
             return str(o)
+
+        if isinstance(o, nessus_report_ReportItem):
+            return o.__dict__
+
+        if isinstance(o, datetime.date):
+            return o.isoformat()
 
         return super().default(o)  # pragma: no cover  ; no such elements

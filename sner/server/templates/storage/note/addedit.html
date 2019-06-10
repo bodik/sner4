@@ -18,10 +18,7 @@
 		</div>
 		{{ b_wtf.bootstrap_field(form.service_id, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.xtype, horizontal=True) }}
-		<div class="form-group">
-			{{ form.data.label(class="col-sm-2 control-label") }}
-			<div class="col-sm-10">{{ form.data(class="form-control", rows="20")|safe }}</div>
-		</div>
+		{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
 		<div class="form-group">
 			<label class="col-sm-2 control-label"></label>
