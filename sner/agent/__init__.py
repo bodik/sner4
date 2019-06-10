@@ -137,8 +137,11 @@ class ServerableAgent(BaseAgent):
                 assignment = requests.get(self.get_assignment_url, timeout=10).json()
                 if not assignment:  # response-nowork
                     self.log.debug('get_assignment response-nowork')
-                    sleep(self.BACKOFF_TIME)
-                    continue
+                    if self.oneshot:
+                        break
+                    else:  # pragma: no cover ; running over multiprocessing
+                        sleep(self.BACKOFF_TIME)
+                        continue
                 jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
                 self.log.debug('got assignment: %s', assignment)
             except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as e:

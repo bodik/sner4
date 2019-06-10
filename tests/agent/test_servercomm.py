@@ -1,6 +1,8 @@
 """tests with various server communication test cases"""
 
+import multiprocessing
 from http import HTTPStatus
+from time import sleep
 from uuid import uuid4
 
 import pytest
@@ -26,7 +28,7 @@ def fail_server(request, monkeypatch, pytestconfig):
     def assign_route():  # pylint: disable=unused-variable
         if current_app.nr_assign < 1:
             current_app.nr_assign += 1
-            return jsonify({})
+            return jsonify({'response': 'invalid'})
 
         if current_app.nr_assign < 2:
             current_app.nr_assign += 1
@@ -52,3 +54,19 @@ def test_fail_server_communication(tmpworkdir, fail_server):  # pylint: disable=
 
     result = agent_main(['--server', fail_server.url(), '--debug', '--oneshot'])
     assert result == 0
+
+
+def test_empty_server_communication(tmpworkdir, live_server):  # pylint: disable=unused-argument,redefined-outer-name
+    """tests oneshot vs wait on assignment on empty server"""
+
+    result = agent_main(['--server', live_server.url(), '--debug', '--oneshot'])
+    assert result == 0
+
+    proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', live_server.url(), '--debug'],))
+    proc_agent.start()
+    sleep(2)
+    assert proc_agent.pid
+    assert proc_agent.is_alive()
+    agent_main(['--terminate', str(proc_agent.pid)])
+    proc_agent.join(3)
+    assert not proc_agent.is_alive()
