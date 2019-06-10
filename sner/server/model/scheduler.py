@@ -4,14 +4,13 @@
 import os
 import re
 from datetime import datetime
-from enum import Enum
 from ipaddress import ip_network
 
 from flask import current_app
 from sqlalchemy.orm import relationship, validates
 
 from sner.server import db
-from sner.server.model import SelectableMixin
+from sner.server.model import SelectableEnum
 
 
 class Task(db.Model):
@@ -82,7 +81,7 @@ class Job(db.Model):
         return os.path.join(current_app.config['SNER_VAR'], self.output) if self.output else None
 
 
-class ExclFamily(SelectableMixin, Enum):
+class ExclFamily(SelectableEnum):
     """exclusion family enum"""
 
     network = 'network'

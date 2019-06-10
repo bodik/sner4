@@ -2,24 +2,12 @@
 # pylint: disable=too-few-public-methods,abstract-method
 
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 
 from sner.server import db
-from sner.server.model import SelectableMixin
-
-
-class SeverityEnum(SelectableMixin, Enum):
-    """severity enum"""
-
-    unknown = 'unknown'
-    info = 'info'
-    low = 'low'
-    medium = 'medium'
-    high = 'high'
-    critical = 'critical'
+from sner.server.model import SelectableEnum
 
 
 class Host(db.Model):
@@ -59,6 +47,17 @@ class Service(db.Model):
 
     def __repr__(self):
         return '<Service %s: %s.%d>' % (self.id, self.proto, self.port)
+
+
+class SeverityEnum(SelectableEnum):
+    """severity enum"""
+
+    unknown = 'unknown'
+    info = 'info'
+    low = 'low'
+    medium = 'medium'
+    high = 'high'
+    critical = 'critical'
 
 
 class Vuln(db.Model):

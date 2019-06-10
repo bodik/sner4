@@ -1,7 +1,9 @@
 """shared objects for models"""
 
+from enum import Enum
 
-class SelectableMixin():
+
+class SelectableEnum(Enum):
     """base class for using enum as in select fields"""
 
     @classmethod
