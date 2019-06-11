@@ -9,23 +9,23 @@ from sner.server.model.storage import Host
 from tests.server.model.storage import create_test_host
 
 
-def test_host_list_route(client):
+def test_host_list_route(cl_operator):
     """host list route test"""
 
-    response = client.get(url_for('storage.host_list_route'))
+    response = cl_operator.get(url_for('storage.host_list_route'))
     assert response.status_code == HTTPStatus.OK
     assert '<h1>Hosts list' in response
 
 
-def test_host_list_json_route(client, test_host):
+def test_host_list_json_route(cl_operator, test_host):
     """host list_json route test"""
 
-    response = client.post(url_for('storage.host_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_host.hostname})
+    response = cl_operator.post(url_for('storage.host_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_host.hostname})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['hostname'] == test_host.hostname
 
-    response = client.post(
+    response = cl_operator.post(
         url_for('storage.host_list_json_route', filter='Host.hostname=="%s"' % test_host.hostname),
         {'draw': 1, 'start': 0, 'length': 1})
     assert response.status_code == HTTPStatus.OK
@@ -33,12 +33,12 @@ def test_host_list_json_route(client, test_host):
     assert response_data['data'][0]['hostname'] == test_host.hostname
 
 
-def test_host_add_route(client):
+def test_host_add_route(cl_operator):
     """host add route test"""
 
     test_host = create_test_host()
 
-    form = client.get(url_for('storage.host_add_route')).form
+    form = cl_operator.get(url_for('storage.host_add_route')).form
     form['address'] = test_host.address
     form['hostname'] = test_host.hostname
     form['os'] = test_host.os
@@ -53,10 +53,10 @@ def test_host_add_route(client):
     assert host.comment == test_host.comment
 
 
-def test_host_edit_route(client, test_host):
+def test_host_edit_route(cl_operator, test_host):
     """host edit route test"""
 
-    form = client.get(url_for('storage.host_edit_route', host_id=test_host.id)).form
+    form = cl_operator.get(url_for('storage.host_edit_route', host_id=test_host.id)).form
     form['hostname'] = 'edited-'+form['hostname'].value
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -66,10 +66,10 @@ def test_host_edit_route(client, test_host):
     assert host.hostname == form['hostname'].value
 
 
-def test_host_delete_route(client, test_host):
+def test_host_delete_route(cl_operator, test_host):
     """host delete route test"""
 
-    form = client.get(url_for('storage.host_delete_route', host_id=test_host.id)).form
+    form = cl_operator.get(url_for('storage.host_delete_route', host_id=test_host.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -77,27 +77,27 @@ def test_host_delete_route(client, test_host):
     assert not host
 
 
-def test_host_vizdns_route(client):
+def test_host_vizdns_route(cl_operator):
     """host vizdns route test"""
 
-    response = client.get(url_for('storage.host_vizdns_route'))
+    response = cl_operator.get(url_for('storage.host_vizdns_route'))
     assert response.status_code == HTTPStatus.OK
 
 
-def test_host_vizdns_json_route(client, test_host):
+def test_host_vizdns_json_route(cl_operator, test_host):
     """host vizdns.json route test"""
 
-    response = client.get(url_for('storage.host_vizdns_json_route', crop=0))
+    response = cl_operator.get(url_for('storage.host_vizdns_json_route', crop=0))
     assert response.status_code == HTTPStatus.OK
 
     response_data = json.loads(response.body.decode('utf-8'))
     assert test_host.hostname.split('.')[0] in [tmp["name"] for tmp in response_data["nodes"]]
 
 
-def test_host_view_route(client, test_host):
+def test_host_view_route(cl_operator, test_host):
     """host view route test"""
 
-    response = client.get(url_for('storage.host_view_route', host_id=test_host.id))
+    response = cl_operator.get(url_for('storage.host_view_route', host_id=test_host.id))
     assert response.status_code == HTTPStatus.OK
 
     assert 'Host %d: %s (%s)' % (test_host.id, test_host.address, test_host.hostname) in response

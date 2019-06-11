@@ -8,6 +8,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server import db
+from sner.server.model.auth import User
 from sner.server.model.scheduler import Excl, ExclFamily, Queue, Task, Target
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
 
@@ -44,6 +45,12 @@ def db_init():  # pragma: no cover
 @with_appcontext
 def db_initdata():
     """put initial data to database"""
+
+    # auth test data
+    db.session.add(User(
+        username='user1',
+        active=True,
+        roles=['user', 'operator', 'admin']))
 
     # scheduler test data
     db.session.add(Excl(

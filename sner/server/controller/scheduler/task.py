@@ -5,6 +5,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
+from sner.server.controller import role_required
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import TaskForm
@@ -13,6 +14,7 @@ from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/task/list')
+@role_required('operator')
 def task_list_route():
     """list tasks"""
 
@@ -20,6 +22,7 @@ def task_list_route():
 
 
 @blueprint.route('/task/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def task_list_json_route():
     """list tasks, data endpoint"""
 
@@ -39,6 +42,7 @@ def task_list_json_route():
 
 
 @blueprint.route('/task/add', methods=['GET', 'POST'])
+@role_required('operator')
 def task_add_route():
     """add task"""
 
@@ -55,6 +59,7 @@ def task_add_route():
 
 
 @blueprint.route('/task/edit/<task_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def task_edit_route(task_id):
     """edit task"""
 
@@ -70,6 +75,7 @@ def task_edit_route(task_id):
 
 
 @blueprint.route('/task/delete/<task_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def task_delete_route(task_id):
     """delete task"""
 

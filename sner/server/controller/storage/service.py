@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
+from sner.server.controller import role_required
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
@@ -18,6 +19,7 @@ VIZPORTS_HIGH = 100.0
 
 
 @blueprint.route('/service/list')
+@role_required('operator')
 def service_list_route():
     """list services"""
 
@@ -25,6 +27,7 @@ def service_list_route():
 
 
 @blueprint.route('/service/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def service_list_json_route():
     """list services, data endpoint"""
 
@@ -50,6 +53,7 @@ def service_list_json_route():
 
 
 @blueprint.route('/service/add/<host_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def service_add_route(host_id):
     """add service to host"""
 
@@ -67,6 +71,7 @@ def service_add_route(host_id):
 
 
 @blueprint.route('/service/edit/<service_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def service_edit_route(service_id):
     """edit service"""
 
@@ -86,6 +91,7 @@ def service_edit_route(service_id):
 
 
 @blueprint.route('/service/delete/<service_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def service_delete_route(service_id):
     """delete service"""
 
@@ -101,6 +107,7 @@ def service_delete_route(service_id):
 
 
 @blueprint.route('/service/vizports')
+@role_required('operator')
 def service_vizports_route():
     """visualize portmap"""
 
@@ -119,6 +126,7 @@ def service_vizports_route():
 
 
 @blueprint.route('/service/portstat/<port>')
+@role_required('operator')
 def service_portstat_route(port):
     """generate port statistics fragment"""
 

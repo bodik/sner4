@@ -12,6 +12,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.command.storage import vuln_report
+from sner.server.controller import role_required
 from sner.server.controller.storage import blueprint, get_related_models
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
@@ -21,6 +22,7 @@ from sner.server.utils import SnerJSONEncoder
 
 
 @blueprint.route('/vuln/list')
+@role_required('operator')
 def vuln_list_route():
     """list vulns"""
 
@@ -28,6 +30,7 @@ def vuln_list_route():
 
 
 @blueprint.route('/vuln/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def vuln_list_json_route():
     """list vulns, data endpoint"""
 
@@ -55,6 +58,7 @@ def vuln_list_json_route():
 
 
 @blueprint.route('/vuln/add/<model_name>/<model_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def vuln_add_route(model_name, model_id):
     """add vuln to host or service"""
 
@@ -77,6 +81,7 @@ def vuln_add_route(model_name, model_id):
 
 
 @blueprint.route('/vuln/edit/<vuln_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def vuln_edit_route(vuln_id):
     """edit vuln"""
 
@@ -111,6 +116,7 @@ def vuln_delete_route(vuln_id):
 
 
 @blueprint.route('/vuln/view/<vuln_id>')
+@role_required('operator')
 def vuln_view_route(vuln_id):
     """view vuln"""
 
@@ -119,6 +125,7 @@ def vuln_view_route(vuln_id):
 
 
 @blueprint.route('/vuln/delete_by_id', methods=['POST'])
+@role_required('operator')
 def vuln_delete_by_id_route():
     """delete multiple vulns route"""
 
@@ -136,6 +143,7 @@ def vuln_delete_by_id_route():
 
 
 @blueprint.route('/vuln/tag_by_id', methods=['POST'])
+@role_required('operator')
 def vuln_tag_by_id_route():
     """tag multiple route"""
 
@@ -155,6 +163,7 @@ def vuln_tag_by_id_route():
 
 
 @blueprint.route('/vuln/grouped')
+@role_required('operator')
 def vuln_grouped_route():
     """view grouped vulns"""
 
@@ -162,6 +171,7 @@ def vuln_grouped_route():
 
 
 @blueprint.route('/vuln/grouped.json', methods=['GET', 'POST'])
+@role_required('operator')
 def vuln_grouped_json_route():
     """view grouped vulns, data endpoint"""
 
@@ -180,6 +190,7 @@ def vuln_grouped_json_route():
 
 
 @blueprint.route('/vuln/report')
+@role_required('operator')
 def vuln_report_route():
     """generate vulns report"""
 

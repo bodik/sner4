@@ -9,23 +9,23 @@ from sner.server.model.scheduler import Queue
 from tests.server.model.scheduler import create_test_queue, create_test_target
 
 
-def test_queue_list_route(client, test_target):
+def test_queue_list_route(cl_operator, test_target):
     """queue list route test"""
 
-    response = client.get(url_for('scheduler.queue_list_route'))
+    response = cl_operator.get(url_for('scheduler.queue_list_route'))
     assert response.status_code == HTTPStatus.OK
     assert '<h1>Queues list' in response
 
 
-def test_queue_list_json_route(client, test_queue):
+def test_queue_list_json_route(cl_operator, test_queue):
     """queue list_json route test"""
 
-    response = client.post(url_for('scheduler.queue_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_queue.name})
+    response = cl_operator.post(url_for('scheduler.queue_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_queue.name})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['name'] == test_queue.name
 
-    response = client.post(
+    response = cl_operator.post(
         url_for('scheduler.queue_list_json_route', filter='Queue.name=="%s"' % test_queue.name),
         {'draw': 1, 'start': 0, 'length': 1})
     assert response.status_code == HTTPStatus.OK
@@ -33,12 +33,12 @@ def test_queue_list_json_route(client, test_queue):
     assert response_data['data'][0]['name'] == test_queue.name
 
 
-def test_queue_add_route(client, test_task):
+def test_queue_add_route(cl_operator, test_task):
     """queue add route test"""
 
     test_queue = create_test_queue(test_task)
 
-    form = client.get(url_for('scheduler.queue_add_route')).form
+    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
     form['name'] = test_queue.name
     form['task'] = test_queue.task.id
     form['group_size'] = test_queue.group_size
@@ -51,10 +51,10 @@ def test_queue_add_route(client, test_task):
     assert queue.name == test_queue.name
 
 
-def test_queue_edit_route(client, test_queue):
+def test_queue_edit_route(cl_operator, test_queue):
     """queue edit route test"""
 
-    form = client.get(url_for('scheduler.queue_edit_route', queue_id=test_queue.id)).form
+    form = cl_operator.get(url_for('scheduler.queue_edit_route', queue_id=test_queue.id)).form
     form['name'] = form['name'].value+' edited'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -63,12 +63,12 @@ def test_queue_edit_route(client, test_queue):
     assert queue.name == form['name'].value
 
 
-def test_queue_enqueue_route(client, test_queue):
+def test_queue_enqueue_route(cl_operator, test_queue):
     """queue enqueue route test"""
 
     test_target = create_test_target(test_queue)
 
-    form = client.get(url_for('scheduler.queue_enqueue_route', queue_id=test_queue.id)).form
+    form = cl_operator.get(url_for('scheduler.queue_enqueue_route', queue_id=test_queue.id)).form
     form['targets'] = test_target.target
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -77,12 +77,12 @@ def test_queue_enqueue_route(client, test_queue):
     assert queue.targets[0].target == test_target.target
 
 
-def test_queue_flush_route(client, test_target):
+def test_queue_flush_route(cl_operator, test_target):
     """queue flush route test"""
 
     test_queue_id = test_target.queue_id
 
-    form = client.get(url_for('scheduler.queue_flush_route', queue_id=test_queue_id)).form
+    form = cl_operator.get(url_for('scheduler.queue_flush_route', queue_id=test_queue_id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -90,10 +90,10 @@ def test_queue_flush_route(client, test_target):
     assert not queue.targets
 
 
-def test_queue_delete_route(client, test_queue):
+def test_queue_delete_route(cl_operator, test_queue):
     """queue delete route test"""
 
-    form = client.get(url_for('scheduler.queue_delete_route', queue_id=test_queue.id)).form
+    form = cl_operator.get(url_for('scheduler.queue_delete_route', queue_id=test_queue.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

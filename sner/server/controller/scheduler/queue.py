@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
+from sner.server.controller import role_required
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
@@ -14,6 +15,7 @@ from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/queue/list', methods=['GET'])
+@role_required('operator')
 def queue_list_route():
     """list queues"""
 
@@ -21,6 +23,7 @@ def queue_list_route():
 
 
 @blueprint.route('/queue/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_list_json_route():
     """list queues, data endpoint"""
 
@@ -47,6 +50,7 @@ def queue_list_json_route():
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
 @blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_add_route(task_id=None):
     """queue add"""
 
@@ -63,6 +67,7 @@ def queue_add_route(task_id=None):
 
 
 @blueprint.route('/queue/edit/<queue_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_edit_route(queue_id):
     """queue edit"""
 
@@ -78,6 +83,7 @@ def queue_edit_route(queue_id):
 
 
 @blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_enqueue_route(queue_id):
     """queue enqueue"""
 
@@ -96,6 +102,7 @@ def queue_enqueue_route(queue_id):
 
 
 @blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_flush_route(queue_id):
     """queue flush"""
 
@@ -115,6 +122,7 @@ def queue_flush_route(queue_id):
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def queue_delete_route(queue_id):
     """queue delete"""
 

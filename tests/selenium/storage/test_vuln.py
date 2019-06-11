@@ -47,52 +47,52 @@ def check_vulns_filtering(selenium, dt_id):
     assert len(dt_elem.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 4
 
 
-def test_vuln_list_route(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_list_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
     """simple test ajaxed datatable rendering"""
 
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    dt_rendered(selenium, 'vuln_list_table', test_vuln.comment)
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
 
 
-def test_vuln_list_route_inrow_delete(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_list_route_inrow_delete(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
     """delete vuln inrow button"""
 
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    dt_inrow_delete(selenium, 'vuln_list_table')
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_inrow_delete(sl_operator, 'vuln_list_table')
     assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
 
 
-def test_vuln_list_route_selectrows(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
+def test_vuln_list_route_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
     """test dt selection and selection buttons"""
 
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_select_rows(selenium, 'vuln_list_table')
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    check_select_rows(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_list_route_multiactions(live_server, selenium, test_vulns_multiaction):  # pylint: disable=unused-argument
+def test_vuln_list_route_multiactions(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
     """test vulns multiactions"""
 
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_vulns_multiactions(selenium, 'vuln_list_table')
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    check_vulns_multiactions(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_list_route_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_list_route_filtering(live_server, sl_operator, test_vulns_filtering):  # pylint: disable=unused-argument
     """test list vulns view filtering features"""
 
-    selenium.get(url_for('storage.vuln_list_route', _external=True))
-    check_vulns_filtering(selenium, 'vuln_list_table')
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    check_vulns_filtering(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_grouped_route(live_server, selenium, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_grouped_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
     """test grouped vulns view"""
 
-    selenium.get(url_for('storage.vuln_grouped_route', _external=True))
-    dt_wait_processing(selenium, 'vuln_grouped_table')
-    assert len(selenium.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 1
+    sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
+    dt_wait_processing(sl_operator, 'vuln_grouped_table')
+    assert len(sl_operator.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 1
 
 
-def test_vuln_grouped_route_filtering(live_server, selenium, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_grouped_route_filtering(live_server, sl_operator, test_vulns_filtering):  # pylint: disable=unused-argument
     """test grouped vulns view filtering features"""
 
-    selenium.get(url_for('storage.vuln_grouped_route', _external=True))
-    check_vulns_filtering(selenium, 'vuln_grouped_table')
+    sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
+    check_vulns_filtering(sl_operator, 'vuln_grouped_table')

@@ -30,11 +30,11 @@ def dt_rendered(selenium, dt_id, td_data):
     assert selenium.find_element_by_xpath('//table[@id="%s"]/tbody/tr/td[text()="%s"]' % (dt_id, td_data))
 
 
-def dt_inrow_delete(selenium, dt_id):
+def dt_inrow_delete(selenium, dt_id, index=0):
     """test delete row/item rendered in _buttons by default ajaxed datatables"""
 
     dt_wait_processing(selenium, dt_id)
-    selenium.find_element_by_id(dt_id).find_element_by_class_name('abutton_delete_by_url').click()
+    selenium.find_element_by_id(dt_id).find_elements_by_class_name('abutton_delete_by_url')[index].click()
     WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.alert_is_present())
     selenium.switch_to.alert.accept()
     dt_wait_processing(selenium, dt_id)

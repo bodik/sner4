@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
+from sner.server.controller import role_required
 from sner.server.controller.storage import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
@@ -14,6 +15,7 @@ from sner.server.sqlafilter import filter_parser
 
 
 @blueprint.route('/host/list')
+@role_required('operator')
 def host_list_route():
     """list hosts"""
 
@@ -21,6 +23,7 @@ def host_list_route():
 
 
 @blueprint.route('/host/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def host_list_json_route():
     """list hosts, data endpoint"""
 
@@ -46,6 +49,7 @@ def host_list_json_route():
 
 
 @blueprint.route('/host/add', methods=['GET', 'POST'])
+@role_required('operator')
 def host_add_route():
     """add host"""
 
@@ -62,6 +66,7 @@ def host_add_route():
 
 
 @blueprint.route('/host/edit/<host_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def host_edit_route(host_id):
     """edit host"""
 
@@ -77,6 +82,7 @@ def host_edit_route(host_id):
 
 
 @blueprint.route('/host/delete/<host_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def host_delete_route(host_id):
     """delete host"""
 
@@ -92,6 +98,7 @@ def host_delete_route(host_id):
 
 
 @blueprint.route('/host/vizdns')
+@role_required('operator')
 def host_vizdns_route():
     """dns hierarchy tree visualization"""
 
@@ -100,6 +107,7 @@ def host_vizdns_route():
 
 
 @blueprint.route('/host/vizdns.json')
+@role_required('operator')
 def host_vizdns_json_route():
     """dns hierarchy tree visualization data generator"""
 
@@ -137,6 +145,7 @@ def host_vizdns_json_route():
 
 
 @blueprint.route('/host/view/<host_id>')
+@role_required('operator')
 def host_view_route(host_id):
     """view host"""
 

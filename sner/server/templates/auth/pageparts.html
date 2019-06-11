@@ -1,0 +1,14 @@
+{% raw %}
+<script id="auth.pagepart-user_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-xs btn-default" href="{{> auth.user_edit_route user_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> auth.user_delete_route user_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+</script>
+{% endraw %}
+<script type="text/javascript">
+	/* hbs partials to pass flask endpoint uris to hbs templates */
+	Handlebars.registerPartial('auth.user_edit_route', Flask.url_for('auth.user_edit_route', {'user_id': '{%raw%}{{user_id}}{%endraw%}'}));
+	Handlebars.registerPartial('auth.user_delete_route', Flask.url_for('auth.user_delete_route', {'user_id': '{%raw%}{{user_id}}{%endraw%}'}));
+
+	/* hbs templates */
+	var auth_pagepart_user_controls = Handlebars.compile(document.getElementById('auth.pagepart-user_controls.hbs').innerHTML);
+</script>

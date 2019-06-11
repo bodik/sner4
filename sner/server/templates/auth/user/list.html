@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_user_list_table_options = {
+		'ajax': {'url': "{{ url_for('auth.user_list_json_route') }}", 'method': 'POST'},
+		'columns': [
+			dt_column('id'),
+			dt_column('username'),
+			dt_column('email'),
+			dt_column('roles'),
+			dt_column('active'),
+			dt_column_buttons(auth_pagepart_user_controls)
+		]
+	};
+	$(document).ready(function() {
+		var dt_user_list_table = $('#user_list_table').DataTable($.extend({}, dt_ajax_options, dt_user_list_table_options));
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="auths">
+	<h1>Users list <a class="btn btn-xs btn-default" href="{{ url_for('auth.user_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+
+	<table id="user_list_table" class="table table-hover table-responsive table-condensed"></table>
+</div>
+{% endblock %}

@@ -3,9 +3,10 @@
 import os
 
 import flask.cli
-from flask import flash, Flask, render_template
+from flask import Flask, render_template
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_jsglue import JSGlue
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
 import yaml
@@ -23,11 +24,13 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_DATABASE_URI': 'postgresql:///sner',
     'SQLALCHEMY_ECHO': False,
 
-    'SNER_VAR': '/var/sner'
+    'SNER_VAR': '/var/sner',
+    'SNER_AUTH_ROLES': ['user', 'operator', 'admin']
 }
 
 db = SQLAlchemy()  # pylint: disable=invalid-name
 jsglue = JSGlue()  # pylint: disable=invalid-name
+login_manager = LoginManager()  # pylint: disable=invalid-name
 toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 
 
@@ -45,7 +48,7 @@ def get_dotted(data, path):
 def config_from_yaml(filename):
     """pull config variables from config file"""
 
-    if filename:
+    if filename and os.path.exists(filename):
         with open(filename, 'r') as ftmp:
             config_dict = yaml.safe_load(ftmp.read())
         config = {
@@ -62,20 +65,29 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     """flask application factory"""
 
     app = Flask('sner.server')
-    app.config.update(DEFAULT_CONFIG)
-    app.config.update(config_from_yaml(config_file))
-    app.config.update(config_from_yaml(os.environ.get(config_env)))
+    app.config.update(DEFAULT_CONFIG)  # default config
+    app.config.update(config_from_yaml(config_file))  # passed from other programs, eg. tests
+    app.config.update(config_from_yaml('sner.yaml'))  # easy configuration from cwd
+    app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi config
 
     db.init_app(app)
     jsglue.init_app(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login_route'
+    login_manager.login_message = 'Not logged in'
+    login_manager.login_message_category = 'warning'
     if app.config['DEBUG']:  # pragma: no cover
         toolbar.init_app(app)
 
+    from sner.server.controller import auth
+    app.register_blueprint(auth.blueprint, url_prefix='/auth')
     from sner.server.controller import scheduler
     app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
     from sner.server.controller import storage
     app.register_blueprint(storage.blueprint, url_prefix='/storage')
 
+    from sner.server.command.auth import auth_command
+    app.cli.add_command(auth_command)
     from sner.server.command.db import db_command
     app.cli.add_command(db_command)
     from sner.server.command.scheduler import scheduler_command
@@ -85,10 +97,6 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     @app.route('/')
     def index_route():  # pylint: disable=unused-variable
-        flash('info', 'info')
-        flash('success', 'success')
-        flash('warning', 'warning')
-        flash('error', 'error')
         return render_template('index.html')
 
     @app.template_filter('datetime')
@@ -104,12 +112,14 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable
+        from sner.server.model.auth import User
         from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task
         from sner.server.model.storage import Host, Note, Service, Vuln
         return {
             'app': app, 'db': db,
             'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
-            'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln}
+            'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln,
+            'User': User}
 
     return app
 

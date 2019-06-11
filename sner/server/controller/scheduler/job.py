@@ -18,6 +18,7 @@ from sqlalchemy_filters import apply_filters
 
 import sner.agent.protocol
 from sner.server import db
+from sner.server.controller import role_required
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
@@ -36,6 +37,7 @@ def job_delete(job):
 
 
 @blueprint.route('/job/list')
+@role_required('operator')
 def job_list_route():
     """list jobs"""
 
@@ -43,6 +45,7 @@ def job_list_route():
 
 
 @blueprint.route('/job/list.json', methods=['GET', 'POST'])
+@role_required('operator')
 def job_list_json_route():
     """list jobs, data endpoint"""
 
@@ -157,6 +160,7 @@ def job_output_route():
 
 
 @blueprint.route('/job/delete/<job_id>', methods=['GET', 'POST'])
+@role_required('operator')
 def job_delete_route(job_id):
     """delete job"""
 

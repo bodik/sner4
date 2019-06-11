@@ -13,23 +13,23 @@ from tests import persist_and_detach
 from tests.server.model.scheduler import create_test_target
 
 
-def test_job_list_route(client):
+def test_job_list_route(cl_operator):
     """job list route test"""
 
-    response = client.get(url_for('scheduler.job_list_route'))
+    response = cl_operator.get(url_for('scheduler.job_list_route'))
     assert response.status_code == HTTPStatus.OK
     assert '<h1>Jobs list' in response
 
 
-def test_job_list_json_route(client, test_job):
+def test_job_list_json_route(cl_operator, test_job):
     """job list_json route test"""
 
-    response = client.post(url_for('scheduler.job_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_job.id})
+    response = cl_operator.post(url_for('scheduler.job_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_job.id})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['id'] == test_job.id
 
-    response = client.post(
+    response = cl_operator.post(
         url_for('scheduler.job_list_json_route', filter='Job.id=="%s"' % test_job.id),
         {'draw': 1, 'start': 0, 'length': 1})
     assert response.status_code == HTTPStatus.OK
@@ -117,10 +117,10 @@ def test_job_output_route(client, test_job):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_job_delete_route(client, test_job_completed):
+def test_job_delete_route(cl_operator, test_job_completed):
     """delete route test"""
 
-    form = client.get(url_for('scheduler.job_delete_route', job_id=test_job_completed.id)).form
+    form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=test_job_completed.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
