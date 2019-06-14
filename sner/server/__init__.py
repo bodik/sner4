@@ -11,6 +11,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
 import yaml
 
+from sner.server.sessions import FilesystemSessionInterface
+
 
 DEFAULT_CONFIG = {
     # flask
@@ -69,6 +71,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.config.update(config_from_yaml(config_file))  # passed from other programs, eg. tests
     app.config.update(config_from_yaml('sner.yaml'))  # easy configuration from cwd
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi config
+
+    app.session_interface = FilesystemSessionInterface('%s/sessions' % app.config['SNER_VAR'])
 
     db.init_app(app)
     jsglue.init_app(app)

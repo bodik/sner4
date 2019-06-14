@@ -1,6 +1,6 @@
 """authentication handling module"""
 
-from flask import Blueprint, current_app, flash, redirect, request, render_template, url_for
+from flask import _request_ctx_stack, Blueprint, current_app, flash, g, redirect, request, render_template, session, url_for
 from flask_login import login_user, logout_user
 
 from sner.server import login_manager
@@ -27,6 +27,9 @@ def login_route():
     if form.validate_on_submit():
         user = User.query.filter(User.active, User.username == form.username.data).one_or_none()
         if user and user.compare_password(form.password.data):
+            _request_ctx_stack.top.session = current_app.session_interface.new_session()
+            if hasattr(g, 'csrf_token'):  # cleanup g, which is used by flask_wtf
+                delattr(g, 'csrf_token')
             login_user(user)
 
             if request.args.get('next'):
@@ -45,5 +48,5 @@ def logout_route():
     """logout route"""
 
     logout_user()
-    flash('Logged out', 'info')
+    session.clear()
     return redirect(url_for('index_route'))
