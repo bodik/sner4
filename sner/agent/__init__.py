@@ -18,12 +18,45 @@ import jsonschema
 import requests
 
 import sner.agent.protocol
+from sner.lib import get_dotted, load_yaml
 from sner.agent.modules import registered_modules
 
+
+DEFAULT_CONFIG = {
+    'SERVER': 'http://localhost:18000',
+    'APIKEY': None,
+    'QUEUE': None
+}
 
 logger = logging.getLogger('sner.agent')  # pylint: disable=invalid-name
 logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
 logger.setLevel(logging.INFO)
+
+
+def config_from_yaml(filename):
+    """pull config variables from config file"""
+
+    config_dict = load_yaml(filename)
+    config = {
+        'SERVER': get_dotted(config_dict, 'agent.server'),
+        'APIKEY': get_dotted(config_dict, 'agent.apikey'),
+        'QUEUE': get_dotted(config_dict, 'agent.queue')}
+    return {k: v for k, v in config.items() if v is not None}
+
+
+def config_from_args(args):
+    """pull config variables from parsed args/generic object"""
+
+    config = {
+        'SERVER': args.server,
+        'APIKEY': args.apikey,
+        'QUEUE': args.queue}
+    return {k: v for k, v in config.items() if v is not None}
+
+
+def apikey_header(apikey):
+    """generate apikey header"""
+    return {'Authorization': 'Apikey %s' % apikey}
 
 
 def zipdir(path, zipto):
@@ -96,17 +129,17 @@ class BaseAgent():
         return retval
 
 
-class ServerableAgent(BaseAgent):
+class ServerableAgent(BaseAgent):  # pylint: disable=too-many-instance-attributes
     """agent to fetch and execute assignments from central job server"""
 
-    BACKOFF_TIME = 5
-
-    def __init__(self, server, queue, oneshot=False):
+    def __init__(self, server, apikey, queue, oneshot=False, backoff_time=5.0):  # pylint: disable=too-many-arguments
         super().__init__()
 
         self.server = server
+        self.apikey = apikey
         self.queue = queue
         self.oneshot = oneshot
+        self.backoff_time = backoff_time
 
         self.loop = True
         self.get_assignment_url = '%s/api/v1/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
@@ -134,22 +167,26 @@ class ServerableAgent(BaseAgent):
         assignment = None
         while self.loop and not assignment:
             try:
-                assignment = requests.get(self.get_assignment_url, timeout=10).json()
+                response = requests.get(self.get_assignment_url, headers=apikey_header(self.apikey), timeout=10)
+                response.raise_for_status()
+                assignment = response.json()
                 if not assignment:  # response-nowork
                     self.log.debug('get_assignment response-nowork')
                     if self.oneshot:
                         break
                     else:  # pragma: no cover ; running over multiprocessing
-                        sleep(self.BACKOFF_TIME)
+                        sleep(self.backoff_time)
                         continue
                 jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
                 self.log.debug('got assignment: %s', assignment)
             except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as e:
                 assignment = None
                 self.log.warning('get_assignment error: %s', e)
-                sleep(self.BACKOFF_TIME)
+                if self.oneshot:
+                    return assignment, 1
+                sleep(self.backoff_time)
 
-        return assignment
+        return assignment, 0
 
     def upload_output(self, output):
         """upload assignment output to the server"""
@@ -157,12 +194,12 @@ class ServerableAgent(BaseAgent):
         uploaded = False
         while not uploaded:
             try:
-                response = requests.post(self.upload_output_url, json=output, timeout=10)
+                response = requests.post(self.upload_output_url, json=output, headers=apikey_header(self.apikey), timeout=10)
                 response.raise_for_status()
                 uploaded = True
             except requests.exceptions.RequestException as e:
                 self.log.warning('upload_output error: %s', e)
-                sleep(self.BACKOFF_TIME)
+                sleep(self.backoff_time)
 
     def run(self, **kwargs):
         """fetch, process and upload output for assignment given by server"""
@@ -170,7 +207,7 @@ class ServerableAgent(BaseAgent):
         retval = 0
         with self.shutdown_context():
             while self.loop:
-                assignment = self.get_assignment()
+                assignment, retval = self.get_assignment()
 
                 if assignment:
                     retval = self.process_assignment(assignment)
@@ -208,14 +245,18 @@ def main(argv=None):
 
     parser = ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='show debug output')
-    parser.add_argument('--server', default='http://localhost:18000', help='server uri')
-    parser.add_argument('--queue', help='select specific queue to work on')
-    parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
-
-    parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
 
     parser.add_argument('--shutdown', type=int, help='request gracefull shutdown of the agent specified by PID')
     parser.add_argument('--terminate', type=int, help='request immediate termination of the agent specified by PID')
+
+    parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
+
+    parser.add_argument('--config', default='sner.yaml', help='agent config')
+    parser.add_argument('--server', help='server uri')
+    parser.add_argument('--apikey', help='server apikey')
+    parser.add_argument('--queue', help='select specific queue to work on')
+    parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
+    parser.add_argument('--backofftime', type=float, default=5.0, help='backoff time for repeating requests; used to speedup tests')
 
     args = parser.parse_args(argv)
     if args.debug:
@@ -233,4 +274,7 @@ def main(argv=None):
         return AssignableAgent().run(input_a=args.assignment)
 
     # standard agent
-    return ServerableAgent(args.server, args.queue, args.oneshot).run()
+    config = dict(DEFAULT_CONFIG)
+    config.update(config_from_yaml(args.config))
+    config.update(config_from_args(args))
+    return ServerableAgent(config.get('SERVER'), config.get('APIKEY'), config.get('QUEUE'), args.oneshot, args.backofftime).run()

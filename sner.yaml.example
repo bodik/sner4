@@ -2,3 +2,8 @@ server:
     secret: 'changeit'
     db: 'postgresql:///sner'
     var: '/var/sner'
+
+agent:
+    server: 'http://localhost:18000'
+    apikey: 'generateit'
+    queue: null

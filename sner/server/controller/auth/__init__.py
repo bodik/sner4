@@ -42,6 +42,18 @@ def user_loader(user_id):
     return User.query.filter(User.id == user_id).one_or_none()
 
 
+@login_manager.request_loader
+def load_user_from_request(req):
+    """api authentication; load user form request"""
+
+    auth_header = req.headers.get('Authorization')
+    if auth_header:
+        apikey = auth_header.replace('Apikey ', '', 1)
+        if apikey:
+            return User.query.filter(User.active, User.apikey == PWS.hash_simple(apikey)).first()
+    return None
+
+
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login_route():
     """login route"""

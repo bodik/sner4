@@ -9,8 +9,8 @@ from flask_jsglue import JSGlue
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
-import yaml
 
+from sner.lib import get_dotted, load_yaml
 from sner.server.sessions import FilesystemSessionInterface
 
 
@@ -36,31 +36,15 @@ login_manager = LoginManager()  # pylint: disable=invalid-name
 toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 
 
-def get_dotted(data, path):
-    """access nested dict by dotted helper"""
-
-    parts = path.split('.')
-    if len(parts) == 1:
-        return data.get(parts[0])
-    if (parts[0] in data) and isinstance(data[parts[0]], dict):
-        return get_dotted(data[parts[0]], '.'.join(parts[1:]))
-    return None
-
-
 def config_from_yaml(filename):
     """pull config variables from config file"""
 
-    if filename and os.path.exists(filename):
-        with open(filename, 'r') as ftmp:
-            config_dict = yaml.safe_load(ftmp.read())
-        config = {
-            'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
-            'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
-            'SNER_VAR': get_dotted(config_dict, 'server.var')}
-        config = {k: v for k, v in config.items() if v is not None}
-        return config
-
-    return {}
+    config_dict = load_yaml(filename)
+    config = {
+        'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
+        'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
+        'SNER_VAR': get_dotted(config_dict, 'server.var')}
+    return {k: v for k, v in config.items() if v is not None}
 
 
 def create_app(config_file=None, config_env='SNER_CONFIG'):
