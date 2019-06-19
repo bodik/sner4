@@ -52,11 +52,11 @@ def simple_server(request, monkeypatch, pytestconfig):
 
     app = Flask('simple_server')
 
-    @app.route('/scheduler/job/assign')
+    @app.route('/api/v1/scheduler/job/assign')
     def assign_route():  # pylint: disable=unused-variable
         return jsonify({'id': uuid4(), 'module': 'dummy', 'params': '', 'targets': []})
 
-    @app.route('/scheduler/job/output', methods=['POST'])
+    @app.route('/api/v1/scheduler/job/output', methods=['POST'])
     def output_route():  # pylint: disable=unused-variable
         return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
 

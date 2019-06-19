@@ -83,6 +83,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     if app.config['DEBUG']:  # pragma: no cover
         toolbar.init_app(app)
 
+    from sner.server.controller import api
+    app.register_blueprint(api.blueprint, url_prefix='/api')
     from sner.server.controller import auth
     app.register_blueprint(auth.blueprint, url_prefix='/auth')
     from sner.server.controller import scheduler

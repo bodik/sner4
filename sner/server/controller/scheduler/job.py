@@ -68,8 +68,7 @@ def job_list_json_route():
     return jsonify(jobs)
 
 
-@blueprint.route('/job/assign')
-@blueprint.route('/job/assign/<queue_id>')
+# routed by api blueprint
 def job_assign_route(queue_id=None):
     """assign job for worker"""
 
@@ -133,7 +132,7 @@ def job_assign_route(queue_id=None):
     return jsonify(assignment)
 
 
-@blueprint.route('/job/output', methods=['POST'])
+# routed by api blueprint
 def job_output_route():
     """receive output from assigned job"""
 

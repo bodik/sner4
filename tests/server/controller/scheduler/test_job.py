@@ -41,20 +41,20 @@ def test_job_assign_route(client, test_queue):
     """job assign route test"""
 
     persist_and_detach(create_test_target(test_queue))
-    response = client.get(url_for('scheduler.job_assign_route', queue_id=test_queue.id))
+    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_id=test_queue.id))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
     queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
     assert len(queue.jobs) == 1
 
     persist_and_detach(create_test_target(test_queue))
-    response = client.get(url_for('scheduler.job_assign_route', queue_id=test_queue.name))
+    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_id=test_queue.name))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
     queue = Queue.query.filter(Queue.name == test_queue.name).one_or_none()
     assert len(queue.jobs) == 2
 
-    response = client.get(url_for('scheduler.job_assign_route', queue_id='notexist'))  # should return response-nowork
+    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_id='notexist'))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
 
@@ -69,7 +69,7 @@ def test_job_assign_highest_priority_route(client, test_task):
     persist_and_detach(create_test_target(queue1))
     persist_and_detach(create_test_target(queue2))
 
-    response = client.get(url_for('scheduler.job_assign_route'))
+    response = client.get(url_for('api.v1_scheduler_job_assign_route'))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
 
@@ -85,7 +85,7 @@ def test_job_assign_with_blacklist(client, test_queue, test_excl_network):
     persist_and_detach(create_test_target(test_queue))
     persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
 
-    response = client.get(url_for('scheduler.job_assign_route'))
+    response = client.get(url_for('api.v1_scheduler_job_assign_route'))
     assert response.status_code == HTTPStatus.OK
     assignment = json.loads(response.body.decode('utf-8'))
 
@@ -95,7 +95,7 @@ def test_job_assign_with_blacklist(client, test_queue, test_excl_network):
     assert len(assignment['targets']) == 1
 
     persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
-    response = client.get(url_for('scheduler.job_assign_route'))  # shoudl return response-nowork
+    response = client.get(url_for('api.v1_scheduler_job_assign_route'))  # shoudl return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
 
@@ -104,7 +104,7 @@ def test_job_output_route(client, test_job):
     """job output route test"""
 
     response = client.post_json(
-        url_for('scheduler.job_output_route'),
+        url_for('api.v1_scheduler_job_output_route'),
         {'id': test_job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')})
     assert response.status_code == HTTPStatus.OK
 
@@ -113,7 +113,7 @@ def test_job_output_route(client, test_job):
     with open(job.output_abspath, 'r') as ftmp:
         assert ftmp.read() == 'a-test-file-contents'
 
-    response = client.post_json(url_for('scheduler.job_output_route'), {'invalid': 'output'}, status='*')
+    response = client.post_json(url_for('api.v1_scheduler_job_output_route'), {'invalid': 'output'}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 

@@ -24,7 +24,7 @@ def fail_server(request, monkeypatch, pytestconfig):
             self.nr_output = 0
     app = Xflask('fail_server')
 
-    @app.route('/scheduler/job/assign')
+    @app.route('/api/v1/scheduler/job/assign')
     def assign_route():  # pylint: disable=unused-variable
         if current_app.nr_assign < 1:
             current_app.nr_assign += 1
@@ -36,7 +36,7 @@ def fail_server(request, monkeypatch, pytestconfig):
 
         return jsonify({'id': uuid4(), 'module': 'dummy', 'params': '', 'targets': []})
 
-    @app.route('/scheduler/job/output', methods=['POST'])
+    @app.route('/api/v1/scheduler/job/output', methods=['POST'])
     def output_route():  # pylint: disable=unused-variable
         if current_app.nr_output < 1:
             current_app.nr_output += 1

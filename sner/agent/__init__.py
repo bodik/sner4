@@ -109,8 +109,8 @@ class ServerableAgent(BaseAgent):
         self.oneshot = oneshot
 
         self.loop = True
-        self.get_assignment_url = '%s/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
-        self.upload_output_url = '%s/scheduler/job/output' % self.server
+        self.get_assignment_url = '%s/api/v1/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
+        self.upload_output_url = '%s/api/v1/scheduler/job/output' % self.server
 
     def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """wait for current assignment to finish"""
