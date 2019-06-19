@@ -8,7 +8,7 @@ from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
-from sner.server.controller import role_required
+from sner.server.controller.auth import role_required
 from sner.server.controller.storage import blueprint, get_related_models
 from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm

@@ -1,7 +1,10 @@
 """authentication handling module"""
 
+from functools import wraps
+from http import HTTPStatus
+
 from flask import _request_ctx_stack, Blueprint, current_app, flash, g, redirect, request, render_template, session, url_for
-from flask_login import login_user, logout_user
+from flask_login import current_user, login_user, logout_user
 
 from sner.server import login_manager
 from sner.server.form.auth import LoginForm
@@ -11,7 +14,25 @@ from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 blueprint = Blueprint('auth', __name__)  # pylint: disable=invalid-name
 
-import sner.server.controller.auth.user  # noqa: E402,F401  pylint: disable=wrong-import-position
+
+def role_required(role, api=False):
+    """flask view decorator implementing role based authorization; does not redirect to login for api views/routes"""
+
+    def _role_required(fnc):
+        @wraps(fnc)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated:
+                if api:
+                    return 'Unauthorized', HTTPStatus.UNAUTHORIZED
+                return login_manager.unauthorized()
+
+            if not current_user.has_role(role):
+                return 'Forbidden', HTTPStatus.FORBIDDEN
+
+            return fnc(*args, **kwargs)
+
+        return decorated_view
+    return _role_required
 
 
 @login_manager.user_loader
@@ -52,3 +73,6 @@ def logout_route():
     logout_user()
     session.clear()
     return redirect(url_for('index_route'))
+
+
+import sner.server.controller.auth.user  # noqa: E402,F401  pylint: disable=wrong-import-position

@@ -18,7 +18,7 @@ from sqlalchemy_filters import apply_filters
 
 import sner.agent.protocol
 from sner.server import db
-from sner.server.controller import role_required
+from sner.server.controller.auth import role_required
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target

@@ -8,8 +8,7 @@ from flask_login import current_user
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
-from sner.server.controller import role_required
-from sner.server.controller.auth import blueprint
+from sner.server.controller.auth import blueprint, role_required
 from sner.server.form import ButtonForm
 from sner.server.form.auth import UserForm, UserChangePasswordForm
 from sner.server.model.auth import User
