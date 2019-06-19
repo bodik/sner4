@@ -1,13 +1,11 @@
 """auth component models"""
 
-from crypt import crypt, mksalt, METHOD_SHA512  # pylint: disable=no-name-in-module
-from hmac import compare_digest
-
 import flask_login
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from sner.server import db
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -41,18 +39,7 @@ class User(db.Model, flask_login.UserMixin):
 
     @password.setter
     def password(self, value):
-        """password setter"""
+        """password setter; condition is handling value edit from empty form.populate_obj submission"""
 
         if value:
-            self._password = crypt(value, mksalt(METHOD_SHA512))
-
-    @property
-    def password_salt(self):
-        """demerges salt from password"""
-
-        return self._password[:self.password.rfind('$')] if self._password else None
-
-    def compare_password(self, password):
-        """compare user password"""
-
-        return compare_digest(crypt(password, self.password_salt), self.password) if self.password_salt else False
+            self._password = PWS().hash(value)

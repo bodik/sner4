@@ -6,7 +6,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.model.auth import User
-from sner.server.password_supervisor import PasswordSupervisor
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server.model.auth import create_test_user
 
 
@@ -37,7 +37,7 @@ def test_user_list_json_route(cl_admin, test_user):
 def test_user_add_route(cl_admin):
     """user add route test"""
 
-    tmp_password = PasswordSupervisor().generate()
+    tmp_password = PWS().generate()
     test_user = create_test_user()
 
     form = cl_admin.get(url_for('auth.user_add_route')).form
@@ -51,7 +51,7 @@ def test_user_add_route(cl_admin):
     user = User.query.filter(User.username == test_user.username).one_or_none()
     assert user
     assert user.username == test_user.username
-    assert user.compare_password(tmp_password)
+    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(user.password)), user.password)
     assert user.active == test_user.active
     assert user.roles == test_user.roles
 
@@ -85,7 +85,7 @@ def test_user_delete_route(cl_admin, test_user):
 def test_user_changepassword_route(cl_user):
     """user change password route"""
 
-    tmp_password = PasswordSupervisor().generate()
+    tmp_password = PWS().generate()
 
     form = cl_user.get(url_for('auth.user_changepassword_route')).form
     form['password1'] = '1'
@@ -108,4 +108,4 @@ def test_user_changepassword_route(cl_user):
     assert response.status_code == HTTPStatus.FOUND
 
     user = User.query.filter(User.username == 'pytest_user').one_or_none()
-    assert user.compare_password(tmp_password)
+    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(user.password)), user.password)

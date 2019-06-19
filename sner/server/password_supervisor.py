@@ -1,7 +1,12 @@
 """password supervisor service"""
 
+import os
 import random
 import re
+from binascii import hexlify
+from crypt import crypt, mksalt, METHOD_SHA512  # pylint: disable=no-name-in-module
+from hashlib import sha512
+from hmac import compare_digest
 
 
 class PasswordSupervisorResult():
@@ -32,7 +37,7 @@ class PasswordSupervisor():
         self.min_classes = min_classes
 
     def check_strength(self, password, username=None):
-        """checks password strength against configured policy"""
+        """supervisor; checks password strength against configured policy"""
 
         # length
         if len(password) < self.min_length:
@@ -62,7 +67,7 @@ class PasswordSupervisor():
         return PasswordSupervisorResult(True, 'Password is according to policy.')
 
     def generate(self, length=40):
-        """generates password compliant with the policy"""
+        """supervisor; generates password compliant with the policy"""
 
         if length < self.min_length:
             raise RuntimeError('Requested less than configured minimum password length.')
@@ -75,12 +80,38 @@ class PasswordSupervisor():
                 ret += random.choice(alphabet)
         return ret
 
+    @staticmethod
+    def generate_apikey():
+        """supervisor; generate new apikey"""
+        return hexlify(os.urandom(32)).decode('ascii')
+
+    @staticmethod
+    def hash(value, salt=None):
+        """encoder; hash password with algo"""
+        return crypt(value, salt if salt else mksalt(METHOD_SHA512))
+
+    @staticmethod
+    def get_salt(value):
+        """encoder; demerge salt from value"""
+        return value[:value.rfind('$')] if value else None
+
+    @staticmethod
+    def compare(value1, value2):
+        """encoder; compare hashes"""
+        return compare_digest(value1, value2) if isinstance(value1, str) and isinstance(value2, str) else False
+
+    @staticmethod
+    def hash_simple(value):
+        """encoder; create non salted hash"""
+        return sha512(value.encode('utf-8')).hexdigest()
+
 
 def test_all():
     """run all test cases"""
 
     pws = PasswordSupervisor()
 
+    # supervisor tests
     pwsr = pws.check_strength('x')
     assert not pwsr.is_strong
     assert 'too short' in pwsr.message
@@ -102,3 +133,12 @@ def test_all():
         assert str(e) == 'Requested less than configured minimum password length.'
         catched_without_pytest = True
     assert catched_without_pytest
+
+    assert len(pws.generate_apikey()) == 64
+
+    # encoder tests
+    tmp_password = pws.generate()
+    tmp_hash = pws.hash(tmp_password)
+    assert pws.compare(pws.hash(tmp_password, pws.get_salt(tmp_hash)), tmp_hash)
+
+    assert len(pws.hash_simple(pws.generate())) == 128
