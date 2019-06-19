@@ -8,7 +8,7 @@ from time import sleep
 from uuid import uuid4
 
 import pytest
-from flask import Flask, jsonify
+from flask import _request_ctx_stack, Flask, jsonify
 from pytest_flask.fixtures import live_server
 
 from sner.agent import main as agent_main
@@ -29,12 +29,12 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longr
     assert 'MARKEDPROCESS' not in os.popen('ps -f').read()
 
 
-def test_terminate_with_liveserver(tmpworkdir, live_server, cleanup_markedprocess, test_longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
+def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_markedprocess, test_longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
     """agent's external process handling test"""
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
-        args=(['--server', live_server.url(), '--debug', '--queue', str(test_longrun_target.queue_id), '--oneshot'],))
+        args=(['--server', live_server.url(), '--apikey', apikey, '--debug', '--queue', str(test_longrun_target.queue_id), '--oneshot'],))
     proc_agent.start()
     sleep(1)
     assert proc_agent.pid
@@ -54,10 +54,14 @@ def simple_server(request, monkeypatch, pytestconfig):
 
     @app.route('/api/v1/scheduler/job/assign')
     def assign_route():  # pylint: disable=unused-variable
+        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code2':
+            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
         return jsonify({'id': uuid4(), 'module': 'dummy', 'params': '', 'targets': []})
 
     @app.route('/api/v1/scheduler/job/output', methods=['POST'])
     def output_route():  # pylint: disable=unused-variable
+        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code2':
+            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
         return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
 
     yield live_server(request, app, monkeypatch, pytestconfig)
@@ -68,7 +72,9 @@ def simple_server(request, monkeypatch, pytestconfig):
 def test_shutdown(tmpworkdir, simple_server):  # pylint: disable=unused-argument,redefined-outer-name
     """test no-work, continuous job assignment and shutdown signal handling"""
 
-    proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', simple_server.url(), '--debug'],))
+    proc_agent = multiprocessing.Process(
+        target=agent_main,
+        args=(['--server', simple_server.url(), '--apikey', 'dummy-breaks-duplicate-code2', '--debug'],))
     proc_agent.start()
     sleep(1)
     assert proc_agent.is_alive()

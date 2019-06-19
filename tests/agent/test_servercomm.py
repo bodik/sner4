@@ -1,18 +1,41 @@
 """tests with various server communication test cases"""
 
 import multiprocessing
+import signal
+from contextlib import contextmanager
 from http import HTTPStatus
 from time import sleep
 from uuid import uuid4
 
 import pytest
-from flask import current_app, Flask, jsonify
+import requests
+from flask import _request_ctx_stack, current_app, Flask, jsonify
 from pytest_flask.fixtures import live_server
 
 from sner.agent import main as agent_main
 
 
-@pytest.fixture
+@contextmanager
+def timeout(time):
+    """timeout helper"""
+
+    class TimedException(Exception):
+        """custom exception"""
+
+    def raise_timeout(signum, frame):  # pylint: disable=unused-argument
+        raise TimedException
+
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.alarm(time)
+    try:
+        yield
+    except TimedException:
+        pass
+    finally:
+        signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+
+@pytest.fixture('function')
 def fail_server(request, monkeypatch, pytestconfig):
     """errors injection server used to test edge-cases in agent's codebase"""
 
@@ -22,27 +45,37 @@ def fail_server(request, monkeypatch, pytestconfig):
             super().__init__(import_name)
             self.nr_assign = 0
             self.nr_output = 0
+            self.assign_done = False
+            self.output_done = False
     app = Xflask('fail_server')
 
     @app.route('/api/v1/scheduler/job/assign')
     def assign_route():  # pylint: disable=unused-variable
-        if current_app.nr_assign < 1:
-            current_app.nr_assign += 1
-            return jsonify({'response': 'invalid'})
+        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code1':
+            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
 
         if current_app.nr_assign < 2:
             current_app.nr_assign += 1
             return jsonify({'response': 'invalid'})
 
+        current_app.assign_done = True
         return jsonify({'id': uuid4(), 'module': 'dummy', 'params': '', 'targets': []})
 
     @app.route('/api/v1/scheduler/job/output', methods=['POST'])
     def output_route():  # pylint: disable=unused-variable
+        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code1':
+            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
+
         if current_app.nr_output < 1:
             current_app.nr_output += 1
             return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'output upload failed'}), HTTPStatus.BAD_REQUEST
 
+        current_app.output_done = True
         return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
+
+    @app.route('/check')
+    def check():  # pylint: disable=unused-variable
+        return jsonify({'assign_done': current_app.assign_done, 'output_done': current_app.output_done})
 
     yield live_server(request, app, monkeypatch, pytestconfig)
 
@@ -52,17 +85,26 @@ def fail_server(request, monkeypatch, pytestconfig):
 def test_fail_server_communication(tmpworkdir, fail_server):  # pylint: disable=unused-argument,redefined-outer-name
     """tests failure handling while retrieving assignment or uploading output"""
 
-    result = agent_main(['--server', fail_server.url(), '--debug', '--oneshot'])
-    assert result == 0
+    # oneshot will abort upon first get_assignment error, coverage for external
+    # processes is not working yet. to test the agent's communication error
+    # handling: the agent will run in-thread, will be breaked by
+    # signal/exception and fail_server internals will be checked manualy
+
+    with timeout(1):
+        agent_main(['--server', fail_server.url(), '--apikey', 'dummy-breaks-duplicate-code1', '--debug', '--backofftime', '0.1'])
+
+    response = requests.get('%s/check' % fail_server.url()).json()
+    assert response['assign_done']
+    assert response['output_done']
 
 
-def test_empty_server_communication(tmpworkdir, live_server):  # pylint: disable=unused-argument,redefined-outer-name
+def test_empty_server_communication(tmpworkdir, live_server, apikey):  # pylint: disable=unused-argument,redefined-outer-name
     """tests oneshot vs wait on assignment on empty server"""
 
-    result = agent_main(['--server', live_server.url(), '--debug', '--oneshot'])
+    result = agent_main(['--server', live_server.url(), '--apikey', apikey, '--debug', '--oneshot'])
     assert result == 0
 
-    proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', live_server.url(), '--debug'],))
+    proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', live_server.url(), '--apikey', apikey, '--debug'],))
     proc_agent.start()
     sleep(2)
     assert proc_agent.pid
@@ -70,3 +112,10 @@ def test_empty_server_communication(tmpworkdir, live_server):  # pylint: disable
     agent_main(['--terminate', str(proc_agent.pid)])
     proc_agent.join(3)
     assert not proc_agent.is_alive()
+
+
+def test_invalid_server_oneshot(tmpworkdir):  # pylint: disable=unused-argument,redefined-outer-name
+    """test to raise exception in oneshot"""
+
+    result = agent_main(['--server', 'http://localhost:0', '--debug', '--oneshot'])
+    assert result == 1

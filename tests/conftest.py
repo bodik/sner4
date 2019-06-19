@@ -8,6 +8,8 @@ import pytest
 
 from sner.server import db, create_app
 from sner.server.command.db import db_remove
+from sner.server.model.auth import User
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
 @pytest.fixture
@@ -35,3 +37,13 @@ def tmpworkdir():
     yield tmpdir
     os.chdir(cwd)
     shutil.rmtree(tmpdir)
+
+
+@pytest.fixture
+def apikey():
+    """yield valid apikey for user in role agent"""
+
+    tmp_apikey = PWS().generate_apikey()
+    db.session.add(User(username='pytest_agent', apikey=tmp_apikey, active=True, roles=['agent']))
+    db.session.commit()
+    yield tmp_apikey

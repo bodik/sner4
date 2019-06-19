@@ -27,10 +27,10 @@ def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
     assert os.path.exists('%s.zip' % test_a['id'])
 
 
-def test_run_with_liveserver(tmpworkdir, live_server, test_dummy_target):  # pylint: disable=unused-argument
+def test_run_with_liveserver(tmpworkdir, live_server, apikey, test_dummy_target):  # pylint: disable=unused-argument
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
-    result = agent_main(['--server', live_server.url(), '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
+    result = agent_main(['--server', live_server.url(), '--apikey', apikey, '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
     assert result == 0
 
     job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()
