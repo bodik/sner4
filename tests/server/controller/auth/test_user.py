@@ -7,6 +7,7 @@ from flask import url_for
 
 from sner.server.model.auth import User
 from sner.server.password_supervisor import PasswordSupervisor as PWS
+from tests.server import get_csrf_token
 from tests.server.model.auth import create_test_user
 
 
@@ -80,6 +81,22 @@ def test_user_delete_route(cl_admin, test_user):
 
     user = User.query.filter(User.username == test_user.username).one_or_none()
     assert not user
+
+
+def test_user_apikey_route(cl_admin, test_user):
+    """user apikey route test"""
+
+    data = {'csrf_token': get_csrf_token(cl_admin)}
+
+    response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='generate'), data)
+    assert response.status_code == HTTPStatus.OK
+    user = User.query.filter(User.id == test_user.id).one_or_none()
+    assert user.apikey
+
+    response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='revoke'), data)
+    assert response.status_code == HTTPStatus.OK
+    user = User.query.filter(User.id == test_user.id).one_or_none()
+    assert not user.apikey
 
 
 def test_user_changepassword_route(cl_user):

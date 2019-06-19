@@ -1,5 +1,7 @@
 """controller auth.user"""
 
+from http import HTTPStatus
+
 from datatables import ColumnDT, DataTables
 from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -11,6 +13,7 @@ from sner.server.controller.auth import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.auth import UserForm, UserChangePasswordForm
 from sner.server.model.auth import User
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 from sner.server.sqlafilter import filter_parser
 
 
@@ -31,6 +34,7 @@ def user_list_json_route():
         ColumnDT(User.id, mData='id'),
         ColumnDT(User.username, mData='username'),
         ColumnDT(User.email, mData='email'),
+        ColumnDT(User.apikey.isnot(None), mData='apikey'),  # pylint: disable=no-member
         ColumnDT(User.roles, mData='roles'),
         ColumnDT(User.active, mData='active'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
@@ -90,6 +94,31 @@ def user_delete_route(user_id):
         return redirect(url_for('auth.user_list_route'))
 
     return render_template('button-delete.html', form=form, form_url=url_for('auth.user_delete_route', user_id=user_id))
+
+
+@blueprint.route('/user/apikey/<user_id>/<action>', methods=['GET', 'POST'])
+@role_required('admin')
+def user_apikey_route(user_id, action):
+    """manage apikey for user"""
+
+    user = User.query.get(user_id)
+    ret = {'status': HTTPStatus.BAD_REQUEST, 'title': 'Apikey operation', 'detail': 'Invalid request'}
+
+    form = ButtonForm()
+    if user and form.validate_on_submit():
+
+        if action == 'generate':
+            apikey = PWS.generate_apikey()
+            user.apikey = apikey
+            ret.update({'status': HTTPStatus.OK, 'detail': 'New apikey generated: %s' % apikey})
+
+        elif action == 'revoke':
+            user.apikey = None
+            ret.update({'status': HTTPStatus.OK, 'detail': 'Apikey revoked'})
+
+        db.session.commit()
+
+    return jsonify(ret), ret['status']
 
 
 @blueprint.route('/user/changepassword', methods=['GET', 'POST'])

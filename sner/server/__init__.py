@@ -27,7 +27,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_ECHO': False,
 
     'SNER_VAR': '/var/sner',
-    'SNER_AUTH_ROLES': ['user', 'operator', 'admin']
+    'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin']
 }
 
 db = SQLAlchemy()  # pylint: disable=invalid-name
