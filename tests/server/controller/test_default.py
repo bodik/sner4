@@ -35,6 +35,8 @@ def test_timedout_session(client):
     """test timed out session"""
 
     sid, session_path = create_timedout_session(client)
+    client.app.session_interface.gc_probability = 0.0  # gc collector must not interfere
+
     response = client.get(url_for('index_route'), headers={'cookie': 'session=%s' % sid})
     assert response.status_code == HTTPStatus.OK
     assert sid != dict_from_cookiejar(client.cookiejar)['session']
@@ -54,7 +56,8 @@ def test_gc_session(client):
     """test gc on session storage"""
 
     sid, session_path = create_timedout_session(client)
-    client.app.session_interface.gc_probability = 1.0
+    client.app.session_interface.gc_probability = 1.0  # gc collector must run
+
     response = client.get(url_for('index_route'))
     assert response.status_code == HTTPStatus.OK
     assert not os.path.exists(session_path)

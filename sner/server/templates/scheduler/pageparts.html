@@ -19,13 +19,7 @@
 </script>
 {% endraw %}
 <script type="text/javascript">
-
-	/// handlebars pageparts and helpers
-	///
-
-	/*
-	 * hbs partials to pass flask endpoint uris to hbs templates
-	 */
+	/* hbs partials to pass flask endpoint uris to hbs templates */
 	Handlebars.registerPartial('scheduler.task_edit_route', Flask.url_for('scheduler.task_edit_route', {'task_id': '{%raw%}{{task_id}}{%endraw%}'}));
 	Handlebars.registerPartial('scheduler.task_delete_route', Flask.url_for('scheduler.task_delete_route', {'task_id': '{%raw%}{{task_id}}{%endraw%}'}));
 
@@ -40,9 +34,7 @@
 	Handlebars.registerPartial('scheduler.excl_edit_route', Flask.url_for('scheduler.excl_edit_route', {'excl_id': '{%raw%}{{excl_id}}{%endraw%}'}));
 	Handlebars.registerPartial('scheduler.excl_delete_route', Flask.url_for('scheduler.excl_delete_route', {'excl_id': '{%raw%}{{excl_id}}{%endraw%}'}));
 
-	/*
-	 * hbs templates
-	 */
+	/* hbs templates */
 	var scheduler_pagepart_task_reference = Handlebars.compile('{%raw%}&lt;Task {{task_id}}: {{task_name}}&gt;{%endraw%}');
 	var scheduler_pagepart_task_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-task_controls.hbs').innerHTML);
 

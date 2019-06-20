@@ -7,7 +7,11 @@
 
 
 ### Installation
+
 ```
+# install prerequisities
+apt-get install git sudo make
+
 # clone and tune repository
 git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
 cd /opt/sner

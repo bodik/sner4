@@ -72,27 +72,32 @@ def db_initdata():
     db.session.add(Task(
         name='dns recon',
         module='nmap',
-        params='-Pn --reason   -sL'))
+        params='-sL  -Pn --reason'))
 
     db.session.add(Task(
         name='default scan',
         module='nmap',
-        params='-Pn --reason   -A'))
+        params='-A  -Pn --reason'))
 
     db.session.add(Task(
         name='full tcp scan',
         module='nmap',
-        params='-Pn --reason   -sS -A -p1-65535   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+        params='-sS -A -p1-65535  -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
     db.session.add(Task(
         name='basic udp scan',
         module='nmap',
-        params='-Pn --reason   -sU -sV   --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+        params='-sU -sV  -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
     db.session.add(Task(
         name='userspace tcp',
         module='nmap',
-        params='-Pn --reason   -sT -A   --min-hostgroup 16 --min-rate 100 --max-rate 200'))
+        params='-sT -A  -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
+
+    db.session.add(Task(
+        name='top100 ack scan',
+        module='nmap',
+        params='-sA --top-ports 100  -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
 
     # development queues with default targets
     queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)

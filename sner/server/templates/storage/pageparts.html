@@ -43,10 +43,6 @@
 </script>
 {% endraw %}
 <script type="text/javascript">
-
-	/// handlebars pageparts and helpers
-	///
-
 	/*
 	 * generate url for ref; python version used during export must remain in sync
 	 */
@@ -82,9 +78,7 @@
 		return (severity in colors) ? colors[severity] : 'label-default';
 	});
 
-	/*
-	 * hbs partials to pass flask endpoint uris to hbs templates
-	 */
+	/* hbs partials to pass flask endpoint uris to hbs templates */
 	Handlebars.registerPartial('storage.host_view_route', Flask.url_for('storage.host_view_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.host_edit_route', Flask.url_for('storage.host_edit_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.host_delete_route', Flask.url_for('storage.host_delete_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
@@ -104,9 +98,7 @@
 	Handlebars.registerPartial('storage.note_edit_route', Flask.url_for('storage.note_edit_route', {'note_id': '{%raw%}{{note_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.note_delete_route', Flask.url_for('storage.note_delete_route', {'note_id': '{%raw%}{{note_id}}{%endraw%}'}));
 
-	/*
-	 * hbs templates
-	 */
+	/* hbs templates */
 	var storage_pagepart_host_link = Handlebars.compile(document.getElementById('storage.pagepart-host_link.hbs').innerHTML);
 	var storage_pagepart_host_controls = Handlebars.compile(document.getElementById('storage.pagepart-host_controls.hbs').innerHTML);
 
