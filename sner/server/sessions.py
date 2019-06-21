@@ -69,6 +69,7 @@ class FilesystemSessionInterface(SessionInterface):
             session_path = os.path.join(self.storage, sid)
             try:
                 if os.path.getatime(session_path) > (time()-self.max_idle_time):
+                    os.utime(session_path)
                     with open(session_path, 'r') as ftmp:
                         return Session(json.loads(ftmp.read()), sid=sid, new=False)
                 os.remove(session_path)

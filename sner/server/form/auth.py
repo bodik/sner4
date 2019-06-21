@@ -11,11 +11,10 @@ from sner.server.password_supervisor import PasswordSupervisor as PWS
 def strong_password(form, field):
     """validate password field"""
 
-    if field.data:
-        username = form.username.data if hasattr(form, 'username') else current_user.username
-        pwsr = PWS().check_strength(field.data, username)
-        if not pwsr.is_strong:
-            raise ValidationError(pwsr.message)
+    username = form.username.data if hasattr(form, 'username') else current_user.username
+    pwsr = PWS().check_strength(field.data, username)
+    if not pwsr.is_strong:
+        raise ValidationError(pwsr.message)
 
 
 def passwords_match(form, field):  # pylint: disable=unused-argument
@@ -47,7 +46,7 @@ class UserForm(FlaskForm):
     """user edit form"""
 
     username = StringField(label='Username', validators=[validators.Length(min=1, max=256)])
-    password = PasswordField(label='Password', validators=[strong_password])
+    password = PasswordField(label='Password', validators=[validators.optional(), strong_password])
     email = StringField(label='Email', validators=[validators.Length(max=256)])
     active = BooleanField(label='Active')
     roles = MultiCheckboxField(label='Roles')
