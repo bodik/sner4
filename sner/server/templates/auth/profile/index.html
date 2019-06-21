@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as b_wtf %}
+
+{% block script %}
+<script>
+	var dt_profile_webauthn_table_options = {
+		'ajax': {'url': Flask.url_for('auth.profile_webauthn_list_json_route'), 'method': 'POST'},
+		'columns': [
+			dt_column('id', {'visible': false}),
+			dt_column('name'),
+			dt_column('registered'),
+			dt_column_buttons(auth_pagepart_profile_webauthn_controls)
+		],
+		'ordering': false,
+		'paging': false,
+		'info': false,
+		'searching': false,
+	};
+
+	$(document).ready(function() {
+		var dt_profile_webauthn_table = $('#profile_webauthn_table').DataTable($.extend({}, dt_ajax_options, dt_profile_webauthn_table_options));
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="profile">
+	<h1>User profile</h1>
+	<dl class="dl-horizontal">
+		<dt>username</dt>
+		<dd>{{ user.username }} <a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_changepassword_route') }}">Change password</a></dd>
+
+		<dt>email</dt>
+		<dd>{{ user.email }}</dd>
+
+		<dt>2fa authentication</dt>
+		<dd>
+		{% if user.totp %}{% set tfa_state = ('enabled', 'Disable') %}{% else %}{% set tfa_state = ['disabled', 'Enable'] %}{% endif %}
+		{{ tfa_state[0] }} <a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_totp_route') }}">{{ tfa_state[1] }}</a>
+		</dd>
+
+		<dt>webauthn credentials</dt>
+		<dd>
+			<div id="profile_webauthn_table_toolbar" class="dt_toolbar">
+				<a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_webauthn_register_route') }}">Register new</a>
+			</div>
+			<table id="profile_webauthn_table" class="table table-hover table-responsive table-condensed"></table>
+		</dd>
+	</dl>
+</div>
+{% endblock %}

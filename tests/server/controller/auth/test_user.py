@@ -97,32 +97,3 @@ def test_user_apikey_route(cl_admin, test_user):
     assert response.status_code == HTTPStatus.OK
     user = User.query.filter(User.id == test_user.id).one_or_none()
     assert not user.apikey
-
-
-def test_user_changepassword_route(cl_user):
-    """user change password route"""
-
-    tmp_password = PWS().generate()
-
-    form = cl_user.get(url_for('auth.user_changepassword_route')).form
-    form['password1'] = '1'
-    form['password2'] = '2'
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//*[@class="text-danger" and text()="Passwords does not match."]')
-
-    form = cl_user.get(url_for('auth.user_changepassword_route')).form
-    form['password1'] = 'weak'
-    form['password2'] = 'weak'
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//*[@class="text-danger" and contains(text(), "Password too short.")]')
-
-    form = cl_user.get(url_for('auth.user_changepassword_route')).form
-    form['password1'] = tmp_password
-    form['password2'] = tmp_password
-    response = form.submit()
-    assert response.status_code == HTTPStatus.FOUND
-
-    user = User.query.filter(User.username == 'pytest_user').one_or_none()
-    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(user.password)), user.password)

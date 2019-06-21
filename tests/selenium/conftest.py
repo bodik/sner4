@@ -33,12 +33,19 @@ def selenium_in_roles(selenium, roles):
     db.session.commit()
 
     selenium.get(url_for('auth.login_route', _external=True))
-    selenium.find_element_by_xpath('//form//input[@id="username"]').send_keys(tmp_user.username)
-    selenium.find_element_by_xpath('//form//input[@id="password"]').send_keys(tmp_password)
-    selenium.find_element_by_xpath('//form//button[@type="submit"]').click()
+    selenium.find_element_by_xpath('//form//input[@name="username"]').send_keys(tmp_user.username)
+    selenium.find_element_by_xpath('//form//input[@name="password"]').send_keys(tmp_password)
+    selenium.find_element_by_xpath('//form//input[@type="submit"]').click()
     WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
 
     return selenium
+
+
+@pytest.fixture
+def sl_user(selenium):  # pylint: disable=redefined-outer-name
+    """yield client authenticated to role user"""
+
+    yield selenium_in_roles(selenium, ['user'])
 
 
 @pytest.fixture

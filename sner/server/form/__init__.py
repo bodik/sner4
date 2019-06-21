@@ -24,3 +24,9 @@ class LinesField(TextAreaField):
 class ButtonForm(FlaskForm):
     """generic button form"""
     pass
+
+
+def empty_to_none(data):
+    """cast empty value/string to none"""
+
+    return data or None

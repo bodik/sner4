@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as b_wtf %}
+
+{% block content %}
+<div class="profile">
+	<h1>Webauthn credential</h1>
+
+	<form class="form-horizontal" method="post">
+		{{ form.csrf_token }}
+		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
+		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	</form>
+</div>
+{% endblock %}

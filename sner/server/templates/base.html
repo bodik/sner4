@@ -54,6 +54,25 @@
 	<script type="text/javascript">
 		// ui helpers and callbacks
 		//
+		/**
+		 * encode ArrayBuffer to base64
+		 *
+		 * @param  {ArrayBuffer} buffer buffer to encode
+		 * @return {string}             encoded buffer
+		 */
+		function array_buffer_to_base64(buffer) {
+			return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+		}
+
+		/**
+		 * decode base64 data to ArrayBuffer
+		 *
+		 * @param  {string}      data data to decode
+		 * @return {ArrayBuffer}      decoded data
+		 */
+		function base64_to_array_buffer(data) {
+			return Uint8Array.from(atob(data), c => c.charCodeAt(0)).buffer;
+		}
 
 		/*
 		 * will rerender element with hbs acording to data attributes
@@ -109,7 +128,7 @@
 				.always(function() { event.data.dt.draw(); });
 		}
 
-		/*
+		/**
 		 * action delete multiple items
 		 * @param {object} event - event with data {'dt': datatable instance}
 		 */
@@ -124,7 +143,7 @@
 				.always(function() { event.data.dt.draw(); });
 		}
 
-		/*
+		/**
 		 * action delete by url
 		 * @param {object} event - optional; event with data {'dt': datatable instance}
 		 */
@@ -136,9 +155,9 @@
 		}
 
 
-		/// ajaxed datatables helpers
-		///
-		/*
+		// ajaxed datatables helpers
+		//
+		/**
 		 * datatables select helper, returns array of selected rows/data ids
 		 * @param {object} dt - datatable instance
 		 */
@@ -149,7 +168,7 @@
 			return ids;
 		};
 
-		/*
+		/**
 		 * datatables helper, toggles pagination if needed
 		 * @param {object} dt - datatable instance
 		 */
@@ -201,10 +220,9 @@
 		};
 
 
-
 		// simple static static datatables
 		//
-		var datatable_static_options = {
+		var dt_static_options = {
 			'columnDefs': [ {
 				'targets': 'no-sort',
 				'orderable': false,
@@ -215,14 +233,13 @@
 		};
 
 
-
 		// common startups
 		//
 		$(document).ready(function() {
-			if (typeof datatable_static_custom !== 'undefined') {
-				datatable_static_options = $.extend({}, datatable_static_options, datatable_static_custom);
+			if (typeof dt_static_custom !== 'undefined') {
+				dt_static_options = $.extend({}, dt_static_options, dt_static_custom);
 			}
-			$('.datatable_static').DataTable(datatable_static_options);
+			$('.dt_static').DataTable(dt_static_options);
 
 			$('.tageditor').tagEditor({'delimiter': '\n'});
 			$('.render_hbs').each(function(index, elem) { render_hbs(elem); });
@@ -283,7 +300,7 @@
 						<li><a href="{{ url_for('auth.user_list_route') }}">Users</a></li>
 						<li role="separator" class="divider"></li>
 					{% endif %}
-						<li><a href="{{ url_for('auth.user_changepassword_route') }}">Change password</a></li>
+						<li><a href="{{ url_for('auth.profile_route') }}">Profile</a></li>
 						<li><a href="{{ url_for('auth.logout_route') }}">Logout</a></li>
 					</ul>
 				</li>

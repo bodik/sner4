@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
 
 from sner.lib import get_dotted, load_yaml
+from sner.server.wrapped_fido2_server import WrappedFido2Server
 from sner.server.sessions import FilesystemSessionInterface
 
 
@@ -34,6 +35,7 @@ db = SQLAlchemy()  # pylint: disable=invalid-name
 jsglue = JSGlue()  # pylint: disable=invalid-name
 login_manager = LoginManager()  # pylint: disable=invalid-name
 toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
+webauthn = WrappedFido2Server()  # pylint: disable=invalid-name
 
 
 def config_from_yaml(filename):
@@ -64,6 +66,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_view = 'auth.login_route'
     login_manager.login_message = 'Not logged in'
     login_manager.login_message_category = 'warning'
+    webauthn.init_app(app)
     if app.config['DEBUG']:  # pragma: no cover
         toolbar.init_app(app)
 
@@ -90,10 +93,10 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
         return render_template('index.html')
 
     @app.template_filter('datetime')
-    def format_datetime(value, fmt="%Y-%m-%dT%H:%M:%S"):  # pylint: disable=unused-variable
+    def format_datetime(value, fmt='%Y-%m-%dT%H:%M:%S'):  # pylint: disable=unused-variable
         """Format a datetime"""
         if value is None:
-            return ""
+            return ''
         return value.strftime(fmt)
 
     # globaly enable flask_wtf csrf token helper
@@ -102,14 +105,14 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable
-        from sner.server.model.auth import User
+        from sner.server.model.auth import User, WebauthnCredential
         from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task
         from sner.server.model.storage import Host, Note, Service, Vuln
         return {
             'app': app, 'db': db,
             'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
             'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln,
-            'User': User}
+            'User': User, 'WebauthnCredential': WebauthnCredential}
 
     return app
 

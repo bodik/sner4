@@ -3,8 +3,9 @@
 from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, SelectMultipleField, StringField, ValidationError, validators, widgets
+from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError, validators, widgets
 
+from sner.server.form import empty_to_none
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
@@ -39,7 +40,15 @@ class LoginForm(FlaskForm):
     """login form"""
 
     username = StringField(label='Username', validators=[validators.InputRequired()])
-    password = PasswordField(label='Password', validators=[validators.InputRequired()])
+    password = PasswordField(label='Password')
+    submit = SubmitField('Login')
+
+
+class TotpCodeForm(FlaskForm):
+    """totp code form"""
+
+    code = StringField(label='TOTP Code', render_kw={'autocomplete': 'off'}, validators=[validators.InputRequired()])
+    submit = SubmitField()
 
 
 class UserForm(FlaskForm):
@@ -61,3 +70,25 @@ class UserChangePasswordForm(FlaskForm):
 
     password1 = PasswordField(label='Password', validators=[passwords_match, strong_password])
     password2 = PasswordField(label='Repeat password', validators=[passwords_match, strong_password])
+    submit = SubmitField('Change password')
+
+
+class WebauthnLoginForm(FlaskForm):
+    """webauthn login form"""
+
+    assertion = HiddenField('Assertion', validators=[validators.InputRequired()])
+
+
+class WebauthnRegisterForm(FlaskForm):
+    """webauthn register token form"""
+
+    attestation = HiddenField('Attestation', validators=[validators.InputRequired()])
+    name = StringField('Name', validators=[validators.Length(max=500)], filters=[empty_to_none])
+    submit = SubmitField('Register', render_kw={'disabled': True})
+
+
+class WebauthnEditForm(FlaskForm):
+    """webauthn edit token form"""
+
+    name = StringField('Name', validators=[validators.Length(max=500)], filters=[empty_to_none])
+    submit = SubmitField('Save')

@@ -28,10 +28,10 @@ class NessusParser():
             host = Host(address=nessushost['tags']['host-ip'])
             db.session.add(host)
 
-        if (not host.hostname) and nessushost['tags'].get('host-fqdn', None):
+        if (not host.hostname) and ('host-fqdn' in nessushost['tags']):
             host.hostname = nessushost['tags']['host-fqdn']
 
-        if (not host.os) and nessushost['tags'].get('operating-system', None):
+        if (not host.os) and ('operating-system' in nessushost['tags']):
             host.os = nessushost['tags']['operating-system']
 
         return host

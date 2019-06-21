@@ -1,8 +1,12 @@
 """auth component models"""
+# pylint: disable=too-few-public-methods,abstract-method
+
+from datetime import datetime
 
 import flask_login
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 from sner.server import db
 from sner.server.password_supervisor import PasswordSupervisor as PWS
@@ -14,10 +18,14 @@ class User(db.Model, flask_login.UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(256), unique=True, nullable=False)
     _password = db.Column('password', db.String(256))
-    _apikey = db.Column('apikey', db.String(256))
     email = db.Column(db.String(256))
     active = db.Column(db.Boolean)
     roles = db.Column(postgresql.ARRAY(db.String, dimensions=1))
+
+    _apikey = db.Column('apikey', db.String(256))
+    totp = db.Column(db.String(256))
+
+    webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan')
 
     @property
     def is_active(self):
@@ -56,3 +64,22 @@ class User(db.Model, flask_login.UserMixin):
         """apikey setter"""
 
         self._apikey = PWS.hash_simple(value) if value else None
+
+    def __repr__(self):
+        return '<User %s: %s>' % (self.id, self.username)
+
+
+class WebauthnCredential(db.Model):
+    """Webauthn credential model"""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_handle = db.Column(db.String(64), nullable=False)
+    credential_data = db.Column(db.LargeBinary(), nullable=False)
+    name = db.Column(db.String(500))
+    registered = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = relationship('User', back_populates='webauthn_credentials')
+
+    def __repr__(self):
+        return '<WebauthnCredential %s: %s>' % (self.id, self.user_id)

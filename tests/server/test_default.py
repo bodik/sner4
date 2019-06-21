@@ -27,6 +27,13 @@ def test_linesfield(app):  # pylint: disable=unused-argument
     assert not form.a.data
 
 
+def test_models_auth_repr(app, test_user, test_wncred):  # pylint: disable=unused-argument
+    """test models repr methods"""
+
+    assert repr(test_user)
+    assert repr(test_wncred)
+
+
 def test_models_scheduler_repr(app, test_task, test_queue, test_target, test_job, test_excl_network):  # noqa: E501  pylint: disable=unused-argument,too-many-arguments
     """test models repr methods"""
 

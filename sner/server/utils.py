@@ -89,6 +89,6 @@ class SnerJSONEncoder(json.JSONEncoder):
             return o.__dict__
 
         if isinstance(o, datetime.date):
-            return o.isoformat()
+            return o.strftime('%Y-%m-%dT%H:%M:%S')
 
         return super().default(o)  # pragma: no cover  ; no such elements

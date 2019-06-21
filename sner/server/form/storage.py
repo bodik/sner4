@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms import FieldList, IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
 
-from sner.server.form import LinesField
+from sner.server.form import empty_to_none, LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
 
 
@@ -22,12 +22,6 @@ def service_id_exists_and_belongs_to_host(form, field):  # pylint: disable=unuse
             raise ValidationError('No such service')
         if not Service.query.filter(Service.id == field.data, Service.host_id == form.host_id.data).one_or_none():
             raise ValidationError('Service does not belong to the host')
-
-
-def empty_to_none(data):
-    """cast empty value/string to none"""
-
-    return data or None
 
 
 class HostForm(FlaskForm):
