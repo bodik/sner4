@@ -2,6 +2,7 @@
 """sner agent"""
 
 import abc
+import copy
 import json
 import logging
 import os
@@ -281,7 +282,7 @@ def main(argv=None):
         return AssignableAgent().run(input_a=args.assignment)
 
     # standard agent
-    config = dict(DEFAULT_CONFIG)
+    config = copy.deepcopy(DEFAULT_CONFIG)
     config.update(config_from_yaml(args.config))
     config.update(config_from_args(args))
     return ServerableAgent(config.get('SERVER'), config.get('APIKEY'), config.get('QUEUE'), args.oneshot, args.backofftime).run()
