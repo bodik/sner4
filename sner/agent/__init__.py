@@ -71,6 +71,10 @@ def zipdir(path, zipto):
                     output_zip.write(filepath, arcname)
 
 
+class TerminateException(Exception):
+    """custom exception for termination from within tests"""
+
+
 class BaseAgent():
     """base agent impl containing main (sub)process handling code"""
 
@@ -116,6 +120,9 @@ class BaseAgent():
             try:
                 self.module_instance = registered_modules[assignment['module']]()
                 retval = self.module_instance.run(assignment)
+            except TerminateException:  # pragma: no cover  ; test would require exact timing, not this time
+                self.terminate()
+                raise
             except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
                 self.log.exception(e)
                 retval = 1

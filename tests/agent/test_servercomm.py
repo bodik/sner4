@@ -12,24 +12,24 @@ import requests
 from flask import _request_ctx_stack, current_app, Flask, jsonify
 from pytest_flask.fixtures import live_server
 
-from sner.agent import main as agent_main
+from sner.agent import main as agent_main, TerminateException
 
 
 @contextmanager
-def timeout(time):
-    """timeout helper"""
+def terminate_after(time):
+    """
+    timed termination helper; will raise internal agent's exception.
+    Raised exception is designed not to be catched by module runner loop and should end agent properly from within.
+    """
 
-    class TimedException(Exception):
-        """custom exception"""
+    def raise_terminate(signum, frame):  # pylint: disable=unused-argument
+        raise TerminateException
 
-    def raise_timeout(signum, frame):  # pylint: disable=unused-argument
-        raise TimedException
-
-    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.signal(signal.SIGALRM, raise_terminate)
     signal.alarm(time)
     try:
         yield
-    except TimedException:
+    except TerminateException:
         pass
     finally:
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
@@ -90,7 +90,7 @@ def test_fail_server_communication(tmpworkdir, fail_server):  # pylint: disable=
     # handling: the agent will run in-thread, will be breaked by
     # signal/exception and fail_server internals will be checked manualy
 
-    with timeout(1):
+    with terminate_after(1):
         agent_main(['--server', fail_server.url(), '--apikey', 'dummy-breaks-duplicate-code1', '--debug', '--backofftime', '0.1'])
 
     response = requests.get('%s/check' % fail_server.url()).json()
