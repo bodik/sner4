@@ -28,5 +28,4 @@ class ButtonForm(FlaskForm):
 
 def empty_to_none(data):
     """cast empty value/string to none"""
-
     return data or None

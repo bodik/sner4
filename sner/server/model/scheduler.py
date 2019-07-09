@@ -17,9 +17,9 @@ class Task(db.Model):
     """holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1000), unique=True)
+    name = db.Column(db.String(1000))
     module = db.Column(db.String(100), nullable=False)
-    params = db.Column(db.Text)
+    params = db.Column(db.Text, nullable=False)
 
     queues = relationship('Queue', back_populates='task')
 

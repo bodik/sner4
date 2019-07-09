@@ -37,7 +37,7 @@ class TaskForm(FlaskForm):
     """profile edit form"""
 
     name = StringField(label='Name', validators=[validators.Length(max=1000)])
-    module = StringField(label='Module', validators=[validators.Length(max=100)])
+    module = StringField(label='Module', validators=[validators.Length(min=1, max=100)])
     params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 

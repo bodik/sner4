@@ -5,7 +5,6 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError, validators, widgets
 
-from sner.server.form import empty_to_none
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
@@ -55,7 +54,7 @@ class UserForm(FlaskForm):
     """user edit form"""
 
     username = StringField(label='Username', validators=[validators.Length(min=1, max=256)])
-    password = PasswordField(label='Password', validators=[validators.optional(), strong_password])
+    password = PasswordField(label='Password', validators=[validators.Optional(), strong_password])
     email = StringField(label='Email', validators=[validators.Length(max=256)])
     active = BooleanField(label='Active')
     roles = MultiCheckboxField(label='Roles')
@@ -84,12 +83,12 @@ class WebauthnRegisterForm(FlaskForm):
     """webauthn register token form"""
 
     attestation = HiddenField('Attestation', validators=[validators.InputRequired()])
-    name = StringField('Name', validators=[validators.Length(max=500)], filters=[empty_to_none])
+    name = StringField('Name', validators=[validators.Length(max=500)])
     submit = SubmitField('Register', render_kw={'disabled': True})
 
 
 class WebauthnEditForm(FlaskForm):
     """webauthn edit token form"""
 
-    name = StringField('Name', validators=[validators.Length(max=500)], filters=[empty_to_none])
+    name = StringField('Name', validators=[validators.Length(max=500)])
     submit = SubmitField('Save')

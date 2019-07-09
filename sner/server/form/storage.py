@@ -38,7 +38,7 @@ class ServiceForm(FlaskForm):
     """service edit form"""
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
-    proto = StringField('Proto', validators=[validators.Length(min=1, max=10)], filters=[empty_to_none])
+    proto = StringField('Proto', validators=[validators.Length(min=1, max=10)])
     port = IntegerField('Port', validators=[validators.NumberRange(min=0, max=65535)])
     state = StringField('State', validators=[validators.Length(max=100)])
     name = StringField('Name', validators=[validators.Length(max=100)])
@@ -77,11 +77,11 @@ class NoteForm(FlaskForm):
 class IdsForm(FlaskForm):
     """ajax; generic multi-id form"""
 
-    ids = FieldList(IntegerField(validators=[validators.DataRequired()]), min_entries=1)
+    ids = FieldList(IntegerField(validators=[validators.InputRequired()]), min_entries=1)
 
 
 class TagByIdForm(FlaskForm):
     """ajax; tagmulti action"""
 
-    ids = FieldList(IntegerField(validators=[validators.DataRequired()]), min_entries=1)
-    tag = StringField(validators=[validators.DataRequired()])
+    ids = FieldList(IntegerField(validators=[validators.InputRequired()]), min_entries=1)
+    tag = StringField(validators=[validators.InputRequired()])
