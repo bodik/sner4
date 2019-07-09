@@ -67,7 +67,7 @@ def service_add_route(host_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
-    return render_template('storage/service/addedit.html', form=form, form_url=url_for('storage.service_add_route', host_id=host_id), host=host)
+    return render_template('storage/service/addedit.html', form=form, host=host)
 
 
 @blueprint.route('/service/edit/<service_id>', methods=['GET', 'POST'])
@@ -83,11 +83,7 @@ def service_edit_route(service_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
-    return render_template(
-        'storage/service/addedit.html',
-        form=form,
-        form_url=url_for('storage.service_edit_route', service_id=service_id),
-        host=service.host)
+    return render_template('storage/service/addedit.html', form=form, host=service.host)
 
 
 @blueprint.route('/service/delete/<service_id>', methods=['GET', 'POST'])
@@ -103,7 +99,7 @@ def service_delete_route(service_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('storage.service_delete_route', service_id=service_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/service/vizports')

@@ -171,4 +171,4 @@ def job_delete_route(job_id):
         job_delete(job)
         return redirect(url_for('scheduler.job_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.job_delete_route', job_id=job_id))
+    return render_template('button-delete.html', form=form)

@@ -72,12 +72,7 @@ def vuln_add_route(model_name, model_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
-    return render_template(
-        'storage/vuln/addedit.html',
-        form=form,
-        form_url=url_for('storage.vuln_add_route', model_name=model_name, model_id=model_id),
-        host=host,
-        service=service)
+    return render_template('storage/vuln/addedit.html', form=form, host=host, service=service)
 
 
 @blueprint.route('/vuln/edit/<vuln_id>', methods=['GET', 'POST'])
@@ -93,12 +88,7 @@ def vuln_edit_route(vuln_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
-    return render_template(
-        'storage/vuln/addedit.html',
-        form=form,
-        form_url=url_for('storage.vuln_edit_route', vuln_id=vuln_id),
-        host=vuln.host,
-        service=vuln.service)
+    return render_template('storage/vuln/addedit.html', form=form, host=vuln.host, service=vuln.service)
 
 
 @blueprint.route('/vuln/delete/<vuln_id>', methods=['GET', 'POST'])
@@ -112,7 +102,7 @@ def vuln_delete_route(vuln_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/vuln/view/<vuln_id>')

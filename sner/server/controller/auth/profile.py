@@ -207,4 +207,4 @@ def profile_webauthn_delete_route(webauthn_id):
         db.session.commit()
         return redirect(url_for('auth.profile_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('auth.profile_webauthn_delete_route', webauthn_id=webauthn_id))
+    return render_template('button-delete.html', form=form)

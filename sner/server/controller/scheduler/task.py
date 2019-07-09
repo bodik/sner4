@@ -55,7 +55,7 @@ def task_add_route():
         db.session.commit()
         return redirect(url_for('scheduler.task_list_route'))
 
-    return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_add_route'))
+    return render_template('scheduler/task/addedit.html', form=form)
 
 
 @blueprint.route('/task/edit/<task_id>', methods=['GET', 'POST'])
@@ -71,7 +71,7 @@ def task_edit_route(task_id):
         db.session.commit()
         return redirect(url_for('scheduler.task_list_route'))
 
-    return render_template('scheduler/task/addedit.html', form=form, form_url=url_for('scheduler.task_edit_route', task_id=task_id))
+    return render_template('scheduler/task/addedit.html', form=form)
 
 
 @blueprint.route('/task/delete/<task_id>', methods=['GET', 'POST'])
@@ -87,4 +87,4 @@ def task_delete_route(task_id):
         db.session.commit()
         return redirect(url_for('scheduler.task_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.task_delete_route', task_id=task_id))
+    return render_template('button-delete.html', form=form)

@@ -62,7 +62,7 @@ def host_add_route():
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=host.id))
 
-    return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_add_route'))
+    return render_template('storage/host/addedit.html', form=form)
 
 
 @blueprint.route('/host/edit/<host_id>', methods=['GET', 'POST'])
@@ -78,7 +78,7 @@ def host_edit_route(host_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=host.id))
 
-    return render_template('storage/host/addedit.html', form=form, form_url=url_for('storage.host_edit_route', host_id=host_id))
+    return render_template('storage/host/addedit.html', form=form)
 
 
 @blueprint.route('/host/delete/<host_id>', methods=['GET', 'POST'])
@@ -94,7 +94,7 @@ def host_delete_route(host_id):
         db.session.commit()
         return redirect(url_for('storage.host_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('storage.host_delete_route', host_id=host_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/host/vizdns')

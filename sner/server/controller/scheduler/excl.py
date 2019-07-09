@@ -66,7 +66,7 @@ def excl_add_route():
         db.session.commit()
         return redirect(url_for('scheduler.excl_list_route'))
 
-    return render_template('scheduler/excl/addedit.html', form=form, form_url=url_for('scheduler.excl_add_route'))
+    return render_template('scheduler/excl/addedit.html', form=form)
 
 
 @blueprint.route('/excl/edit/<excl_id>', methods=['GET', 'POST'])
@@ -82,7 +82,7 @@ def excl_edit_route(excl_id):
         db.session.commit()
         return redirect(url_for('scheduler.excl_list_route'))
 
-    return render_template('scheduler/excl/addedit.html', form=form, form_url=url_for('scheduler.excl_edit_route', excl_id=excl_id))
+    return render_template('scheduler/excl/addedit.html', form=form)
 
 
 @blueprint.route('/excl/delete/<excl_id>', methods=['GET', 'POST'])
@@ -98,7 +98,7 @@ def excl_delete_route(excl_id):
         db.session.commit()
         return redirect(url_for('scheduler.excl_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.excl_delete_route', excl_id=excl_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/excl/import', methods=['GET', 'POST'])
@@ -127,7 +127,7 @@ def excl_import_route():
             current_app.logger.exception(e)
             flash('Import failed', 'error')
 
-    return render_template('scheduler/excl/import.html', form=form, form_url=url_for('scheduler.excl_import_route'))
+    return render_template('scheduler/excl/import.html', form=form)
 
 
 @blueprint.route('/excl/export')

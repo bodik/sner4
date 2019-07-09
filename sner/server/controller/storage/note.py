@@ -73,12 +73,7 @@ def note_add_route(model_name, model_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
-    return render_template(
-        'storage/note/addedit.html',
-        form=form,
-        form_url=url_for('storage.note_add_route', model_name=model_name, model_id=model_id),
-        host=host,
-        service=service)
+    return render_template('storage/note/addedit.html', form=form, host=host, service=service)
 
 
 @blueprint.route('/note/edit/<note_id>', methods=['GET', 'POST'])
@@ -94,12 +89,7 @@ def note_edit_route(note_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
-    return render_template(
-        'storage/note/addedit.html',
-        form=form,
-        form_url=url_for('storage.note_edit_route', note_id=note_id),
-        host=note.host,
-        service=note.service)
+    return render_template('storage/note/addedit.html', form=form, host=note.host, service=note.service)
 
 
 @blueprint.route('/note/delete/<note_id>', methods=['GET', 'POST'])
@@ -114,7 +104,7 @@ def note_delete_route(note_id):
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=note.host_id))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('storage.note_delete_route', note_id=note_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/note/view/<note_id>')

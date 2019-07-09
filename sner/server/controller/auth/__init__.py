@@ -140,7 +140,7 @@ def login_route():
 
         flash('Invalid credentials.', 'error')
 
-    return render_template('auth/login.html', form=form, form_url=url_for('auth.login_route', **request.args))
+    return render_template('auth/login.html', form=form)
 
 
 @blueprint.route('/logout')
@@ -169,7 +169,7 @@ def login_totp_route():
 
         form.code.errors.append('Invalid code')
 
-    return render_template('auth/login_totp.html', form=form, form_url=url_for('auth.login_totp_route', **request.args))
+    return render_template('auth/login_totp.html', form=form)
 
 
 @blueprint.route('/login_webauthn_pkcro', methods=['POST'])

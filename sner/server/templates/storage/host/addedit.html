@@ -5,16 +5,13 @@
 <div class="hosts">
 	<h1>Host add/edit</h1>
 
-	<form class="form-horizontal" action="{{ form_url }}" method="post">
+	<form class="form-horizontal" method="post">
 		{{ form.csrf_token }}
 		{{ b_wtf.bootstrap_field(form.address, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.hostname, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.os, horizontal=True) }}
 		{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
-		<div class="form-group">
-			<label class="col-sm-2 control-label"></label>
-			<div class="col-sm-10"><button class="btn-default btn" type="submit">Save</button></div>
-		</div>
+		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
 	</form>
 </div>
 {% endblock %}

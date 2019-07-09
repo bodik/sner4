@@ -1,7 +1,7 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import FieldList, IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
+from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError, validators
 
 from sner.server.form import empty_to_none, LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
@@ -31,6 +31,7 @@ class HostForm(FlaskForm):
     hostname = StringField('Hostname', validators=[validators.Length(max=256)])
     os = StringField('Os')
     comment = TextAreaField('Comment')
+    submit = SubmitField('Save')
 
 
 class ServiceForm(FlaskForm):
@@ -43,6 +44,7 @@ class ServiceForm(FlaskForm):
     name = StringField('Name', validators=[validators.Length(max=100)])
     info = StringField('Info', validators=[validators.Length(max=2000)])
     comment = TextAreaField('Comment')
+    submit = SubmitField('Save')
 
 
 class VulnForm(FlaskForm):
@@ -58,6 +60,7 @@ class VulnForm(FlaskForm):
     refs = LinesField('Refs', render_kw={'rows': '5'}, filters=[empty_to_none])
     tags = LinesField('Tags', render_kw={'class': 'form-control tageditor'}, filters=[empty_to_none])
     comment = TextAreaField('Comment')
+    submit = SubmitField('Save')
 
 
 class NoteForm(FlaskForm):
@@ -68,6 +71,7 @@ class NoteForm(FlaskForm):
     xtype = StringField('xType', validators=[validators.Length(max=500)])
     data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
+    submit = SubmitField('Save')
 
 
 class IdsForm(FlaskForm):

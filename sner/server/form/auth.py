@@ -48,7 +48,7 @@ class TotpCodeForm(FlaskForm):
     """totp code form"""
 
     code = StringField(label='TOTP Code', render_kw={'autocomplete': 'off'}, validators=[validators.InputRequired()])
-    submit = SubmitField()
+    submit = SubmitField('Login')
 
 
 class UserForm(FlaskForm):
@@ -59,6 +59,7 @@ class UserForm(FlaskForm):
     email = StringField(label='Email', validators=[validators.Length(max=256)])
     active = BooleanField(label='Active')
     roles = MultiCheckboxField(label='Roles')
+    submit = SubmitField('Save')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

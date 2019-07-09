@@ -63,7 +63,7 @@ def queue_add_route(task_id=None):
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
-    return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_add_route'))
+    return render_template('scheduler/queue/addedit.html', form=form)
 
 
 @blueprint.route('/queue/edit/<queue_id>', methods=['GET', 'POST'])
@@ -79,7 +79,7 @@ def queue_edit_route(queue_id):
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
-    return render_template('scheduler/queue/addedit.html', form=form, form_url=url_for('scheduler.queue_edit_route', queue_id=queue_id))
+    return render_template('scheduler/queue/addedit.html', form=form)
 
 
 @blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
@@ -98,7 +98,7 @@ def queue_enqueue_route(queue_id):
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
-    return render_template('scheduler/queue/enqueue.html', form=form, form_url=url_for('scheduler.queue_enqueue_route', queue_id=queue_id))
+    return render_template('scheduler/queue/enqueue.html', form=form)
 
 
 @blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
@@ -114,11 +114,7 @@ def queue_flush_route(queue_id):
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
-    return render_template(
-        'button-generic.html',
-        form=form,
-        form_url=url_for('scheduler.queue_flush_route', queue_id=queue_id),
-        button_caption='Flush')
+    return render_template('button-generic.html', form=form, button_caption='Flush')
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
@@ -134,4 +130,4 @@ def queue_delete_route(queue_id):
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('scheduler.queue_delete_route', queue_id=queue_id))
+    return render_template('button-delete.html', form=form)

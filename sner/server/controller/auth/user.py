@@ -59,7 +59,7 @@ def user_add_route():
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
 
-    return render_template('auth/user/addedit.html', form=form, form_url=url_for('auth.user_add_route'))
+    return render_template('auth/user/addedit.html', form=form)
 
 
 @blueprint.route('/auth/edit/<user_id>', methods=['GET', 'POST'])
@@ -75,7 +75,7 @@ def user_edit_route(user_id):
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
 
-    return render_template('auth/user/addedit.html', form=form, form_url=url_for('auth.user_edit_route', user_id=user_id))
+    return render_template('auth/user/addedit.html', form=form)
 
 
 @blueprint.route('/user/delete/<user_id>', methods=['GET', 'POST'])
@@ -91,7 +91,7 @@ def user_delete_route(user_id):
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
 
-    return render_template('button-delete.html', form=form, form_url=url_for('auth.user_delete_route', user_id=user_id))
+    return render_template('button-delete.html', form=form)
 
 
 @blueprint.route('/user/apikey/<user_id>/<action>', methods=['GET', 'POST'])

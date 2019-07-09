@@ -4,7 +4,7 @@ import re
 from ipaddress import ip_network
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, SelectField, StringField, TextAreaField, ValidationError, validators
+from wtforms import BooleanField, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 from sner.server.form import LinesField
@@ -39,6 +39,7 @@ class TaskForm(FlaskForm):
     name = StringField(label='Name', validators=[validators.Length(max=1000)])
     module = StringField(label='Module', validators=[validators.Length(max=100)])
     params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
+    submit = SubmitField('Save')
 
 
 class QueueForm(FlaskForm):
@@ -49,12 +50,14 @@ class QueueForm(FlaskForm):
     group_size = IntegerField(label='Group size', default=1)
     priority = IntegerField(label='Priority', default=0)
     active = BooleanField(label='Active')
+    submit = SubmitField('Save')
 
 
 class QueueEnqueueForm(FlaskForm):
     """queue enqueue form"""
 
-    targets = LinesField(label='Targets')
+    targets = LinesField(label='Targets', render_kw={'rows': '10'})
+    submit = SubmitField('Enqueue')
 
 
 class ExclForm(FlaskForm):
@@ -63,6 +66,7 @@ class ExclForm(FlaskForm):
     family = SelectField('Family', choices=ExclFamily.choices(), coerce=ExclFamily.coerce, validators=[valid_excl_family])
     value = StringField(label='Value', validators=[validators.Length(min=1, max=1000), valid_excl_value])
     comment = TextAreaField('Comment')
+    submit = SubmitField('Save')
 
 
 class ExclImportForm(FlaskForm):
@@ -70,3 +74,4 @@ class ExclImportForm(FlaskForm):
 
     data = TextAreaField(label='Data', render_kw={'rows': '10'}, validators=[validators.InputRequired()])
     replace = BooleanField(label='Replace')
+    submit = SubmitField('Import')
