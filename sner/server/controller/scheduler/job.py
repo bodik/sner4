@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import jsonschema
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 from sqlalchemy_filters import apply_filters
@@ -23,7 +23,7 @@ from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.model.scheduler import Job, Queue, Target
 from sner.server.sqlafilter import filter_parser
-from sner.server.utils import ExclMatcher
+from sner.server.utils import ExclMatcher, SnerJSONEncoder
 
 
 def job_delete(job):
@@ -58,6 +58,7 @@ def job_list_json_route():
         ColumnDT(Job.output, mData='output'),
         ColumnDT(Job.time_start, mData='time_start'),
         ColumnDT(Job.time_end, mData='time_end'),
+        ColumnDT((Job.time_end-Job.time_start), mData='time_taken'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Job).outerjoin(Queue)
@@ -65,7 +66,7 @@ def job_list_json_route():
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
     jobs = DataTables(request.values.to_dict(), query, columns).output_result()
-    return jsonify(jobs)
+    return Response(json.dumps(jobs, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 # routed by api blueprint
