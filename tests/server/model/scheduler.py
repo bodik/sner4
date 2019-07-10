@@ -2,8 +2,8 @@
 
 import json
 import os
-import uuid
 from datetime import datetime
+from uuid import uuid4
 from zipfile import ZipFile
 
 import pytest
@@ -44,7 +44,7 @@ def create_test_job(a_test_queue):
     """test job data; only assigned"""
 
     return Job(
-        id=str(uuid.uuid4()),
+        id=str(uuid4()),
         queue=a_test_queue,
         assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
         time_start=datetime.now())

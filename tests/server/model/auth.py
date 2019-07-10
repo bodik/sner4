@@ -1,13 +1,12 @@
 """auth tests models"""
 
-from uuid import uuid4
-
 import pytest
 from fido2 import cbor
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server import webauthn
 from sner.server.model.auth import User, WebauthnCredential
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests import persist_and_detach
 
 
@@ -16,7 +15,7 @@ def create_test_user():
 
     return User(
         username='user1',
-        password=str(uuid4()),
+        password=PWS().generate(),
         active=True,
         roles=['user'])
 
