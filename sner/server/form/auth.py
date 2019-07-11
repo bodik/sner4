@@ -55,9 +55,9 @@ class TotpCodeForm(FlaskForm):
 class UserForm(FlaskForm):
     """user edit form"""
 
-    username = StringField(label='Username', validators=[Length(min=1, max=256)])
+    username = StringField(label='Username', validators=[Length(min=1, max=250)])
     password = PasswordField(label='Password', validators=[Optional(), strong_password])
-    email = StringField(label='Email', validators=[Length(max=256)])
+    email = StringField(label='Email', validators=[Length(max=250)])
     active = BooleanField(label='Active')
     roles = MultiCheckboxField(label='Roles')
     submit = SubmitField('Save')
@@ -85,7 +85,7 @@ class WebauthnRegisterForm(FlaskForm):
     """webauthn register token form"""
 
     attestation = HiddenField('Attestation', validators=[InputRequired()])
-    name = StringField('Name', validators=[Length(max=500)])
+    name = StringField('Name', validators=[Length(max=250)])
     submit = SubmitField('Register', render_kw={'disabled': True})
 
 

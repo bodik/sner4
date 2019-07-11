@@ -16,14 +16,13 @@ class User(db.Model, flask_login.UserMixin):
     """user model"""
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(256), unique=True, nullable=False)
-    _password = db.Column('password', db.String(256))
-    email = db.Column(db.String(256))
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    _password = db.Column(db.String(250), name='password')
+    email = db.Column(db.String(250))
     active = db.Column(db.Boolean)
     roles = db.Column(postgresql.ARRAY(db.String, dimensions=1))
-
-    _apikey = db.Column('apikey', db.String(256))
-    totp = db.Column(db.String(256))
+    _apikey = db.Column(db.String(250), name='apikey')
+    totp = db.Column(db.String(32))
 
     webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan')
 
@@ -76,7 +75,7 @@ class WebauthnCredential(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user_handle = db.Column(db.String(64), nullable=False)
     credential_data = db.Column(db.LargeBinary(), nullable=False)
-    name = db.Column(db.String(500))
+    name = db.Column(db.String(250))
     registered = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = relationship('User', back_populates='webauthn_credentials')

@@ -17,8 +17,8 @@ class Task(db.Model):
     """holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1000))
-    module = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(250))
+    module = db.Column(db.String(250), nullable=False)
     params = db.Column(db.Text, nullable=False)
 
     queues = relationship('Queue', back_populates='task')
@@ -31,7 +31,7 @@ class Queue(db.Model):
     """task assignment for specific targets"""
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1000))
+    name = db.Column(db.String(250))
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
@@ -61,11 +61,11 @@ class Target(db.Model):
 class Job(db.Model):
     """assigned job"""
 
-    id = db.Column(db.String(100), primary_key=True)
+    id = db.Column(db.String(36), primary_key=True)
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
     assignment = db.Column(db.Text)
     retval = db.Column(db.Integer)
-    output = db.Column(db.String(4096))
+    output = db.Column(db.Text)
     time_start = db.Column(db.DateTime, default=datetime.utcnow)
     time_end = db.Column(db.DateTime)
 
@@ -97,7 +97,7 @@ class Excl(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     family = db.Column(db.Enum(ExclFamily), nullable=False)
-    value = db.Column(db.String(1000), nullable=False)
+    value = db.Column(db.Text, nullable=False)
     comment = db.Column(db.Text)
 
     def __repr__(self):

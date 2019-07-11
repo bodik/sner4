@@ -39,11 +39,11 @@ class ServiceForm(FlaskForm):
     """service edit form"""
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
-    proto = StringField('Proto', validators=[Length(min=1, max=10)])
+    proto = StringField('Proto', validators=[Length(min=1, max=50)])
     port = IntegerField('Port', validators=[NumberRange(min=0, max=65535)])
-    state = StringField('State', validators=[Length(max=100)])
-    name = StringField('Name', validators=[Length(max=100)])
-    info = StringField('Info', validators=[Length(max=2000)])
+    state = StringField('State', validators=[Length(max=50)])
+    name = StringField('Name', validators=[Length(max=250)])
+    info = StringField('Info')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 
@@ -53,8 +53,8 @@ class VulnForm(FlaskForm):
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
     service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
-    name = StringField('Name', validators=[Length(min=1, max=500)])
-    xtype = StringField('xType', validators=[Length(max=500)])
+    name = StringField('Name', validators=[Length(min=1, max=1000)])
+    xtype = StringField('xType', validators=[Length(max=250)])
     severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaField('Descr', render_kw={'rows': '5'})
     data = TextAreaField('Data', render_kw={'rows': '5'})
@@ -69,7 +69,7 @@ class NoteForm(FlaskForm):
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
     service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
-    xtype = StringField('xType', validators=[Length(max=500)])
+    xtype = StringField('xType', validators=[Length(max=250)])
     data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')

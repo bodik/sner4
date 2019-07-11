@@ -37,8 +37,8 @@ def valid_excl_value(form, field):
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringField(label='Name', validators=[Length(max=1000)])
-    module = StringField(label='Module', validators=[Length(min=1, max=100)])
+    name = StringField(label='Name', validators=[Length(max=250)])
+    module = StringField(label='Module', validators=[Length(min=1, max=250)])
     params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
@@ -46,7 +46,7 @@ class TaskForm(FlaskForm):
 class QueueForm(FlaskForm):
     """queue edit form"""
 
-    name = StringField(label='Name', validators=[Length(max=1000)])
+    name = StringField(label='Name', validators=[Length(max=250)])
     task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False)  # pylint: disable=unnecessary-lambda
     group_size = IntegerField(label='Group size', default=1, validators=[NumberRange(min=1)])
     priority = IntegerField(label='Priority', default=0, validators=[InputRequired()])
@@ -65,7 +65,7 @@ class ExclForm(FlaskForm):
     """exclustion edit form"""
 
     family = SelectField('Family', choices=ExclFamily.choices(), coerce=ExclFamily.coerce, validators=[valid_excl_family])
-    value = StringField(label='Value', validators=[Length(min=1, max=1000), valid_excl_value])
+    value = StringField(label='Value', validators=[Length(min=1), valid_excl_value])
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 
