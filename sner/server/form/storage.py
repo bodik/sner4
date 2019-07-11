@@ -1,7 +1,8 @@
 """flask forms"""
 
 from flask_wtf import FlaskForm
-from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError, validators
+from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
+from wtforms.validators import InputRequired, IPAddress, Length, NumberRange, Optional
 
 from sner.server.form import empty_to_none, LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
@@ -27,8 +28,8 @@ def service_id_exists_and_belongs_to_host(form, field):  # pylint: disable=unuse
 class HostForm(FlaskForm):
     """host edit form"""
 
-    address = StringField('Address', validators=[validators.IPAddress(ipv4=True, ipv6=True)])
-    hostname = StringField('Hostname', validators=[validators.Length(max=256)])
+    address = StringField('Address', validators=[IPAddress(ipv4=True, ipv6=True)])
+    hostname = StringField('Hostname', validators=[Length(max=256)])
     os = StringField('Os')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
@@ -38,11 +39,11 @@ class ServiceForm(FlaskForm):
     """service edit form"""
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
-    proto = StringField('Proto', validators=[validators.Length(min=1, max=10)])
-    port = IntegerField('Port', validators=[validators.NumberRange(min=0, max=65535)])
-    state = StringField('State', validators=[validators.Length(max=100)])
-    name = StringField('Name', validators=[validators.Length(max=100)])
-    info = StringField('Info', validators=[validators.Length(max=2000)])
+    proto = StringField('Proto', validators=[Length(min=1, max=10)])
+    port = IntegerField('Port', validators=[NumberRange(min=0, max=65535)])
+    state = StringField('State', validators=[Length(max=100)])
+    name = StringField('Name', validators=[Length(max=100)])
+    info = StringField('Info', validators=[Length(max=2000)])
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 
@@ -51,9 +52,9 @@ class VulnForm(FlaskForm):
     """note edit form"""
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
-    service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
-    name = StringField('Name', validators=[validators.Length(min=1, max=500)])
-    xtype = StringField('xType', validators=[validators.Length(max=500)])
+    service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
+    name = StringField('Name', validators=[Length(min=1, max=500)])
+    xtype = StringField('xType', validators=[Length(max=500)])
     severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaField('Descr', render_kw={'rows': '5'})
     data = TextAreaField('Data', render_kw={'rows': '5'})
@@ -67,8 +68,8 @@ class NoteForm(FlaskForm):
     """note edit form"""
 
     host_id = IntegerField('Host_id', validators=[host_id_exists])
-    service_id = IntegerField('Service_id', validators=[validators.Optional(), service_id_exists_and_belongs_to_host])
-    xtype = StringField('xType', validators=[validators.Length(max=500)])
+    service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
+    xtype = StringField('xType', validators=[Length(max=500)])
     data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
@@ -77,11 +78,11 @@ class NoteForm(FlaskForm):
 class IdsForm(FlaskForm):
     """ajax; generic multi-id form"""
 
-    ids = FieldList(IntegerField(validators=[validators.InputRequired()]), min_entries=1)
+    ids = FieldList(IntegerField(validators=[InputRequired()]), min_entries=1)
 
 
 class TagByIdForm(FlaskForm):
     """ajax; tagmulti action"""
 
-    ids = FieldList(IntegerField(validators=[validators.InputRequired()]), min_entries=1)
-    tag = StringField(validators=[validators.InputRequired()])
+    ids = FieldList(IntegerField(validators=[InputRequired()]), min_entries=1)
+    tag = StringField(validators=[InputRequired()])

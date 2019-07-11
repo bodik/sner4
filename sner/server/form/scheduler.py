@@ -4,8 +4,9 @@ import re
 from ipaddress import ip_network
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError, validators
+from wtforms import BooleanField, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms.validators import InputRequired, Length, NumberRange
 
 from sner.server.form import LinesField
 from sner.server.model.scheduler import ExclFamily, Task
@@ -36,8 +37,8 @@ def valid_excl_value(form, field):
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringField(label='Name', validators=[validators.Length(max=1000)])
-    module = StringField(label='Module', validators=[validators.Length(min=1, max=100)])
+    name = StringField(label='Name', validators=[Length(max=1000)])
+    module = StringField(label='Module', validators=[Length(min=1, max=100)])
     params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
@@ -45,10 +46,10 @@ class TaskForm(FlaskForm):
 class QueueForm(FlaskForm):
     """queue edit form"""
 
-    name = StringField(label='Name', validators=[validators.Length(max=1000)])
+    name = StringField(label='Name', validators=[Length(max=1000)])
     task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False)  # pylint: disable=unnecessary-lambda
-    group_size = IntegerField(label='Group size', default=1)
-    priority = IntegerField(label='Priority', default=0)
+    group_size = IntegerField(label='Group size', default=1, validators=[NumberRange(min=1)])
+    priority = IntegerField(label='Priority', default=0, validators=[InputRequired()])
     active = BooleanField(label='Active')
     submit = SubmitField('Save')
 
@@ -56,7 +57,7 @@ class QueueForm(FlaskForm):
 class QueueEnqueueForm(FlaskForm):
     """queue enqueue form"""
 
-    targets = LinesField(label='Targets', render_kw={'rows': '10'})
+    targets = LinesField(label='Targets', render_kw={'rows': '10'}, validators=[InputRequired()])
     submit = SubmitField('Enqueue')
 
 
@@ -64,7 +65,7 @@ class ExclForm(FlaskForm):
     """exclustion edit form"""
 
     family = SelectField('Family', choices=ExclFamily.choices(), coerce=ExclFamily.coerce, validators=[valid_excl_family])
-    value = StringField(label='Value', validators=[validators.Length(min=1, max=1000), valid_excl_value])
+    value = StringField(label='Value', validators=[Length(min=1, max=1000), valid_excl_value])
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 
@@ -72,6 +73,6 @@ class ExclForm(FlaskForm):
 class ExclImportForm(FlaskForm):
     """exclusions list import form"""
 
-    data = TextAreaField(label='Data', render_kw={'rows': '10'}, validators=[validators.InputRequired()])
+    data = TextAreaField(label='Data', render_kw={'rows': '10'}, validators=[InputRequired()])
     replace = BooleanField(label='Replace')
     submit = SubmitField('Import')

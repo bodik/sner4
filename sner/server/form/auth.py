@@ -3,7 +3,9 @@
 from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError, validators, widgets
+from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError
+from wtforms.validators import InputRequired, Length, Optional
+from wtforms.widgets import CheckboxInput, ListWidget
 
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
@@ -31,14 +33,14 @@ class MultiCheckboxField(SelectMultipleField):
     Iterating the field will produce subfields, allowing custom rendering of
     the enclosed checkbox fields.
     """
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
+    widget = ListWidget(prefix_label=False)
+    option_widget = CheckboxInput()
 
 
 class LoginForm(FlaskForm):
     """login form"""
 
-    username = StringField(label='Username', validators=[validators.InputRequired()])
+    username = StringField(label='Username', validators=[InputRequired()])
     password = PasswordField(label='Password')
     submit = SubmitField('Login')
 
@@ -46,16 +48,16 @@ class LoginForm(FlaskForm):
 class TotpCodeForm(FlaskForm):
     """totp code form"""
 
-    code = StringField(label='TOTP Code', render_kw={'autocomplete': 'off'}, validators=[validators.InputRequired()])
+    code = StringField(label='TOTP Code', render_kw={'autocomplete': 'off'}, validators=[InputRequired()])
     submit = SubmitField('Login')
 
 
 class UserForm(FlaskForm):
     """user edit form"""
 
-    username = StringField(label='Username', validators=[validators.Length(min=1, max=256)])
-    password = PasswordField(label='Password', validators=[validators.Optional(), strong_password])
-    email = StringField(label='Email', validators=[validators.Length(max=256)])
+    username = StringField(label='Username', validators=[Length(min=1, max=256)])
+    password = PasswordField(label='Password', validators=[Optional(), strong_password])
+    email = StringField(label='Email', validators=[Length(max=256)])
     active = BooleanField(label='Active')
     roles = MultiCheckboxField(label='Roles')
     submit = SubmitField('Save')
@@ -76,19 +78,19 @@ class UserChangePasswordForm(FlaskForm):
 class WebauthnLoginForm(FlaskForm):
     """webauthn login form"""
 
-    assertion = HiddenField('Assertion', validators=[validators.InputRequired()])
+    assertion = HiddenField('Assertion', validators=[InputRequired()])
 
 
 class WebauthnRegisterForm(FlaskForm):
     """webauthn register token form"""
 
-    attestation = HiddenField('Attestation', validators=[validators.InputRequired()])
-    name = StringField('Name', validators=[validators.Length(max=500)])
+    attestation = HiddenField('Attestation', validators=[InputRequired()])
+    name = StringField('Name', validators=[Length(max=500)])
     submit = SubmitField('Register', render_kw={'disabled': True})
 
 
 class WebauthnEditForm(FlaskForm):
     """webauthn edit token form"""
 
-    name = StringField('Name', validators=[validators.Length(max=500)])
+    name = StringField('Name', validators=[Length(max=500)])
     submit = SubmitField('Save')
