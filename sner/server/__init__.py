@@ -1,6 +1,7 @@
 """main application package module"""
 
 import os
+import sys
 
 import flask.cli
 from flask import Flask, render_template
@@ -13,6 +14,7 @@ from flask_wtf.csrf import generate_csrf
 from sner.lib import get_dotted, load_yaml
 from sner.server.wrapped_fido2_server import WrappedFido2Server
 from sner.server.sessions import FilesystemSessionInterface
+from sner.version import __version__
 
 
 DEFAULT_CONFIG = {
@@ -120,6 +122,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 def cli():
     """server command wrapper"""
 
+    if '--version' in sys.argv:
+        print('Sner %s' % __version__)
     os.environ['FLASK_APP'] = 'sner.server'
     os.environ['FLASK_ENV'] = 'development'
     os.environ['FLASK_RUN_PORT'] = '18000'

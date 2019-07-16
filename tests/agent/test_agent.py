@@ -9,6 +9,13 @@ from sner.server.model.scheduler import Job
 from tests.agent import file_from_zip
 
 
+def test_version(tmpworkdir):  # pylint: disable=unused-argument
+    """test print version"""
+
+    result = agent_main(['--version'])
+    assert result == 0
+
+
 def test_commandline_assignment(tmpworkdir, test_dummy_a):  # pylint: disable=unused-argument
     """test custom assignment passed from command line"""
 

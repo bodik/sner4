@@ -21,6 +21,7 @@ import requests
 import sner.agent.protocol
 from sner.lib import get_dotted, load_yaml
 from sner.agent.modules import registered_modules
+from sner.version import __version__
 
 
 DEFAULT_CONFIG = {
@@ -253,6 +254,7 @@ def main(argv=None):
 
     parser = ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='show debug output')
+    parser.add_argument('--version', action='store_true', help='print version and exit')
 
     parser.add_argument('--shutdown', type=int, help='request gracefull shutdown of the agent specified by PID')
     parser.add_argument('--terminate', type=int, help='request immediate termination of the agent specified by PID')
@@ -272,6 +274,9 @@ def main(argv=None):
     logger.debug(args)
 
     # agent process management helpers
+    if args.version:
+        print('Sner %s' % __version__)
+        return 0
     if args.shutdown:
         return os.kill(args.shutdown, signal.SIGUSR1)
     if args.terminate:

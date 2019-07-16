@@ -9,6 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from sner.server import cli, get_dotted
+from sner.version import __version__
 
 
 def test_get_dotted_function():
@@ -38,6 +39,22 @@ def test_cli():
     assert pytest_wrapped_e.value.code == 0
 
 
+def test_version():
+    """test sner server cli/main flask wrapper"""
+
+    buf_stdout = StringIO()
+
+    patch_argv = patch.object(sys, 'argv', ['--version'])
+    patch_environ = patch.object(os, 'environ', {})
+    patch_stdout = patch.object(sys, 'stdout', buf_stdout)
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        with patch_argv, patch_environ, patch_stdout:
+            cli()
+
+    assert pytest_wrapped_e.value.code == 0
+    assert 'Sner %s' % __version__ in buf_stdout.getvalue()
+
+
 def test_shell():
     """test shell context imports"""
 
@@ -47,9 +64,9 @@ def test_shell():
     patch_argv = patch.object(sys, 'argv', ['bin/server', 'shell'])
     patch_environ = patch.object(os, 'environ', {})
     patch_stdin = patch.object(sys, 'stdin', buf_stdin)
-    path_stdout = patch.object(sys, 'stdout', buf_stdout)
+    patch_stdout = patch.object(sys, 'stdout', buf_stdout)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        with patch_argv, patch_environ, patch_stdin, path_stdout:
+        with patch_argv, patch_environ, patch_stdin, patch_stdout:
             cli()
 
     assert pytest_wrapped_e.value.code == 0
