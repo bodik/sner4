@@ -97,7 +97,7 @@ def db_initdata():
     db.session.add(Task(
         name='top100 ack scan',
         module='nmap',
-        params='-sA --top-ports 100  -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
+        params='-sA --top-ports 100  -Pn --reason --min-hostgroup 64 --min-rate 50 --max-rate 100'))
 
     # development queues with default targets
     queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
