@@ -37,35 +37,35 @@ def valid_excl_value(form, field):
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringField(label='Name', validators=[Length(max=250)])
-    module = StringField(label='Module', validators=[Length(min=1, max=250)])
-    params = TextAreaField(label='Parameters', render_kw={'rows': '10'})
+    name = StringField('Name', [Length(max=250)])
+    module = StringField('Module', [InputRequired(), Length(min=1, max=250)])
+    params = TextAreaField('Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
 
 class QueueForm(FlaskForm):
     """queue edit form"""
 
-    name = StringField(label='Name', validators=[Length(max=250)])
-    task = QuerySelectField(query_factory=lambda: Task.query.all(), allow_blank=False)  # pylint: disable=unnecessary-lambda
-    group_size = IntegerField(label='Group size', default=1, validators=[NumberRange(min=1)])
-    priority = IntegerField(label='Priority', default=0, validators=[InputRequired()])
-    active = BooleanField(label='Active')
+    name = StringField('Name', [Length(max=250)])
+    task = QuerySelectField('Task', [InputRequired()], query_factory=lambda: Task.query.all(), allow_blank=False)  # noqa: E501  pylint: disable=unnecessary-lambda
+    group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
+    priority = IntegerField('Priority', [InputRequired()], default=0)
+    active = BooleanField('Active')
     submit = SubmitField('Save')
 
 
 class QueueEnqueueForm(FlaskForm):
     """queue enqueue form"""
 
-    targets = LinesField(label='Targets', render_kw={'rows': '10'}, validators=[InputRequired()])
+    targets = LinesField('Targets', [InputRequired()], render_kw={'rows': '10'})
     submit = SubmitField('Enqueue')
 
 
 class ExclForm(FlaskForm):
     """exclustion edit form"""
 
-    family = SelectField('Family', choices=ExclFamily.choices(), coerce=ExclFamily.coerce, validators=[valid_excl_family])
-    value = StringField(label='Value', validators=[Length(min=1), valid_excl_value])
+    family = SelectField('Family', [InputRequired(), valid_excl_family], choices=ExclFamily.choices(), coerce=ExclFamily.coerce)
+    value = StringField('Value', [InputRequired(), Length(min=1), valid_excl_value])
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 
@@ -73,6 +73,6 @@ class ExclForm(FlaskForm):
 class ExclImportForm(FlaskForm):
     """exclusions list import form"""
 
-    data = TextAreaField(label='Data', render_kw={'rows': '10'}, validators=[InputRequired()])
-    replace = BooleanField(label='Replace')
+    data = TextAreaField('Data', [InputRequired()], render_kw={'rows': '10'})
+    replace = BooleanField('Replace')
     submit = SubmitField('Import')

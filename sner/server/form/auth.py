@@ -40,26 +40,26 @@ class MultiCheckboxField(SelectMultipleField):
 class LoginForm(FlaskForm):
     """login form"""
 
-    username = StringField(label='Username', validators=[InputRequired()])
-    password = PasswordField(label='Password')
+    username = StringField('Username')
+    password = PasswordField('Password')
     submit = SubmitField('Login')
 
 
 class TotpCodeForm(FlaskForm):
     """totp code form"""
 
-    code = StringField(label='TOTP Code', render_kw={'autocomplete': 'off'}, validators=[InputRequired()])
+    code = StringField('TOTP Code', [InputRequired()], render_kw={'autocomplete': 'off'})
     submit = SubmitField('Login')
 
 
 class UserForm(FlaskForm):
     """user edit form"""
 
-    username = StringField(label='Username', validators=[Length(min=1, max=250)])
-    password = PasswordField(label='Password', validators=[Optional(), strong_password])
-    email = StringField(label='Email', validators=[Length(max=250)])
-    active = BooleanField(label='Active')
-    roles = MultiCheckboxField(label='Roles')
+    username = StringField('Username', [InputRequired(), Length(min=1, max=250)])
+    password = PasswordField('Password', [Optional(), strong_password])
+    email = StringField('Email', [Length(max=250)])
+    active = BooleanField('Active')
+    roles = MultiCheckboxField('Roles')
     submit = SubmitField('Save')
 
     def __init__(self, *args, **kwargs):
@@ -70,27 +70,27 @@ class UserForm(FlaskForm):
 class UserChangePasswordForm(FlaskForm):
     """user change password form"""
 
-    password1 = PasswordField(label='Password', validators=[passwords_match, strong_password])
-    password2 = PasswordField(label='Repeat password', validators=[passwords_match, strong_password])
+    password1 = PasswordField('Password', [InputRequired(), passwords_match, strong_password])
+    password2 = PasswordField('Repeat password', [InputRequired(), passwords_match, strong_password])
     submit = SubmitField('Change password')
 
 
 class WebauthnLoginForm(FlaskForm):
     """webauthn login form"""
 
-    assertion = HiddenField('Assertion', validators=[InputRequired()])
+    assertion = HiddenField('Assertion', [InputRequired()])
 
 
 class WebauthnRegisterForm(FlaskForm):
     """webauthn register token form"""
 
-    attestation = HiddenField('Attestation', validators=[InputRequired()])
-    name = StringField('Name', validators=[Length(max=250)])
+    attestation = HiddenField('Attestation', [InputRequired()])
+    name = StringField('Name', [Length(max=250)])
     submit = SubmitField('Register', render_kw={'disabled': True})
 
 
 class WebauthnEditForm(FlaskForm):
     """webauthn edit token form"""
 
-    name = StringField('Name', validators=[Length(max=500)])
+    name = StringField('Name', [Length(max=500)])
     submit = SubmitField('Save')

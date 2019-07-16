@@ -28,8 +28,8 @@ def service_id_exists_and_belongs_to_host(form, field):  # pylint: disable=unuse
 class HostForm(FlaskForm):
     """host edit form"""
 
-    address = StringField('Address', validators=[IPAddress(ipv4=True, ipv6=True)])
-    hostname = StringField('Hostname', validators=[Length(max=256)])
+    address = StringField('Address', [InputRequired(), IPAddress(ipv4=True, ipv6=True)])
+    hostname = StringField('Hostname', [Length(max=256)])
     os = StringField('Os')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
@@ -38,11 +38,11 @@ class HostForm(FlaskForm):
 class ServiceForm(FlaskForm):
     """service edit form"""
 
-    host_id = IntegerField('Host_id', validators=[host_id_exists])
-    proto = StringField('Proto', validators=[Length(min=1, max=50)])
-    port = IntegerField('Port', validators=[NumberRange(min=0, max=65535)])
-    state = StringField('State', validators=[Length(max=50)])
-    name = StringField('Name', validators=[Length(max=250)])
+    host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
+    proto = StringField('Proto', [InputRequired(), Length(min=1, max=50)])
+    port = IntegerField('Port', [InputRequired(), NumberRange(min=0, max=65535)])
+    state = StringField('State', [Length(max=50)])
+    name = StringField('Name', [Length(max=250)])
     info = StringField('Info')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
@@ -51,11 +51,11 @@ class ServiceForm(FlaskForm):
 class VulnForm(FlaskForm):
     """note edit form"""
 
-    host_id = IntegerField('Host_id', validators=[host_id_exists])
-    service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
-    name = StringField('Name', validators=[Length(min=1, max=1000)])
-    xtype = StringField('xType', validators=[Length(max=250)])
-    severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
+    host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
+    service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
+    name = StringField('Name', [InputRequired(), Length(min=1, max=1000)])
+    xtype = StringField('xType', [Length(max=250)])
+    severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaField('Descr', render_kw={'rows': '5'})
     data = TextAreaField('Data', render_kw={'rows': '5'})
     refs = LinesField('Refs', render_kw={'rows': '5'})
@@ -67,9 +67,9 @@ class VulnForm(FlaskForm):
 class NoteForm(FlaskForm):
     """note edit form"""
 
-    host_id = IntegerField('Host_id', validators=[host_id_exists])
-    service_id = IntegerField('Service_id', validators=[Optional(), service_id_exists_and_belongs_to_host])
-    xtype = StringField('xType', validators=[Length(max=250)])
+    host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
+    service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
+    xtype = StringField('xType', [Length(max=250)])
     data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
@@ -78,11 +78,11 @@ class NoteForm(FlaskForm):
 class IdsForm(FlaskForm):
     """ajax; generic multi-id form"""
 
-    ids = FieldList(IntegerField(validators=[InputRequired()]), min_entries=1)
+    ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
 
 
 class TagByIdForm(FlaskForm):
     """ajax; tagmulti action"""
 
-    ids = FieldList(IntegerField(validators=[InputRequired()]), min_entries=1)
-    tag = StringField(validators=[InputRequired()])
+    ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
+    tag = StringField('tag', [InputRequired()])
