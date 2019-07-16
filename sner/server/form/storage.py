@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
 from wtforms.validators import InputRequired, IPAddress, Length, NumberRange, Optional
 
-from sner.server.form import empty_to_none, LinesField
+from sner.server.form import LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
 
 
@@ -58,8 +58,8 @@ class VulnForm(FlaskForm):
     severity = SelectField('Severity', choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaField('Descr', render_kw={'rows': '5'})
     data = TextAreaField('Data', render_kw={'rows': '5'})
-    refs = LinesField('Refs', render_kw={'rows': '5'}, filters=[empty_to_none])
-    tags = LinesField('Tags', render_kw={'class': 'form-control tageditor'}, filters=[empty_to_none])
+    refs = LinesField('Refs', render_kw={'rows': '5'})
+    tags = LinesField('Tags', render_kw={'class': 'form-control tageditor'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 

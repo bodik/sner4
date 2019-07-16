@@ -19,8 +19,8 @@ class User(db.Model, flask_login.UserMixin):
     username = db.Column(db.String(250), unique=True, nullable=False)
     _password = db.Column(db.String(250), name='password')
     email = db.Column(db.String(250))
-    active = db.Column(db.Boolean)
-    roles = db.Column(postgresql.ARRAY(db.String, dimensions=1))
+    active = db.Column(db.Boolean, nullable=False, default=False)
+    roles = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     _apikey = db.Column(db.String(250), name='apikey')
     totp = db.Column(db.String(32))
 
@@ -74,7 +74,7 @@ class WebauthnCredential(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user_handle = db.Column(db.String(64), nullable=False)
-    credential_data = db.Column(db.LargeBinary(), nullable=False)
+    credential_data = db.Column(db.LargeBinary, nullable=False)
     name = db.Column(db.String(250))
     registered = db.Column(db.DateTime, default=datetime.utcnow)
 

@@ -71,8 +71,8 @@ class Vuln(db.Model):
     severity = db.Column(db.Enum(SeverityEnum), nullable=False)
     descr = db.Column(db.Text)
     data = db.Column(db.Text)
-    refs = db.Column(postgresql.ARRAY(db.String, dimensions=1))
-    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1))
+    refs = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
 
     host = relationship('Host', back_populates='vulns')

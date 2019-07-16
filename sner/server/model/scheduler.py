@@ -35,7 +35,7 @@ class Queue(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
-    active = db.Column(db.Boolean)
+    active = db.Column(db.Boolean, nullable=False, default=False)
 
     task = relationship('Task', back_populates='queues')
     targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
@@ -49,7 +49,7 @@ class Target(db.Model):
     """single target of the task"""
 
     id = db.Column(db.Integer, primary_key=True)
-    target = db.Column(db.Text)
+    target = db.Column(db.Text, nullable=False)
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'), nullable=False)
 
     queue = relationship('Queue', back_populates='targets')
@@ -63,7 +63,7 @@ class Job(db.Model):
 
     id = db.Column(db.String(36), primary_key=True)
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
-    assignment = db.Column(db.Text)
+    assignment = db.Column(db.Text, nullable=False)
     retval = db.Column(db.Integer)
     output = db.Column(db.Text)
     time_start = db.Column(db.DateTime, default=datetime.utcnow)
@@ -77,7 +77,6 @@ class Job(db.Model):
     @property
     def output_abspath(self):
         """return absolute path to the output data file acording to current app config"""
-
         return os.path.join(current_app.config['SNER_VAR'], self.output) if self.output else None
 
 
