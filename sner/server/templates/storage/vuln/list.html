@@ -48,9 +48,9 @@
 		</div>
 
 		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags is_null ""') }}">Not tagged</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags is_not_null ""') }}">Tagged</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags is_null "" OR (Vuln.tags not_all "report" AND Vuln.tags not_all "info")') }}">Exclude reviewed</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
+			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
 		</div>
 
