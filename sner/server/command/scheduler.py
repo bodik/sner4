@@ -2,7 +2,7 @@
 
 import json
 import sys
-from ipaddress import ip_network
+from ipaddress import ip_address, ip_network, summarize_address_range
 
 import click
 from flask import current_app
@@ -42,6 +42,16 @@ def enumips(targets, **kwargs):
     for item in targets:
         for tmp in ip_network(item).hosts():
             print(tmp)
+
+
+@scheduler_command.command(name='rangetocidr', help='convert range specified addr space to series of cidr')
+@click.argument('start')
+@click.argument('end')
+def rangetocidr(start, end):
+    """summarize net rage into cidrs"""
+
+    for tmp in summarize_address_range(ip_address(start), ip_address(end)):
+        print(tmp)
 
 
 # queue commands

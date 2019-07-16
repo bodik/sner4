@@ -23,6 +23,16 @@ def test_enumips_command(runner, tmpworkdir):
     assert '127.0.0.133' in result.output
 
 
+def test_rangetocidr_command(runner, tmpworkdir):
+    """range to cidr enumerator test"""
+
+    result = runner.invoke(scheduler_command, ['rangetocidr', '127.0.0.0', '128.0.0.3'])
+    assert result.exit_code == 0
+
+    assert '127.0.0.0/8' in result.output
+    assert '128.0.0.0/30' in result.output
+
+
 def test_queue_list_command(runner, test_queue):
     """queue list command test"""
 
