@@ -2,23 +2,63 @@
 
 {% block script %}
 <script type="text/javascript">
+	var dt_static_custom = {
+		'searching': false,
+		'order': [[1, 'desc']],
+	};
+
 	$(document).ready(function() {
 		$('.portmap_item').on('mouseenter', function() {
 			$.ajax({
-				url: "{{ url_for('storage.service_portstat_route', port='REPLACE') }}".replace('REPLACE', $(this).attr('data-port')),
+				url: Flask.url_for('storage.service_portstat_route', {'port': $(this).attr('data-port')}),
 				success: function (data, status, jqXHR) { $('#port_detail').html(data);	}
 			});
 		});
+
+		$('#portstates').on('shown.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "true"); });
+		$('#portstates').on('hidden.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "false"); });
+		$('#portstates').toggleClass('in', localStorage.getItem('service_vizports_portstates_collapse') === "true");
 	});
 </script> 
 {% endblock %}
 
 {% block content %}
-<h1>Services portmap</h1>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h4 class="panel-title"><a data-toggle="collapse" href="#portstates">Services port states</a></h4>
+	</div>
 
+	<div id="portstates" class="panel-collapse collapse">
+		<div class="panel-body">
+			<table class="dt_static table table-condensed">
+			<thead>
+				<tr>
+				<th>port state</th>
+				<th>state count</th>
+				<th class="no-sort">_buttons</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for tmp in portstates %}
+				<tr>
+				<td>{{ tmp['state'] }}</td>
+				<td>{{ tmp['state_count'] }}</td>
+				<td>
+					<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(tmp['state'])) }}"><span class="glyphicon glyphicon-filter"></span></a>
+					<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(tmp['state'])) }}"><span class="glyphicon glyphicon-list"></span></a>
+				</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<h2>Services port map{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.service_vizports_route') }}">unfilter</a></small>{% endif %}</h2>
 <div class="row">
 	<div class="col-md-8">
-	{% for tmp in data %}
+	{% for tmp in portmap %}
 		<a class="portmap_item" href="{{ url_for('storage.service_list_route', filter='Service.port=="%s"'|format(tmp['port'])) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
 	{% endfor %}
 	</div>

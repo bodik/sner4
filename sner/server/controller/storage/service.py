@@ -2,7 +2,7 @@
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import func
+from sqlalchemy import desc, func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -107,18 +107,21 @@ def service_delete_route(service_id):
 def service_vizports_route():
     """visualize portmap"""
 
-    data = []
-    for port, count in db.session.query(Service.port, func.count(Service.id)).order_by(Service.port).group_by(Service.port).all():
-        data.append({'port': port, 'count': count})
+    query = db.session.query(Service.state, func.count(Service.id).label('state_count')).group_by(Service.state).order_by(desc('state_count'))
+    portstates = [tmp for tmp in query.all()]
 
+    query = db.session.query(Service.port, func.count(Service.id)).order_by(Service.port).group_by(Service.port)
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+    portmap = [{'port': port, 'count': count} for port, count in query.all()]
     # compute sizing for rendered element
-    lowest = min(data, key=lambda x: x['count'])['count']
-    highest = max(data, key=lambda x: x['count'])['count']
+    lowest = min(portmap, key=lambda x: x['count'])['count']
+    highest = max(portmap, key=lambda x: x['count'])['count']
     coef = (VIZPORTS_HIGH-VIZPORTS_LOW) / max(1, (highest-lowest))
-    for tmp in data:
+    for tmp in portmap:
         tmp['size'] = VIZPORTS_LOW + ((tmp['count']-lowest)*coef)
 
-    return render_template('storage/service/vizports.html', data=data)
+    return render_template('storage/service/vizports.html', portmap=portmap, portstates=portstates)
 
 
 @blueprint.route('/service/portstat/<port>')

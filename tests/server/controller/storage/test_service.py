@@ -87,9 +87,11 @@ def test_service_vizports_route(cl_operator, test_service):
 
     response = cl_operator.get(url_for('storage.service_vizports_route'))
     assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
 
-    elems = response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
-    assert elems
+    response = cl_operator.get(url_for('storage.service_vizports_route', filter='Service.state=="%s"' % test_service.state))
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
 
 
 def test_service_portstat_route(cl_operator, test_service):
