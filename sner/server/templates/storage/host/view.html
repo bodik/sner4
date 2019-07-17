@@ -3,14 +3,14 @@
 {% block script %}
 <script type="text/javascript">
 	$(document).ready(function() {
-		$("a[data-toggle='tab']").on("show.bs.tab", function(e) {
-			localStorage.setItem("host_view_activeTab", $(e.target).attr("href"));
+		$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+			localStorage.setItem('host_view_active_tab', $(e.target).attr('href'));
 		});
-		var activeTab = localStorage.getItem("host_view_activeTab");
-		if (!activeTab) { activeTab = $("a[data-toggle='tab']").first().attr("href"); }
-		$("#host_view a[href='" + activeTab + "']").tab("show");
+		var active_tab = localStorage.getItem('host_view_active_tab');
+		if (!active_tab) { active_tab = $('a[data-toggle="tab"]').first().attr('href'); }
+		$('#host_view a[href="' + active_tab + '"]').tab('show');
 
-		$("a[data-toggle='tab']").on("shown.bs.tab", function(e) {
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
 			$.fn.dataTable.tables({visible: true, api: true}).columns.adjust();
 		});
 	});

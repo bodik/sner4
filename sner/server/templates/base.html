@@ -203,20 +203,25 @@
 		 * datatables helper, default ajax enhanced dt options
 		 */
 		var dt_ajax_options = {
-			"serverSide": true,
-			"processing": true,
+			// general settings
+			'serverSide': true,
+			'processing': true,
 
+			// visuals
 			'dom': '<"row"<"col-sm-6"l><"col-sm-6"f>> <"row"<"col-sm-12"p>> <"row"<"col-sm-12"rt>> <"row"<"col-sm-6"i><"col-sm-6"p>>',
 			'info': true,
 			'paging': true,
 			'pageLength': 10,
-			'stateSave': true,
-			'stateDuration': -1,
 
-			"drawCallback": function (settings) {
+			// behaviors
+			'drawCallback': function (settings) {
 				dt_toggle_pagination(this.api());
 				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api()}, action_delete_by_url);
-			}
+			},
+			'stateSave': true,
+			// paging might get broken when transiting from high page of non-filtered table to filtered one with few row, state key must reflect the filter
+			'stateSaveCallback': function(settings,data) { sessionStorage.setItem('DataTables_'+settings.sInstance+'_'+window.location.pathname+'_'+window.location.search, JSON.stringify(data)); },
+			'stateLoadCallback': function(settings) { return JSON.parse(sessionStorage.getItem('DataTables_'+settings.sInstance+'_'+window.location.pathname+'_'+window.location.search)); }
 		};
 
 
