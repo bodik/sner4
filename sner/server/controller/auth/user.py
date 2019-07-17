@@ -94,26 +94,24 @@ def user_delete_route(user_id):
     return render_template('button-delete.html', form=form)
 
 
-@blueprint.route('/user/apikey/<user_id>/<action>', methods=['GET', 'POST'])
+@blueprint.route('/user/apikey/<user_id>/<action>', methods=['POST'])
 @role_required('admin')
 def user_apikey_route(user_id, action):
     """manage apikey for user"""
 
     user = User.query.get(user_id)
-    ret = {'status': HTTPStatus.BAD_REQUEST, 'title': 'Apikey operation', 'detail': 'Invalid request'}
-
     form = ButtonForm()
     if user and form.validate_on_submit():
 
         if action == 'generate':
             apikey = PWS.generate_apikey()
             user.apikey = apikey
-            ret.update({'status': HTTPStatus.OK, 'detail': 'New apikey generated: %s' % apikey})
+            db.session.commit()
+            return jsonify({'title': 'Apikey operation', 'detail': 'New apikey generated: %s' % apikey}), HTTPStatus.OK
 
-        elif action == 'revoke':
+        if action == 'revoke':
             user.apikey = None
-            ret.update({'status': HTTPStatus.OK, 'detail': 'Apikey revoked'})
+            db.session.commit()
+            return jsonify({'title': 'Apikey operation', 'detail': 'Apikey revoked'}), HTTPStatus.OK
 
-        db.session.commit()
-
-    return jsonify(ret), ret['status']
+    return jsonify({'title': 'Apikey operation', 'detail': 'Invalid request'}), HTTPStatus.BAD_REQUEST

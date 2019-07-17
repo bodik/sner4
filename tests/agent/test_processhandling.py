@@ -62,7 +62,7 @@ def simple_server(request, monkeypatch, pytestconfig):
     def output_route():  # pylint: disable=unused-variable
         if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code2':
             return 'Unauthorized', HTTPStatus.UNAUTHORIZED
-        return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
+        return '', HTTPStatus.OK
 
     yield live_server(request, app, monkeypatch, pytestconfig)
 

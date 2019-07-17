@@ -143,7 +143,7 @@ def job_output_route():
         retval = request.json['retval']
         output = base64.b64decode(request.json['output'])
     except (jsonschema.exceptions.ValidationError, binascii.Error):
-        return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+        return jsonify({'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
 
     job = Job.query.filter(Job.id == job_id).one_or_none()
     if job and (job.output is None):
@@ -156,7 +156,7 @@ def job_output_route():
         job.time_end = datetime.utcnow()
         db.session.commit()
 
-    return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
+    return '', HTTPStatus.OK
 
 
 @blueprint.route('/job/delete/<job_id>', methods=['GET', 'POST'])

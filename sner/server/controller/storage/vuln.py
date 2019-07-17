@@ -124,12 +124,12 @@ def vuln_delete_by_id_route():
         try:
             Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
             db.session.commit()
-            return jsonify({'status': HTTPStatus.OK})
+            return '', HTTPStatus.OK
         except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
             db.session.rollback()
-            return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
+            return jsonify({'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
 
-    return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/vuln/tag_by_id', methods=['POST'])
@@ -144,12 +144,12 @@ def vuln_tag_by_id_route():
             for vuln in Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).all():
                 vuln.tags = list(set((vuln.tags or []) + [tag]))
             db.session.commit()
-            return jsonify({'status': 200})
+            return '', HTTPStatus.OK
         except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
             db.session.rollback()
-            return jsonify({'status': 400, 'title': 'Action failed', 'detail': str(e)}), 400
+            return jsonify({'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
 
-    return jsonify({'status': 400, 'title': 'Invalid form submitted.'}), 400
+    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/vuln/grouped')

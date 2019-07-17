@@ -68,10 +68,10 @@ def fail_server(request, monkeypatch, pytestconfig):
 
         if current_app.nr_output < 1:
             current_app.nr_output += 1
-            return jsonify({'status': HTTPStatus.BAD_REQUEST, 'title': 'output upload failed'}), HTTPStatus.BAD_REQUEST
+            return jsonify({'title': 'output upload failed'}), HTTPStatus.BAD_REQUEST
 
         current_app.output_done = True
-        return jsonify({'status': HTTPStatus.OK}), HTTPStatus.OK
+        return '', HTTPStatus.OK
 
     @app.route('/check')
     def check():  # pylint: disable=unused-variable

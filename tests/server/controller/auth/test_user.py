@@ -97,3 +97,6 @@ def test_user_apikey_route(cl_admin, test_user):
     assert response.status_code == HTTPStatus.OK
     user = User.query.filter(User.id == test_user.id).one_or_none()
     assert not user.apikey
+
+    response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='invalid'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
