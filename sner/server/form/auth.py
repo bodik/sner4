@@ -1,4 +1,7 @@
-"""auth forms"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+auth forms
+"""
 
 from flask import current_app
 from flask_login import current_user

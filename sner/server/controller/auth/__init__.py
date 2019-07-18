@@ -1,4 +1,7 @@
-"""authentication handling module"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+authentication handling module
+"""
 
 import os
 from base64 import b32decode, b32encode, b64decode, b64encode

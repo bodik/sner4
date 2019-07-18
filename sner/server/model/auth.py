@@ -1,4 +1,7 @@
-"""auth component models"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+auth component models
+"""
 # pylint: disable=too-few-public-methods,abstract-method
 
 from datetime import datetime

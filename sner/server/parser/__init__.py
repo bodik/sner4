@@ -1,4 +1,7 @@
-"""sner parsers"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+sner parsers
+"""
 
 registered_parsers = {}  # pylint: disable=invalid-name
 

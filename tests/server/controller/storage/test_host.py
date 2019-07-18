@@ -1,4 +1,7 @@
-"""controller hosts tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller hosts tests
+"""
 
 import json
 from http import HTTPStatus

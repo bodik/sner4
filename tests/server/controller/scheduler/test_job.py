@@ -1,4 +1,7 @@
-"""controller job tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller job tests
+"""
 
 import base64
 import json

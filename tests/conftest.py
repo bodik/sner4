@@ -1,4 +1,7 @@
-"""sner pytest config and fixtures"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+sner pytest config and fixtures
+"""
 
 import os
 import shutil

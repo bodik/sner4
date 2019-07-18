@@ -1,4 +1,7 @@
-"""run sqlafilter parser tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+run sqlafilter parser tests
+"""
 
 from sner.server.sqlafilter import test_all
 

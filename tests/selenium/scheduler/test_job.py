@@ -1,4 +1,7 @@
-"""selenium ui tests for scheduler.job component"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+selenium ui tests for scheduler.job component
+"""
 
 from flask import url_for
 

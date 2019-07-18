@@ -1,4 +1,7 @@
-"""shared fixtures for selenium tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+shared fixtures for selenium tests
+"""
 
 from uuid import uuid4
 

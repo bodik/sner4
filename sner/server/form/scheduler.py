@@ -1,4 +1,7 @@
-"""flask forms"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+flask forms
+"""
 
 import re
 from ipaddress import ip_network

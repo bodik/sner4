@@ -1,4 +1,7 @@
-"""shared fixtures for storage component"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+shared fixtures for storage component
+"""
 
 import pytest
 

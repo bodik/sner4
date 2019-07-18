@@ -1,4 +1,7 @@
-"""server functions tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+server functions tests
+"""
 
 import os
 import sys

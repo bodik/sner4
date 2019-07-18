@@ -1,4 +1,7 @@
-"""agents tests shared functions"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+agents tests shared functions
+"""
 
 from zipfile import ZipFile
 

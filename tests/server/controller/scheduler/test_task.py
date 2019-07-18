@@ -1,4 +1,7 @@
-"""controller scheduler.task tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller scheduler.task tests
+"""
 
 import json
 from http import HTTPStatus

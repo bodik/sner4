@@ -1,4 +1,7 @@
-"""scheduler test models"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+scheduler test models
+"""
 
 import json
 import os

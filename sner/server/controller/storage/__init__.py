@@ -1,4 +1,7 @@
-"""controller storage main module"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller storage main module
+"""
 
 from flask import Blueprint
 

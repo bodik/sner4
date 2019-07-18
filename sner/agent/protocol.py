@@ -1,4 +1,7 @@
-"""agent to server protocol definitions"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+agent to server protocol definitions
+"""
 # pylint: disable=invalid-name
 
 common_definitions = {

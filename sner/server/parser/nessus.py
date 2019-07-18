@@ -1,4 +1,7 @@
-"""parsers to import from agent outputs to storage"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+parsers to import from agent outputs to storage
+"""
 
 import json
 import sys

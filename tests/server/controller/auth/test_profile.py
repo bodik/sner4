@@ -1,4 +1,7 @@
-"""controller auth.profile tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller auth.profile tests
+"""
 
 import json
 from base64 import b64decode, b64encode

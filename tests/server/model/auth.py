@@ -1,4 +1,7 @@
-"""auth tests models"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+auth tests models
+"""
 
 import pytest
 from fido2 import cbor

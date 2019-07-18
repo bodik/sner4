@@ -1,4 +1,7 @@
-"""misc utils used in server"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+misc utils used in server
+"""
 
 import abc
 import datetime

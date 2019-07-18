@@ -1,4 +1,7 @@
-"""sner.server.controller.storage functions test"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+sner.server.controller.storage functions test
+"""
 
 from sner.server.controller.storage import get_related_models
 from sner.server.form.storage import NoteForm, VulnForm

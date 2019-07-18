@@ -1,4 +1,7 @@
-"""selenium ui tests module"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+selenium ui tests module
+"""
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC

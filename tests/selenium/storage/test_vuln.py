@@ -1,4 +1,7 @@
-"""selenium ui tests for storage.vuln component"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+selenium ui tests for storage.vuln component
+"""
 
 from flask import url_for
 

@@ -1,4 +1,7 @@
-"""controller default tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller default tests
+"""
 
 import os
 from http import HTTPStatus

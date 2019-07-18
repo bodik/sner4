@@ -1,5 +1,7 @@
-#!/usr/bin/env python
-"""sner agent"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+sner agent
+"""
 
 import abc
 import copy

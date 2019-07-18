@@ -1,4 +1,7 @@
-"""yubico fido2 server wrapped for flask factory pattern delayed configuration"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+yubico fido2 server wrapped for flask factory pattern delayed configuration
+"""
 
 from socket import getfqdn
 

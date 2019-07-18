@@ -1,4 +1,7 @@
-"""selenium storage ui tests shared functions"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+selenium storage ui tests shared functions
+"""
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait

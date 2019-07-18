@@ -1,4 +1,7 @@
-"""server side stored session implementation"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+server side stored session implementation
+"""
 
 import json
 import os

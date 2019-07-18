@@ -1,4 +1,7 @@
-"""shared functions for selenium auth tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+shared functions for selenium auth tests
+"""
 
 
 class js_variable_ready():  # pylint: disable=invalid-name,too-few-public-methods

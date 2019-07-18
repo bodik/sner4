@@ -1,4 +1,7 @@
-"""parsing simple boolean enabled filter expressions into sqlalchemy-filters tree"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+parsing simple boolean enabled filter expressions into sqlalchemy-filters tree
+"""
 
 from lark import Lark, Transformer
 

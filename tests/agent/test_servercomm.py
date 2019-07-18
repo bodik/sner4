@@ -1,4 +1,7 @@
-"""tests with various server communication test cases"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+tests with various server communication test cases
+"""
 
 import multiprocessing
 import signal

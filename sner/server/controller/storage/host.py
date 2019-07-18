@@ -1,4 +1,7 @@
-"""controller host"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+controller host
+"""
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for

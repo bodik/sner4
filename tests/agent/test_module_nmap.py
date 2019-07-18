@@ -1,4 +1,7 @@
-"""agent module dummy tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+agent module dummy tests
+"""
 
 import json
 from uuid import uuid4

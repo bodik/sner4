@@ -1,4 +1,7 @@
-"""auth controler tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+auth controler tests
+"""
 
 from base64 import b64decode, b64encode
 from http import HTTPStatus

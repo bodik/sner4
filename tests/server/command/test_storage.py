@@ -1,4 +1,7 @@
-"""storage commands tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+storage commands tests
+"""
 
 import json
 import re

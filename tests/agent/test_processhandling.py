@@ -1,4 +1,7 @@
-"""agents process handling"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+agents process handling
+"""
 
 import json
 import multiprocessing

@@ -1,4 +1,7 @@
-"""job controler"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+job controler
+"""
 
 import base64
 import binascii

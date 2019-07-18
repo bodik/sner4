@@ -1,4 +1,7 @@
-"""nmap output parser tests"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+nmap output parser tests
+"""
 
 import pytest
 from libnmap.parser import NmapParserException

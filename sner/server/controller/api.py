@@ -1,4 +1,7 @@
-"""api controller; only a stubs for binding routes implementations to application uri space"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+api controller; only a stubs for binding routes implementations to application uri space
+"""
 
 from flask import Blueprint
 

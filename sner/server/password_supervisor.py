@@ -1,4 +1,7 @@
-"""password supervisor service"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+password supervisor service
+"""
 
 import os
 import random

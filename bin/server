@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""sner server runner stub"""
+"""
+sner server runner stub
+"""
 
 import os
 import sys

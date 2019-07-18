@@ -1,4 +1,7 @@
-"""sner tests package"""
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+sner tests package
+"""
 
 from sner.server import db
 
