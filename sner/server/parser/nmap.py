@@ -28,8 +28,18 @@ class NmapParser():
             host = Host(address=nmaphost.address)
             db.session.add(host)
 
-        if (not host.hostname) and nmaphost.hostnames:
-            host.hostname = nmaphost.hostnames[0]
+        if nmaphost.hostnames:
+            hostnames = list(set(nmaphost.hostnames))
+
+            if not host.hostname:
+                host.hostname = hostnames[0]
+
+            if (host.hostname != hostnames[0]) or (len(hostnames) > 1):
+                note = Note.query.filter(Host.id == host.id, Note.xtype == 'nmap.hostnames').one_or_none()
+                if not note:
+                    note = Note(host=host, xtype='nmap.hostnames', data=json.dumps([]))
+                    db.session.add(note)
+                note.data = json.dumps(list(set(json.loads(note.data) + hostnames)))
 
         for osmatch in nmaphost.os_match_probabilities():
             if (osmatch.accuracy == 100) and (not host.os):

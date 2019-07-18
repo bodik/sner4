@@ -8,7 +8,6 @@ import sys
 
 import flask.cli
 from flask import Flask, render_template
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_jsglue import JSGlue
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -39,7 +38,6 @@ DEFAULT_CONFIG = {
 db = SQLAlchemy()  # pylint: disable=invalid-name
 jsglue = JSGlue()  # pylint: disable=invalid-name
 login_manager = LoginManager()  # pylint: disable=invalid-name
-toolbar = DebugToolbarExtension()  # pylint: disable=invalid-name
 webauthn = WrappedFido2Server()  # pylint: disable=invalid-name
 
 
@@ -72,8 +70,6 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_message = 'Not logged in'
     login_manager.login_message_category = 'warning'
     webauthn.init_app(app)
-    if app.config['DEBUG']:  # pragma: no cover
-        toolbar.init_app(app)
 
     from sner.server.controller import api
     app.register_blueprint(api.blueprint, url_prefix='/api')

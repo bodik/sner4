@@ -38,15 +38,6 @@ class Base():
             ftmp.write(json.dumps(assignment))
         return 0
 
-    def execute(self, cmd, output_file='output'):
-        """execute command and capture output"""
-
-        with open(output_file, 'w') as output_fd:
-            self.process = subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
-            retval = self.process.wait()
-            self.process = None
-        return retval
-
     def terminate(self):  # pragma: no cover  ; running over multiprocessing
         """terminate executed command"""
 
@@ -55,6 +46,15 @@ class Base():
                 os.kill(self.process.pid, signal.SIGTERM)
             except OSError as e:
                 self.log.error(e)
+
+    def _execute(self, cmd, output_file='output'):
+        """execute command and capture output"""
+
+        with open(output_file, 'w') as output_fd:
+            self.process = subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
+            retval = self.process.wait()
+            self.process = None
+        return retval
 
 
 @register_module('dummy')
@@ -72,4 +72,4 @@ class Nmap(Base):
         super().run(assignment)
         with open('targets', 'w') as ftmp:
             ftmp.write('\n'.join(assignment['targets']))
-        return self.execute('nmap -iL targets -oA output %s' % assignment['params'])
+        return self._execute('nmap -iL targets -oA output %s' % assignment['params'])

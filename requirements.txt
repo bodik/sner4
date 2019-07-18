@@ -3,7 +3,6 @@ fido2
 file-magic
 flake8
 flask
-flask-debugtoolbar
 flask-jsglue
 flask-login
 flask-sqlalchemy
