@@ -57,7 +57,6 @@ class Base():
 @register_module('dummy')
 class Dummy(Base):
     """testing agent impl"""
-    pass
 
 
 @register_module('nmap')

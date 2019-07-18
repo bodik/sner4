@@ -11,7 +11,7 @@ from flask.sessions import SessionInterface, SessionMixin
 from werkzeug.datastructures import CallbackDict
 
 
-class Session(CallbackDict, SessionMixin):
+class Session(CallbackDict, SessionMixin):  # pylint: disable=too-many-ancestors
     """custom session object, modeled after original flask impl and flask_session"""
 
     sid = None

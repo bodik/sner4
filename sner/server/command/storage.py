@@ -94,7 +94,6 @@ def vuln_report():
 @click.group(name='storage', help='sner.server storage management')
 def storage_command():
     """storage commands click group/container"""
-    pass
 
 
 @storage_command.command(name='import', help='import data from files')

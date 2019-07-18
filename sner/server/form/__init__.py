@@ -23,4 +23,3 @@ class LinesField(TextAreaField):
 
 class ButtonForm(FlaskForm):
     """generic button form"""
-    pass
