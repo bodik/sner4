@@ -12,7 +12,7 @@ venv:
 install-deps:
 	which psql || sudo apt-get -y install postgres-all
 	sudo apt-get -y install unzip nmap
-	pip install -r requirements.txt
+	pip install -r requirements.lock
 
 freeze:
 	@pip freeze | grep -v '^pkg-resources='
