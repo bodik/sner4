@@ -2,19 +2,26 @@
 
 [![Build Status](https://travis-ci.org/bodik/sner4.svg?branch=master)](https://travis-ci.org/bodik/sner4)
 
+## Table of Contents
 
-## Quick start
+* [Quick start](#1-quick-start)
+* [Project description](#2-project-description)
+* [Features](#3-features)
+* [Usage](#4-usage)
+* [Development](#5-development)
 
 
-### Installation
+## 1 Quick start
+
+### 1.1 Installation
 
 ```
 # install prerequisities
 apt-get install git sudo make
 
 # clone and tune repository
-git clone https://gitlab.flab.cesnet.cz/bodik/sner4 /opt/sner
-cd /opt/sner
+git clone https://gitlab.flab.cesnet.cz/bodik/sner4 sner
+cd sner
 ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
 
 # OPTIONAL, create and activate virtualenv
@@ -39,14 +46,14 @@ make db
 bin/server run
 ```
 
-### Basic dns recon
+### 1.2 Basic dns recon
 ```
 bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file -
 bin/agent --debug --queue 'dns recon'
 ```
 
 
-## Project description
+## 2 Project description
 
 Currently, an ad-hoc developed version of the orchestration tool/wrapper for
 distributing, partitioning and analysis of various nmap and nikto workloads is
@@ -54,30 +61,26 @@ used during first phases of FLAB pentesting methodology.
 
 The main goals of this project is to create server-client software suite for:
 
-* distributing network reconaissance workload
+* Distributing network reconaissance workload
 	* scanning performed by the layer of modular agents, wrapping already
 	  existing tools such as nmap, nikto, sslscan, nessus and metasploit
 	* pivoting, long term timing, performance
 		
-* analysis of the gathered recon data for monitoring of operated services in
-  the large networks similary to the shodan and censys public services
+* Analysis and data management
+	* analysis of the gathered recon data for monitoring of discovered services
+	  in large networks similary to the shodan and censys public services
+	* managing of recon and vulnerability data for the purposes of the pentesting
+	  processes
 
-* managing of recon and vulnerability data for the purposes of the pentesting
-  processes
-
-
-### Considered existing solutions
-
-* https://github.com/infobyte/faraday -- too big to customize
-* https://ivre.rocks/ -- only limited set of scanning tools supported
-* https://github.com/ChrisRimondi/VulntoES -- too simple, without management interface
-* https://github.com/secforce/sparta.git -- only heavy gui
+Several existing solutions has been found, but not any of them meets our long term 
+requirements. Typically the existing project are too big to customize (Faraday), does
+not have simple extendable support for multiple scanning tools (ivre), does not allow
+to easy modify the UI (metasploit) or does not have web-based UI at all (VulntoES, sparta).
 
 
+### 2.1 Design overview
 
-## Design overview
-
-* Recon
+* Distributing network reconaissance workload
 	* planner		-- management and scheduling for repetitive recon of the monitored networks
 	* scheduler		-- job/task distribution
 	* agent			-- modular wrapper for scanning tools
@@ -87,8 +90,8 @@ wrapped tools for the analysis and data management components.
 
 * Analysis and data management
 	* processor/parser	-- recon and vulnerability data preprocessing and analytics layer
-	* storage		-- long term host/ip centric storage for r/v data
-	* visualization		-- management/view interface for r/v data
+	* storage		-- long term host/ip centric storage
+	* visualization		-- management/view interface
 
 
 ```
@@ -112,7 +115,7 @@ wrapped tools for the analysis and data management components.
                         |      |              |                    |
                         |      +--------------+             +---------------------+
                         |                                   |                     |
-                        |                                   |  vizualizations     |
+                        |                                   |  visualizations     |
                         |                                   |                     |
                         |                                   +---------------------+
                         |
@@ -122,63 +125,215 @@ wrapped tools for the analysis and data management components.
 ```
 
 
+## 3 Features
 
-## agent to server.scheduler protocol description
+All implemented features supports penetration testing or continuous monitoring
+processes.
 
-Simple REST/HTTP based protocol with JSON data encoding.
-TODO: authentication
+
+### 3.1 Agent
+
+* Wraps existing tools with the communication and execution layer = module.
+  Any module should inherit from `sner.agent.modules.Base`.
+
+* For agent-server protocol specification see the `sner/agent/procotol.py`.
+
+* Server authentication requires valid apikey for account with role *agent*.
+  Apikey should be placed in config file (note that passing apikey by
+  command-line argument might leak the apikey).
+
+* Agent can run periodicaly or one-time only (`--oneshot`) against server or
+  just for specific queue (`--queue`)
+
+* If running, agent can be stopped gracefully (`--shutdown`, might take time if
+  long running job/assignment is executing, or terminated immediately
+  (`--terminate`).
+
+
+### 3.2 Server
+
+Server itself is flask-based application with web and command line interface.
+The main components are roughly devided to python modules (also flask
+blueprints) but with tight coupling.
+
+
+#### 3.2.1 Auth
+
+Component provides AAA mechanisms for the server.
+
+* Authentication
+	* Schemas supported
+		-- username+password, w/o OTP as second factor;
+		   FIDO2/webauthn password-less;
+		   Header-based authentication for scheduler API (agents only)
+	* Session based implementation
+		-- default flask sessions replaced with server-side file-backed implementation;
+		   no save sessions for agents
+	* Password storage
+		-- `user.password` salted-sha512, should allow transitions if needed;
+		   `user.apikey` sha512;
+		   managed by `sner/server/password_supervisor.py`
+
+* Authorization
+	* static set of roles used for very simple route-based authorization
+
+* Account management
+	* user CRUD
+	* roles management: admin, operator, user (no privileges, planned for shodan-like RO interface), agent
+	* apikey (re)generation
+
+* Command-line interface
+	* user password reset
+
+
+#### 3.2.2 Scheduler
+
+Components provides workload configuration and distribution mechanisms for the
+recon subsystem. Each agents draws (repeatedly) an `assignment` from server,
+executes the workload, packs the output and post-back the results of the
+assigned `job`.
+
+* Models:
+
+	* `task` -- general settings for module executed by agent. Agent
+	  module is responsible for interpreting the `task.params` property.
+
+	* `queue` -- holds list of targets for specific task. When creating
+	  assignment for agent, server select active queue with highest priority and
+          draws N targets (`queue.group_size`) from queue randomly.
+
+	* `job` -- represents one assignment/job for the agent. `assignment` is represented 
+          by JSON object and output as `job.retval` and `job.output`.
+	  `output` should be a zip file and corresponding parser in `storage` component
+	  should be able to understand it's contents. Output archive must include
+	  `assignment.txt` file with appropriate data. Archives are stored directly on disk
+          in directory structure corresponding to queues for better manipulation (listing, backup, import).
+
+	* `excl` -- model for target exclusion. During large or long recons, some parts
+	  of monitored networks must be avoided for policy, operations or security reasons.
+          `excl` models holds information which CIDR or regex specified targets must not
+          be assigned from queues. Exclusions are used during the assignment phase (not
+	  enqueue phase because exclusion list might change between time of queue setup and target selection),
+          scheduler silently discards all drawed targets matching any configured exclusion.
+
+* Web interface
+	* CRUD operations for all models except `job` model.
+	* assignment and ouput gathering functionality for agents is available through `/api` endpoints
+
+* Command-line interface
+	* job management (list, delete)
+	* queues management (list, enqueue, flush)
+	* ip enumeration helpers (enumips, rangetocird)
+
+
+#### 3.2.3 Storage and parsers
+
+Storage component is main long-term data database. It's design is host/ip
+centric and should represent complete state of discovered hosts, services among
+with associated vulnerabilities and notes. Parsers are components responsible
+for parsing and interpreting agent output data (typically zip blobs) and
+translating it into storage models/entities.
+
+* Models:
+
+	* `host` -- host/ip based basic information
+	* `service` -- service information
+	* `vuln` -- vulnerability data associated with host (or service)
+	* `note` -- additional data associated with host (or service)
+
+Note: The storage model is heavily inspired by Metasploit framework. `[model].xtype`
+property is used to differentiate categories of information held in the model
+instance, the property is mainly used by parsers.
+
+* Web interface
+	* CRUD operation for all models
+	* multi-item operations on `vuln` model for vulnerability evaluation process (tag, delete)
+	* filtering for preset categories (not tagged, exclude reviewed, ...)
+	* vulnerability report generation
+	* basic visualizations: hostnames tree interactive graph, service port map
+
+* Command-line interface
+	* storage data management (import, flush)
+	* report generation
+
+
+#### 3.2.4 Visualizations and planner
+
+* Not implemented yet
+	* Visualisations should allow for end-user read-only visualization and searching features.
+	* Planner component should take care of periodic queueing of existing or new targets to refresh information in storage.
+
+
+#### 3.2.5 Shell
+
+For scripting and programmatic manipulation with objects in all parts of the
+server a shell with pre loaded model is available. The usage is according to
+normal flask cli shell.
 
 ```
-;; definitions
-
-queue-id		= 1*DIGIT / 1*ALPHA
-				; queue identifier
-
-assignment		= jsonobject
-				; {
-				;	"id": uuid,
-				;	"module": string,
-				;	"params": string,
-				;	"targets": array of strings
-				; }
-				; full schema defined in agent.protocol module
-
-output			= jsonobject
-				; {
-				;	"id": uuid,
-				;	"retval": int,
-				;	"output": string, base64 encoded data
-				; }
-				; full schema defined in agent.protocol module
-
-http-ok			= "HTTP/x.x 200 OK" ; standard http response
-http-bad-request	= "HTTP/x.x 400 Bad Request" ; standard http response
-
-
-
-;; agent to server - request assignment/job
-
-request-assign-job	= "GET /scheduler/job/assign" ["/" queue-id]
-
-response-assign-job	= response-nowork / response-assignment
-
-response-nowork		= http-ok "{}"
-				; no assignment/job available
-
-response-assignment	= http-ok assignment
-				; assignment object in response body
-
-
-
-;; agent to server - upload assignment/job output
-
-request-job-output	= "POST /scheduler/job/output" output
-				; output object in request body
-
-response-job-output	= response-accepted / response-refused
-
-response-accepted	= http-ok
-				; output accepted			
-response-refused	= http-bad-request
-				; malformed request or output refused
+webservices = Service.query.filter(Service.proto=='tcp', Service.port.in_([80, 443, 8080, 8443])).all()
+for tmp in webservices:
+  print('%s:%s' % (tmp.host.address, tmp.port))
 ```
+
+
+## 4 Usage
+
+### 4.1 Recon scenario
+
+1. Define new or select existing task (*scheduler > tasks > add | edit*)
+
+2. Define new queue for task (*scheduler > queues > add | edit*)
+
+3. Generate target list
+	* manualy
+	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
+	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
+
+4. Setup exclusions (*scheduler > exclusions > add | edit*)
+
+5. Enqueue targets
+	* web: *scheduler > queues > [queue] > enqueue*
+	* shell: `bin/server scheduler queue_enqueue [queue_id | queue_name] --file=targets`
+
+6. Run the agent `bin/agent &` (but screen is better)
+
+7. Monitor the queue until drained and all jobs has been finished by agent(s)
+
+8. Stop the agent `bin/agent --shutdown [PID]`
+
+9. Gathered recon data found in corresponding `SNER_VAR/scheduler/[queue.id]` directory can be used for analysis
+
+### 4.2 Data evaluation scenario
+
+1. Import existing data with one of the available parsers (import command is able to detect zip or raw data and handover it to the parser accordingly)
+
+   `bin/server storage import [parser name] [filename]`
+
+    Import adds information to the storage, to replace either delete specific the information first or flush whole storage.
+
+2. Use web interface to consult the data *storage > hosts | services | vulns | notes | vizdns | vizports/portmap*
+
+3. Manage data in storage
+	* use comments to pinpoint important nodes and services
+	* use server shell for further analysis and data management (eg. collect service list for further examination)
+	* review and tag or delete vulnerabilities one-by-one or use groupped view to speed up the process
+
+4. Generate preliminary vulnerability report for monitored network
+
+
+## 5 Development
+
+* Server part is flask-based application, while agent is standalone python
+  module. Consult `.travis.yml` to get started.
+
+* Project uses flake8, pylint (mostly defaults) pytest, coverage, selenium and
+  travis-ci.org to ensure some coding standard and functionality.
+
+* Web interface is a *simple form based airship rental like application* based
+  on DataTables glued together with jQuery and a few enhancements for multi
+  item operations.
+
+* EmberJS/React for UI is under evaluation, but yet in not_this_time category.
+
+* Any review or contribution is welcome.
