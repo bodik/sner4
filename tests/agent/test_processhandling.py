@@ -18,7 +18,9 @@ from sner.agent import main as agent_main
 
 
 def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longrun_a):  # pylint: disable=unused-argument
-    """agent's external process handling test"""
+    """
+    Agent external process handling test. Even thou the test uses nmap module, the point is to test sner.agent.modules.Base _terminate helper.
+    """
 
     proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_a), '--debug'],))
     proc_agent.start()
@@ -33,7 +35,9 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longr
 
 
 def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_markedprocess, test_longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
-    """agent's external process handling test"""
+    """
+    Agent external process handling test. Even thou the test uses nmap module, the point is to test sner.agent.modules.Base _terminate helper.
+    """
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
