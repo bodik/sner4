@@ -102,7 +102,7 @@ class BaseAgent():
 
     @contextmanager
     def terminate_context(self):
-        """terminate context manager; should restore handlers despite underlying code exceptions"""
+        """terminate context manager; should restore handlers despite of underlying code exceptions"""
 
         self.original_signal_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self.terminate)
         self.original_signal_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self.terminate)
@@ -164,7 +164,7 @@ class ServerableAgent(BaseAgent):  # pylint: disable=too-many-instance-attribute
 
     @contextmanager
     def shutdown_context(self):
-        """shutdown context manager; should restore handlers despite underlying code exceptions"""
+        """shutdown context manager; should restore handlers despite of underlying code exceptions"""
 
         self.original_signal_handlers[signal.SIGUSR1] = signal.signal(signal.SIGUSR1, self.shutdown)
         try:

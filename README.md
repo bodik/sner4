@@ -133,8 +133,7 @@ processes.
 
 ### 3.1 Agent
 
-* Wraps existing tools with the communication and execution layer = module.
-  Any module should inherit from `sner.agent.modules.Base`.
+* Wraps existing tools with the communication and execution layer.
 
 * For agent-server protocol specification see the `sner/agent/procotol.py`.
 
@@ -148,6 +147,17 @@ processes.
 * If running, agent can be stopped gracefully (`--shutdown`, might take time if
   long running job/assignment is executing, or terminated immediately
   (`--terminate`).
+
+#### 3.1.1 Agent modules
+
+Any module should inherit from `sner.agent.modules.Base`. Each module requires
+own target specification, consult corresponding class docstring for more
+information.
+
+Available modules:
+	* dummy
+	* nmap
+	* inetverscan
 
 
 ### 3.2 Server
