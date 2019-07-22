@@ -128,5 +128,16 @@ def storage_flush():
 @with_appcontext
 def storage_report():
     """generate vuln report"""
-
     print(vuln_report())
+
+
+@storage_command.command(name='inetverscan_svclist', help='generate service listing for inetverscan')
+@with_appcontext
+def storage_inetverscan_svclist():
+    """generate service listing for inetverscan; used to feed inetverscan queue from storage data"""
+
+    for service in Service.query.filter(Service.proto.in_(['tcp', 'udp'])).all():
+        print('%s://%s:%d' % (
+            service.proto,
+            service.host.address if ':' not in service.host.address else '[%s]' % service.host.address,
+            service.port))

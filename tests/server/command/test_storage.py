@@ -60,6 +60,30 @@ def test_import_nessus_command(runner):
     assert 'CVE-1900-0000' in tmpvuln.refs
 
 
+def test_import_inetverscan_command_zipfile(runner):
+    """test inetverscan parser; zipfile import"""
+
+    result = runner.invoke(storage_command, ['import', 'inetverscan', 'tests/server/data/parser-inetverscan-job.zip'])
+    assert result.exit_code == 0
+
+    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
+    host = Host.query.filter(Host.id == host_id).one_or_none()
+    assert host
+    assert host.services[0].port == 18000
+    assert host.services[0].info == 'product: Werkzeug httpd version: 0.15.5 extrainfo: Python 3.7.3'
+
+
+def test_import_inetverscan_command_plaintext(runner):
+    """test inetverscan parser; plaintext import"""
+
+    result = runner.invoke(storage_command, ['import', 'inetverscan', 'tests/server/data/parser-inetverscan-output-1.xml'])
+    assert result.exit_code == 0
+
+    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
+    host = Host.query.filter(Host.id == host_id).one_or_none()
+    assert host
+
+
 def test_flush_command(runner, test_service, test_vuln, test_note):
     """flush storage database"""
 
@@ -86,3 +110,13 @@ def test_report_command(runner, test_vuln):
     result = runner.invoke(storage_command, ['report'])
     assert result.exit_code == 0
     assert ',"%s",' % test_vuln.name in result.output
+
+
+def test_inetverscan_svclist_command(runner, test_service):
+    """test inetverscan service listing"""
+
+    result = runner.invoke(storage_command, ['inetverscan_svclist'])
+    assert result.exit_code == 0
+
+    host = Host.query.filter(Host.id == test_service.host_id).one()
+    assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output

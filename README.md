@@ -150,9 +150,7 @@ processes.
 
 #### 3.1.1 Agent modules
 
-Any module should inherit from `sner.agent.modules.Base`. Each module requires
-own target specification, consult corresponding class docstring for more
-information.
+Any module should inherit from `sner.agent.modules.Base`.
 
 Available modules:
 	* dummy
@@ -212,6 +210,9 @@ assigned `job`.
 	  assignment for agent, server select active queue with highest priority and
           draws N targets (`queue.group_size`) from queue randomly.
 
+	  Each agent module requires own target specification, consult corresponding agent module class
+	  docstring for more information.
+
 	* `job` -- represents one assignment/job for the agent. `assignment` is represented 
           by JSON object and output as `job.retval` and `job.output`.
 	  `output` should be a zip file and corresponding parser in `storage` component
@@ -240,9 +241,10 @@ assigned `job`.
 
 Storage component is main long-term data database. It's design is host/ip
 centric and should represent complete state of discovered hosts, services among
-with associated vulnerabilities and notes. Parsers are components responsible
-for parsing and interpreting agent output data (typically zip blobs) and
-translating it into storage models/entities.
+with associated vulnerabilities and notes.
+
+Parsers are components responsible for parsing and interpreting agent output
+data (typically zip blobs) and translating it into storage models/entities.
 
 * Models:
 
@@ -265,6 +267,7 @@ instance, the property is mainly used by parsers.
 * Command-line interface
 	* storage data management (import, flush)
 	* report generation
+	* generate service endpoint listing for inetverscan module
 
 
 #### 3.2.4 Visualizations and planner

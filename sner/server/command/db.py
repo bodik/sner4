@@ -100,7 +100,12 @@ def db_initdata():
     db.session.add(Task(
         name='top100 ack scan',
         module='nmap',
-        params='-sA --top-ports 100  -Pn --reason --min-hostgroup 64 --min-rate 50 --max-rate 100'))
+        params='-sA --top-ports 100    -Pn --reason --min-hostgroup 64 --min-rate 50 --max-rate 100'))
+
+    db.session.add(Task(
+        name='inet endpoint version scan',
+        module='inetverscan',
+        params='-sV    -Pn --reason --scan-delay 5'))
 
     # development queues with default targets
     queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
@@ -112,6 +117,18 @@ def db_initdata():
     db.session.add(queue)
     for target in range(100):
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
+
+    # other queues
+    db.session.add(
+        Queue(name='top100 ack scan', task=Task.query.filter(Task.name == 'top100 ack scan').one(), group_size=64, priority=10, active=False))
+
+    db.session.add(
+        Queue(
+            name='inet endpoint version scan',
+            task=Task.query.filter(Task.name == 'inet endpoint version scan').one(),
+            group_size=50,
+            priority=10,
+            active=False))
 
     # storage test data
     host = Host(

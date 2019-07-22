@@ -7,6 +7,7 @@ import abc
 import json
 import logging
 import os
+import re
 import shlex
 import signal
 import subprocess
@@ -26,7 +27,11 @@ def register_module(name):
 
 
 class Base():
-    """simple dummy agent module"""
+    """
+    Base class for agent modules. For ABNF target specifications literals not
+    explicitly specified here see 'RFC 3986 Appendix A: Collected ABNF for URI'
+    (https://tools.ietf.org/html/rfc3986#appendix-A)
+    """
 
     def __init__(self):
         self.log = logging.getLogger('sner.agent.module.%s' % __class__)
@@ -55,8 +60,9 @@ class Base():
     def _execute(self, cmd, output_file='output'):
         """execute command and capture output"""
 
+        cmdarg = shlex.split(cmd) if isinstance(cmd, str) else cmd
         with open(output_file, 'w') as output_fd:
-            self.process = subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
+            self.process = subprocess.Popen(cmdarg, stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
             retval = self.process.wait()
             self.process = None
         return retval
@@ -64,7 +70,13 @@ class Base():
 
 @register_module('dummy')
 class Dummy(Base):
-    """testing agent impl"""
+    """
+    testing module implementation
+
+    ## target specification
+
+    target = 1*CHAR
+    """
 
     def run(self, assignment):
         """simply write assignment and return"""
@@ -77,7 +89,14 @@ class Dummy(Base):
 
 @register_module('nmap')
 class Nmap(Base):
-    """nmap wrapper"""
+    """
+    nmap module
+
+    ## target specification
+    note: MUST NOT mix ipv4 and ipv6 targets
+
+    target = IPv4address / IPv6address / reg-name
+    """
 
     def run(self, assignment):
         """run the agent"""
@@ -85,8 +104,56 @@ class Nmap(Base):
         super().run(assignment)
         with open('targets', 'w') as ftmp:
             ftmp.write('\n'.join(assignment['targets']))
-        return self._execute('nmap -iL targets -oA output %s' % assignment['params'])
+        return self._execute('nmap %s -oA output -iL targets' % assignment['params'])
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
         """terminate scanner if running"""
+        self._terminate()
+
+
+@register_module('inetverscan')
+class Inetverscan(Base):
+    """
+    internet endpoint nmap-based version scanner
+
+    ## target specification
+
+    proto    = "tcp" / "udp"
+    hostspec = IPv4address / "[" IPv6address "]" / reg-name
+    port     = 1*DIGIT
+    target   = proto "://" hostspec ":" port
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.loop = True
+
+    def run(self, assignment):
+        """run the agent"""
+
+        ret = 0
+        super().run(assignment)
+
+        for idx, target in enumerate(assignment['targets']):
+            mtmp = re.match(r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$', target)
+            if mtmp:
+                cmd = ['nmap'] + shlex.split(assignment['params']) \
+                    + ['-oA', 'output-%d' % idx, '-p', '%s:%s' % (mtmp.group('proto')[0].upper(), mtmp.group('port'))]
+                host = mtmp.group('host')
+                if (host[0] == '[') and (host[-1] == ']'):
+                    cmd += ['-6', host[1:-1]]
+                else:
+                    cmd.append(host)
+                ret |= self._execute(cmd, 'output-%d' % idx)
+            else:
+                self.log.warning('invalid target: %s', target)
+            if not self.loop:  # pragma: no cover  ; not tested
+                break
+
+        return ret
+
+    def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
+        """terminate scanner if running"""
+
+        self.loop = False
         self._terminate()
