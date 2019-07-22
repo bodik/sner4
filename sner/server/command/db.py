@@ -75,27 +75,27 @@ def db_initdata():
     db.session.add(Task(
         name='dns recon',
         module='nmap',
-        params='-sL  -Pn --reason'))
+        params='-sL    -Pn --reason'))
 
     db.session.add(Task(
         name='default scan',
         module='nmap',
-        params='-A  -Pn --reason'))
+        params='-A    -Pn --reason'))
 
     db.session.add(Task(
         name='full tcp scan',
         module='nmap',
-        params='-sS -A -p1-65535  -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+        params='-sS -A -p1-65535    -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
     db.session.add(Task(
         name='basic udp scan',
         module='nmap',
-        params='-sU -sV  -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
+        params='-sU -sV    -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
 
     db.session.add(Task(
         name='userspace tcp',
         module='nmap',
-        params='-sT -A  -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
+        params='-sT -A    -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
 
     db.session.add(Task(
         name='top100 ack scan',
