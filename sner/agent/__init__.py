@@ -3,7 +3,6 @@
 sner agent
 """
 
-import abc
 import copy
 import json
 import logging
@@ -11,6 +10,7 @@ import os
 import shutil
 import signal
 import sys
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from base64 import b64encode
 from contextlib import contextmanager
@@ -79,7 +79,7 @@ class TerminateException(Exception):
     """custom exception for termination from within tests"""
 
 
-class BaseAgent():
+class AgentBase(ABC):
     """base agent impl containing main (sub)process handling code"""
 
     def __init__(self):
@@ -88,7 +88,7 @@ class BaseAgent():
         self.original_signal_handlers = {}
         self.loop = None
 
-    @abc.abstractmethod
+    @abstractmethod
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
 
@@ -140,7 +140,7 @@ class BaseAgent():
         return retval
 
 
-class ServerableAgent(BaseAgent):  # pylint: disable=too-many-instance-attributes
+class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attributes
     """agent to fetch and execute assignments from central job server"""
 
     def __init__(self, server, apikey, queue, oneshot=False, backoff_time=5.0):  # pylint: disable=too-many-arguments
@@ -236,7 +236,7 @@ class ServerableAgent(BaseAgent):  # pylint: disable=too-many-instance-attribute
         return retval
 
 
-class AssignableAgent(BaseAgent):
+class AssignableAgent(AgentBase):
     """agent to execute assignments supplied from command line"""
 
     def run(self, **kwargs):

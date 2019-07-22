@@ -3,7 +3,6 @@
 sner agent execution modules
 """
 
-import abc
 import json
 import logging
 import os
@@ -11,6 +10,7 @@ import re
 import shlex
 import signal
 import subprocess
+from abc import ABC, abstractmethod
 
 
 registered_modules = {}  # pylint: disable=invalid-name
@@ -26,7 +26,7 @@ def register_module(name):
     return register_module_real
 
 
-class Base():
+class ModuleBase(ABC):
     """
     Base class for agent modules. For ABNF target specifications literals not
     explicitly specified here see 'RFC 3986 Appendix A: Collected ABNF for URI'
@@ -37,14 +37,14 @@ class Base():
         self.log = logging.getLogger('sner.agent.module.%s' % __class__)
         self.process = None
 
-    @abc.abstractmethod
+    @abstractmethod
     def run(self, assignment):  # pylint: disable=no-self-use
         """run module for assignment"""
 
         with open('assignment.json', 'w+') as ftmp:
             ftmp.write(json.dumps(assignment))
 
-    @abc.abstractmethod
+    @abstractmethod
     def terminate(self):
         """terminate method; should terminate module immediatelly"""
 
@@ -69,7 +69,7 @@ class Base():
 
 
 @register_module('dummy')
-class Dummy(Base):
+class Dummy(ModuleBase):
     """
     testing module implementation
 
@@ -88,7 +88,7 @@ class Dummy(Base):
 
 
 @register_module('nmap')
-class Nmap(Base):
+class Nmap(ModuleBase):
     """
     nmap module
 
@@ -112,7 +112,7 @@ class Nmap(Base):
 
 
 @register_module('inetverscan')
-class Inetverscan(Base):
+class Inetverscan(ModuleBase):
     """
     internet endpoint nmap-based version scanner
 

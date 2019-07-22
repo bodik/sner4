@@ -150,8 +150,6 @@ processes.
 
 #### 3.1.1 Agent modules
 
-Any module should inherit from `sner.agent.modules.Base`.
-
 Available modules:
 	* dummy
 	* nmap
