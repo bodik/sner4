@@ -54,7 +54,7 @@ class NessusParser(ParserBase):
         if (not host.hostname) and ('host-fqdn' in nessushost['tags']):
             host.hostname = nessushost['tags']['host-fqdn']
 
-        if (not host.os) and ('operating-system' in nessushost['tags']):
+        if 'operating-system' in nessushost['tags']:
             host.os = nessushost['tags']['operating-system']
 
         return host

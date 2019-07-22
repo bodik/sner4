@@ -66,7 +66,7 @@ class NmapParser(ParserBase):
                 note.data = json.dumps(list(set(json.loads(note.data) + hostnames)))
 
         for osmatch in nmaphost.os_match_probabilities():
-            if (osmatch.accuracy == 100) and (not host.os):
+            if osmatch.accuracy == 100:
                 host.os = osmatch.name
 
         for iscript in nmaphost.scripts_results:
@@ -87,12 +87,9 @@ class NmapParser(ParserBase):
             service = Service(host=host, proto=nmapservice.protocol, port=nmapservice.port)
             db.session.add(service)
 
-        if not service.state:
-            service.state = "%s:%s" % (nmapservice.state, nmapservice.reason)
-        if not service.name:
-            service.name = nmapservice.service
-        if not service.info:
-            service.info = nmapservice.banner
+        service.state = "%s:%s" % (nmapservice.state, nmapservice.reason)
+        service.name = nmapservice.service
+        service.info = nmapservice.banner
 
         for iscript in nmapservice.scripts_results:
             xtype = 'nmap.%s' % iscript["id"]
