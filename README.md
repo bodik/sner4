@@ -151,9 +151,10 @@ processes.
 #### 3.1.1 Agent modules
 
 Available modules:
-	* dummy
-	* nmap
-	* inetverscan
+
+* dummy
+* nmap
+* inetverscan
 
 
 ### 3.2 Server
