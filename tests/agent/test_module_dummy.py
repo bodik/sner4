@@ -6,7 +6,7 @@ agent module dummy tests
 import json
 
 from sner.agent import main as agent_main
-from tests.agent import file_from_zip
+from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir, test_dummy_a):  # pylint: disable=unused-argument

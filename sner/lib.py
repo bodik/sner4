@@ -4,7 +4,9 @@ shared functions
 """
 
 import os
+from zipfile import ZipFile
 
+import magic
 import yaml
 
 
@@ -26,3 +28,16 @@ def load_yaml(filename):
         with open(filename, 'r') as ftmp:
             return yaml.safe_load(ftmp.read())
     return {}
+
+
+def is_zip(path):
+    """detect if path is zip archive"""
+    return magic.detect_from_filename(path).mime_type == 'application/zip'
+
+
+def file_from_zip(zippath, filename):
+    """exctract filename data from zipfile"""
+
+    with ZipFile(zippath) as ftmp_zip:
+        with ftmp_zip.open(filename) as ftmp:
+            return ftmp.read()

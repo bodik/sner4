@@ -3,6 +3,9 @@
 sner parsers
 """
 
+from abc import ABC, abstractmethod
+
+
 registered_parsers = {}  # pylint: disable=invalid-name
 
 
@@ -14,6 +17,15 @@ def register_parser(name):
             registered_parsers[name] = cls
         return cls
     return register_parser_real
+
+
+class ParserBase(ABC):  # pylint: disable=too-few-public-methods
+    """parser interface definition"""
+
+    @staticmethod
+    @abstractmethod
+    def import_file(path):
+        """import file from disk to storage"""
 
 
 import sner.server.parser.nmap  # noqa: E402  pylint: disable=wrong-import-position

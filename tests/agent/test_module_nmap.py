@@ -7,7 +7,7 @@ import json
 from uuid import uuid4
 
 from sner.agent import main as agent_main
-from tests.agent import file_from_zip
+from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument

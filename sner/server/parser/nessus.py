@@ -11,19 +11,39 @@ from nessus_report_parser import parse_nessus_xml
 
 from sner.server import db
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
-from sner.server.parser import register_parser
+from sner.server.parser import ParserBase, register_parser
 from sner.server.utils import SnerJSONEncoder
 
 
-@register_parser('nessus')
-class NessusParser():
+@register_parser('nessus')  # pylint: disable=too-few-public-methods
+class NessusParser(ParserBase):
     """nessus .nessus output parser"""
 
-    JOB_OUTPUT_DATAFILE = None
     SEVERITY_MAP = {'0': 'info', '1': 'low', '2': 'medium', '3': 'high', '4': 'critical'}
 
     @staticmethod
-    def import_host(nessushost):
+    def import_file(path):
+        """import nessus data from file"""
+
+        with open(path, 'r') as ftmp:
+            NessusParser._data_to_storage(ftmp.read())
+
+    @staticmethod
+    def _data_to_storage(data):
+        """parse data and put/update models in storage"""
+
+        report = parse_nessus_xml(data)['report']
+        for ihost in report['hosts']:
+            host = NessusParser._import_host(ihost)
+
+            for ireport_item in ihost['report_items']:
+                NessusParser._import_report_item(host, ireport_item)
+
+            print('parsed host: %s' % host)
+        db.session.commit()
+
+    @staticmethod
+    def _import_host(nessushost):
         """pull host to storage"""
 
         host = Host.query.filter(Host.address == nessushost['tags']['host-ip']).one_or_none()
@@ -40,7 +60,7 @@ class NessusParser():
         return host
 
     @staticmethod
-    def import_report_item(host, report_item):
+    def _import_report_item(host, report_item):
         """import nessus_v2 ReportItem 'element'"""
 
         report_item['port'] = int(report_item['port'])
@@ -107,20 +127,6 @@ class NessusParser():
             db.session.add(vuln)
 
         return vuln
-
-    @staticmethod
-    def data_to_storage(data):
-        """parse data and put/update models in storage"""
-
-        report = parse_nessus_xml(data)['report']
-        for ihost in report['hosts']:
-            host = NessusParser.import_host(ihost)
-
-            for ireport_item in ihost['report_items']:
-                NessusParser.import_report_item(host, ireport_item)
-
-            print('parsed host: %s' % host)
-        db.session.commit()
 
 
 def debug_parser():  # pragma: no cover

@@ -8,10 +8,8 @@ import re
 import sys
 from csv import DictWriter, QUOTE_ALL
 from io import StringIO
-from zipfile import ZipFile
 
 import click
-import magic
 from flask import current_app
 from flask.cli import with_appcontext
 from sqlalchemy import func
@@ -106,16 +104,6 @@ def storage_command():
 def storage_import(path, parser):
     """import data"""
 
-    def data_from_file(filename, job_output_datafile):
-        with open(filename, 'rb') as ifile:
-            mime_type = magic.detect_from_fobj(ifile).mime_type
-            if mime_type == 'application/zip':
-                with ZipFile(ifile, 'r') as ftmp:
-                    data = ftmp.read(job_output_datafile)
-            else:
-                data = ifile.read()
-        return data.decode('utf-8')
-
     if parser not in registered_parsers:
         current_app.logger.error('no such parser')
         sys.exit(1)
@@ -123,7 +111,7 @@ def storage_import(path, parser):
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
-            parser_impl.data_to_storage(data_from_file(item, parser_impl.JOB_OUTPUT_DATAFILE))
+            parser_impl.import_file(item)
     sys.exit(0)
 
 

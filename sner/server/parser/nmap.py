@@ -8,19 +8,43 @@ import sys
 
 import libnmap.parser
 
+from sner.lib import is_zip, file_from_zip
 from sner.server import db
-from sner.server.parser import register_parser
+from sner.server.parser import ParserBase, register_parser
 from sner.server.model.storage import Host, Note, Service
 
 
-@register_parser('nmap')
-class NmapParser():
+@register_parser('nmap')  # pylint: disable=too-few-public-methods
+class NmapParser(ParserBase):
     """nmap xml output parser"""
 
-    JOB_OUTPUT_DATAFILE = 'output.xml'
+    @staticmethod
+    def import_file(path):
+        """import nmap data from file or archive"""
+
+        if is_zip(path):
+            data = file_from_zip(path, 'output.xml').decode('utf-8')
+        else:
+            with open(path, 'r') as ftmp:
+                data = ftmp.read()
+        NmapParser._data_to_storage(data)
 
     @staticmethod
-    def import_host(nmaphost):
+    def _data_to_storage(data):
+        """parse data and put/update models in storage"""
+
+        report = libnmap.parser.NmapParser.parse_fromstring(data)
+        for ihost in report.hosts:
+            host = NmapParser._import_host(ihost)
+
+            for iservice in ihost.services:
+                NmapParser._import_service(host, iservice)
+
+            print('parsed host: %s' % host)
+        db.session.commit()
+
+    @staticmethod
+    def _import_host(nmaphost):
         """pull host to storage"""
 
         host = Host.query.filter(Host.address == nmaphost.address).one_or_none()
@@ -55,7 +79,7 @@ class NmapParser():
         return host
 
     @staticmethod
-    def import_service(host, nmapservice):
+    def _import_service(host, nmapservice):
         """pull service to storage"""
 
         service = Service.query.filter(Service.host == host, Service.proto == nmapservice.protocol, Service.port == nmapservice.port).one_or_none()
@@ -78,20 +102,6 @@ class NmapParser():
                 db.session.add(note)
 
         return service
-
-    @staticmethod
-    def data_to_storage(data):
-        """parse data and put/update models in storage"""
-
-        report = libnmap.parser.NmapParser.parse_fromstring(data)
-        for ihost in report.hosts:
-            host = NmapParser.import_host(ihost)
-
-            for iservice in ihost.services:
-                NmapParser.import_service(host, iservice)
-
-            print('parsed host: %s' % host)
-        db.session.commit()
 
 
 def debug_parser():  # pragma: no cover
