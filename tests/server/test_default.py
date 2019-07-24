@@ -96,5 +96,8 @@ def test_excl_matcher(app, test_excl_network, test_excl_regex):  # pylint: disab
     assert not matcher.match(str(test_network.network_address-1))
     assert not matcher.match(str(test_network.broadcast_address+1))
 
+    assert matcher.match('tcp://%s:12345' % str(test_network.network_address))
+    assert not matcher.match('tcp://notanaddress:12345')
+
     assert matcher.match('notarget1')
     assert not matcher.match('notarget3')

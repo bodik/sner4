@@ -124,6 +124,8 @@ class Inetverscan(ModuleBase):
     target   = proto "://" hostspec ":" port
     """
 
+    TARGET_RE = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$'
+
     def __init__(self):
         super().__init__()
         self.loop = True
@@ -135,7 +137,7 @@ class Inetverscan(ModuleBase):
         super().run(assignment)
 
         for idx, target in enumerate(assignment['targets']):
-            mtmp = re.match(r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$', target)
+            mtmp = re.match(self.TARGET_RE, target)
             if mtmp:
                 cmd = ['nmap'] + shlex.split(assignment['params']) \
                     + ['-oA', 'output-%d' % idx, '-p', '%s:%s' % (mtmp.group('proto')[0].upper(), mtmp.group('port'))]

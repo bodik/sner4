@@ -11,6 +11,7 @@ from ipaddress import ip_address, ip_network
 
 from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
 
+from sner.agent.modules import Inetverscan
 from sner.server.model.scheduler import Excl, ExclFamily
 from sner.server.model.storage import SeverityEnum
 
@@ -67,7 +68,16 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):
         try:
             return ip_address(value) in self.match_to
         except ValueError:
-            return False
+            pass
+
+        try:
+            mtmp = re.match(Inetverscan.TARGET_RE, value)
+            if mtmp:
+                return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
+        except ValueError:
+            pass
+
+        return False
 
 
 @ExclMatcher.register(ExclFamily.regex)  # pylint: disable=too-few-public-methods
