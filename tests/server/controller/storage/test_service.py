@@ -103,4 +103,4 @@ def test_service_portstat_route(cl_operator, test_service):
     response = cl_operator.get(url_for('storage.service_portstat_route', port=test_service.port))
     assert response.status_code == HTTPStatus.OK
 
-    assert response.lxml.xpath('//li[text()="%s"]' % test_service.info)
+    assert response.lxml.xpath('//td/a[text()="%s"]' % test_service.info)

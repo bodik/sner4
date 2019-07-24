@@ -1,6 +1,16 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
+{% block style %}
+<style>
+/* fix scrollbar to prevet columns reflow when long content is pulled into #port_detail */
+html { overflow-y: scroll; }
+/* used in service/portstat html fragment */
+table.table-condensed tbody tr td { padding: 1px; }
+table.borderless tbody tr td { border: none; }
+</style>
+{% endblock %}
+
 {% block script %}
 <script type="text/javascript">
 	var dt_static_custom = {
@@ -31,7 +41,7 @@
 
 	<div id="portstates" class="panel-collapse collapse">
 		<div class="panel-body">
-			<table class="dt_static table table-condensed">
+			<table class="dt_static table table-condensed table-hover">
 			<thead>
 				<tr>
 				<th>port state</th>
@@ -40,13 +50,13 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for tmp in portstates %}
+				{% for state, count in portstates %}
 				<tr>
-				<td>{{ tmp['state'] }}</td>
-				<td>{{ tmp['state_count'] }}</td>
+				<td>{{ state }}</td>
+				<td>{{ count }}</td>
 				<td>
-					<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(tmp['state'])) }}"><span class="glyphicon glyphicon-filter"></span></a>
-					<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(tmp['state'])) }}"><span class="glyphicon glyphicon-list"></span></a>
+					<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(state)) }}"><span class="glyphicon glyphicon-filter"></span></a>
+					<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(state)) }}"><span class="glyphicon glyphicon-list"></span></a>
 				</td>
 				</tr>
 				{% endfor %}
@@ -58,12 +68,12 @@
 
 <h2>Services port map{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.service_vizports_route') }}">unfilter</a></small>{% endif %}</h2>
 <div class="row">
-	<div class="col-md-8">
-	{% for tmp in portmap %}
+	<div class="col-md-6">
+		{% for tmp in portmap %}
 		<a class="portmap_item" href="{{ url_for('storage.service_list_route', filter='Service.port=="%s"'|format(tmp['port'])) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
-	{% endfor %}
+		{% endfor %}
 	</div>
 
-	<div id="port_detail" class="col-md-4"></div>
+	<div id="port_detail" class="col-md-6"></div>
 </div>
 {% endblock %}

@@ -110,8 +110,8 @@ def service_delete_route(service_id):
 def service_vizports_route():
     """visualize portmap"""
 
-    query = db.session.query(Service.state, func.count(Service.id).label('state_count')).group_by(Service.state).order_by(desc('state_count'))
-    portstates = [tmp for tmp in query.all()]
+    portstates = db.session.query(Service.state, func.count(Service.id).label('state_count')) \
+        .group_by(Service.state).order_by(desc('state_count')).all()
 
     query = db.session.query(Service.port, func.count(Service.id)).order_by(Service.port).group_by(Service.port)
     if 'filter' in request.values:
@@ -132,15 +132,16 @@ def service_vizports_route():
 def service_portstat_route(port):
     """generate port statistics fragment"""
 
-    stats = {}
-    query = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port).order_by(Service.proto).group_by(Service.proto)
-    for proto, count in query.all():
-        stats[proto] = count
-    infos = db.session.query(func.distinct(Service.info)).filter(Service.port == port, Service.info != '').all()
-    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').all()
-    hosts = db.session \
-        .query(func.concat(Host.address, ' (', Host.hostname, ')'), Host.id) \
+    stats = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port) \
+        .group_by(Service.proto).order_by(Service.proto).all()
+
+    infos = db.session.query(func.distinct(Service.info), func.count(Service.id).label('info_count')) \
+        .filter(Service.port == port, Service.info != '').group_by(Service.info).order_by(desc('info_count')).all()
+
+    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment).all()
+
+    hosts = db.session.query(Host.address, Host.hostname, Host.id) \
         .select_from(Service).outerjoin(Host) \
-        .filter(Service.port == port).all()
+        .filter(Service.port == port).order_by(Host.address).all()
 
     return render_template('storage/service/portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)
