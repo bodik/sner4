@@ -13,10 +13,12 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 from sqlalchemy import func
+from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.parser import registered_parsers
+from sner.server.sqlafilter import filter_parser
 
 
 def vuln_report():
@@ -133,10 +135,14 @@ def storage_report():
 
 @storage_command.command(name='inetverscan_svclist', help='generate service listing for inetverscan')
 @with_appcontext
-def storage_inetverscan_svclist():
+@click.argument('qfilter', required=False)
+def storage_inetverscan_svclist(qfilter=None):
     """generate service listing for inetverscan; used to feed inetverscan queue from storage data"""
 
-    for service in Service.query.filter(Service.proto.in_(['tcp', 'udp'])).all():
+    query = Service.query.filter(Service.proto.in_(['tcp', 'udp']))
+    if qfilter:
+        query = apply_filters(query, filter_parser.parse(qfilter), do_auto_join=False)
+    for service in query.all():
         print('%s://%s:%d' % (
             service.proto,
             service.host.address if ':' not in service.host.address else '[%s]' % service.host.address,

@@ -117,6 +117,10 @@ def test_inetverscan_svclist_command(runner, test_service):
 
     result = runner.invoke(storage_command, ['inetverscan_svclist'])
     assert result.exit_code == 0
+    host = Host.query.filter(Host.id == test_service.host_id).one()
+    assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
+    result = runner.invoke(storage_command, ['inetverscan_svclist', 'Service.port=="%d"' % test_service.port])
+    assert result.exit_code == 0
     host = Host.query.filter(Host.id == test_service.host_id).one()
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output

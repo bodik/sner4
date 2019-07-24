@@ -266,7 +266,7 @@ instance, the property is mainly used by parsers.
 * Command-line interface
 	* storage data management (import, flush)
 	* report generation
-	* generate service endpoint listing for inetverscan module
+	* generate service endpoint listing for inetverscan module (supports filtering)
 
 
 #### 3.2.4 Visualizations and planner
