@@ -105,8 +105,7 @@ def host_delete_route(host_id):
 def host_vizdns_route():
     """dns hierarchy tree visualization"""
 
-    crop = request.args.get('crop', 1, type=int)
-    return render_template('storage/host/vizdns.html', crop=crop)
+    return render_template('storage/host/vizdns.html')
 
 
 @blueprint.route('/host/vizdns.json')
@@ -133,8 +132,7 @@ def host_vizdns_json_route():
             (nodes, links) = to_graph_data(nodeid, treedata[node], nodes, links)
         return (nodes, links)
 
-    crop = request.args.get('crop', 1, type=int)
-
+    crop = request.args.get('crop', 0, type=int)
     hostnames_tree = {}
     for ihost in Host.query.all():
         if ihost.hostname:

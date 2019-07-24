@@ -22,6 +22,7 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.js') }}"></script>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/select.dataTables.min.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.select.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/plugin.ellipsis.js') }}"></script>
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tageditor/jquery.tag-editor.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.caret.min.js') }}"></script>
@@ -46,7 +47,10 @@
 		/* dt styling */
 		.dataTables_wrapper, .dt_toolbar { margin-top: 5px; margin-bottom: 5px; }
 		td.dt-nowrap { white-space: nowrap; }
+
+		/* other */
 		.text-alert { color: red; }
+		.text-warning { color: orange; }
 	</style>
 
 
@@ -184,7 +188,7 @@
 		 * @param {object} extra - extra data to inject into column definition
 		 */
 		function dt_column(d, extra={}) {
-			return $.extend({"name": d, "title": d, "data": d, "render": $.fn.dataTable.render.text()}, extra);
+			return $.extend({'name': d, 'title': d, 'data': d, 'render': $.fn.dataTable.render.text()}, extra);
 		}
 
 		/**
@@ -213,6 +217,7 @@
 			'info': true,
 			'paging': true,
 			'pageLength': 10,
+			'lengthMenu': [ 10, 50, 100, 200, 500, 1000 ],
 
 			// behaviors
 			'drawCallback': function (settings) {
@@ -285,13 +290,16 @@
 				<li><a href="{{ url_for('storage.vuln_list_route') }}">st:Vulns</a></li>
 				<li><a href="{{ url_for('storage.vuln_grouped_route') }}">st:Vulns grouped</a></li>
 				<li><a href="{{ url_for('storage.note_list_route') }}">st:Notes</a></li>
-				<li><a href="{{ url_for('storage.host_vizdns_route') }}">st:Hosts:vizdns</a></li>
+				<li><a href="{{ url_for('storage.host_vizdns_route', crop=1) }}">st:Hosts:vizdns</a></li>
 				<li><a href="{{ url_for('storage.service_vizports_route') }}">st:Services:vizports</a></li>
 				{% endif %}
 			{% endif %}
 			</ul>
 
 			<ul class="nav navbar-nav navbar-right">
+			{% if config['DEBUG'] %}
+				<li><a title="debug is on"><span class="text-warning glyphicon glyphicon-warning-sign"></span></a></li>
+			{% endif %}
 			{% if not current_user.is_authenticated %}
 				<li><a href="{{ url_for('auth.login_route') }}">Login</a></li>
 			{% else %}
