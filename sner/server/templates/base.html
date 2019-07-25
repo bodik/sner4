@@ -292,6 +292,7 @@
 				<li><a href="{{ url_for('storage.note_list_route') }}">st:Notes</a></li>
 				<li><a href="{{ url_for('storage.host_vizdns_route', crop=1) }}">st:Hosts:vizdns</a></li>
 				<li><a href="{{ url_for('storage.service_vizports_route') }}">st:Services:vizports</a></li>
+				<li><a href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">st:Services:vizinfos</a></li>
 				{% endif %}
 			{% endif %}
 			</ul>

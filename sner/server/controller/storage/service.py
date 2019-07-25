@@ -6,6 +6,7 @@ controller service
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import desc, func
+from sqlalchemy.dialects import postgresql
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -136,7 +137,7 @@ def service_portstat_route(port):
         .group_by(Service.proto).order_by(Service.proto).all()
 
     infos = db.session.query(func.distinct(Service.info), func.count(Service.id).label('info_count')) \
-        .filter(Service.port == port, Service.info != '').group_by(Service.info).order_by(desc('info_count')).all()
+        .filter(Service.port == port, Service.info != '', Service.info is not None).group_by(Service.info).order_by(desc('info_count')).all()
 
     comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment).all()
 
@@ -145,3 +146,31 @@ def service_portstat_route(port):
         .filter(Service.port == port).order_by(Host.address).all()
 
     return render_template('storage/service/portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)
+
+
+@blueprint.route('/service/vizinfos')
+@role_required('operator')
+def service_vizinfos_route():
+    """generate word cloud for service.info"""
+
+    return render_template('storage/service/vizinfos.html')
+
+
+@blueprint.route('/service/vizinfos.json')
+@role_required('operator')
+def service_vizinfos_json_route():
+    """service info visualization json data endpoint"""
+
+    if request.args.get('crop'):
+        crop = request.args.get('crop', type=int)
+        info_column = func.array_to_string(func.string_to_array(Service.info, ' ', type_=postgresql.ARRAY(db.String))[1:crop], ' ')
+    else:
+        info_column = Service.info
+
+    query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')) \
+        .filter(Service.info != '', Service.info is not None).group_by(info_column).order_by(desc('info_count'))
+
+    if request.args.get('limit'):
+        query = query.limit(request.args.get('limit'))
+
+    return jsonify([{'info': info, 'count': count} for info, count in query.all()])

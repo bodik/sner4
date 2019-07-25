@@ -104,3 +104,24 @@ def test_service_portstat_route(cl_operator, test_service):
     assert response.status_code == HTTPStatus.OK
 
     assert response.lxml.xpath('//td/a[text()="%s"]' % test_service.info)
+
+
+def test_service_vizinfos_route(cl_operator):
+    """service vizinfos route test"""
+
+    response = cl_operator.get(url_for('storage.service_vizinfos_route'))
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_service_vizinfos_json_route(cl_operator, test_service):
+    """service vizinfos json route test"""
+
+    response = cl_operator.get(url_for('storage.service_vizinfos_json_route'))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data[0]['info'] == test_service.info
+
+    response = cl_operator.get(url_for('storage.service_vizinfos_json_route', crop=2, limit=1))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data[0]['info'] == ' '.join(test_service.info.split(' ')[:2])

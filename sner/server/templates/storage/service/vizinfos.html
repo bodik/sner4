@@ -1,0 +1,129 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='d3-cloud/d3.layout.cloud.js') }}"></script>
+{% endblock %}
+
+{% block style %}
+<style>
+.toolbar {
+	text-align: center;
+	margin-bottom: 0.5em;
+}
+svg {
+	border:1px solid lightgrey;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!--
+	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
+	https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js
+	https://github.com/jasondavies/d3-cloud
+-->
+<div class="services">
+	<div class="toolbar">
+		<div class="btn-group">
+			<a class="btn btn-xs btn-default disabled">view:</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="view:normal">normal</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="view:inverse">inverse</a>
+		</div>
+
+		<div class="btn-group">
+			<a class="btn btn-xs btn-default disabled">crop at:</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:2">2</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:3">3</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:4">4</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:5">5</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:">no crop</a>
+		</div>
+
+		<div class="btn-group">
+			<a class="btn btn-xs btn-default disabled">limit:</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:10">10</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:30">30</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:40">40</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:50">50</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:100">100</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:200">200</a>
+			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:">no limit</a>
+		</div>
+	</div>
+	<svg></svg>
+</div>
+
+<script>
+/* globals*/
+var url_params = new URLSearchParams(window.location.search);
+if (!url_params.has('view')) { url_params.set('view', 'normal'); }
+
+/* graph */
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+var width = $('.services')[0].clientWidth;
+var height = 0.8 * window.innerHeight;
+var svg = d3.select('svg')
+	.attr('width', width)
+	.attr('height', height);
+var wordcloud = svg.append('g')
+	.attr('class','wordcloud')
+	.attr('transform', 'translate(' + width/2 + ',' + height/2 + ')');
+var processing = svg.append('g')
+	.attr('class', 'processing')
+	.attr('transform', 'translate(' + width/2 + ',' + height/2 + ')')
+	.append('text')
+		.style('font-size', '20px')
+		.style('text-anchor', 'middle')
+		.text('Processing graph ...');
+
+/* generate graph layout */
+d3.json(Flask.url_for('storage.service_vizinfos_json_route') + window.location.search, function(data) {
+	var counts = data.map(function(d) { return d.count; });
+	var max = Math.max.apply(null, counts);
+	var min = Math.min.apply(null, counts);
+	var fontSize = d3.scaleLog().domain((url_params.get('view') == 'inverse') ? [max, min] : [min, max]).range([10, 40]);
+
+	d3.layout.cloud()
+		.size([width, height])
+		.timeInterval(20)
+		.words(data)
+		.rotate(0)
+		.fontSize(function(d) { return fontSize(d.count); })
+		.text(function(d) { return d.info; })
+		.on('end', draw)
+		.start();
+});
+
+/* computed layout draw callback */
+function draw(words) {
+	d3.select('.wordcloud').selectAll('text')
+		.data(words)
+		.enter().append('text')
+			.attr('class','word')
+			.style('fill', function(d, i) { return color(i); })
+			.style('font-size', function(d) { return d.size + 'px'; })
+			.style('font-family', function(d) { return d.font; })
+			.attr('text-anchor', 'middle')
+			.attr('transform', function(d) { return 'translate(' + [d.x, d.y] + ') rotate(' + d.rotate + ')'; })
+			.text(function(d) { return d.text; });
+
+	d3.select('.processing').style('visibility', 'hidden');
+}
+
+/* graph controls. this might seem heavy, but to preserve all but selected request.args in jinja2 is not so nice/simple and requires 'do statement extension' */
+$('.abutton_modify_view').each(function(index, elem) {
+	var new_params = new URLSearchParams(url_params);
+	var [key, val] = elem.getAttribute('data-args').split(':');
+	if (val) {
+		new_params.set(key, val);
+		if (url_params.get(key) == val) { $(elem).addClass('active'); }
+	} else {
+		new_params.delete(key);
+		if (!url_params.has(key)) { $(elem).addClass('active'); }
+	}
+	elem.href = '?' + new_params.toString();
+});
+</script>
+{% endblock %}
