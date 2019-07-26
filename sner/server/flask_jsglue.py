@@ -1,6 +1,15 @@
-from flask import current_app, make_response, url_for
+"""
+modified Flask-JSGlue 0.3.1 https://github.com/stewartpark/Flask-JSGlue/
+* released version 0.3.1 does not use app.config['APPLICATION_ROOT']
+* master does not install required template
+"""
+# pylint: disable=invalid-name,missing-docstring,unused-argument,unused-variable
+
+import json
+import re
+
+from flask import make_response, url_for
 from jinja2 import Markup
-import re, json
 
 JSGLUE_JS_PATH = '/jsglue.js'
 JSGLUE_NAMESPACE = 'Flask'
@@ -12,17 +21,20 @@ def get_routes(app):
     output = []
     for r in app.url_map.iter_rules():
         endpoint = r.endpoint
-        rule = r.rule
+        if (app.config['APPLICATION_ROOT'] == '/') or (not app.config['APPLICATION_ROOT']):
+            rule = r.rule
+        else:  # pragma: no cover ; not tested
+            rule = '{root}{rule}'.format(root=app.config['APPLICATION_ROOT'], rule=r.rule)
         rule_args = [x.split(':')[-1] for x in rule_parser.findall(rule)]
         rule_tr = splitter.split(rule)
         output.append((endpoint, rule_tr, rule_args))
     return sorted(output, key=lambda x: len(x[1]), reverse=True)
 
 
-class JSGlue(object):
+class JSGlue():
     def __init__(self, app=None, **kwargs):
         self.app = app
-        if app is not None:
+        if app is not None:  # pragma: no cover ; not tested
             self.init_app(app)
 
     def init_app(self, app):
