@@ -14,7 +14,6 @@ fido2==0.7.0
 file-magic==0.4.0
 flake8==3.7.8
 Flask==1.1.1
-Flask-JSGlue==0.3.1
 Flask-Login==0.4.1
 Flask-SQLAlchemy==2.4.0
 Flask-WTF==0.14.2

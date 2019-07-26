@@ -1,9 +1,10 @@
-server:
-    secret: 'changeit'
-    db: 'postgresql:///sner'
-    var: '/var/sner'
-
-agent:
-    server: 'http://localhost:18000'
-    apikey: 'generateit'
-    queue: null
+#server:
+#    secret: 'changeit'
+#    application_root: '/sner'
+#    db: 'postgresql://user:password@localhost/sner'
+#    var: '/var/sner'
+#
+#agent:
+#    server: 'http://localhost:18000'
+#    apikey: 'generateit'
+#    queue: null

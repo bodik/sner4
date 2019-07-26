@@ -8,12 +8,12 @@ import sys
 
 import flask.cli
 from flask import Flask, render_template
-from flask_jsglue import JSGlue
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
 
 from sner.lib import get_dotted, load_yaml
+from sner.server.flask_jsglue import JSGlue
 from sner.server.wrapped_fido2_server import WrappedFido2Server
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
@@ -47,6 +47,7 @@ def config_from_yaml(filename):
     config_dict = load_yaml(filename)
     config = {
         'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
+        'APPLICATION_ROOT': get_dotted(config_dict, 'server.application_root'),
         'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
         'SNER_VAR': get_dotted(config_dict, 'server.var')}
     return {k: v for k, v in config.items() if v is not None}
