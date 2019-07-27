@@ -263,7 +263,7 @@ def main(argv=None):
 
     parser.add_argument('--assignment', help='manually specified assignment; mostly for debug purposses')
 
-    parser.add_argument('--config', default='sner.yaml', help='agent config')
+    parser.add_argument('--config', default='/etc/sner.yaml', help='agent config')
     parser.add_argument('--server', help='server uri')
     parser.add_argument('--apikey', help='server apikey')
     parser.add_argument('--queue', help='select specific queue to work on')
