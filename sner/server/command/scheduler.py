@@ -3,18 +3,16 @@
 scheduler commands
 """
 
-import json
 import sys
 from ipaddress import ip_address, ip_network, summarize_address_range
 
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy import func
 
 from sner.server import db
 from sner.server.controller.scheduler.job import job_delete
-from sner.server.model.scheduler import Job, Queue, Target, Task
+from sner.server.model.scheduler import Job, Queue, Target
 
 
 def queuebyx(queueid):
@@ -30,8 +28,6 @@ def queuebyx(queueid):
 def scheduler_command():
     """scheduler commands click group/container"""
 
-
-# misc commands
 
 @scheduler_command.command(name='enumips', help='enumerate ip address range')
 @click.argument('targets', nargs=-1)
@@ -55,22 +51,6 @@ def rangetocidr(start, end):
 
     for tmp in summarize_address_range(ip_address(start), ip_address(end)):
         print(tmp)
-
-
-# queue commands
-
-@scheduler_command.command(name='queue_list', help='queues listing')
-@with_appcontext
-def queue_list():
-    """list queues"""
-
-    listing = db.session.query(Queue.id, Queue.name, Task, func.count(Target.id)) \
-        .outerjoin(Task).outerjoin(Target).group_by(Queue.id, Queue.name, Task).all()
-    headers = ['id', 'name', 'task', 'targets']
-    fmt = '%-4s %-20s %-40s %-8s'
-    print(fmt % tuple(headers))
-    for row in listing:
-        print(fmt % row)
 
 
 @scheduler_command.command(name='queue_enqueue', help='add targets to queue')
@@ -111,35 +91,17 @@ def queue_flush(queue_id):
     sys.exit(0)
 
 
-# job commands
-
-@scheduler_command.command(name='job_list', help='jobs listing')
+@scheduler_command.command(name='queue_prune', help='delete all associated jobs')
+@click.argument('queue_id')
 @with_appcontext
-def job_list():
-    """list jobs"""
+def queue_prune(queue_id):
+    """delete all jobs associated with queue"""
 
-    headers = ['id', 'queue', 'retval', 'time_start', 'time_end', 'output_filename']
-    fmt = '%-36s %-40s %6s %-20s %-20s %-40s'
-    print(fmt % tuple(headers))
-    for job in Job.query.all():
-        print(fmt % (
-            job.id,
-            json.dumps(job.queue.name if job.queue else ''),
-            job.retval,
-            current_app.jinja_env.filters['datetime'](job.time_start),
-            current_app.jinja_env.filters['datetime'](job.time_end),
-            job.output))
-
-
-@scheduler_command.command(name='job_delete', help='delete job')
-@click.argument('job_id')
-@with_appcontext
-def job_delete_command(job_id):
-    """job delete command stub"""
-
-    job = Job.query.filter(Job.id == job_id).one_or_none()
-    if not job:
-        current_app.logger.error('no such job')
+    queue = queuebyx(queue_id)
+    if not queue:
+        current_app.logger.error('no such queue')
         sys.exit(1)
 
-    sys.exit(job_delete(job))
+    for job in Job.query.filter(Job.queue_id == queue.id).all():
+        job_delete(job)
+    sys.exit(0)

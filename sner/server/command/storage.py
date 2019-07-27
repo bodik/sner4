@@ -3,6 +3,7 @@
 storage commands
 """
 
+import json
 import os
 import re
 import sys
@@ -12,11 +13,11 @@ from io import StringIO
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
-from sner.server.model.storage import Host, Service, Vuln
+from sner.server.model.storage import Host, Note, Service, Vuln
 from sner.server.parser import registered_parsers
 from sner.server.sqlafilter import filter_parser
 
@@ -133,17 +134,84 @@ def storage_report():
     print(vuln_report())
 
 
-@storage_command.command(name='inetverscan_svclist', help='generate service listing for inetverscan')
+@storage_command.command(name='host_cleanup', help='cleanup hosts; remove hosts not associated with any data (eg. just addresses)')
 @with_appcontext
-@click.argument('qfilter', required=False)
-def storage_inetverscan_svclist(qfilter=None):
-    """generate service listing for inetverscan; used to feed inetverscan queue from storage data"""
+@click.option('--dry', is_flag=True, help='do not actually remove')
+def storage_host_cleanup(**kwargs):
+    """
+    clean up storage, will remove all hosts:
+        * without any data attribute set
+        * having no service, vuln or note
+    """
 
-    query = Service.query.filter(Service.proto.in_(['tcp', 'udp']))
-    if qfilter:
-        query = apply_filters(query, filter_parser.parse(qfilter), do_auto_join=False)
-    for service in query.all():
-        print('%s://%s:%d' % (
-            service.proto,
-            service.host.address if ':' not in service.host.address else '[%s]' % service.host.address,
-            service.port))
+    services_count = func.count(Service.id)
+    vulns_count = func.count(Vuln.id)
+    notes_count = func.count(Note.id)
+    query_hosts = Host.query \
+        .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
+        .filter(
+            or_(Host.hostname == '', Host.hostname == None),  # noqa: E711  pylint: disable=singleton-comparison
+            or_(Host.os == '', Host.os == None),  # noqa: E711  pylint: disable=singleton-comparison
+            or_(Host.comment == '', Host.comment == None)  # noqa: E711  pylint: disable=singleton-comparison
+        ) \
+        .having(services_count == 0).having(vulns_count == 0).having(notes_count == 0).group_by(Host.id)
+
+    if kwargs['dry']:
+        for host in query_hosts.all():
+            print(host)
+
+        # do not commit, it's dry test
+        db.session.rollback()
+    else:
+        for host in query_hosts.all():
+            db.session.delete(host)
+        db.session.commit()
+
+
+@storage_command.command(name='service_list', help='service (filtered) listing')
+@with_appcontext
+@click.option('--filter', help='filter query')
+@click.option('--long', is_flag=True, help='show service extended info')
+def storage_service_list(**kwargs):
+    """generate service listing; used to feed inetverscan queue from storage data"""
+
+    def fmt_addr(val):
+        """format ?ipv6 address"""
+        return val if ':' not in val else '[%s]' % val
+
+    def data_default(svc):
+        """return tuple for default output"""
+        return (svc.proto, fmt_addr(svc.host.address), svc.port)
+
+    def data_long(svc):
+        """return tuple for long output"""
+        return (svc.proto, fmt_addr(svc.host.address), svc.port, svc.name, svc.state, json.dumps(svc.info))
+
+    query = Service.query
+    if kwargs['filter']:
+        query = apply_filters(query, filter_parser.parse(kwargs['filter']), do_auto_join=False)
+
+    fmt, fndata = '%s://%s:%d', data_default
+    if kwargs['long']:
+        fmt, fndata = '%s://%s:%d %s %s %s', data_long
+    for tmp in query.all():
+        print(fmt % fndata(tmp))
+
+
+@storage_command.command(name='service_cleanup', help='cleanup services; remove all in "filtered" state')
+@with_appcontext
+@click.option('--dry', is_flag=True, help='do not actually remove')
+def storage_service_cleanup(**kwargs):
+    """clean up storage, will remove all services in any of 'filtered' state"""
+
+    query_services = Service.query.filter(Service.state.ilike('filtered%'))
+    if kwargs['dry']:
+        for service in query_services.all():
+            print(service)
+
+        # do not commit, it's dry test
+        db.session.rollback()
+    else:
+        for service in query_services.all():
+            db.session.delete(service)
+        db.session.commit()

@@ -36,16 +36,8 @@ def test_rangetocidr_command(runner, tmpworkdir):
     assert '128.0.0.0/30' in result.output
 
 
-def test_queue_list_command(runner, test_queue):
-    """queue list command test"""
-
-    result = runner.invoke(scheduler_command, ['queue_list'])
-    assert result.exit_code == 0
-    assert test_queue.name in result.output
-
-
 def test_queue_enqueue_command(runner, tmpworkdir, test_queue):
-    """queue enqueue route test"""
+    """queue enqueue command test"""
 
     test_target = create_test_target(test_queue)
     test_path = 'ips.txt'
@@ -69,7 +61,7 @@ def test_queue_enqueue_command(runner, tmpworkdir, test_queue):
 
 
 def test_queue_flush_command(runner, test_target):
-    """queue flush route test"""
+    """queue flush command test"""
 
     test_queue_id = test_target.queue_id
 
@@ -83,23 +75,14 @@ def test_queue_flush_command(runner, test_target):
     assert not queue.targets
 
 
-def test_job_list_command(runner, test_job):
-    """job list command test"""
+def test_queue_prune_command(runner, test_job_completed):
+    """queue prune command test"""
 
-    result = runner.invoke(scheduler_command, ['job_list'])
-    assert result.exit_code == 0
-    assert test_job.id in result.output
-
-
-def test_job_delete_command(runner, test_job_completed):
-    """job delete command test"""
-
-    result = runner.invoke(scheduler_command, ['job_delete', str(666)])
+    result = runner.invoke(scheduler_command, ['queue_prune', str(666)])
     assert result.exit_code == 1
 
-    result = runner.invoke(scheduler_command, ['job_delete', test_job_completed.id])
+    result = runner.invoke(scheduler_command, ['queue_prune', str(test_job_completed.queue_id)])
     assert result.exit_code == 0
 
-    job = Job.query.filter(Job.id == test_job_completed.id).one_or_none()
-    assert not job
+    assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()
     assert not os.path.exists(test_job_completed.output_abspath)

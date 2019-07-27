@@ -9,6 +9,7 @@ import re
 from sner.server import db
 from sner.server.command.storage import storage_command
 from sner.server.model.storage import Host, Note, Service, SeverityEnum, Vuln
+from tests import persist_and_detach
 
 
 def test_import_invalidparser(runner):
@@ -112,15 +113,66 @@ def test_report_command(runner, test_vuln):
     assert ',"%s",' % test_vuln.name in result.output
 
 
-def test_inetverscan_svclist_command(runner, test_service):
-    """test inetverscan service listing"""
+def test_host_cleanup_command(runner):
+    """test host_cleanup command"""
 
-    result = runner.invoke(storage_command, ['inetverscan_svclist'])
+    test_host1 = persist_and_detach(Host(address='127.127.127.135', os='identified'))
+    test_host2 = persist_and_detach(Host(address='127.127.127.134'))
+    persist_and_detach(Service(host_id=test_host2.id, proto='tcp', port=1, state='anystate:reason'))
+    test_host3 = persist_and_detach(Host(address='127.127.127.133', os=''))
+
+    result = runner.invoke(storage_command, ['host_cleanup', '--dry'])
+    assert result.exit_code == 0
+
+    assert repr(test_host1) not in result.output
+    assert repr(test_host2) not in result.output
+    assert repr(test_host3) in result.output
+    assert Host.query.count() == 3
+
+    result = runner.invoke(storage_command, ['host_cleanup'])
+    assert result.exit_code == 0
+
+    hosts = Host.query.all()
+    assert len(hosts) == 2
+    assert test_host3.id not in [x.id for x in hosts]
+
+
+def test_service_list_command(runner, test_service):
+    """test services listing"""
+
+    result = runner.invoke(storage_command, ['service_list'])
     assert result.exit_code == 0
     host = Host.query.filter(Host.id == test_service.host_id).one()
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
-    result = runner.invoke(storage_command, ['inetverscan_svclist', 'Service.port=="%d"' % test_service.port])
+    result = runner.invoke(storage_command, ['service_list', '--long'])
+    assert result.exit_code == 0
+    assert json.dumps(test_service.info) in result.output
+
+    result = runner.invoke(storage_command, ['service_list', '--filter', 'Service.port=="%d"' % test_service.port])
     assert result.exit_code == 0
     host = Host.query.filter(Host.id == test_service.host_id).one()
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
+
+
+def test_service_cleanup_command(runner, test_host):
+    """test service_cleanup command"""
+
+    test_service1 = persist_and_detach(Service(host_id=test_host.id, proto='tcp', port=1, state='open:reason'))
+    test_service2 = persist_and_detach(Service(host_id=test_host.id, proto='tcp', port=1, state='filtered:reason'))
+    persist_and_detach(Note(host_id=test_host.id, service_id=test_service2.id, xtype='cleanuptest', data='atestdata'))
+
+    result = runner.invoke(storage_command, ['service_cleanup', '--dry'])
+    assert result.exit_code == 0
+
+    assert repr(test_service1) not in result.output
+    assert repr(test_service2) in result.output
+    assert Service.query.count() == 2
+
+    result = runner.invoke(storage_command, ['service_cleanup'])
+    assert result.exit_code == 0
+
+    assert Note.query.count() == 0
+    services = Service.query.all()
+    assert len(services) == 1
+    assert services[0].id == test_service1.id

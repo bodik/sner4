@@ -147,7 +147,7 @@ Component provides AAA mechanisms for the server.
 	* apikey (re)generation
 
 * Command-line interface
-	* user password reset
+	* user password reset (`passwordreset`)
 
 
 #### 2.2.2 Scheduler
@@ -187,9 +187,8 @@ assigned `job`.
 	* assignment and ouput gathering functionality for agents is available through `/api` endpoints
 
 * Command-line interface
-	* job management (list, delete)
-	* queues management (list, enqueue, flush)
-	* ip enumeration helpers (enumips, rangetocird)
+	* ip/targets enumeration helpers (`enumips`, `rangetocird`)
+	* queue management (`queue_enqueue`, `queue_flush`, `queue_prune`)
 
 
 #### 2.2.3 Storage and parsers
@@ -219,9 +218,10 @@ instance, the property is mainly used by parsers.
 	* basic visualizations: hostnames tree interactive graph, service port map
 
 * Command-line interface
-	* storage data management (import, flush)
-	* report generation
-	* generate service endpoint listing for inetverscan module (supports filtering)
+	* storage data management (`import`, `flush`)
+	* report generation (`report`)
+	* host management (`host_cleanup`)
+	* service management (`service_list`, `service_cleanup`)
 
 
 #### 3.2.4 Visualizations and planner

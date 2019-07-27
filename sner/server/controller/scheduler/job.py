@@ -36,7 +36,6 @@ def job_delete(job):
         os.remove(job.output_abspath)
     db.session.delete(job)
     db.session.commit()
-    return 0
 
 
 @blueprint.route('/job/list')
