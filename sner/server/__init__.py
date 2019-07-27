@@ -14,17 +14,14 @@ from flask_wtf.csrf import generate_csrf
 
 from sner.lib import get_dotted, load_yaml
 from sner.server.flask_jsglue import JSGlue
-from sner.server.wrapped_fido2_server import WrappedFido2Server
 from sner.server.sessions import FilesystemSessionInterface
+from sner.server.wrapped_fido2_server import WrappedFido2Server
 from sner.version import __version__
 
 
 DEFAULT_CONFIG = {
     # flask
     'SECRET_KEY': os.urandom(32),
-
-    # debug toolbar
-    'DEBUG_TB_INTERCEPT_REDIRECTS': False,
 
     # sqlalchemy
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,

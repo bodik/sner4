@@ -4,56 +4,14 @@
 
 ## Table of Contents
 
-* [Quick start](#1-quick-start)
-* [Project description](#2-project-description)
-* [Features](#3-features)
+* [Project description](#1-project-description)
+* [Features](#2-features)
+* [Installation](#3-installation)
 * [Usage](#4-usage)
 * [Development](#5-development)
 
 
-## 1 Quick start
-
-### 1.1 Installation
-
-```
-# install prerequisities
-apt-get install git sudo make
-
-# clone and tune repository
-git clone https://gitlab.flab.cesnet.cz/bodik/sner4 sner
-cd sner
-ln -s ../../bin/git_hookprecommit.sh .git/hooks/pre-commit
-
-# OPTIONAL, create and activate virtualenv
-make venv
-. venv/bin/activate
-
-# install dependencies
-make install-deps
-
-# run just tests or full coverage
-make db-create-test
-make test
-make coverage
-
-# OPTIONAL, install extras and run even larger test-suite
-make install-extra
-make test-extra
-
-# activate venv and run dev server
-make db-create-default
-make db
-bin/server run
-```
-
-### 1.2 Basic dns recon
-```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file -
-bin/agent --debug --queue 'dns recon'
-```
-
-
-## 2 Project description
+## 1 Project description
 
 Currently, an ad-hoc developed version of the orchestration tool/wrapper for
 distributing, partitioning and analysis of various nmap and nikto workloads is
@@ -78,7 +36,7 @@ not have simple extendable support for multiple scanning tools (ivre), does not 
 to easy modify the UI (metasploit) or does not have web-based UI at all (VulntoES, sparta).
 
 
-### 2.1 Design overview
+### 1.1 Design overview
 
 * Distributing network reconaissance workload
 	* planner		-- management and scheduling for repetitive recon of the monitored networks
@@ -125,13 +83,13 @@ wrapped tools for the analysis and data management components.
 ```
 
 
-## 3 Features
+## 2 Features
 
 All implemented features supports penetration testing or continuous monitoring
 processes.
 
 
-### 3.1 Agent
+### 2.1 Agent
 
 * Wraps existing tools with the communication and execution layer.
 
@@ -148,23 +106,22 @@ processes.
   long running job/assignment is executing, or terminated immediately
   (`--terminate`).
 
-#### 3.1.1 Agent modules
 
-Available modules:
+#### 2.1.1 Agent modules
 
 * dummy
 * nmap
 * inetverscan
 
 
-### 3.2 Server
+### 2.2 Server
 
 Server itself is flask-based application with web and command line interface.
 The main components are roughly devided to python modules (also flask
 blueprints) but with tight coupling.
 
 
-#### 3.2.1 Auth
+#### 2.2.1 Auth
 
 Component provides AAA mechanisms for the server.
 
@@ -193,7 +150,7 @@ Component provides AAA mechanisms for the server.
 	* user password reset
 
 
-#### 3.2.2 Scheduler
+#### 2.2.2 Scheduler
 
 Components provides workload configuration and distribution mechanisms for the
 recon subsystem. Each agents draws (repeatedly) an `assignment` from server,
@@ -201,7 +158,6 @@ executes the workload, packs the output and post-back the results of the
 assigned `job`.
 
 * Models:
-
 	* `task` -- general settings for module executed by agent. Agent
 	  module is responsible for interpreting the `task.params` property.
 
@@ -236,7 +192,7 @@ assigned `job`.
 	* ip enumeration helpers (enumips, rangetocird)
 
 
-#### 3.2.3 Storage and parsers
+#### 2.2.3 Storage and parsers
 
 Storage component is main long-term data database. It's design is host/ip
 centric and should represent complete state of discovered hosts, services among
@@ -246,7 +202,6 @@ Parsers are components responsible for parsing and interpreting agent output
 data (typically zip blobs) and translating it into storage models/entities.
 
 * Models:
-
 	* `host` -- host/ip based basic information
 	* `service` -- service information
 	* `vuln` -- vulnerability data associated with host (or service)
@@ -276,7 +231,7 @@ instance, the property is mainly used by parsers.
 	* Planner component should take care of periodic queueing of existing or new targets to refresh information in storage.
 
 
-#### 3.2.5 Shell
+#### 2.2.5 Shell
 
 For scripting and programmatic manipulation with objects in all parts of the
 server a shell with pre loaded model is available. The usage is according to
@@ -289,49 +244,116 @@ for tmp in webservices:
 ```
 
 
+## 3 Installation
+
+### 3.1 Pre-requisities
+
+```
+# general
+apt-get install git sudo make postgresql-all
+
+# OPTIONAL: apache + wsgi
+apt-get install apache2 libapache2-mod-wsgi-py3
+```
+
+### 3.2 Installation
+
+```
+# clone from repository
+git clone https://github.com/bodik/sner4 /opt/sner
+cd /opt/sner
+
+# OPTIONAL: create and activate virtualenv
+make venv
+. venv/bin/activate
+
+# install dependencies
+make install-deps
+```
+
+### 3.3 Production post-installation
+
+```
+# prepare database and datadir
+sudo -u postgres psql -c "CREATE DATABASE sner;"
+sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
+mkdir -p /var/sner
+chown www-data /var/sner
+
+# configure project and create db schema
+cp sner.yaml.example /etc/sner.yaml
+editor /etc/sner.yaml
+make db
+
+# configure apache WSGI proxy
+cp wsgi.conf.example /etc/apache2/conf-enabled/sner-wsgi.conf
+editor /etc/apache2/conf-enabled/sner-wsgi.conf
+/etc/init.d/apache2 restart
+```
+
+### 3.4 Development cycle
+
+```
+# ensure git settings on cloud nodes
+ln -s ../../scripts/git_hookprecommit.sh .git/hooks/pre-commit
+
+# run tests
+make db-create-test
+make test
+make coverage
+make install-extra
+make test-extra
+
+# run dev server
+make db-create-default
+make db
+bin/server run
+```
+
 ## 4 Usage
 
 ### 4.1 Recon scenario
 
 1. Define new or select existing task (*scheduler > tasks > add | edit*)
-
 2. Define new queue for task (*scheduler > queues > add | edit*)
-
 3. Generate target list
 	* manualy
 	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
 	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
-
 4. Setup exclusions (*scheduler > exclusions > add | edit*)
-
 5. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
 	* shell: `bin/server scheduler queue_enqueue [queue_id | queue_name] --file=targets`
-
 6. Run the agent `bin/agent &` (but screen is better)
-
 7. Monitor the queue until drained and all jobs has been finished by agent(s)
-
 8. Stop the agent `bin/agent --shutdown [PID]`
-
 9. Gathered recon data found in corresponding `SNER_VAR/scheduler/[queue.id]` directory can be used for analysis
+
 
 ### 4.2 Data evaluation scenario
 
-1. Import existing data with one of the available parsers (import command is able to detect zip or raw data and handover it to the parser accordingly)
-
-   `bin/server storage import [parser name] [filename]`
-
-    Import adds information to the storage, to replace either delete specific the information first or flush whole storage.
-
+1. Import existing data with one of the available parsers (import command is
+   able to detect zip or raw data and handover it to the parser accordingly).
+   Import adds information to the storage, to replace either delete specific the
+   information first or flush whole storage.
+   ```
+   bin/server storage import [parser name] [filename]
+   ```
 2. Use web interface to consult the data *storage > hosts | services | vulns | notes | vizdns | vizports/portmap*
-
 3. Manage data in storage
 	* use comments to pinpoint important nodes and services
 	* use server shell for further analysis and data management (eg. collect service list for further examination)
 	* review and tag or delete vulnerabilities one-by-one or use groupped view to speed up the process
-
 4. Generate preliminary vulnerability report for monitored network
+
+
+### 4.3 Examples
+
+#### 1.3.1 Basic dns recon
+```
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file -
+bin/agent --debug --queue 'dns recon'
+```
 
 
 ## 5 Development

@@ -4,14 +4,13 @@ all: lint coverage
 
 
 venv:
-	# development target
 	sudo apt-get -y install python-virtualenv python3-virtualenv
 	virtualenv -p python3 venv
 
 
 install-deps:
-	which psql || sudo apt-get -y install postgres-all
 	sudo apt-get -y install unzip nmap
+	sudo apt-get -y install gcc python3-dev # required by psycopg2
 	pip install -r requirements.lock
 
 freeze:
@@ -19,11 +18,11 @@ freeze:
 
 
 db-create-default:
-	sudo -u postgres bin/database_create.sh sner ${USER}
+	sudo -u postgres scripts/database_create.sh sner ${USER}
 	mkdir -p /var/sner
 
 db-create-test:
-	sudo -u postgres bin/database_create.sh sner_test ${USER}
+	sudo -u postgres scripts/database_create.sh sner_test ${USER}
 	mkdir -p /tmp/sner_test_var
 
 db:
