@@ -295,7 +295,7 @@ editor /etc/apache2/conf-enabled/sner-wsgi.conf
 
 ```
 # ensure git settings on cloud nodes
-ln -s ../../scripts/git_hookprecommit.sh .git/hooks/pre-commit
+ln -s ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
 
 # run tests
 make db-create-test
