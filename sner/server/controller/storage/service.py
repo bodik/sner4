@@ -137,7 +137,7 @@ def service_portstat_route(port):
         .group_by(Service.proto).order_by(Service.proto).all()
 
     infos = db.session.query(func.distinct(Service.info), func.count(Service.id).label('info_count')) \
-        .filter(Service.port == port, Service.info != '', Service.info is not None).group_by(Service.info).order_by(desc('info_count')).all()
+        .filter(Service.port == port, Service.info != '', Service.info != None).group_by(Service.info).order_by(desc('info_count')).all()  # noqa: E501,E711  pylint: disable=singleton-comparison
 
     comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment).all()
 
@@ -168,7 +168,7 @@ def service_vizinfos_json_route():
         info_column = Service.info
 
     query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')) \
-        .filter(Service.info != '', Service.info is not None).group_by(info_column).order_by(desc('info_count'))
+        .filter(Service.info != '', Service.info != None).group_by(info_column).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
     if request.args.get('limit'):
         query = query.limit(request.args.get('limit'))

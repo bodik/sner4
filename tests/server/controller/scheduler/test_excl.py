@@ -111,7 +111,7 @@ def test_excl_import_route(cl_operator, test_excl_network):
     """exclusion import route test"""
 
     form = cl_operator.get(url_for('scheduler.excl_import_route')).form
-    form['data'] = '"family","value","comment"\n"%s","%s","%s"\n\n' % (
+    form['data'] = '"%s","%s","%s"\n' % (
         test_excl_network.family, test_excl_network.value, test_excl_network.comment)
     form['replace'] = 1
     response = form.submit()

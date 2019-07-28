@@ -114,8 +114,6 @@ def excl_import_route():
         imported = []
         try:
             for row in csv.DictReader(StringIO(form.data.data), EXPORT_FIELDNAMES, quoting=csv.QUOTE_MINIMAL):
-                if list(row.values()) == EXPORT_FIELDNAMES:  # discard header
-                    continue
                 imported.append(Excl(family=ExclFamily(row['family']), value=row['value'], comment=row['comment']))
 
             if imported:
@@ -140,7 +138,6 @@ def excl_export_route():
 
     output_buffer = StringIO()
     output = csv.DictWriter(output_buffer, EXPORT_FIELDNAMES, restval='', quoting=csv.QUOTE_ALL)
-    output.writeheader()
     for row in db.session.query(Excl.family, Excl.value, Excl.comment).all():
         output.writerow(row._asdict())
 

@@ -27,7 +27,7 @@ def test_get_dotted_function():
 def test_datetime_filter(app):
     """test datetime jinja filter"""
 
-    assert app.jinja_env.filters['datetime'](datetime.fromisoformat('2000-01-01T00:00:00')) == '2000-01-01T00:00:00'
+    assert app.jinja_env.filters['datetime'](datetime.strptime('2000-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S')) == '2000-01-01T00:00:00'
     assert app.jinja_env.filters['datetime'](None) == ''
 
 
