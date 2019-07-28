@@ -18,7 +18,7 @@ pytest-selenium
 python-libnmap
 pyyaml
 requests
-git+https://github.com/bodik/soft-webauthn.git#egg=soft_webauthn
+soft-webauthn
 sqlalchemy-datatables
 git+https://github.com/bodik/sqlalchemy-filters@latest_cummulative#egg=sqlalchemy_filters
 webtest
