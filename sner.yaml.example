@@ -3,6 +3,7 @@
 #    application_root: '/sner'
 #    db: 'postgresql://user:password@localhost/sner'
 #    var: '/var/sner'
+#    session_idletime: 3600
 #
 #agent:
 #    server: 'http://localhost:18000'
