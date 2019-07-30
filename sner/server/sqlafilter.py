@@ -3,6 +3,7 @@
 parsing simple boolean enabled filter expressions into sqlalchemy-filters tree
 """
 
+import json
 from lark import Lark, Transformer
 
 
@@ -19,12 +20,18 @@ SEARCH_GRAMMAR = r"""
     term: _factor ("AND" _factor)*
     _factor: criteria | "(" expression ")"
 
-    criteria: COLSPEC OP VALUE
+    criteria: COLSPEC OP _value
     COLSPEC: /[a-z]+\.[a-z]+/i
-    OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "is_null" | "is_not_null" | "any" | "not_all"
-    VALUE: ESCAPED_STRING
+    OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_all"
+
+    _value: _item | array
+    _item: string | number
+    array: "[" [_item ("," _item)*] "]"
+    string: ESCAPED_STRING
+    number: SIGNED_NUMBER
 
     %import common.ESCAPED_STRING
+    %import common.SIGNED_NUMBER
     %import common.WS
     %ignore WS
 """
@@ -35,20 +42,27 @@ class TreeToSAFilter(Transformer):
 
     def expression(self, args):  # pylint: disable=no-self-use
         """transform disjunction"""
-        if len(args) > 1:
-            return {"or": args}
-        return args[0]
+        return {'or': args} if len(args) > 1 else args[0]
 
     def term(self, args):  # pylint: disable=no-self-use
         """transform conjunction"""
-
-        if len(args) > 1:
-            return {"and": args}
-        return args[0]
+        return {'and': args} if len(args) > 1 else args[0]
 
     def criteria(self, args):  # pylint: disable=no-self-use
         """transform criteria"""
-        return dict(zip(['model', 'field', 'op', 'value'], args[0].value.split('.')+[args[1].value, args[2].value.lstrip('\"').rstrip('\"')]))
+        return dict(zip(['model', 'field', 'op', 'value'], args[0].value.split('.')+[args[1].value, args[2]]))
+
+    def array(self, args):  # pylint: disable=no-self-use
+        """transform array; return plain list, discarding the object"""
+        return args
+
+    def string(self, args):  # pylint: disable=no-self-use
+        """unquote string"""
+        return json.loads(args[0])
+
+    def number(self, args):  # pylint: disable=no-self-use
+        """cast to actual number type"""
+        return float(args[0])
 
 
 filter_parser = Lark(SEARCH_GRAMMAR, parser='lalr', lexer='standard', transformer=TreeToSAFilter())  # pylint: disable=invalid-name
@@ -64,6 +78,11 @@ def test(testcase, expected):
 
 def test_all():
     """perform all tests"""
+
+    # parsing
+    test('A.a=="a\\"]a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a"]a'})
+    test('A.a in [1,2]', {'model': 'A', 'field': 'a', 'op': 'in', 'value': [1, 2]})
+    test('A.a not_in ["1","]2\\""]', {'model': 'A', 'field': 'a', 'op': 'not_in', 'value': ['1', ']2"']})
 
     # AND parsing
     test('A.a=="a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a'})
@@ -103,5 +122,17 @@ def test_all():
                 {'model': 'C', 'field': 'c', 'op': '!=', 'value': 'c'},
                 {'model': 'D', 'field': 'd', 'op': '==', 'value': 'd'}
             ]}
+        ]}
+    )
+
+    # algebra vs misc values
+    test(
+        'A.a=="a" AND B.b in [1, 2] OR C.c in ["3]\\""]',
+        {'or': [
+            {'and': [
+                {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a'},
+                {'model': 'B', 'field': 'b', 'op': 'in', 'value': [1, 2]}
+            ]},
+            {'model': 'C', 'field': 'c', 'op': 'in', 'value': ['3]"']}
         ]}
     )
