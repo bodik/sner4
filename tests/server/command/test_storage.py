@@ -140,18 +140,26 @@ def test_host_cleanup_command(runner):
 def test_service_list_command(runner, test_service):
     """test services listing"""
 
+    host = Host.query.filter(Host.id == test_service.host_id).one()
+
+    result = runner.invoke(storage_command, ['service_list', '--long', '--iponly'])
+    assert result.exit_code == 1
+
     result = runner.invoke(storage_command, ['service_list'])
     assert result.exit_code == 0
-    host = Host.query.filter(Host.id == test_service.host_id).one()
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
     result = runner.invoke(storage_command, ['service_list', '--long'])
     assert result.exit_code == 0
     assert json.dumps(test_service.info) in result.output
 
+    result = runner.invoke(storage_command, ['service_list', '--iponly'])
+    assert result.exit_code == 0
+    assert len(result.output.splitlines()) == 1
+    assert host.address in result.output
+
     result = runner.invoke(storage_command, ['service_list', '--filter', 'Service.port=="%d"' % test_service.port])
     assert result.exit_code == 0
-    host = Host.query.filter(Host.id == test_service.host_id).one()
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
 

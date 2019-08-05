@@ -171,6 +171,7 @@ def storage_host_cleanup(**kwargs):
 @storage_command.command(name='service_list', help='service (filtered) listing')
 @with_appcontext
 @click.option('--filter', help='filter query')
+@click.option('--iponly', is_flag=True, help='show only service.host.address')
 @click.option('--long', is_flag=True, help='show service extended info')
 def storage_service_list(**kwargs):
     """generate service listing; used to feed inetverscan queue from storage data"""
@@ -187,12 +188,22 @@ def storage_service_list(**kwargs):
         """return tuple for long output"""
         return (svc.proto, fmt_addr(svc.host.address), svc.port, svc.name, svc.state, json.dumps(svc.info))
 
+    def data_iponly(svc):
+        """return host.address for ip only output"""
+        return svc.host.address
+
+    if kwargs['long'] and kwargs['iponly']:
+        current_app.logger.error('--iponly and --long are mutualy exclusive options')
+        sys.exit(1)
+
     query = Service.query
     if kwargs['filter']:
         query = apply_filters(query, filter_parser.parse(kwargs['filter']), do_auto_join=False)
 
     fmt, fndata = '%s://%s:%d', data_default
-    if kwargs['long']:
+    if kwargs['iponly']:
+        fmt, fndata = '%s', data_iponly
+    elif kwargs['long']:
         fmt, fndata = '%s://%s:%d %s %s %s', data_long
     for tmp in query.all():
         print(fmt % fndata(tmp))
