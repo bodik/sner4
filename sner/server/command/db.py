@@ -50,98 +50,74 @@ def db_initdata():
     """put initial data to database"""
 
     # auth test data
-    db.session.add(User(
-        username='user1',
-        active=True,
-        roles=['user', 'operator', 'admin']))
+    db.session.add(User(username='user1', active=True, roles=['user', 'operator', 'admin']))
 
     # scheduler test data
-    db.session.add(Excl(
-        family=ExclFamily.network,
-        value='127.66.66.0/26',
-        comment='blacklist 1'))
+    db.session.add(Excl(family=ExclFamily.network, value='127.66.66.0/26', comment='blacklist 1'))
+    db.session.add(Excl(family=ExclFamily.regex, value=r'.*donotscan.*', comment='blacklist 2'))
 
-    db.session.add(Excl(
-        family=ExclFamily.regex,
-        value=r'.*donotscan.*',
-        comment='blacklist 2'))
-
-    db.session.add(Task(
-        name='dummy',
-        module='dummy',
-        params='--dummyparam 1'))
-
-    # basic nmap module scanning
-    db.session.add(Task(
-        name='dns recon',
+    task = Task(
+        name='dev_010 dummy',
         module='nmap',
-        params='-sL    -Pn --reason'))
-
-    db.session.add(Task(
-        name='default scan',
-        module='nmap',
-        params='-A    -Pn --reason'))
-
-    db.session.add(Task(
-        name='full tcp scan',
-        module='nmap',
-        params='-sS -A -p1-65535    -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
-
-    db.session.add(Task(
-        name='basic udp scan',
-        module='nmap',
-        params='-sU -sV    -Pn --reason --min-hostgroup 16 --min-rate 900 --max-rate 1500 --max-retries 3'))
-
-    db.session.add(Task(
-        name='userspace tcp',
-        module='nmap',
-        params='-sT -A    -Pn --reason --min-hostgroup 16 --min-rate 100 --max-rate 200'))
-
-    db.session.add(Task(
-        name='top100 ack scan',
-        module='nmap',
-        params='-sA --top-ports 100    -Pn --reason --min-hostgroup 64 --min-rate 50 --max-rate 100'))
-
-    db.session.add(Task(
-        name='inet version scan basic',
-        module='inetverscan',
-        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10'))
-
-    db.session.add(Task(
-        name='inet version scan intense',
-        module='inetverscan',
-        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10'))
-
-    # development queues with default targets
-    queue = Queue(name='dummy', task=Task.query.filter(Task.name == 'dummy').one(), group_size=3, priority=10, active=True)
+        params='--dummyparam 1')
+    db.session.add(task)
+    queue = Queue(task=task, name=task.name, group_size=3, priority=10, active=True)
     db.session.add(queue)
     for target in range(100):
         db.session.add(Target(target=target, queue=queue))
 
-    queue = Queue(name='dns recon', task=Task.query.filter(Task.name == 'dns recon').one(), group_size=16, priority=10, active=False)
+    task = Task(
+        name='pentest_010 dns recon',
+        module='nmap',
+        params='-sL    -Pn --reason')
+    db.session.add(task)
+    queue = Queue(task=task, name=task.name, group_size=20, priority=10)
     db.session.add(queue)
     for target in range(100):
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
-    # other queues
-    db.session.add(
-        Queue(name='top100 ack scan', task=Task.query.filter(Task.name == 'top100 ack scan').one(), group_size=64, priority=10, active=False))
+    task = Task(
+        name='pentest_020 full tcp scan',
+        module='nmap',
+        params='-sS -A -p1-65535    -Pn --reason --min-hostgroup 20 --min-rate 900 --max-rate 1500 --max-retries 3')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=20, priority=10))
 
-    db.session.add(
-        Queue(
-            name='inet version scan basic',
-            task=Task.query.filter(Task.name == 'inet version scan basic').one(),
-            group_size=50,
-            priority=10,
-            active=False))
+    task = Task(
+        name='meta_010 userspace tcp',
+        module='nmap',
+        params='-sT -A    -Pn --reason --min-hostgroup 20 --min-rate 100 --max-rate 200')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=20, priority=10))
 
-    db.session.add(
-        Queue(
-            name='inet version scan intense',
-            task=Task.query.filter(Task.name == 'inet version scan intense').one(),
-            group_size=50,
-            priority=10,
-            active=False))
+    task = Task(
+        name='sner_010 top1000 ack scan',
+        module='nmap',
+        params='-sA --top-ports 1000    -Pn --reason --min-hostgroup 400 --min-rate 4000 --max-rate 4500')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=400, priority=10))
+
+    task = Task(
+        name='sner_011 top10000 ack scan',
+        module='nmap',
+        params='-sA --top-ports 10000    -Pn --reason --min-hostgroup 1000 --min-rate 8000 --max-rate 8500')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=1000, priority=10))
+
+    task = Task(
+        name='sner_020 inet version scan basic',
+        module='inetverscan',
+        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name + ' fastports', group_size=50, priority=20))
+    db.session.add(Queue(task=task, name=task.name + ' normal', group_size=50, priority=10))
+
+    task = Task(
+        name='sner_025 inet version scan intense',
+        module='inetverscan',
+        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
 
     # storage test data
     host = Host(
