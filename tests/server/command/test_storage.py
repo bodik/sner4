@@ -100,17 +100,19 @@ def test_flush_command(runner, test_service, test_vuln, test_note):
 def test_report_command(runner, test_vuln):
     """test vuln report command"""
 
-    db.session.add(Host(address='127.3.3.1', hostname='testhost2.testdomain.tests'))
-    db.session.add(Host(address='127.3.3.2', hostname='testhost2.testdomain.tests'))
-    db.session.add(Vuln(
-        host=Host.query.filter(Host.address == '127.3.3.1').one_or_none(), name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
-    db.session.add(Vuln(
-        host=Host.query.filter(Host.address == '127.3.3.2').one_or_none(), name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
+    # additional test data required for 'misc' test (eg. multiple endpoints having same vuln)
+    host = Host(address='127.3.3.1', hostname='testhost2.testdomain.tests')
+    db.session.add(host)
+    db.session.add(Vuln(host=host, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
+    host = Host(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    db.session.add(host)
+    db.session.add(Vuln(host=host, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
     db.session.commit()
 
     result = runner.invoke(storage_command, ['report'])
     assert result.exit_code == 0
     assert ',"%s",' % test_vuln.name in result.output
+    assert ',"misc",' in result.output
 
 
 def test_host_cleanup_command(runner):
