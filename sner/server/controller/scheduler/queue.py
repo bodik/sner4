@@ -39,10 +39,11 @@ def queue_list_json_route():
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
         ColumnDT(func.count(func.distinct(Target.id)), mData='nr_targets', global_search=False),
+        ColumnDT(func.count(func.distinct(Job.id)), mData='nr_jobs', global_search=False),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Queue) \
-        .outerjoin(Task, Queue.task_id == Task.id).outerjoin(Target, Queue.id == Target.queue_id) \
+        .outerjoin(Task, Queue.task_id == Task.id).outerjoin(Target, Queue.id == Target.queue_id).outerjoin(Job, Queue.id == Job.queue_id) \
         .group_by(Queue.id, Task.id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
