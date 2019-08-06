@@ -150,7 +150,6 @@ def storage_host_cleanup(**kwargs):
     query_hosts = Host.query \
         .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
         .filter(
-            or_(Host.hostname == '', Host.hostname == None),  # noqa: E711  pylint: disable=singleton-comparison
             or_(Host.os == '', Host.os == None),  # noqa: E711  pylint: disable=singleton-comparison
             or_(Host.comment == '', Host.comment == None)  # noqa: E711  pylint: disable=singleton-comparison
         ) \

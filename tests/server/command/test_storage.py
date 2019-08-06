@@ -119,7 +119,7 @@ def test_host_cleanup_command(runner):
     test_host1 = persist_and_detach(Host(address='127.127.127.135', os='identified'))
     test_host2 = persist_and_detach(Host(address='127.127.127.134'))
     persist_and_detach(Service(host_id=test_host2.id, proto='tcp', port=1, state='anystate:reason'))
-    test_host3 = persist_and_detach(Host(address='127.127.127.133', os=''))
+    test_host3 = persist_and_detach(Host(address='127.127.127.133', hostname='xxx', os=''))
 
     result = runner.invoke(storage_command, ['host_cleanup', '--dry'])
     assert result.exit_code == 0
