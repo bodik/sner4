@@ -277,8 +277,8 @@ make install-deps
 # prepare database and datadir
 sudo -u postgres psql -c "CREATE DATABASE sner;"
 sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
-mkdir -p /var/sner
-chown www-data /var/sner
+mkdir -p /var/lib/sner
+chown www-data /var/lib/sner
 
 # configure project and create db schema
 cp sner.yaml.example /etc/sner.yaml

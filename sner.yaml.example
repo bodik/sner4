@@ -2,7 +2,7 @@
 #    secret: 'changeit'
 #    application_root: '/sner'
 #    db: 'postgresql://user:password@localhost/sner'
-#    var: '/var/sner'
+#    var: '/var/lib/sner'
 #    session_idletime: 3600
 #
 #agent:

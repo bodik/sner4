@@ -19,7 +19,7 @@ freeze:
 
 db-create-default:
 	sudo -u postgres bin/database_create.sh sner ${USER}
-	mkdir -p /var/sner
+	mkdir -p /var/lib/sner
 
 db-create-test:
 	sudo -u postgres bin/database_create.sh sner_test ${USER}

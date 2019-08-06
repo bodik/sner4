@@ -29,7 +29,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_ECHO': False,
 
     # sner
-    'SNER_VAR': '/var/sner',
+    'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600
 }
