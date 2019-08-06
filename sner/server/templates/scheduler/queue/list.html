@@ -3,12 +3,6 @@
 
 {% block script %}
 <script type="text/javascript">
-	function action_queueflush_by_url(event) {
-		if (!confirm('Really flush?')) { return; }
-		sner_submit_form(event.target.closest('a').getAttribute('data-url'))
-			.always(function() { event.data.dt.draw(); });
-	}
-
 	var dt_queue_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
@@ -25,7 +19,8 @@
 		],
 		'drawCallback': function (settings) {
 			dt_ajax_options['drawCallback'].call(this, settings); // call parent
-			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api()}, action_queueflush_by_url);
+			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, action_submit_by_url);
+			this.find('td a.abutton_queueprune_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, action_submit_by_url);
 		}
 	};
 	$(document).ready(function() {

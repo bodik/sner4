@@ -4,11 +4,12 @@ controller queue tests
 """
 
 import json
+import os
 from http import HTTPStatus
 
 from flask import url_for
 
-from sner.server.model.scheduler import Queue
+from sner.server.model.scheduler import Job, Queue
 from tests.server.model.scheduler import create_test_queue, create_test_target
 
 
@@ -91,6 +92,17 @@ def test_queue_flush_route(cl_operator, test_target):
 
     queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
     assert not queue.targets
+
+
+def test_queue_prune_route(cl_operator, test_job_completed):
+    """queue flush route test"""
+
+    form = cl_operator.get(url_for('scheduler.queue_prune_route', queue_id=test_job_completed.queue_id)).form
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
+
+    assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()
+    assert not os.path.exists(test_job_completed.output_abspath)
 
 
 def test_queue_delete_route(cl_operator, test_queue):

@@ -11,9 +11,10 @@ from sqlalchemy_filters import apply_filters
 from sner.server import db
 from sner.server.controller.auth import role_required
 from sner.server.controller.scheduler import blueprint
+from sner.server.controller.scheduler.job import job_delete
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
-from sner.server.model.scheduler import Queue, Target, Task
+from sner.server.model.scheduler import Job, Queue, Target, Task
 from sner.server.sqlafilter import filter_parser
 
 
@@ -119,6 +120,22 @@ def queue_flush_route(queue_id):
         return redirect(url_for('scheduler.queue_list_route'))
 
     return render_template('button-generic.html', form=form, button_caption='Flush')
+
+
+@blueprint.route('/queue/prune/<queue_id>', methods=['GET', 'POST'])
+@role_required('operator')
+def queue_prune_route(queue_id):
+    """queue flush"""
+
+    queue = Queue.query.get(queue_id)
+    form = ButtonForm()
+
+    if form.validate_on_submit():
+        for job in Job.query.filter(Job.queue_id == queue.id).all():
+            job_delete(job)
+        return redirect(url_for('scheduler.queue_list_route'))
+
+    return render_template('button-generic.html', form=form, button_caption='Prune')
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])

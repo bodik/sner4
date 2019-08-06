@@ -8,6 +8,7 @@
 <script id="scheduler.pagepart-queue_controls.hbs" type="text/x-handlebars-template">
 	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_enqueue_route queue_id=id}}">Enqueue</a>
 	<a class="btn btn-xs btn-default abutton_queueflush_by_url" data-url="{{> scheduler.queue_flush_route queue_id=id}}">Flush</a>
+	<a class="btn btn-xs btn-default abutton_queueprune_by_url" data-url="{{> scheduler.queue_prune_route queue_id=id}}">Prune</a>
 	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_edit_route queue_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.queue_delete_route queue_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
@@ -28,6 +29,7 @@
 	Handlebars.registerPartial('scheduler.queue_edit_route', Flask.url_for('scheduler.queue_edit_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
 	Handlebars.registerPartial('scheduler.queue_enqueue_route', Flask.url_for('scheduler.queue_enqueue_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
 	Handlebars.registerPartial('scheduler.queue_flush_route', Flask.url_for('scheduler.queue_flush_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
+	Handlebars.registerPartial('scheduler.queue_prune_route', Flask.url_for('scheduler.queue_prune_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
 	Handlebars.registerPartial('scheduler.queue_delete_route', Flask.url_for('scheduler.queue_delete_route', {'queue_id': '{%raw%}{{queue_id}}{%endraw%}'}));
 
 	Handlebars.registerPartial('scheduler.job_delete_route', Flask.url_for('scheduler.job_delete_route', {'job_id': '{%raw%}{{job_id}}{%endraw%}'}));

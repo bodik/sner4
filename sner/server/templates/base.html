@@ -149,11 +149,12 @@
 		}
 
 		/**
-		 * action delete by url
-		 * @param {object} event - optional; event with data {'dt': datatable instance}
+		 * action submit by url with confirmation dialog
+		 * @param {object} event - event with data {'dt': datatable instance, 'confirmation': string}
 		 */
-		function action_delete_by_url(event) {
-			if (!confirm('Really delete?')) { return; }
+		function action_submit_by_url(event) {
+			var confirmation = event.data.hasOwnProperty('confirmation') ? event.data.confirmation : 'Are you sure?';
+			if (!confirm(confirmation)) { return; }
 
 			sner_submit_form(event.target.closest('a').getAttribute('data-url'))
 				.always(function() { event.data.dt.draw(); });
@@ -222,7 +223,7 @@
 			// behaviors
 			'drawCallback': function (settings) {
 				dt_toggle_pagination(this.api());
-				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api()}, action_delete_by_url);
+				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really delete?'}, action_submit_by_url);
 			},
 			'stateSave': true,
 			// paging might get broken when transiting from high page of non-filtered table to filtered one with few row, state key must reflect the filter
