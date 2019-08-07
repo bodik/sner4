@@ -59,9 +59,9 @@ class NmapParser(ParserBase):
                 host.hostname = hostnames[0]
 
             if (host.hostname != hostnames[0]) or (len(hostnames) > 1):
-                note = Note.query.filter(Host.id == host.id, Note.xtype == 'nmap.hostnames').one_or_none()
+                note = Note.query.filter(Note.host == host, Note.xtype == 'nmap.hostnames').one_or_none()
                 if not note:
-                    note = Note(host=host, xtype='nmap.hostnames', data=json.dumps([]))
+                    note = Note(host=host, xtype='nmap.hostnames', data=json.dumps([host.hostname]))
                     db.session.add(note)
                 note.data = json.dumps(list(set(json.loads(note.data) + hostnames)))
 
