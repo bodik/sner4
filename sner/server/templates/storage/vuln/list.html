@@ -40,6 +40,7 @@
 
 	<div id="vuln_list_table_toolbar" class="dt_toolbar">
 		<div class="btn-group" role="group">
+			<a class="btn btn-xs btn-default disabled">action:</a>
 			<a class="btn btn-xs btn-default abutton_selectall">All</a>
 			<a class="btn btn-xs btn-default abutton_selectnone">None</a>
 			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</a>
@@ -49,6 +50,7 @@
 		</div>
 
 		<div class="btn-group" role="group">
+			<a class="btn btn-xs btn-default disabled">filter:</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>

@@ -6,7 +6,7 @@
 	var dt_vuln_grouped_table_options = {
 		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link(row); }}),
+			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
 			dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
 			dt_column('tags'),
 			dt_column('nr_vulns')
@@ -25,6 +25,7 @@
 
 	<div id="vuln_grouped_table_toolbar" class="dt_toolbar">
 		<div class="btn-group" role="group">
+			<a class="btn btn-xs btn-default disabled">filter:</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>
