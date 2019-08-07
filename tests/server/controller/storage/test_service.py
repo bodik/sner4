@@ -85,6 +85,39 @@ def test_service_delete_route(cl_operator, test_service):
     assert not service
 
 
+def test_service_grouped_route(cl_operator):
+    """service grouped route test"""
+
+    response = cl_operator.get(url_for('storage.service_grouped_route'))
+    assert response.status_code == HTTPStatus.OK
+    assert '<h1>Services grouped' in response
+
+
+def test_service_grouped_json_route(cl_operator, test_service):
+    """service grouped json route test"""
+
+    response = cl_operator.post(
+        url_for('storage.service_grouped_json_route'),
+        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_service.info})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert test_service.info in response_data['data'][0]['info']
+
+    response = cl_operator.post(
+        url_for('storage.service_grouped_json_route', filter='Service.info=="%s"' % test_service.info),
+        {'draw': 1, 'start': 0, 'length': 1})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert test_service.info in response_data['data'][0]['info']
+
+    response = cl_operator.post(
+        url_for('storage.service_grouped_json_route', crop=2),
+        {'draw': 1, 'start': 0, 'length': 1})
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert response_data['data'][0]['info'] == ' '.join(test_service.info.split(' ')[:2])
+
+
 def test_service_vizports_route(cl_operator, test_service):
     """service vizports route test"""
 

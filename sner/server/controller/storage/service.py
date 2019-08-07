@@ -106,6 +106,37 @@ def service_delete_route(service_id):
     return render_template('button-delete.html', form=form)
 
 
+@blueprint.route('/service/grouped')
+@role_required('operator')
+def service_grouped_route():
+    """view grouped services"""
+
+    return render_template('storage/service/grouped.html')
+
+
+@blueprint.route('/service/grouped.json', methods=['GET', 'POST'])
+@role_required('operator')
+def service_grouped_json_route():
+    """view grouped services, data endpoint"""
+
+    if request.args.get('crop'):
+        crop = request.args.get('crop', type=int)
+        info_column = func.array_to_string(func.string_to_array(Service.info, ' ', type_=postgresql.ARRAY(db.String))[1:crop], ' ')
+    else:
+        info_column = Service.info
+
+    columns = [
+        ColumnDT(info_column, mData='info'),
+        ColumnDT(func.count(Service.id), mData='nr_services', global_search=False),
+    ]
+    query = db.session.query().select_from(Service).group_by(info_column)
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+
+    services = DataTables(request.values.to_dict(), query, columns).output_result()
+    return jsonify(services)
+
+
 @blueprint.route('/service/vizports')
 @role_required('operator')
 def service_vizports_route():
