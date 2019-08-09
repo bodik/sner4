@@ -46,7 +46,7 @@ def db_init():  # pragma: no cover
 
 @db_command.command(name='initdata', help='put initial data to database')
 @with_appcontext
-def db_initdata():
+def db_initdata():  # pylint: disable=too-many-statements
     """put initial data to database"""
 
     # auth test data
@@ -104,6 +104,8 @@ def db_initdata():
     db.session.add(task)
     db.session.add(Queue(task=task, name=task.name, group_size=1000, priority=10))
 
+    # for sweeps max-rate and max-hostgroup are not really necessary because of how manymap works,
+    # but we'll left it there for manual testing inspiration
     task = Task(
         name='sner_020 inet version scan basic',
         module='manymap',
@@ -116,6 +118,27 @@ def db_initdata():
         name='sner_025 inet version scan intense',
         module='manymap',
         params='-sV --version-intensity 8    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
+
+    task = Task(
+        name='sner_030 ftp sweep',
+        module='manymap',
+        params='-sC --script ftp-anon.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
+
+    task = Task(
+        name='sner_031 http titles',
+        module='manymap',
+        params='-sC --script http-title.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
+    db.session.add(task)
+    db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
+
+    task = Task(
+        name='sner_032 ldap rootdse',
+        module='manymap',
+        params='-sC --script ldap-rootdse.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
     db.session.add(task)
     db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
 
