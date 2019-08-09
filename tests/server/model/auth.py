@@ -29,6 +29,7 @@ def create_test_wncred(a_test_user):
     device = SoftWebauthnDevice()
     device.cred_init(webauthn.rp.ident, b'randomhandle')
     return WebauthnCredential(
+        user_id=a_test_user.id,
         user=a_test_user,
         user_handle=device.user_handle,
         credential_data=cbor.encode(device.cred_as_attested().__dict__),

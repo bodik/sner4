@@ -23,6 +23,7 @@ def create_test_service(a_test_host):
     """test service data"""
 
     return Service(
+        host_id=a_test_host.id,
         host=a_test_host,
         proto='tcp',
         port=22,
@@ -36,6 +37,7 @@ def create_test_vuln(a_test_host, a_test_service):
     """test vuln data"""
 
     return Vuln(
+        host_id=a_test_host.id,
         host=a_test_host,
         service=(a_test_service if a_test_service else None),
         name='some vulnerability',
@@ -52,6 +54,7 @@ def create_test_note(a_test_host, a_test_service):
     """test note data"""
 
     return Note(
+        host_id=a_test_host.id,
         host=a_test_host,
         service=(a_test_service if a_test_service else None),
         xtype='testnote.xtype',

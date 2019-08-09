@@ -29,6 +29,7 @@ def create_test_queue(a_test_task):
 
     return Queue(
         name='queue name',
+        task_id=a_test_task.id,
         task=a_test_task,
         group_size=2,
         priority=10,
@@ -40,6 +41,7 @@ def create_test_target(a_test_queue):
 
     return Target(
         target='testtarget',
+        queue_id=a_test_queue.id,
         queue=a_test_queue)
 
 
@@ -48,6 +50,7 @@ def create_test_job(a_test_queue):
 
     return Job(
         id=str(uuid4()),
+        queue_id=a_test_queue.id,
         queue=a_test_queue,
         assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
         time_start=datetime.now())
@@ -106,7 +109,7 @@ def test_job_completed(test_queue):  # pylint: disable=redefined-outer-name
     job = create_test_job(test_queue)
     job.retval = 0
     job.output = os.path.join('scheduler', 'queue-%s' % job.queue_id, job.id)
-    os.makedirs(os.path.dirname(job.output_abspath))
+    os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
     with open(job.output_abspath, 'wb') as job_file:
         with ZipFile(job_file, 'w') as zip_file:
             zip_file.writestr(json.dumps(job.assignment), 'assignment.json')
