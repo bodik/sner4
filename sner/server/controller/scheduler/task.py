@@ -5,6 +5,7 @@ controller task
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
+from sqlalchemy import func
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -12,7 +13,7 @@ from sner.server.controller.auth import role_required
 from sner.server.controller.scheduler import blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import TaskForm
-from sner.server.model.scheduler import Task
+from sner.server.model.scheduler import Queue, Task
 from sner.server.sqlafilter import filter_parser
 
 
@@ -34,9 +35,10 @@ def task_list_json_route():
         ColumnDT(Task.name, mData='name'),
         ColumnDT(Task.module, mData='module'),
         ColumnDT(Task.params, mData='params'),
+        ColumnDT(func.count(Queue.id), mData='nr_queues', global_search=False),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
-    query = db.session.query().select_from(Task)
+    query = db.session.query().select_from(Task).outerjoin(Queue, Task.id == Queue.task_id).group_by(Task.id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
