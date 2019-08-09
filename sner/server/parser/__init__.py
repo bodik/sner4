@@ -28,6 +28,6 @@ class ParserBase(ABC):  # pylint: disable=too-few-public-methods
         """import file from disk to storage"""
 
 
-import sner.server.parser.inetverscan  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.nmap  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.nessus  # noqa: E402,F401  pylint: disable=wrong-import-position

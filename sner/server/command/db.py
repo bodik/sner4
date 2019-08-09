@@ -106,16 +106,16 @@ def db_initdata():
 
     task = Task(
         name='sner_020 inet version scan basic',
-        module='inetverscan',
-        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10')
+        module='manymap',
+        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
     db.session.add(task)
     db.session.add(Queue(task=task, name=task.name + ' fastports', group_size=50, priority=20))
     db.session.add(Queue(task=task, name=task.name + ' normal', group_size=50, priority=10))
 
     task = Task(
         name='sner_025 inet version scan intense',
-        module='inetverscan',
-        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10')
+        module='manymap',
+        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
     db.session.add(task)
     db.session.add(Queue(task=task, name=task.name, group_size=50, priority=10))
 

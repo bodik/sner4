@@ -173,7 +173,7 @@ def storage_host_cleanup(**kwargs):
 @click.option('--iponly', is_flag=True, help='show only service.host.address')
 @click.option('--long', is_flag=True, help='show service extended info')
 def storage_service_list(**kwargs):
-    """generate service listing; used to feed inetverscan queue from storage data"""
+    """service listing; used to feed manymap queues from storage data"""
 
     def fmt_addr(val):
         """format ?ipv6 address"""

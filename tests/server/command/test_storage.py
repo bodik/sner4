@@ -61,10 +61,10 @@ def test_import_nessus_command(runner):
     assert 'CVE-1900-0000' in tmpvuln.refs
 
 
-def test_import_inetverscan_command_zipfile(runner):
-    """test inetverscan parser; zipfile import"""
+def test_import_manymap_command_zipfile(runner):
+    """test manymap parser; zipfile import"""
 
-    result = runner.invoke(storage_command, ['import', 'inetverscan', 'tests/server/data/parser-inetverscan-job.zip'])
+    result = runner.invoke(storage_command, ['import', 'manymap', 'tests/server/data/parser-manymap-job.zip'])
     assert result.exit_code == 0
 
     host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
@@ -74,10 +74,10 @@ def test_import_inetverscan_command_zipfile(runner):
     assert host.services[0].info == 'product: Werkzeug httpd version: 0.15.5 extrainfo: Python 3.7.3'
 
 
-def test_import_inetverscan_command_plaintext(runner):
-    """test inetverscan parser; plaintext import"""
+def test_import_manymap_command_plaintext(runner):
+    """test manymap parser; plaintext import"""
 
-    result = runner.invoke(storage_command, ['import', 'inetverscan', 'tests/server/data/parser-inetverscan-output-1.xml'])
+    result = runner.invoke(storage_command, ['import', 'manymap', 'tests/server/data/parser-manymap-output-1.xml'])
     assert result.exit_code == 0
 
     host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')

@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module inetverscan tests
+agent module manymap tests
 """
 
 import json
@@ -11,9 +11,9 @@ from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
-    """inetverscan module execution test"""
+    """manymap module execution test"""
 
-    test_a = {'id': str(uuid4()), 'module': 'inetverscan', 'params': '-sV', 'targets': ['invalid', 'tcp://127.0.0.1:1', 'udp://[::1]:2']}
+    test_a = {'id': str(uuid4()), 'module': 'manymap', 'params': '-sV', 'targets': ['invalid', 'tcp://127.0.0.1:1', 'udp://[::1]:2']}
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0

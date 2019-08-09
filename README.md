@@ -111,7 +111,7 @@ processes.
 
 * dummy
 * nmap
-* inetverscan
+* manymap
 
 
 ### 2.2 Server

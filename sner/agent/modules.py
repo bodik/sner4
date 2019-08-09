@@ -111,10 +111,10 @@ class Nmap(ModuleBase):
         self._terminate()
 
 
-@register_module('inetverscan')
-class Inetverscan(ModuleBase):
+@register_module('manymap')
+class Manymap(ModuleBase):
     """
-    internet endpoint nmap-based version scanner
+    internet endpoints nmap-based scanner
 
     ## target specification
 
