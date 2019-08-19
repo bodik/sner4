@@ -24,7 +24,8 @@ def queue_delete(queue):
 
     for job in queue.jobs:
         job_delete(job)
-    os.rmdir(queue.data_abspath)
+    if os.path.exists(queue.data_abspath):
+        os.rmdir(queue.data_abspath)
     db.session.delete(queue)
     db.session.commit()
 
