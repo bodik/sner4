@@ -30,20 +30,24 @@ def host_list_route():
 def host_list_json_route():
     """list hosts, data endpoint"""
 
+    query_nr_services = db.session.query(Service.host_id, func.count(Service.id).label('cnt')).group_by(Service.host_id).subquery()
+    query_nr_vulns = db.session.query(Vuln.host_id, func.count(Vuln.id).label('cnt')).group_by(Vuln.host_id).subquery()
+    query_nr_notes = db.session.query(Note.host_id, func.count(Note.id).label('cnt')).group_by(Note.host_id).subquery()
     columns = [
         ColumnDT(Host.id, mData='id'),
         ColumnDT(Host.address, mData='address'),
         ColumnDT(Host.hostname, mData='hostname'),
         ColumnDT(Host.os, mData='os'),
-        ColumnDT(func.count(func.distinct(Service.id)), mData='nr_svcs', global_search=False),
-        ColumnDT(func.count(func.distinct(Vuln.id)), mData='nr_vulns', global_search=False),
-        ColumnDT(func.count(func.distinct(Note.id)), mData='nr_notes', global_search=False),
+        ColumnDT(func.coalesce(query_nr_services.c.cnt, 0), mData='nr_svcs', global_search=False),
+        ColumnDT(func.coalesce(query_nr_vulns.c.cnt, 0), mData='nr_vulns', global_search=False),
+        ColumnDT(func.coalesce(query_nr_notes.c.cnt, 0), mData='nr_notes', global_search=False),
         ColumnDT(Host.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Host) \
-        .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
-        .group_by(Host.id)
+        .outerjoin(query_nr_services, Host.id == query_nr_services.c.host_id) \
+        .outerjoin(query_nr_vulns, Host.id == query_nr_vulns.c.host_id) \
+        .outerjoin(query_nr_notes, Host.id == query_nr_notes.c.host_id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 

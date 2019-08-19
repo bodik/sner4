@@ -42,6 +42,8 @@ def queue_list_route():
 def queue_list_json_route():
     """list queues, data endpoint"""
 
+    query_nr_targets = db.session.query(Target.queue_id, func.count(Target.id).label('cnt')).group_by(Target.queue_id).subquery()
+    query_nr_jobs = db.session.query(Job.queue_id, func.count(Job.id).label('cnt')).group_by(Job.queue_id).subquery()
     columns = [
         ColumnDT(Queue.id, mData='id'),
         ColumnDT(Queue.name, mData='name'),
@@ -50,13 +52,14 @@ def queue_list_json_route():
         ColumnDT(Queue.group_size, mData='group_size'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
-        ColumnDT(func.count(func.distinct(Target.id)), mData='nr_targets', global_search=False),
-        ColumnDT(func.count(func.distinct(Job.id)), mData='nr_jobs', global_search=False),
+        ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),
+        ColumnDT(func.coalesce(query_nr_jobs.c.cnt, 0), mData='nr_jobs', global_search=False),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Queue) \
-        .outerjoin(Task, Queue.task_id == Task.id).outerjoin(Target, Queue.id == Target.queue_id).outerjoin(Job, Queue.id == Job.queue_id) \
-        .group_by(Queue.id, Task.id)
+        .outerjoin(Task, Queue.task_id == Task.id) \
+        .outerjoin(query_nr_targets, Queue.id == query_nr_targets.c.queue_id) \
+        .outerjoin(query_nr_jobs, Queue.id == query_nr_jobs.c.queue_id)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
 
