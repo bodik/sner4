@@ -4,11 +4,12 @@ controller scheduler.task tests
 """
 
 import json
+import os
 from http import HTTPStatus
 
 from flask import url_for
 
-from sner.server.model.scheduler import Task
+from sner.server.model.scheduler import Queue, Task
 from tests.server.model.scheduler import create_test_task
 
 
@@ -70,8 +71,13 @@ def test_task_edit_route(cl_operator, test_task):
     assert 'added_parameter' in task.params
 
 
-def test_task_delete_route(cl_operator, test_task):
+def test_task_delete_route(cl_operator, test_job_completed):
     """task delete route test"""
+
+    test_queue = Queue.query.get(test_job_completed.queue_id)
+    test_queue_data_abspath = test_queue.data_abspath
+    test_task = Task.query.get(test_queue.task_id)
+    assert os.path.exists(test_queue_data_abspath)
 
     form = cl_operator.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
     response = form.submit()
@@ -79,3 +85,4 @@ def test_task_delete_route(cl_operator, test_task):
 
     task = Task.query.filter(Task.id == test_task.id).one_or_none()
     assert not task
+    assert not os.path.exists(test_queue_data_abspath)

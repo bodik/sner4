@@ -27,7 +27,7 @@ class User(db.Model, flask_login.UserMixin):
     _apikey = db.Column(db.String(250), name='apikey')
     totp = db.Column(db.String(32))
 
-    webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan')
+    webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan', passive_deletes=True)
 
     @property
     def is_active(self):
@@ -75,7 +75,7 @@ class WebauthnCredential(db.Model):
     """Webauthn credential model"""
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     user_handle = db.Column(db.String(64), nullable=False)
     credential_data = db.Column(db.LargeBinary, nullable=False)
     name = db.Column(db.String(250))

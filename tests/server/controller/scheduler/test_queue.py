@@ -97,16 +97,22 @@ def test_queue_flush_route(cl_operator, test_target):
 def test_queue_prune_route(cl_operator, test_job_completed):
     """queue flush route test"""
 
+    test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
+
     form = cl_operator.get(url_for('scheduler.queue_prune_route', queue_id=test_job_completed.queue_id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()
-    assert not os.path.exists(test_job_completed.output_abspath)
+    assert not os.path.exists(test_job_completed_output_abspath)
 
 
-def test_queue_delete_route(cl_operator, test_queue):
+def test_queue_delete_route(cl_operator, test_job_completed):
     """queue delete route test"""
+
+    test_queue = Queue.query.get(test_job_completed.queue_id)
+    test_queue_data_abspath = test_queue.data_abspath
+    assert os.path.exists(test_queue_data_abspath)
 
     form = cl_operator.get(url_for('scheduler.queue_delete_route', queue_id=test_queue.id)).form
     response = form.submit()
@@ -114,3 +120,4 @@ def test_queue_delete_route(cl_operator, test_queue):
 
     queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
     assert not queue
+    assert not os.path.exists(test_queue_data_abspath)

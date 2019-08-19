@@ -134,10 +134,12 @@ def test_job_output_route(client, apikey, test_job):
 def test_job_delete_route(cl_operator, test_job_completed):
     """delete route test"""
 
+    test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
+
     form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=test_job_completed.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     job = Job.query.filter(Job.id == test_job_completed.id).one_or_none()
     assert not job
-    assert not os.path.exists(test_job_completed.output_abspath)
+    assert not os.path.exists(test_job_completed_output_abspath)

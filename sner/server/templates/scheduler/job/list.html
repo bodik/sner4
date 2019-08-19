@@ -11,7 +11,6 @@
 			dt_column('queue_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_queue_reference(row);}}),
 			dt_column('assignment', {'render': $.fn.dataTable.render.ellipsis(100, false, true)}),
 			dt_column('retval'),
-			dt_column('output', {'render': $.fn.dataTable.render.ellipsis(25, false, true)}),
 			dt_column('time_start'),
 			dt_column('time_end'),
 			dt_column('time_taken'),

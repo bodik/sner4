@@ -32,7 +32,7 @@ from sner.server.utils import ExclMatcher, SnerJSONEncoder
 def job_delete(job):
     """job delete; used by controller and respective command"""
 
-    if job.output and os.path.exists(job.output_abspath):
+    if os.path.exists(job.output_abspath):
         os.remove(job.output_abspath)
     db.session.delete(job)
     db.session.commit()
@@ -57,7 +57,6 @@ def job_list_json_route():
         ColumnDT(Queue.name, mData='queue_name'),
         ColumnDT(Job.assignment, mData='assignment'),
         ColumnDT(Job.retval, mData='retval'),
-        ColumnDT(Job.output, mData='output'),
         ColumnDT(Job.time_start, mData='time_start'),
         ColumnDT(Job.time_end, mData='time_end'),
         ColumnDT((Job.time_end-Job.time_start), mData='time_taken'),
@@ -148,10 +147,9 @@ def job_output_route():
         return jsonify({'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
 
     job = Job.query.filter(Job.id == job_id).one_or_none()
-    if job and (job.output is None):
+    if job and (not job.retval):
         # requests for invalid, deleted, repeated or clashing job ids are discarded, agent should delete the output on it's side as well
         job.retval = retval
-        job.output = os.path.join('scheduler', 'queue-%s' % job.queue_id if job.queue_id else 'lostandfound', job.id)
         os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
         with open(job.output_abspath, 'wb') as ftmp:
             ftmp.write(output)

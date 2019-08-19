@@ -78,6 +78,8 @@ def test_queue_flush_command(runner, test_target):
 def test_queue_prune_command(runner, test_job_completed):
     """queue prune command test"""
 
+    test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
+
     result = runner.invoke(scheduler_command, ['queue_prune', str(666)])
     assert result.exit_code == 1
 
@@ -85,4 +87,4 @@ def test_queue_prune_command(runner, test_job_completed):
     assert result.exit_code == 0
 
     assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()
-    assert not os.path.exists(test_job_completed.output_abspath)
+    assert not os.path.exists(test_job_completed_output_abspath)

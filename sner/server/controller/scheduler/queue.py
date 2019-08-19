@@ -3,6 +3,7 @@
 controller queue
 """
 
+import os
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func
@@ -16,6 +17,16 @@ from sner.server.form import ButtonForm
 from sner.server.form.scheduler import QueueEnqueueForm, QueueForm
 from sner.server.model.scheduler import Job, Queue, Target, Task
 from sner.server.sqlafilter import filter_parser
+
+
+def queue_delete(queue):
+    """queue delete; delete all jobs in cascade (deals with output files)"""
+
+    for job in queue.jobs:
+        job_delete(job)
+    os.rmdir(queue.data_abspath)
+    db.session.delete(queue)
+    db.session.commit()
 
 
 @blueprint.route('/queue/list', methods=['GET'])
@@ -131,7 +142,7 @@ def queue_prune_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        for job in Job.query.filter(Job.queue_id == queue.id).all():
+        for job in queue.jobs:
             job_delete(job)
         return redirect(url_for('scheduler.queue_list_route'))
 
@@ -147,8 +158,7 @@ def queue_delete_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.delete(queue)
-        db.session.commit()
+        queue_delete(queue)
         return redirect(url_for('scheduler.queue_list_route'))
 
     return render_template('button-delete.html', form=form)

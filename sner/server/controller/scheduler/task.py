@@ -11,10 +11,20 @@ from sqlalchemy_filters import apply_filters
 from sner.server import db
 from sner.server.controller.auth import role_required
 from sner.server.controller.scheduler import blueprint
+from sner.server.controller.scheduler.queue import queue_delete
 from sner.server.form import ButtonForm
 from sner.server.form.scheduler import TaskForm
 from sner.server.model.scheduler import Queue, Task
 from sner.server.sqlafilter import filter_parser
+
+
+def task_delete(task):
+    """task delete; delete all queues and respective jobs in cascade (deals with output files)"""
+
+    for queue in task.queues:
+        queue_delete(queue)
+    db.session.delete(task)
+    db.session.commit()
 
 
 @blueprint.route('/task/list')
@@ -88,8 +98,7 @@ def task_delete_route(task_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.delete(task)
-        db.session.commit()
+        task_delete(task)
         return redirect(url_for('scheduler.task_list_route'))
 
     return render_template('button-delete.html', form=form)

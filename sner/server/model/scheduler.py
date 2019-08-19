@@ -24,7 +24,7 @@ class Task(db.Model):
     module = db.Column(db.String(250), nullable=False)
     params = db.Column(db.Text, nullable=False)
 
-    queues = relationship('Queue', back_populates='task')
+    queues = relationship('Queue', back_populates='task', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return '<Task %d: %s>' % (self.id, self.name)
@@ -35,17 +35,22 @@ class Queue(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id', ondelete='CASCADE'), nullable=False)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
 
     task = relationship('Task', back_populates='queues')
-    targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan')
-    jobs = relationship('Job', back_populates='queue')
+    targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
+    jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return '<Queue %d: %s>' % (self.id, self.name)
+
+    @property
+    def data_abspath(self):
+        """return absolute path of the queue data directory"""
+        return os.path.join(current_app.config['SNER_VAR'], 'scheduler', 'queue-%s' % self.id) if self.id else None
 
 
 class Target(db.Model):
@@ -53,7 +58,7 @@ class Target(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     target = db.Column(db.Text, nullable=False)
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'), nullable=False)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
 
     queue = relationship('Queue', back_populates='targets')
 
@@ -65,10 +70,9 @@ class Job(db.Model):
     """assigned job"""
 
     id = db.Column(db.String(36), primary_key=True)
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'))
     assignment = db.Column(db.Text, nullable=False)
     retval = db.Column(db.Integer)
-    output = db.Column(db.Text)
     time_start = db.Column(db.DateTime, default=datetime.utcnow)
     time_end = db.Column(db.DateTime)
 
@@ -80,7 +84,7 @@ class Job(db.Model):
     @property
     def output_abspath(self):
         """return absolute path to the output data file acording to current app config"""
-        return os.path.join(current_app.config['SNER_VAR'], self.output) if self.output else None
+        return os.path.join(self.queue.data_abspath, self.id)
 
 
 class ExclFamily(SelectableEnum):
