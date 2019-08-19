@@ -58,7 +58,7 @@ def db_initdata():  # pylint: disable=too-many-statements
 
     task = Task(
         name='dev_010 dummy',
-        module='nmap',
+        module='dummy',
         params='--dummyparam 1')
     db.session.add(task)
     queue = Queue(task=task, name=task.name, group_size=3, priority=10, active=True)
