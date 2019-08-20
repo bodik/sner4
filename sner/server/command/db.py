@@ -44,7 +44,7 @@ def db_init():  # pragma: no cover
     db.create_all()
 
 
-@db_command.command(name='initdata', help='put initial data to database')
+@db_command.command(name='init-data', help='put initial data to database')
 @with_appcontext
 def db_initdata():  # pylint: disable=too-many-statements
     """put initial data to database"""

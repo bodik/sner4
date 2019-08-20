@@ -135,7 +135,7 @@ management and user profile self-management.
 
 ##### CLI
 
-* user password reset (`passwordreset`)
+* user password reset (`reset-password`)
 
 
 #### 2.2.2 Scheduler
@@ -183,7 +183,7 @@ configured exclusion during drawing process.
 ##### CLI
 
 * ip/targets enumeration helpers (`enumips`, `rangetocird`)
-* queue management (`queue_enqueue`, `queue_flush`, `queue_prune`)
+* queue management (`queue-enqueue`, `queue-flush`, `queue-prune`)
 
 
 #### 2.2.3 Storage and parsers
@@ -207,8 +207,8 @@ service info word cloud).
 
 * storage data management (`import`, `flush`)
 * report generation (`report`)
-* host management (`host_cleanup`)
-* service management (`service_list`, `service_cleanup`)
+* host management (`host-cleanup`)
+* service management (`service-list`, `service-cleanup`)
 
 
 #### 2.2.4 Visualizations and planner
@@ -314,7 +314,7 @@ bin/server run
 4. Setup exclusions (*scheduler > exclusions > add | edit*)
 5. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
-	* shell: `bin/server scheduler queue_enqueue [queue_id | queue_name] --file=targets`
+	* shell: `bin/server scheduler queue-enqueue [queue_id | queue_name] --file=targets`
 6. Run the agent `bin/agent &` (use screen for convenience)
 7. Monitor the queue until drained and all jobs has been finished by agent
 8. Stop the agent `bin/agent --shutdown [PID]`
@@ -337,7 +337,7 @@ bin/server run
 #### 4.3.1 Basic dns recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns_recon' --file=-
 bin/agent --debug --queue 'dns recon'
 ```
 
@@ -349,32 +349,32 @@ Import gathered data after each step.
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue_enqueue 'sner_011 top10000 ack scan' --file=-
+        | bin/server scheduler queue-enqueue 'sner_011 top10000 ack scan' --file=-
     ```
 
 2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
 
     ```
     # fast track
-    bin/server storage service_list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue_enqueue 'sner_020 inet version scan basic commonports' --file=-
+    bin/server storage service-list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
+        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic commonports' --file=-
     # rest of the ports
-    bin/server storage service_list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue_enqueue 'sner_020 inet version scan basic normal' --file=-
+    bin/server storage service-list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
+        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic normal' --file=-
     ```
 
 3. Re-queue services without identification for high intensity version scan.
 
     ```
-    bin/server storage service_list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue_enqueue 'sner_025 inet version scan intense' --file=-
+    bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
+        | bin/server scheduler queue-enqueue 'sner_025 inet version scan intense' --file=-
     ```
 
 4. Cleanup storage, remove services in filtered state (ack scan artifacts) and prune hosts without any data
 
     ```
-    bin/server storage service_cleanup
-    bin/server storage host_cleanup
+    bin/server storage service-cleanup
+    bin/server storage host-cleanup
     ```
 
 5. ?Fully rescan alive hosts
@@ -386,16 +386,16 @@ Import gathered data after each step.
 
 ```
 # ftp sweep
-bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
-    | bin/server scheduler queue_enqueue 'sner_030 ftp sweep' --file=-
+bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
+    | bin/server scheduler queue-enqueue 'sner_030 ftp sweep' --file=-
 
 # http titles
-bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
-    | bin/server scheduler queue_enqueue 'sner_031 http titles' --file=-
+bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
+    | bin/server scheduler queue-enqueue 'sner_031 http titles' --file=-
 
 # ldap info
-bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
-    | bin/server scheduler queue_enqueue 'sner_032 ldap rootdse' --file=-
+bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
+    | bin/server scheduler queue-enqueue 'sner_032 ldap rootdse' --file=-
 ```
 
 ##### Manual
@@ -407,7 +407,7 @@ Generally pure nmap can be used to do specific sweeps/scanning.
 nmap SCANTYPE TIMING(-Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1) TARGETING OUTPUT(-oA output)
 
 # example
-bin/server storage service_list --filter 'Service.port == 22' --iponly > targets
+bin/server storage service-list --filter 'Service.port == 22' --iponly > targets
 nmap \
     -sV --version-intensity 4 \
     -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1 \

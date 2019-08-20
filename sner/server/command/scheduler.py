@@ -53,7 +53,7 @@ def rangetocidr(start, end):
         print(tmp)
 
 
-@scheduler_command.command(name='queue_enqueue', help='add targets to queue')
+@scheduler_command.command(name='queue-enqueue', help='add targets to queue')
 @click.argument('queue_id')
 @click.argument('argtargets', nargs=-1)
 @click.option('--file', type=click.File('r'))
@@ -75,7 +75,7 @@ def queue_enqueue(queue_id, argtargets, **kwargs):
     sys.exit(0)
 
 
-@scheduler_command.command(name='queue_flush', help='flush all targets from queue')
+@scheduler_command.command(name='queue-flush', help='flush all targets from queue')
 @click.argument('queue_id')
 @with_appcontext
 def queue_flush(queue_id):
@@ -91,7 +91,7 @@ def queue_flush(queue_id):
     sys.exit(0)
 
 
-@scheduler_command.command(name='queue_prune', help='delete all associated jobs')
+@scheduler_command.command(name='queue-prune', help='delete all associated jobs')
 @click.argument('queue_id')
 @with_appcontext
 def queue_prune(queue_id):

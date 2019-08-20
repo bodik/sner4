@@ -44,18 +44,18 @@ def test_queue_enqueue_command(runner, tmpworkdir, test_queue):
     with open(test_path, 'w') as ftmp:
         ftmp.write(test_target.target)
 
-    result = runner.invoke(scheduler_command, ['queue_enqueue', str(666), test_target.target])
+    result = runner.invoke(scheduler_command, ['queue-enqueue', str(666), test_target.target])
     assert result.exit_code == 1
 
-    result = runner.invoke(scheduler_command, ['queue_enqueue', str(test_queue.id), test_target.target])
+    result = runner.invoke(scheduler_command, ['queue-enqueue', str(test_queue.id), test_target.target])
     assert result.exit_code == 0
     assert Queue.query.filter(Queue.id == test_queue.id).one_or_none().targets[0].target == test_target.target
 
-    result = runner.invoke(scheduler_command, ['queue_enqueue', str(test_queue.id), '--file', test_path])
+    result = runner.invoke(scheduler_command, ['queue-enqueue', str(test_queue.id), '--file', test_path])
     assert result.exit_code == 0
     assert len(Queue.query.filter(Queue.id == test_queue.id).one_or_none().targets) == 2
 
-    result = runner.invoke(scheduler_command, ['queue_enqueue', str(test_queue.name), test_target.target])
+    result = runner.invoke(scheduler_command, ['queue-enqueue', str(test_queue.name), test_target.target])
     assert result.exit_code == 0
     assert len(Queue.query.filter(Queue.id == test_queue.id).one_or_none().targets) == 3
 
@@ -65,10 +65,10 @@ def test_queue_flush_command(runner, test_target):
 
     test_queue_id = test_target.queue_id
 
-    result = runner.invoke(scheduler_command, ['queue_flush', str(666)])
+    result = runner.invoke(scheduler_command, ['queue-flush', str(666)])
     assert result.exit_code == 1
 
-    result = runner.invoke(scheduler_command, ['queue_flush', str(test_queue_id)])
+    result = runner.invoke(scheduler_command, ['queue-flush', str(test_queue_id)])
     assert result.exit_code == 0
 
     queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
@@ -80,10 +80,10 @@ def test_queue_prune_command(runner, test_job_completed):
 
     test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
 
-    result = runner.invoke(scheduler_command, ['queue_prune', str(666)])
+    result = runner.invoke(scheduler_command, ['queue-prune', str(666)])
     assert result.exit_code == 1
 
-    result = runner.invoke(scheduler_command, ['queue_prune', str(test_job_completed.queue_id)])
+    result = runner.invoke(scheduler_command, ['queue-prune', str(test_job_completed.queue_id)])
     assert result.exit_code == 0
 
     assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()

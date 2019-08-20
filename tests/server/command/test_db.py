@@ -23,7 +23,7 @@ def test_dbinit_command(runner):
 def test_dbinitdata_command(runner):
     """db initdata test"""
 
-    result = runner.invoke(db_command, ['initdata'])
+    result = runner.invoke(db_command, ['init-data'])
     assert result.exit_code == 0
 
     assert Target.query.all()

@@ -28,7 +28,7 @@ db-create-test:
 db:
 	bin/server db remove
 	bin/server db init
-	bin/server db initdata
+	bin/server db init-data
 
 
 lint: flake8 pylint

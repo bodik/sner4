@@ -134,7 +134,7 @@ def storage_report():
     print(vuln_report())
 
 
-@storage_command.command(name='host_cleanup', help='cleanup hosts; remove hosts not associated with any data (eg. just addresses)')
+@storage_command.command(name='host-cleanup', help='cleanup hosts; remove hosts not associated with any data (eg. just addresses)')
 @with_appcontext
 @click.option('--dry', is_flag=True, help='do not actually remove')
 def storage_host_cleanup(**kwargs):
@@ -167,7 +167,7 @@ def storage_host_cleanup(**kwargs):
         db.session.commit()
 
 
-@storage_command.command(name='service_list', help='service (filtered) listing')
+@storage_command.command(name='service-list', help='service (filtered) listing')
 @with_appcontext
 @click.option('--filter', help='filter query')
 @click.option('--iponly', is_flag=True, help='show only service.host.address')
@@ -208,7 +208,7 @@ def storage_service_list(**kwargs):
         print(fmt % fndata(tmp))
 
 
-@storage_command.command(name='service_cleanup', help='cleanup services; remove all in "filtered" state')
+@storage_command.command(name='service-cleanup', help='cleanup services; remove all in "filtered" state')
 @with_appcontext
 @click.option('--dry', is_flag=True, help='do not actually remove')
 def storage_service_cleanup(**kwargs):

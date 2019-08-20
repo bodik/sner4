@@ -19,7 +19,7 @@ def auth_command():
     """auth commands click group/container"""
 
 
-@auth_command.command(name='passwordreset', help='password reset')
+@auth_command.command(name='reset-password', help='password reset')
 @click.argument('username')
 @with_appcontext
 def passwordreset(username):

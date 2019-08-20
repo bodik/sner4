@@ -123,7 +123,7 @@ def test_host_cleanup_command(runner):
     persist_and_detach(Service(host_id=test_host2.id, proto='tcp', port=1, state='anystate:reason'))
     test_host3 = persist_and_detach(Host(address='127.127.127.133', hostname='xxx', os=''))
 
-    result = runner.invoke(storage_command, ['host_cleanup', '--dry'])
+    result = runner.invoke(storage_command, ['host-cleanup', '--dry'])
     assert result.exit_code == 0
 
     assert repr(test_host1) not in result.output
@@ -131,7 +131,7 @@ def test_host_cleanup_command(runner):
     assert repr(test_host3) in result.output
     assert Host.query.count() == 3
 
-    result = runner.invoke(storage_command, ['host_cleanup'])
+    result = runner.invoke(storage_command, ['host-cleanup'])
     assert result.exit_code == 0
 
     hosts = Host.query.all()
@@ -144,23 +144,23 @@ def test_service_list_command(runner, test_service):
 
     host = Host.query.filter(Host.id == test_service.host_id).one()
 
-    result = runner.invoke(storage_command, ['service_list', '--long', '--iponly'])
+    result = runner.invoke(storage_command, ['service-list', '--long', '--iponly'])
     assert result.exit_code == 1
 
-    result = runner.invoke(storage_command, ['service_list'])
+    result = runner.invoke(storage_command, ['service-list'])
     assert result.exit_code == 0
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
-    result = runner.invoke(storage_command, ['service_list', '--long'])
+    result = runner.invoke(storage_command, ['service-list', '--long'])
     assert result.exit_code == 0
     assert json.dumps(test_service.info) in result.output
 
-    result = runner.invoke(storage_command, ['service_list', '--iponly'])
+    result = runner.invoke(storage_command, ['service-list', '--iponly'])
     assert result.exit_code == 0
     assert len(result.output.splitlines()) == 1
     assert host.address in result.output
 
-    result = runner.invoke(storage_command, ['service_list', '--filter', 'Service.port=="%d"' % test_service.port])
+    result = runner.invoke(storage_command, ['service-list', '--filter', 'Service.port=="%d"' % test_service.port])
     assert result.exit_code == 0
     assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
 
@@ -172,14 +172,14 @@ def test_service_cleanup_command(runner, test_host):
     test_service2 = persist_and_detach(Service(host_id=test_host.id, proto='tcp', port=1, state='filtered:reason'))
     persist_and_detach(Note(host_id=test_host.id, service_id=test_service2.id, xtype='cleanuptest', data='atestdata'))
 
-    result = runner.invoke(storage_command, ['service_cleanup', '--dry'])
+    result = runner.invoke(storage_command, ['service-cleanup', '--dry'])
     assert result.exit_code == 0
 
     assert repr(test_service1) not in result.output
     assert repr(test_service2) in result.output
     assert Service.query.count() == 2
 
-    result = runner.invoke(storage_command, ['service_cleanup'])
+    result = runner.invoke(storage_command, ['service-cleanup'])
     assert result.exit_code == 0
 
     assert Note.query.count() == 0
