@@ -111,7 +111,7 @@ def db_initdata():  # pylint: disable=too-many-statements
         module='manymap',
         params='-sV --version-intensity 4    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1')
     db.session.add(task)
-    db.session.add(Queue(task=task, name=task.name + ' fastports', group_size=50, priority=20))
+    db.session.add(Queue(task=task, name=task.name + ' commonports', group_size=50, priority=20))
     db.session.add(Queue(task=task, name=task.name + ' normal', group_size=50, priority=10))
 
     task = Task(

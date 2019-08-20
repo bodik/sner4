@@ -13,101 +13,100 @@
 
 ## 1 Project description
 
-Currently, an ad-hoc developed version of the orchestration tool/wrapper for
-distributing, partitioning and analysis of various nmap and nikto workloads is
-used during first phases of FLAB pentesting methodology.
+Currently, an ad-hoc developed version of the orchestration tool/wrapper is
+used for distributing, partitioning and analysis of various nmap and nikto
+workloads during first phases of FLAB penetration testing methodology.
 
-The main goals of this project is to create server-client software suite for:
+The main goal of this project is to create server-client software suite for:
 
-* Distributing network reconaissance workload
-	* scanning performed by the layer of modular agents, wrapping already
-	  existing tools such as nmap, nikto, sslscan, nessus and metasploit
-	* pivoting, long term timing, performance
-		
-* Analysis and data management
-	* analysis of the gathered recon data for monitoring of discovered services
-	  in large networks similary to the shodan and censys public services
-	* managing of recon and vulnerability data for the purposes of the pentesting
-	  processes
+* Distributing network reconnaissance workload
+	* scanning performed by modular agents, wrapping already existing tools
+	  such as nmap, nikto, sslscan, nessus and metasploit
+	* pivoting, long term timing and performance management
 
-Several existing solutions has been found, but not any of them meets our long term 
-requirements. Typically the existing project are too big to customize (Faraday), does
-not have simple extendable support for multiple scanning tools (ivre), does not allow
-to easy modify the UI (metasploit) or does not have web-based UI at all (VulntoES, sparta).
+* Data analysis and management
+	* analysis of the data for service monitoring in large networks similarly
+	  to the Shodan and Censys services
+	* managing recon and vulnerability data for penetration testing tasks
+
+Several existing solutions are available, but none of them meets our long term
+requirements. Typically the existing projects are too heavy to customize
+(Faraday), does not have simple extendable support for multiple scanning tools
+(ivre), does not allow to easy modify the user-interface (metasploit) or does
+not have web-based user-interface at all (VulntoES, sparta).
 
 
 ### 1.1 Design overview
 
-* Distributing network reconaissance workload
-	* planner		-- management and scheduling for repetitive recon of the monitored networks
-	* scheduler		-- job/task distribution
-	* agent			-- modular wrapper for scanning tools
+The application is divided into several components according to main functions.
+The output of the reconnaissance subsystem are the standard output data from
+the wrapped tools and should be parser by respective parser components/modules
+to push the data into data management subsystem (eg. storage).
 
-The output of the recon components are the typical machine readable data from
-wrapped tools for the analysis and data management components.
+| Function            | Component     | Description |
+| ------------------- | ------------- | ----------- |
+| **reconnaissance**  |||
+|                     | planner       | management and scheduling for continuous recon |
+|                     | scheduler     | job/task distribution |
+|                     | agent         | modular wrapper for scanning tools | 
+| **data management** |||
+|                     | parser        | agent module data parsing |
+|                     | storage       | long term ip-centric storage |
+|                     | visualization | read-only analytics and visualization user-interface |
 
-* Analysis and data management
-	* processor/parser	-- recon and vulnerability data preprocessing and analytics layer
-	* storage		-- long term host/ip centric storage
-	* visualization		-- management/view interface
-
+Components interconnection graph.
 
 ```
-                                                    +---+  raw files
+                                                    +---+  (raw) files
               agent  +--+--+  server                |
                         |                           |
-     +-------------+    |      +--------------+     |      +----------------------+
-     |             |    |      |              |     |      |                      |  module1
-     |  agent      +<--------->+  scheduler   +----------->+  processor/parser    |  module2
-     |             |    |      |              |     |      |                      |  modulex
-     +-------------+    |      +--------------+     |      +----------------------+
-                        |            ^              |             |
-      module1           |            |              +             |
-      module2           |            |                           \|/
-      modulex           |            |                      +--------------+
-                        |            |                      |              |
-                        |            |                      |  db/storage  |
-                        |      +--------------+             |              |
-                        |      |              |             +--------------+
+     +-------------+    |      +--------------+     |     +-----------------+
+     |             |    |      |              |     |     |                 |  module1
+     |  agent      |<--------->|  scheduler   |---------->|  parser         |  module2
+     |             |    |      |              |     |     |                 |  moduleX
+     +-------------+    |      +--------------+     |     +-----------------+
+                        |            ^              |              |
+      module1           |            |              +              |
+      module2           |            |                            \|/
+      moduleX           |            |                    +-----------------+
+                        |            |                    |                 |
+                        |            |                    |  db/storage     |
+                        |      +--------------+           |                 |
+                        |      |              |           +-----------------+
                         |      |  planner     |                    ^
                         |      |              |                    |
-                        |      +--------------+             +---------------------+
-                        |                                   |                     |
-                        |                                   |  visualizations     |
-                        |                                   |                     |
-                        |                                   +---------------------+
+                        |      +--------------+           +-----------------+
+                        |                                 |                 |
+                        |                                 |  visualization  |
+                        |                                 |                 |
+                        |                                 +-----------------+
                         |
-                        |                                     module1
-                        +                                     module2
-                                                              modulex
+                        |                                  module1
+                        +                                  module2
+                                                           moduleX
 ```
 
 
 ## 2 Features
 
-All implemented features supports penetration testing or continuous monitoring
-processes.
-
 
 ### 2.1 Agent
 
-* Wraps existing tools with the communication and execution layer.
+Agent wraps an existing tools with the communication (agent) and execution
+layers (modules). Typically agent draws assignment from server, performs the
+task, packs the output and posts it back to the server.
 
-* For agent-server protocol specification see the `sner/agent/procotol.py`.
+Agent can run periodicaly (default) or one-time only (`--oneshot`). A specific
+queue to draw assignments from can be forced with `--queue` argument. Also
+agent can execute static assignment (`--assignment`). Running agent can be
+stopped gracefully (`--shutdown`) or terminated immediately (`--terminate`).
 
-* Server authentication requires valid apikey for account with role *agent*.
-  Apikey should be placed in config file (note that passing apikey by
-  command-line argument might leak the apikey).
+Server requires the agent to authenticate itself by valid apikey for an account
+in role *agent*. The apikey should be placed in config file, passing apikey
+through `--appikey` is possible, but not recommended.
 
-* Agent can run periodicaly or one-time only (`--oneshot`) against server or
-  just for specific queue (`--queue`)
-
-* If running, agent can be stopped gracefully (`--shutdown`, might take time if
-  long running job/assignment is executing, or terminated immediately
-  (`--terminate`).
-
-
-#### 2.1.1 Agent modules
+For agent-server protocol specification see the `sner/agent/procotol.py`.
+Currently implemented modules are:
 
 * dummy
 * nmap
@@ -116,131 +115,123 @@ processes.
 
 ### 2.2 Server
 
-Server itself is flask-based application with web and command line interface.
-The main components are roughly devided to python modules (also flask
-blueprints) but with tight coupling.
+Server is an flask-based application with web and command line interface.
 
 
 #### 2.2.1 Auth
 
-Component provides AAA mechanisms for the server.
+Component which provides AA mechanisms for the server. 
 
-* Authentication
-	* Schemas supported
-		-- username+password, w/o OTP as second factor;
-		   FIDO2/webauthn password-less;
-		   Header-based authentication for scheduler API (agents only)
-	* Session based implementation
-		-- default flask sessions replaced with server-side file-backed implementation;
-		   no save sessions for agents
-	* Password storage
-		-- `user.password` salted-sha512, should allow transitions if needed;
-		   `user.apikey` sha512;
-		   managed by `sner/server/password_supervisor.py`
+Authentication mechanisms supported are: username+password w/o OTP as second
+factor, FIDO2 Webauthn password-less authentication and header-based apikey
+authentication (agent only). Passwords and apikeys are governed by
+*PasswordSupervisor* module. Default Flask session implementation has been
+replaced with custom session server-side file based storage.
 
-* Authorization
-	* static set of roles used for very simple route-based authorization
+Authorization is based on routes role-based access lists and user roles.
 
-* Account management
-	* user CRUD
-	* roles management: admin, operator, user (no privileges, planned for shodan-like RO interface), agent
-	* apikey (re)generation
+Account management allows CRUD operations on users, role and apikey
+management and user profile self-management.
 
-* Command-line interface
-	* user password reset (`passwordreset`)
+##### CLI
+
+* user password reset (`passwordreset`)
 
 
 #### 2.2.2 Scheduler
 
-Components provides workload configuration and distribution mechanisms for the
-recon subsystem. Each agents draws (repeatedly) an `assignment` from server,
-executes the workload, packs the output and post-back the results of the
+Component which provides workload configuration and distribution mechanism.
+Each agents draws (repeatedly) an `assignment` from scheduler component,
+executes the workload, packs the output and posts back the results of the
 assigned `job`.
 
-* Models:
-	* `task` -- general settings for module executed by agent. Agent
-	  module is responsible for interpreting the `task.params` property.
+##### Task
 
-	* `queue` -- holds list of targets for specific task. When creating
-	  assignment for agent, server select active queue with highest priority and
-          draws N targets (`queue.group_size`) from queue randomly.
+A work settings for module executed by agent. Modules itself are responsible
+for interpreting the `params` property.
 
-	  Each agent module requires own target specification, consult corresponding agent module class
-	  docstring for more information.
+##### Queue
 
-	* `job` -- represents one assignment/job for the agent. `assignment` is represented 
-          by JSON object and output as `job.retval` and `job.output`.
-	  `output` should be a zip file and corresponding parser in `storage` component
-	  should be able to understand it's contents. Output archive must include
-	  `assignment.txt` file with appropriate data. Archives are stored directly on disk
-          in directory structure corresponding to queues for better manipulation (listing, backup, import).
+Represents list of targets for specific task. When creating an assignment for
+agent, server select active, non-empty queue with highest priority and draws
+`group_size` number of random targets.
 
-	* `excl` -- model for target exclusion. During large or long recons, some parts
-	  of monitored networks must be avoided for policy, operations or security reasons.
-          `excl` models holds information which CIDR or regex specified targets must not
-          be assigned from queues. Exclusions are used during the assignment phase (not
-	  enqueue phase because exclusion list might change between time of queue setup and target selection),
-          scheduler silently discards all drawed targets matching any configured exclusion.
+Each module might require specific target format, consult the corresponding
+module class docstring for more information.
 
-* Web interface
-	* CRUD operations for all models except `job` model.
-	* assignment and ouput gathering functionality for agents is available through `/api` endpoints
+##### Job
 
-* Command-line interface
-	* ip/targets enumeration helpers (`enumips`, `rangetocird`)
-	* queue management (`queue_enqueue`, `queue_flush`, `queue_prune`)
+Represents one assignment/job for the agent. `assignment` is a JSON object and
+*output* as tuple of `retval` and output data.  Output data is a zip archive
+which contents should be understood by a respective parser in *storage*
+component. Archive must include at least an `assignment.txt` file with
+assignment JSON. Archives are stored directly on disk in directory structure
+corresponding to queues for better manipulation (listing, backup, import).
+
+Assignment and ouput gathering function is available through `/api` endpoints.
+
+##### Excl (exclusion)
+
+A setting for target exclusion. During large or long recons, some parts of
+monitored networks must be avoided for policy, operations or security reasons.
+Excl(usions) holds information which CIDR or regex specified targets must not
+be assigned from queues. Exclusions are used during the assignment phase (not
+enqueue phase) because exclusion list might change between time of queue setup
+and target selection, scheduler silently discards all targets matching any
+configured exclusion during drawing process.
+
+##### CLI
+
+* ip/targets enumeration helpers (`enumips`, `rangetocird`)
+* queue management (`queue_enqueue`, `queue_flush`, `queue_prune`)
 
 
 #### 2.2.3 Storage and parsers
 
-Storage component is main long-term data database. It's design is host/ip
-centric and should represent complete state of discovered hosts, services among
-with associated vulnerabilities and notes.
+Parsers are components used to import agent output data (zip archives) of
+various formats to corresponding storage models.
 
-Parsers are components responsible for parsing and interpreting agent output
-data (typically zip blobs) and translating it into storage models/entities.
+Storage component is a main long term database. It's design is IP-centric and
+holds information about discovered hosts, services with associated
+vulnerabilities and notes. The storage models (`Host`, `Service`, `Vuln` and
+`Note`) are heavily inspired by Metasploit framework, thou most of the
+properties are self explanatory, the `[model].xtype` property is used to
+describe category of the data and used mainly by parsers.
 
-* Models:
-	* `host` -- host/ip based basic information
-	* `service` -- service information
-	* `vuln` -- vulnerability data associated with host (or service)
-	* `note` -- additional data associated with host (or service)
+Web interface allows for CRUD operations on all models, on some also multi-item
+operations such as tag and delete, filtering, vulnerability report generation
+(FLAB specific) and basic visualizations (dns tree graph, service port map,
+service info word cloud).
 
-Note: The storage model is heavily inspired by Metasploit framework. `[model].xtype`
-property is used to differentiate categories of information held in the model
-instance, the property is mainly used by parsers.
+##### CLI
 
-* Web interface
-	* CRUD operation for all models
-	* multi-item operations on `vuln` model for vulnerability evaluation process (tag, delete)
-	* filtering for preset categories (not tagged, exclude reviewed, ...)
-	* vulnerability report generation
-	* basic visualizations: hostnames tree interactive graph, service port map
-
-* Command-line interface
-	* storage data management (`import`, `flush`)
-	* report generation (`report`)
-	* host management (`host_cleanup`)
-	* service management (`service_list`, `service_cleanup`)
+* storage data management (`import`, `flush`)
+* report generation (`report`)
+* host management (`host_cleanup`)
+* service management (`service_list`, `service_cleanup`)
 
 
-#### 3.2.4 Visualizations and planner
+#### 2.2.4 Visualizations and planner
 
-* Not implemented yet
-	* Visualisations should allow for end-user read-only visualization and searching features.
-	* Planner component should take care of periodic queueing of existing or new targets to refresh information in storage.
+**Not implemented**
+
+Visualisations should allow for end-user read-only visualization and searching
+features.
+
+Planner component should take care of periodic queueing of existing or new
+targets to refresh information in storage.
 
 
 #### 2.2.5 Shell
 
-For scripting and programmatic manipulation with objects in all parts of the
-server a shell with pre loaded model is available. The usage is according to
-normal flask cli shell.
+Flask shell (pre-loaded with sner models) is available for scripting and
+programmatic manipulation with objects of all components.
 
 ```
-webservices = Service.query.filter(Service.proto=='tcp', Service.port.in_([80, 443, 8080, 8443])).all()
-for tmp in webservices:
-  print('%s:%s' % (tmp.host.address, tmp.port))
+$ bin/server shell
+>>> webservices = Service.query.filter(Service.proto=='tcp', Service.port.in_([80, 443, 8080, 8443])).all()
+>>> for tmp in webservices:
+...   print('%s:%s' % (tmp.host.address, tmp.port))
 ```
 
 
@@ -312,10 +303,10 @@ bin/server run
 
 ## 4 Usage
 
-### 4.1 Recon scenario
+### 4.1 Reconnaissance scenario
 
-1. Define new or select existing task (*scheduler > tasks > add | edit*)
-2. Define new queue for task (*scheduler > queues > add | edit*)
+1. Select existing or define new task: *scheduler > tasks > add | edit*
+2. Select existing or define new queue: *scheduler > queues > add | edit*
 3. Generate target list
 	* manualy
 	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
@@ -324,50 +315,118 @@ bin/server run
 5. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
 	* shell: `bin/server scheduler queue_enqueue [queue_id | queue_name] --file=targets`
-6. Run the agent `bin/agent &` (but screen is better)
-7. Monitor the queue until drained and all jobs has been finished by agent(s)
+6. Run the agent `bin/agent &` (use screen for convenience)
+7. Monitor the queue until drained and all jobs has been finished by agent
 8. Stop the agent `bin/agent --shutdown [PID]`
-9. Gathered recon data found in corresponding `SNER_VAR/scheduler/[queue.id]` directory can be used for analysis
+9. Gathered reconnaissance data can be found in correspondig queue directory (`[SNER_VAR]/scheduler/[queue.id]`)
 
 
 ### 4.2 Data evaluation scenario
 
-1. Import existing data with one of the available parsers (import command is
-   able to detect zip or raw data and handover it to the parser accordingly).
-   Import adds information to the storage, to replace either delete specific the
-   information first or flush whole storage.
-   ```
-   bin/server storage import [parser name] [filename]
-   ```
-2. Use web interface to consult the data *storage > hosts | services | vulns | notes | vizdns | vizports/portmap*
+1. Import existing data with one of the available parsers: `bin/server storage import [parser name] [filename]`
+2. Use web interface to consult the data: *storage > hosts | services | vulns | notes | ...*
 3. Manage data in storage
-	* use comments to pinpoint important nodes and services
-	* use server shell for further analysis and data management (eg. collect service list for further examination)
-	* review and tag or delete vulnerabilities one-by-one or use groupped view to speed up the process
-4. Generate preliminary vulnerability report for monitored network
+	* use comments to sort the data
+	* use server shell for advanced analysis
+	* review, tag or delete vulnerabilities
+4. Generate preliminary vulnerability report: *storage > vulns > Generate report*
 
 
 ### 4.3 Examples
 
-#### 1.3.1 Basic dns recon
+#### 4.3.1 Basic dns recon
+
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file -
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue_enqueue 'dns_recon' --file=-
 bin/agent --debug --queue 'dns recon'
+```
+
+#### 4.3.2 General long-term scanning strategy
+
+Import gathered data after each step.
+
+1. Service discovery, TCP ACK scan to search for alive hosts and probable services (avoids some flow based IDS/IPS systems).
+
+    ```
+    bin/server scheduler enumips 192.168.0.0/16 \
+        | bin/server scheduler queue_enqueue 'sner_011 top10000 ack scan' --file=-
+    ```
+
+2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
+
+    ```
+    # fast track
+    bin/server storage service_list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
+        | bin/server scheduler queue_enqueue 'sner_020 inet version scan basic commonports' --file=-
+    # rest of the ports
+    bin/server storage service_list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
+        | bin/server scheduler queue_enqueue 'sner_020 inet version scan basic normal' --file=-
+    ```
+
+3. Re-queue services without identification for high intensity version scan.
+
+    ```
+    bin/server storage service_list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
+        | bin/server scheduler queue_enqueue 'sner_025 inet version scan intense' --file=-
+    ```
+
+4. Cleanup storage, remove services in filtered state (ack scan artifacts) and prune hosts without any data
+
+    ```
+    bin/server storage service_cleanup
+    bin/server storage host_cleanup
+    ```
+
+5. ?Fully rescan alive hosts
+
+
+#### 4.3.3 Service specific scanning
+
+##### Automated (module manymap)
+
+```
+# ftp sweep
+bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
+    | bin/server scheduler queue_enqueue 'sner_030 ftp sweep' --file=-
+
+# http titles
+bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
+    | bin/server scheduler queue_enqueue 'sner_031 http titles' --file=-
+
+# ldap info
+bin/server storage service_list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
+    | bin/server scheduler queue_enqueue 'sner_032 ldap rootdse' --file=-
+```
+
+##### Manual
+
+Generally pure nmap can be used to do specific sweeps/scanning.
+
+```
+# template
+nmap SCANTYPE TIMING(-Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1) TARGETING OUTPUT(-oA output)
+
+# example
+bin/server storage service_list --filter 'Service.port == 22' --iponly > targets
+nmap \
+    -sV --version-intensity 4 \
+    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1 \
+    -p T:22 -iL targets \
+    -oA output
+bin/server storage import nmap output.xml
 ```
 
 
 ## 5 Development
 
-* Server part is flask-based application, while agent is standalone python
-  module. Consult `.travis.yml` to get started.
-
-* Project uses flake8, pylint (mostly defaults) pytest, coverage, selenium and
-  travis-ci.org to ensure some coding standard and functionality.
+* Server is Flask based application, agent is standalone python module. See
+  `.travis.yml` to get started.
 
 * Web interface is a *simple form based airship rental like application* based
-  on DataTables glued together with jQuery and a few enhancements for multi
-  item operations.
+  on DataTables glued together with jQuery and a few enhancements for
+  multi-item operations.
 
-* EmberJS/React for UI is under evaluation, but yet in not_this_time category.
+* Project uses flake8, pylint, pytest, coverage, selenium and travis-ci.org to
+  ensure functionality and coding standards.
 
 * Any review or contribution is welcome.
