@@ -35,11 +35,10 @@ class NessusParser(ParserBase):
         report = parse_nessus_xml(data)['report']
         for ihost in report['hosts']:
             host = NessusParser._import_host(ihost)
-
             for ireport_item in ihost['report_items']:
                 NessusParser._import_report_item(host, ireport_item)
-
             print('parsed host: %s' % host)
+
         db.session.commit()
 
     @staticmethod
@@ -51,8 +50,16 @@ class NessusParser(ParserBase):
             host = Host(address=nessushost['tags']['host-ip'])
             db.session.add(host)
 
-        if (not host.hostname) and ('host-fqdn' in nessushost['tags']):
-            host.hostname = nessushost['tags']['host-fqdn']
+        if 'host-fqdn' in nessushost['tags']:
+            if not host.hostname:
+                host.hostname = nessushost['tags']['host-fqdn']
+
+            if host.hostname != nessushost['tags']['host-fqdn']:
+                note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
+                if not note:
+                    note = Note(host=host, xtype='hostnames', data=json.dumps([host.hostname]))
+                    db.session.add(note)
+                note.data = json.dumps(list(set(json.loads(note.data) + [nessushost['tags']['host-fqdn']])))
 
         if 'operating-system' in nessushost['tags']:
             host.os = nessushost['tags']['operating-system']
@@ -63,68 +70,53 @@ class NessusParser(ParserBase):
     def _import_report_item(host, report_item):
         """import nessus_v2 ReportItem 'element'"""
 
-        report_item['port'] = int(report_item['port'])
-
+        port = int(report_item['port'])
+        xtype = 'nessus.%s' % report_item['plugin_id']
         service = None
-        if report_item['port']:
+
+        if port:
             service = Service.query.filter(
                 Service.host == host,
                 Service.proto == report_item['protocol'],
-                Service.port == report_item['port']).one_or_none()
+                Service.port == port).one_or_none()
             if not service:
-                service = Service(
-                    host=host,
-                    proto=report_item['protocol'],
-                    port=report_item['port'],
-                    name=report_item['service_name'],
-                    state='nessus')
+                service = Service(host=host, proto=report_item['protocol'], port=port)
                 db.session.add(service)
 
-        xtype = 'nessus.%s' % report_item['plugin_id']
+            service.state = 'open:nessus'
+            service.name = report_item['service_name']
+
+        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == xtype).one_or_none()
+        if not note:
+            note = Note(host=host, service=service, xtype=xtype)
+            db.session.add(note)
+        note.data = json.dumps(report_item, cls=SnerJSONEncoder)
+        db.session.flush()  # required to get .id
+
         vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == xtype).one_or_none()
         if not vuln:
-            # create refs, mimic metasploit import
-            refs = []
-            for ref in report_item.get('cve', []):
-                refs.append('%s' % ref)
-
-            for ref in report_item.get('bid', []):
-                refs.append('BID-%s' % ref)
-
-            for ref in report_item.get('xref', []):
-                refs.append('%s-%s' % tuple(ref.split(':', maxsplit=1)))
-
-            if report_item.get('metasploit_name', None):
-                refs.append('MSF-%s' % report_item['metasploit_name'])
-
-            if report_item.get('see_also', None):
-                for ref in report_item['see_also'].splitlines():
-                    refs.append('URL-%s' % ref)
-
-            if report_item.get('plugin_id', None):
-                refs.append('NSS-%s' % report_item['plugin_id'])
-
-            # create note with full vulnerability data
-            note = Note(
-                host=host,
-                service=service,
-                xtype=xtype,
-                data=json.dumps(report_item, cls=SnerJSONEncoder))
-            db.session.add(note)
-            db.session.flush()
-            refs.append('SN-%s' % note.id)
-
-            # create vulnerability
-            vuln = Vuln(
-                host=host,
-                service=service,
-                xtype=xtype,
-                name=report_item['plugin_name'],
-                severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
-                descr='## Synopsis\n\n%s\n\n ##Description\n\n%s' % (report_item['synopsis'], report_item['description']),
-                data=report_item['plugin_output'],
-                refs=refs)
+            vuln = Vuln(host=host, service=service, xtype=xtype)
             db.session.add(vuln)
+
+        refs = ['SN-%s' % note.id]
+        if 'cve' in report_item:
+            refs += [ref for ref in report_item['cve']]
+        if 'bid' in report_item:
+            refs += ['BID-%s' % ref for ref in report_item['bid']]
+        if 'xref' in report_item:
+            refs += ['%s-%s' % tuple(ref.split(':', maxsplit=1)) for ref in report_item['xref']]
+        if ('see_also' in report_item) and report_item['see_also']:
+            refs += ['URL-%s' % ref for ref in report_item['see_also'].splitlines()]
+        if ('metasploit_name' in report_item) and report_item['metasploit_name']:
+            refs.append('MSF-%s' % report_item['metasploit_name'])
+        if ('plugin_id' in report_item) and report_item['plugin_id']:
+            refs.append('NSS-%s' % report_item['plugin_id'])
+
+        vuln.name = report_item['plugin_name']
+        vuln.severity = SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']])
+        vuln.descr = '## Synopsis\n\n%s\n\n ##Description\n\n%s' % (report_item['synopsis'], report_item['description'])
+        vuln.data = report_item['plugin_output']
+        vuln.refs = refs
 
         return vuln
 

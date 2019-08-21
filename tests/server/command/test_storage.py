@@ -60,6 +60,13 @@ def test_import_nessus_command(runner):
     assert tmpvuln
     assert 'CVE-1900-0000' in tmpvuln.refs
 
+    # test adding additional hostnames
+    result = runner.invoke(storage_command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple-hostname.xml'])
+    assert result.exit_code == 0
+    note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
+    assert note
+    assert len(json.loads(note.data)) == 2
+
 
 def test_import_manymap_command_zipfile(runner):
     """test manymap parser; zipfile import"""
