@@ -41,3 +41,8 @@ def file_from_zip(zippath, filename):
     with ZipFile(zippath) as ftmp_zip:
         with ftmp_zip.open(filename) as ftmp:
             return ftmp.read()
+
+
+def format_host_address(value):
+    """format ipv4 vs ipv6 address to string"""
+    return value if ':' not in value else '[%s]' % value

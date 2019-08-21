@@ -16,6 +16,7 @@ from flask.cli import with_appcontext
 from sqlalchemy import func, or_
 from sqlalchemy_filters import apply_filters
 
+from sner.lib import format_host_address
 from sner.server import db
 from sner.server.model.storage import Host, Note, Service, Vuln
 from sner.server.parser import registered_parsers
@@ -175,17 +176,13 @@ def storage_host_cleanup(**kwargs):
 def storage_service_list(**kwargs):
     """service listing; used to feed manymap queues from storage data"""
 
-    def fmt_addr(val):
-        """format ?ipv6 address"""
-        return val if ':' not in val else '[%s]' % val
-
     def data_default(svc):
         """return tuple for default output"""
-        return (svc.proto, fmt_addr(svc.host.address), svc.port)
+        return (svc.proto, format_host_address(svc.host.address), svc.port)
 
     def data_long(svc):
         """return tuple for long output"""
-        return (svc.proto, fmt_addr(svc.host.address), svc.port, svc.name, svc.state, json.dumps(svc.info))
+        return (svc.proto, format_host_address(svc.host.address), svc.port, svc.name, svc.state, json.dumps(svc.info))
 
     def data_iponly(svc):
         """return host.address for ip only output"""
