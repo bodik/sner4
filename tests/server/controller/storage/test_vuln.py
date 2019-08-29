@@ -112,11 +112,17 @@ def test_delete_by_id_route(cl_operator, test_vuln):
 def test_tag_by_id_route(cl_operator, test_vuln):
     """vuln multi tag route for ajaxed toolbars test"""
 
-    data = {'tag': 'testtag', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
+    data = {'tag': 'testtag', 'action': 'set', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
     response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
     vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
     assert 'testtag' in vuln.tags
+
+    data = {'tag': 'testtag', 'action': 'unset', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
+    response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
+    assert response.status_code == HTTPStatus.OK
+    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+    assert 'testtag' not in vuln.tags
 
     response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST

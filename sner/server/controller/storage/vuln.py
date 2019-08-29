@@ -145,7 +145,11 @@ def vuln_tag_by_id_route():
         try:
             tag = form.tag.data
             for vuln in Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).all():
-                vuln.tags = list(set((vuln.tags or []) + [tag]))
+                # full assignment must be used for sqla to realize the change
+                if form.action.data == 'set':
+                    vuln.tags = list(set((vuln.tags or []) + [tag]))
+                if form.action.data == 'unset':
+                    vuln.tags = [x for x in vuln.tags if x != tag]
             db.session.commit()
             return '', HTTPStatus.OK
         except SQLAlchemyError as e:  # pragma: no cover  ; unable to test

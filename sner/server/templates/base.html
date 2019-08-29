@@ -124,7 +124,10 @@
 		 * @param {object} event - event with data {'dt': datatable instance, 'tag': string}
 		 */
 		function action_tag_by_id(event) {
-			var data = {'tag': event.target.getAttribute('data-tag')};
+			var data = {
+				'tag': event.target.getAttribute('data-tag'),
+				'action': event.data.action
+			};
 
 			var ids = dt_get_selected_ids(event.data.dt);
 			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }

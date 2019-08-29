@@ -5,7 +5,7 @@ flask forms
 
 from flask_wtf import FlaskForm
 from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
-from wtforms.validators import InputRequired, IPAddress, Length, NumberRange, Optional
+from wtforms.validators import AnyOf, InputRequired, IPAddress, Length, NumberRange, Optional
 
 from sner.server.form import LinesField
 from sner.server.model.storage import Host, Service, SeverityEnum
@@ -89,3 +89,4 @@ class TagByIdForm(FlaskForm):
 
     ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
     tag = StringField('tag', [InputRequired()])
+    action = StringField('action', [InputRequired(), AnyOf(['set', 'unset'])])

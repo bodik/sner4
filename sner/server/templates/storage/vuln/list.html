@@ -27,8 +27,9 @@
 		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, dt_ajax_options, dt_vuln_list_table_options));
 		$('#vuln_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_vuln_list_table}, action_selectall);
 		$('#vuln_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_vuln_list_table}, action_selectnone);
-		$('#vuln_list_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_tag_by_id_route') }}"}, action_tag_by_id);
+		$('#vuln_list_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, action_tag_by_id);
 		$('#vuln_list_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_vuln_list_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
+		$('#vuln_list_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, action_tag_by_id);
 	});
 </script>
 {% endblock %}
@@ -45,8 +46,16 @@
 			<a class="btn btn-xs btn-default abutton_selectnone">None</a>
 			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</a>
 			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="report"><span class="glyphicon glyphicon-tag"></span> Report</a>
-			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> TODO</a>
+			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> ToDo</a>
 			<a class="btn btn-xs btn-default abutton_deletemulti"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+			<div class="btn-group">
+				<a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+				<ul class="dropdown-menu">
+					<li><a class="abutton_untagmulti" data-tag="info">Untag Info</a></li>
+					<li><a class="abutton_untagmulti" data-tag="report">Untag Report</a></li>
+					<li><a class="abutton_untagmulti" data-tag="todo">Untag ToDo</a></li>
+				</ul>
+			</div>
 		</div>
 
 		<div class="btn-group" role="group">

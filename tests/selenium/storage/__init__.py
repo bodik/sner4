@@ -53,7 +53,7 @@ def check_vulns_multiactions(selenium, dt_id):
 
     # both might be tagged at the same time
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(text(), "TODO")]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(text(), "ToDo")]').click()
     dt_elem = dt_wait_processing(selenium, dt_id)
     assert Vuln.query.filter(Vuln.tags.any('todo')).count() == 2
 
