@@ -22,7 +22,7 @@ SEARCH_GRAMMAR = r"""
 
     criteria: COLSPEC OP _value
     COLSPEC: /[a-z]+\.[a-z]+/i
-    OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_all"
+    OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "not_ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_all"
 
     _value: _item | array
     _item: string | number
