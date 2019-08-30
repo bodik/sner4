@@ -1,11 +1,31 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
+{% block script %}
+<script type="text/javascript">
+function action_vuln_tag(event) {
+	var data = JSON.parse(event.target.closest('a').getAttribute('data-tagaction'));
+	sner_submit_form(Flask.url_for('storage.vuln_tag_by_id_route'), data)
+		.always(function() { window.location.reload(); });
+}
+
+$(document).ready(function() {
+	$('.abutton_vuln_tag_set').on('click', action_vuln_tag);
+	$('.abutton_vuln_tag_unset').on('click', action_vuln_tag);
+});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="Vulns">
 	<h1>
 		Vuln {{ vuln.id }}: {{ vuln.name }}
 		<small>
+			<div class="btn-group">
+				<a class="btn btn-xs btn-default abutton_vuln_tag_set" data-tagaction='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-tag"></span> Info</a>
+				<a class="btn btn-xs btn-default abutton_vuln_tag_set" data-tagaction='{{ {'action': 'set', 'tag': 'report', 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-tag"></span> Report</a>
+				<a class="btn btn-xs btn-default abutton_vuln_tag_set" data-tagaction='{{ {'action': 'set', 'tag': 'todo', 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-tag"></span> ToDo</a>
+			</div>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
 			{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
 		</small>
@@ -19,6 +39,12 @@
 		<dt>xtype</dt><dd>{{ vuln.xtype }}</dd>
 		<dt>severity</dt><dd class="render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</dd>
 		<dt>refs</dt><dd class="render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</dd>
+		<dt>tags</dt>
+			<dd>
+			{% for tag in vuln.tags|sort %}
+				<span class="label label-light tag-label">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-remove text-default"></span></a></span>
+			{% endfor %}
+			</dd>
 		<dt>comment</dt><dd>{{ vuln.comment }}</dd>
 		</dl>
 	</div>
