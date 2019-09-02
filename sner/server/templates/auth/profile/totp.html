@@ -10,6 +10,14 @@
 <div class="profile">
 	<h1>Two-factor authentication setup ({% if secret %}enable{% else %}disable{% endif %})</h1>
 
+	<div>
+		To enable two-factor authentication::
+		<ol>
+			<li>Scan the barcode or add the text seed to your authenticator.</li>
+			<li>Verify pairing with one code.</li>
+		</ol>
+	</div>
+
 	<form class="form-horizontal" method="post">
 		{{ form.csrf_token }}
 
