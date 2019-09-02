@@ -62,7 +62,7 @@
 				var dt_host_view_service_table_options = {
 					'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
-						dt_column('id'),
+						dt_column('id', {'visible': false}),
 						dt_column('host_id', {'visible': false}),
 						dt_column('host_address', {'visible': false}),
 						dt_column('host_hostname', {'visible': false}),
@@ -109,7 +109,7 @@
 					'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
 						dt_column_select(),
-						dt_column('id'),
+						dt_column('id', {'visible': false}),
 						dt_column('host_id', {'visible': false}),
 						dt_column('host_address', {'visible': false}),
 						dt_column('host_hostname', {'visible': false}),
@@ -143,7 +143,7 @@
 				var dt_host_view_note_table_options = {
 					'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 					'columns': [
-						dt_column('id'),
+						dt_column('id', {'visible': false}),
 						dt_column('host_id', {'visible': false}),
 						dt_column('host_address', {'visible': false}),
 						dt_column('host_hostname', {'visible': false}),

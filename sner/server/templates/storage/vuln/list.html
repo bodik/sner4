@@ -7,7 +7,7 @@
 		'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			dt_column_select(),
-			dt_column('id'),
+			dt_column('id', {'visible': false}),
 			dt_column('host_id', {'visible': false}),
 			dt_column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
 			dt_column('host_hostname'),

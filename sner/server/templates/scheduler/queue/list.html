@@ -6,7 +6,7 @@
 	var dt_queue_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id'),
+			dt_column('id', {'visible': false}),
 			dt_column('name'),
 			dt_column('task_id', {'visible': false}),
 			dt_column('task_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_task_reference(row);}}),

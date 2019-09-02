@@ -6,7 +6,7 @@
 	var dt_task_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.task_list_json_route') }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id'),
+			dt_column('id', {'visible': false}),
 			dt_column('name'),
 			dt_column('module'),
 			dt_column('params'),
