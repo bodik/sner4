@@ -38,10 +38,8 @@
 	Handlebars.registerPartial('scheduler.excl_delete_route', Flask.url_for('scheduler.excl_delete_route', {'excl_id': '{%raw%}{{excl_id}}{%endraw%}'}));
 
 	/* hbs templates */
-	var scheduler_pagepart_task_reference = Handlebars.compile('{%raw%}&lt;Task {{task_id}}: {{task_name}}&gt;{%endraw%}');
 	var scheduler_pagepart_task_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-task_controls.hbs').innerHTML);
 
-	var scheduler_pagepart_queue_reference = Handlebars.compile('{%raw%}&lt;Queue {{queue_id}}: {{queue_name}}&gt;{%endraw%}');
 	var scheduler_pagepart_queue_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-queue_controls.hbs').innerHTML);
 
 	var scheduler_pagepart_job_controls = Handlebars.compile(document.getElementById('scheduler.pagepart-job_controls.hbs').innerHTML);

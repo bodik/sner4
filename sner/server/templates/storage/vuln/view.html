@@ -19,7 +19,7 @@ $(document).ready(function() {
 {% block content %}
 <div class="Vulns">
 	<h1>
-		Vuln {{ vuln.id }}: {{ vuln.name }}
+		Vuln {{ vuln.name }}
 		<small>
 			<div class="btn-group">
 				<a class="btn btn-xs btn-default abutton_vuln_tag_set" data-tagaction='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-tag"></span> Info</a>

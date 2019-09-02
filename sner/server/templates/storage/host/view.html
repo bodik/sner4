@@ -21,7 +21,7 @@
 {% block content %}
 <div class="hosts">
 	<h1>
-		Host {{host.id}}: {{host.address}} ({{host.hostname}})
+		Host {{host.address}} ({{host.hostname}})
 		<small>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.service_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Service</a>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>

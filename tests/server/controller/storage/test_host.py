@@ -103,4 +103,4 @@ def test_host_view_route(cl_operator, test_host):
     response = cl_operator.get(url_for('storage.host_view_route', host_id=test_host.id))
     assert response.status_code == HTTPStatus.OK
 
-    assert 'Host %d: %s (%s)' % (test_host.id, test_host.address, test_host.hostname) in response
+    assert 'Host %s (%s)' % (test_host.address, test_host.hostname) in response

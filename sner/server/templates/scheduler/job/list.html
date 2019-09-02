@@ -8,7 +8,7 @@
 		'columns': [
 			dt_column('id'),
 			dt_column('queue_id', {'visible': false}),
-			dt_column('queue_name', {'render': function(data, type, row, meta) {return scheduler_pagepart_queue_reference(row);}}),
+			dt_column('queue_name'),
 			dt_column('assignment', {'render': $.fn.dataTable.render.ellipsis(100, false, true)}),
 			dt_column('retval'),
 			dt_column('time_start'),
