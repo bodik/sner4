@@ -39,11 +39,11 @@
 		<dt>modified</dt><dd>{{ host.modified|datetime }}</dd>
 		<dt>external data</dt>
 			<dd>
-				<a href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
-				<a href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
-				<a href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
-				<a href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
-				<a href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
+				<a rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
+				<a rel="noreferrer" href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
+				<a rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
+				<a rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
+				<a rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
 			</dd>
 		</dl>
 	</div>
