@@ -28,6 +28,8 @@ $(document).ready(function() {
 			</div>
 			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
 			{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
+
+			<a class="btn btn-xs btn-default" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><span class="glyphicon glyphicon-list"></span></a>
 		</small>
 	</h1>
 
