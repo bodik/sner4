@@ -1,6 +1,8 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
+{% block title %}Vuln view {{ vuln.name }}{% endblock %}
+
 {% block script %}
 <script type="text/javascript">
 function action_vuln_tag(event) {

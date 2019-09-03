@@ -2,6 +2,8 @@
 {% extends "base.html" %}
 {% import "bootstrap_wtf.html" as b_wtf %}
 
+{% block title %}Two-factor authentication setup{% endblock %}
+
 {% block script %}
 <script src="{{ url_for('static', filename='qrious/qrious.min.js') }}"></script>
 {% endblock %}

@@ -1,6 +1,8 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
+{% block title %}Note view {{ note.host.address }} {{note.xtype}}{% endblock %}
+
 {% block content %}
 <div class="notes">
 	<h1>
