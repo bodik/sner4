@@ -133,8 +133,11 @@
 				'tag': event.target.getAttribute('data-tag'),
 				'action': event.data.action
 			};
-
 			var ids = dt_get_selected_ids(event.data.dt);
+			if (ids.length == 0) {
+				toastr.warning('No items selected');
+				return Promise.resolve();
+			}
 			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
 
 			sner_submit_form(event.data.url, data)
@@ -150,6 +153,10 @@
 
 			var data = {};
 			var ids = dt_get_selected_ids(event.data.dt);
+			if (ids.length == 0) {
+				toastr.warning('No items selected');
+				return Promise.resolve();
+			}
 			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
 
 			sner_submit_form(event.data.url, data)
