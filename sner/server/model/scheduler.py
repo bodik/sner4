@@ -20,7 +20,7 @@ class Task(db.Model):
     """holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), nullable=False, unique=True)
+    name = db.Column(db.String(250), nullable=False)
     module = db.Column(db.String(250), nullable=False)
     params = db.Column(db.Text, nullable=False)
 
@@ -34,7 +34,7 @@ class Queue(db.Model):
     """task assignment for specific targets"""
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), nullable=False, unique=True)
+    name = db.Column(db.String(250), nullable=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id', ondelete='CASCADE'), nullable=False)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)

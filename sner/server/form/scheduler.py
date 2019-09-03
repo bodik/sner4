@@ -12,7 +12,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import InputRequired, Length, NumberRange
 
 from sner.server.form import LinesField
-from sner.server.model.scheduler import ExclFamily, Queue, Task
+from sner.server.model.scheduler import ExclFamily, Task
 
 
 def valid_excl_family(form, field):  # pylint: disable=unused-argument
@@ -37,20 +37,6 @@ def valid_excl_value(form, field):
             raise ValidationError('Invalid regex')
 
 
-def task_name_unique(form, field):  # pylint: disable=unused-argument
-    """validate task.name uniqueness"""
-
-    if Task.query.filter(Task.name == field.data).one_or_none():
-        raise ValidationError('Name already exists')
-
-
-def queue_name_unique(form, field):  # pylint: disable=unused-argument
-    """validate queue.name uniqueness"""
-
-    if Queue.query.filter(Queue.name == field.data).one_or_none():
-        raise ValidationError('Name already exists')
-
-
 def tasks():
     """returns list of tasks for selectfiled"""
     return Task.query.all()
@@ -59,7 +45,7 @@ def tasks():
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringField('Name', [InputRequired(), Length(min=1, max=250), task_name_unique])
+    name = StringField('Name', [InputRequired(), Length(min=1, max=250)])
     module = StringField('Module', [InputRequired(), Length(min=1, max=250)])
     params = TextAreaField('Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
@@ -68,7 +54,7 @@ class TaskForm(FlaskForm):
 class QueueForm(FlaskForm):
     """queue edit form"""
 
-    name = StringField('Name', [InputRequired(), Length(min=1, max=250), queue_name_unique])
+    name = StringField('Name', [InputRequired(), Length(min=1, max=250)])
     task = QuerySelectField('Task', [InputRequired()], query_factory=tasks, allow_blank=False, get_label='name')
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
