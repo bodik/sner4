@@ -105,7 +105,7 @@ def queue_edit_route(queue_id):
 @blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
 @role_required('operator')
 def queue_enqueue_route(queue_id):
-    """queue enqueue"""
+    """queue enqueue; put targets into queue"""
 
     queue = Queue.query.get(queue_id)
     form = QueueEnqueueForm()
@@ -124,7 +124,7 @@ def queue_enqueue_route(queue_id):
 @blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
 @role_required('operator')
 def queue_flush_route(queue_id):
-    """queue flush"""
+    """queue flush; flush all targets from queue"""
 
     queue = Queue.query.get(queue_id)
     form = ButtonForm()
@@ -140,7 +140,7 @@ def queue_flush_route(queue_id):
 @blueprint.route('/queue/prune/<queue_id>', methods=['GET', 'POST'])
 @role_required('operator')
 def queue_prune_route(queue_id):
-    """queue flush"""
+    """queue prune; delete all queue jobs"""
 
     queue = Queue.query.get(queue_id)
     form = ButtonForm()

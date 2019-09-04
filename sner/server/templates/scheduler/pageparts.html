@@ -1,15 +1,25 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% raw %}
 <script id="scheduler.pagepart-task_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_add_route task_id=id}}"><span class="glyphicon glyphicon-plus"></span> Queue</a>
 	<a class="btn btn-xs btn-default" href="{{> scheduler.task_edit_route task_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<div class="btn-group">
+		<a class="btn btn-xs btn-default dropdown-toggle task-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
+		<ul class="dropdown-menu dropdown-menu-right">
+			<li><a href="{{> scheduler.queue_add_route task_id=id}}">Add queue</a></li>
+		</ul>
+	</div>
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.task_delete_route task_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
 <script id="scheduler.pagepart-queue_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_enqueue_route queue_id=id}}">Enqueue</a>
-	<a class="btn btn-xs btn-default abutton_queueflush_by_url" data-url="{{> scheduler.queue_flush_route queue_id=id}}">Flush</a>
-	<a class="btn btn-xs btn-default abutton_queueprune_by_url" data-url="{{> scheduler.queue_prune_route queue_id=id}}">Prune</a>
 	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_edit_route queue_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
+	<div class="btn-group">
+		<a class="btn btn-xs btn-default dropdown-toggle queue-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
+		<ul class="dropdown-menu dropdown-menu-right">
+			<li><a href="{{> scheduler.queue_enqueue_route queue_id=id}}" title="Put targets to queue">Enqueue</a></li>
+			<li><a class="abutton_queueflush_by_url" data-url="{{> scheduler.queue_flush_route queue_id=id}}" title="Flush all targets from queue">Flush</a></li>
+			<li><a class="abutton_queueprune_by_url" data-url="{{> scheduler.queue_prune_route queue_id=id}}" title="Delete all jobs associated with queue">Prune</a></li>
+		</ul>
+	</div>
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.queue_delete_route queue_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
 <script id="scheduler.pagepart-job_controls.hbs" type="text/x-handlebars-template">
