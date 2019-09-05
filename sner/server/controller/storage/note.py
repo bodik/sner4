@@ -17,6 +17,7 @@ from sner.server.form import ButtonForm
 from sner.server.form.storage import NoteForm
 from sner.server.model.storage import Host, Note, Service
 from sner.server.sqlafilter import filter_parser
+from sner.server.utils import relative_referrer, valid_next_url
 
 
 @blueprint.app_template_filter()
@@ -85,12 +86,13 @@ def note_edit_route(note_id):
     """edit note"""
 
     note = Note.query.get(note_id)
-    form = NoteForm(obj=note)
+    form = NoteForm(obj=note, return_url=relative_referrer())
 
     if form.validate_on_submit():
         form.populate_obj(note)
         db.session.commit()
-        return redirect(url_for('storage.host_view_route', host_id=note.host_id))
+        if valid_next_url(form.return_url.data):
+            return redirect(form.return_url.data)
 
     return render_template('storage/note/addedit.html', form=form, host=note.host, service=note.service)
 

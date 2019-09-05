@@ -4,7 +4,7 @@ flask forms
 """
 
 from flask_wtf import FlaskForm
-from wtforms import FieldList, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
+from wtforms import FieldList, HiddenField, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
 from wtforms.validators import AnyOf, InputRequired, IPAddress, Length, NumberRange, Optional
 
 from sner.server.form import LinesField
@@ -36,6 +36,7 @@ class HostForm(FlaskForm):
     os = StringField('Os')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
+    return_url = HiddenField()
 
 
 class ServiceForm(FlaskForm):
@@ -49,6 +50,7 @@ class ServiceForm(FlaskForm):
     info = StringField('Info')
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
+    return_url = HiddenField()
 
 
 class VulnForm(FlaskForm):
@@ -65,6 +67,7 @@ class VulnForm(FlaskForm):
     tags = LinesField('Tags', render_kw={'class': 'form-control tageditor'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
+    return_url = HiddenField()
 
 
 class NoteForm(FlaskForm):
@@ -76,6 +79,7 @@ class NoteForm(FlaskForm):
     data = TextAreaField('Data', render_kw={'rows': '20'})
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
+    return_url = HiddenField()
 
 
 class IdsForm(FlaskForm):

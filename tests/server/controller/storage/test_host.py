@@ -61,6 +61,7 @@ def test_host_edit_route(cl_operator, test_host):
 
     form = cl_operator.get(url_for('storage.host_edit_route', host_id=test_host.id)).form
     form['hostname'] = 'edited-'+form['hostname'].value
+    form['return_url'] = url_for('storage.host_list_route')
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

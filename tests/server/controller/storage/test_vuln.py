@@ -67,6 +67,7 @@ def test_vuln_edit_route(cl_operator, test_vuln):
     form = cl_operator.get(url_for('storage.vuln_edit_route', vuln_id=test_vuln.id)).form
     form['name'] = 'edited '+form['name'].value
     form['tags'] = form['tags'].value + '\nedited'
+    form['return_url'] = url_for('storage.vuln_list_route')
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

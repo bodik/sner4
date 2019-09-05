@@ -6,11 +6,12 @@ misc server components tests
 from ipaddress import ip_network
 
 import pytest
+from flask import url_for
 from flask_wtf import FlaskForm
 
 from sner.server.form import LinesField
 from sner.server.model.scheduler import Excl, ExclFamily
-from sner.server.utils import ExclMatcher
+from sner.server.utils import ExclMatcher, valid_next_url
 from tests.server import DummyPostData
 
 
@@ -101,3 +102,10 @@ def test_excl_matcher(app, test_excl_network, test_excl_regex):  # pylint: disab
 
     assert matcher.match('notarget1')
     assert not matcher.match('notarget3')
+
+
+def test_valid_next_url(app):  # pylint: disable=unused-argument
+    """test next= and return_url= validator"""
+
+    assert valid_next_url(url_for('index_route'))
+    assert not valid_next_url('invalid_route')

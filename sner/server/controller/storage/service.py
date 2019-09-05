@@ -16,6 +16,7 @@ from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
 from sner.server.sqlafilter import filter_parser
+from sner.server.utils import relative_referrer, valid_next_url
 
 
 VIZPORTS_LOW = 10.0
@@ -80,12 +81,13 @@ def service_edit_route(service_id):
     """edit service"""
 
     service = Service.query.get(service_id)
-    form = ServiceForm(obj=service)
+    form = ServiceForm(obj=service, return_url=relative_referrer())
 
     if form.validate_on_submit():
         form.populate_obj(service)
         db.session.commit()
-        return redirect(url_for('storage.host_view_route', host_id=service.host_id))
+        if valid_next_url(form.return_url.data):
+            return redirect(form.return_url.data)
 
     return render_template('storage/service/addedit.html', form=form, host=service.host)
 

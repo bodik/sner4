@@ -21,7 +21,7 @@ from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.sqlafilter import filter_parser
-from sner.server.utils import SnerJSONEncoder
+from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/vuln/list')
@@ -84,12 +84,13 @@ def vuln_edit_route(vuln_id):
     """edit vuln"""
 
     vuln = Vuln.query.get(vuln_id)
-    form = VulnForm(obj=vuln)
+    form = VulnForm(obj=vuln, return_url=relative_referrer())
 
     if form.validate_on_submit():
         form.populate_obj(vuln)
         db.session.commit()
-        return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
+        if valid_next_url(form.return_url.data):
+            return redirect(form.return_url.data)
 
     return render_template('storage/vuln/addedit.html', form=form, host=vuln.host, service=vuln.service)
 

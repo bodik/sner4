@@ -15,6 +15,7 @@ from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
 from sner.server.model.storage import Host, Note, Service, Vuln
 from sner.server.sqlafilter import filter_parser
+from sner.server.utils import relative_referrer, valid_next_url
 
 
 @blueprint.route('/host/list')
@@ -78,12 +79,13 @@ def host_edit_route(host_id):
     """edit host"""
 
     host = Host.query.get(host_id)
-    form = HostForm(obj=host)
+    form = HostForm(obj=host, return_url=relative_referrer())
 
     if form.validate_on_submit():
         form.populate_obj(host)
         db.session.commit()
-        return redirect(url_for('storage.host_view_route', host_id=host.id))
+        if valid_next_url(form.return_url.data):
+            return redirect(form.return_url.data)
 
     return render_template('storage/host/addedit.html', form=form)
 

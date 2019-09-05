@@ -24,6 +24,7 @@ from sner.server.form import ButtonForm
 from sner.server.form.auth import LoginForm, TotpCodeForm, WebauthnLoginForm
 from sner.server.model.auth import User
 from sner.server.password_supervisor import PasswordSupervisor as PWS
+from sner.server.utils import valid_next_url
 
 
 blueprint = Blueprint('auth', __name__)  # pylint: disable=invalid-name
@@ -40,10 +41,8 @@ def regenerate_session():
 def redirect_after_login():
     """handle next after successfull login"""
 
-    if request.args.get('next'):
-        for rule in current_app.url_map.iter_rules():
-            if rule.rule.startswith(request.args.get('next')):
-                return redirect(request.args.get('next'))
+    if ('next' in request.args) and valid_next_url(request.args.get('next')):
+        return redirect(request.args.get('next'))
     return redirect(url_for('index_route'))
 
 

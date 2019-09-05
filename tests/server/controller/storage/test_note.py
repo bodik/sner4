@@ -60,6 +60,7 @@ def test_note_edit_route(cl_operator, test_note):
 
     form = cl_operator.get(url_for('storage.note_edit_route', note_id=test_note.id)).form
     form['data'] = 'edited '+form['data'].value
+    form['return_url'] = url_for('storage.note_list_route')
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

@@ -9,7 +9,9 @@ import json
 import re
 from ipaddress import ip_address, ip_network
 
+from flask import current_app, request, url_for
 from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
+from werkzeug.exceptions import HTTPException
 
 from sner.agent.modules import Manymap
 from sner.server.model.scheduler import Excl, ExclFamily
@@ -105,3 +107,19 @@ class SnerJSONEncoder(json.JSONEncoder):
             return o.strftime('%Y-%m-%dT%H:%M:%S')
 
         return super().default(o)  # pragma: no cover  ; no such elements
+
+
+def relative_referrer():
+    """makes relative relative from absolute"""
+    return request.referrer.replace(url_for('index_route', _external=True), '/') if request.referrer else None
+
+
+def valid_next_url(url):
+    """validates next= and return_url= urls"""
+
+    map_adapter = current_app.url_map.bind(current_app.config['SERVER_NAME'] or '')
+    try:
+        map_adapter.match(url)
+    except HTTPException:
+        return False
+    return True

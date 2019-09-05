@@ -65,6 +65,7 @@ def test_service_edit_route(cl_operator, test_service):
     form = cl_operator.get(url_for('storage.service_edit_route', service_id=test_service.id)).form
     form['state'] = 'down'
     form['info'] = 'edited '+form['info'].value
+    form['return_url'] = url_for('storage.service_list_route')
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
