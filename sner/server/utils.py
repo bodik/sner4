@@ -3,10 +3,10 @@
 misc utils used in server
 """
 
-import abc
 import datetime
 import json
 import re
+from abc import ABC, abstractmethod
 from ipaddress import ip_address, ip_network
 
 from flask import current_app, request, url_for
@@ -47,14 +47,14 @@ class ExclMatcher():
         return False
 
 
-class ExclMatcherImplInterface(abc.ABC):  # pylint: disable=too-few-public-methods
+class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
     """base interface which must  be implemented by all available matchers"""
 
-    @abc.abstractmethod
+    @abstractmethod
     def __init__(self, match_to):
         """constructor"""
 
-    @abc.abstractmethod
+    @abstractmethod
     def match(self, value):
         """returns bool if value matches the initialized match_to"""
 
