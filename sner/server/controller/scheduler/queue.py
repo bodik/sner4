@@ -113,7 +113,9 @@ def queue_enqueue_route(queue_id):
     if form.validate_on_submit():
         targets = []
         for target in form.data['targets']:
-            targets.append({'target': target, 'queue_id': queue.id})
+            tmp = target.strip()
+            if tmp:
+                targets.append({'target': tmp, 'queue_id': queue.id})
         db.session.bulk_insert_mappings(Target, targets)
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))

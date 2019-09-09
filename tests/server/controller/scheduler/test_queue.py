@@ -73,11 +73,12 @@ def test_queue_enqueue_route(cl_operator, test_queue):
     test_target = create_test_target(test_queue)
 
     form = cl_operator.get(url_for('scheduler.queue_enqueue_route', queue_id=test_queue.id)).form
-    form['targets'] = test_target.target
+    form['targets'] = test_target.target + '\n \n '
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+    assert len(queue.targets) == 1
     assert queue.targets[0].target == test_target.target
 
 

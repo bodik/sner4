@@ -43,6 +43,7 @@ def test_queue_enqueue_command(runner, tmpworkdir, test_queue):
     test_path = 'ips.txt'
     with open(test_path, 'w') as ftmp:
         ftmp.write(test_target.target)
+        ftmp.write('\n \n ')
 
     result = runner.invoke(scheduler_command, ['queue-enqueue', str(666), test_target.target])
     assert result.exit_code == 1
