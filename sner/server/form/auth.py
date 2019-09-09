@@ -67,7 +67,7 @@ class UserChangePasswordForm(FlaskForm):
     """user change password form"""
 
     password1 = PasswordField('Password', [InputRequired(), EqualTo('password2', 'Passwords does not match.'), strong_password])
-    password2 = PasswordField('Repeat password')
+    password2 = PasswordField('Repeat password', [InputRequired()])
     submit = SubmitField('Change password')
 
 
