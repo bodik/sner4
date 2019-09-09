@@ -152,8 +152,8 @@ def service_vizports_route():
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
     portmap = [{'port': port, 'count': count} for port, count in query.all()]
     # compute sizing for rendered element
-    lowest = min(portmap, key=lambda x: x['count'])['count']
-    highest = max(portmap, key=lambda x: x['count'])['count']
+    lowest = min(portmap, key=lambda x: x['count'])['count'] if portmap else 0
+    highest = max(portmap, key=lambda x: x['count'])['count'] if portmap else 0
     coef = (VIZPORTS_HIGH-VIZPORTS_LOW) / max(1, (highest-lowest))
     for tmp in portmap:
         tmp['size'] = VIZPORTS_LOW + ((tmp['count']-lowest)*coef)
