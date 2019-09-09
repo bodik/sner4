@@ -7,7 +7,7 @@ from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError
-from wtforms.validators import InputRequired, Length, Optional
+from wtforms.validators import EqualTo, InputRequired, Length, Optional
 from wtforms.widgets import CheckboxInput, ListWidget
 
 from sner.server.password_supervisor import PasswordSupervisor as PWS
@@ -20,13 +20,6 @@ def strong_password(form, field):
     pwsr = PWS().check_strength(field.data, username)
     if not pwsr.is_strong:
         raise ValidationError(pwsr.message)
-
-
-def passwords_match(form, field):  # pylint: disable=unused-argument
-    """match passwords for change password"""
-
-    if form.password1.data != form.password2.data:
-        raise ValidationError('Passwords does not match.')
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -73,8 +66,8 @@ class UserForm(FlaskForm):
 class UserChangePasswordForm(FlaskForm):
     """user change password form"""
 
-    password1 = PasswordField('Password', [InputRequired(), passwords_match, strong_password])
-    password2 = PasswordField('Repeat password', [InputRequired(), passwords_match, strong_password])
+    password1 = PasswordField('Password', [InputRequired(), EqualTo('password2', 'Passwords does not match.'), strong_password])
+    password2 = PasswordField('Repeat password')
     submit = SubmitField('Change password')
 
 
