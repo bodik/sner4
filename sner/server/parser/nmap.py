@@ -89,8 +89,8 @@ class NmapParser(ParserBase):
             db.session.add(service)
 
         service.state = "%s:%s" % (nmapservice.state, nmapservice.reason)
-        service.name = nmapservice.service
-        service.info = nmapservice.banner
+        service.name = nmapservice.service if nmapservice.service else None
+        service.info = nmapservice.banner if nmapservice.banner else None
 
         for iscript in nmapservice.scripts_results:
             xtype = 'nmap.%s' % iscript["id"]
