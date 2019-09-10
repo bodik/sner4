@@ -124,7 +124,7 @@ def valid_next_url(url):
     if parsed_url.netloc:
         return False
 
-    # valid for current application
+    # valid for current application, but omit extra url parameters
     map_adapter = current_app.url_map.bind(current_app.config['SERVER_NAME'] or '')
     try:
         map_adapter.match(parsed_url.path)

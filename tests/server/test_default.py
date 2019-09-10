@@ -108,4 +108,5 @@ def test_valid_next_url(app):  # pylint: disable=unused-argument
     """test next= and return_url= validator"""
 
     assert valid_next_url(url_for('index_route'))
+    assert not valid_next_url('http://invalid_route')
     assert not valid_next_url('invalid_route')

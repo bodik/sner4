@@ -2,3 +2,4 @@ server:
     secret: 'changeit'
     db: 'postgresql:///sner_test'
     var: '/tmp/sner_test_var'
+    application_root: '/'
