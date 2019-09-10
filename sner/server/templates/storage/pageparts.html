@@ -98,7 +98,7 @@
 	Handlebars.registerPartial('storage.host_delete_route', Flask.url_for('storage.host_delete_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
 
 	Handlebars.registerPartial('storage.service_add_route', Flask.url_for('storage.service_add_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
-	Handlebars.registerPartial('storage.service_list_route_filter_info', Flask.url_for('storage.service_list_route', {'filter': '{%raw%}Service.info=="{{filter_value}}"{%endraw%}'}));
+	Handlebars.registerPartial('storage.service_list_route_filter_info', Flask.url_for('storage.service_list_route', {'filter': '{%raw%}Service.info ilike "{{filter_value}}%"{%endraw%}'}));
 	Handlebars.registerPartial('storage.service_edit_route', Flask.url_for('storage.service_edit_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.service_delete_route', Flask.url_for('storage.service_delete_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
 
