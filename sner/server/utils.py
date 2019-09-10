@@ -8,6 +8,7 @@ import json
 import re
 from abc import ABC, abstractmethod
 from ipaddress import ip_address, ip_network
+from urllib.parse import urlparse
 
 from flask import current_app, request, url_for
 from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
@@ -117,9 +118,17 @@ def relative_referrer():
 def valid_next_url(url):
     """validates next= and return_url= urls"""
 
+    parsed_url = urlparse(url)
+
+    # accept only relative URLs
+    if parsed_url.netloc:
+        return False
+
+    # valid for current application
     map_adapter = current_app.url_map.bind(current_app.config['SERVER_NAME'] or '')
     try:
-        map_adapter.match(url)
+        map_adapter.match(parsed_url.path)
     except HTTPException:
         return False
+
     return True
