@@ -151,7 +151,7 @@ def test_service_list_command(runner, test_service):
 
     host = Host.query.filter(Host.id == test_service.host_id).one()
 
-    result = runner.invoke(storage_command, ['service-list', '--long', '--iponly'])
+    result = runner.invoke(storage_command, ['service-list', '--long', '--short'])
     assert result.exit_code == 1
 
     result = runner.invoke(storage_command, ['service-list'])
@@ -162,10 +162,13 @@ def test_service_list_command(runner, test_service):
     assert result.exit_code == 0
     assert json.dumps(test_service.info) in result.output
 
-    result = runner.invoke(storage_command, ['service-list', '--iponly'])
+    result = runner.invoke(storage_command, ['service-list', '--short'])
     assert result.exit_code == 0
-    assert len(result.output.splitlines()) == 1
-    assert host.address in result.output
+    assert result.output.strip() == host.address
+
+    result = runner.invoke(storage_command, ['service-list', '--short', '--hostnames'])
+    assert result.exit_code == 0
+    assert result.output.strip() == host.hostname
 
     result = runner.invoke(storage_command, ['service-list', '--filter', 'Service.port=="%d"' % test_service.port])
     assert result.exit_code == 0

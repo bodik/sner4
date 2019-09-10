@@ -171,38 +171,39 @@ def storage_host_cleanup(**kwargs):
 @storage_command.command(name='service-list', help='service (filtered) listing')
 @with_appcontext
 @click.option('--filter', help='filter query')
-@click.option('--iponly', is_flag=True, help='show only service.host.address')
+@click.option('--hostnames', is_flag=True, help='show host.hostname')
+@click.option('--short', is_flag=True, help='show only service.host.address/hostname')
 @click.option('--long', is_flag=True, help='show service extended info')
 def storage_service_list(**kwargs):
     """service listing; used to feed manymap queues from storage data"""
 
-    def data_default(svc):
-        """return tuple for default output"""
-        return (svc.proto, format_host_address(svc.host.address), svc.port)
+    def get_host(svc, hostnames=False):
+        """return address or hostname"""
 
-    def data_long(svc):
-        """return tuple for long output"""
-        return (svc.proto, format_host_address(svc.host.address), svc.port, svc.name, svc.state, json.dumps(svc.info))
+        if hostnames and svc.host.hostname:
+            return svc.host.hostname
+        return format_host_address(svc.host.address)
 
-    def data_iponly(svc):
-        """return host.address for ip only output"""
-        return svc.host.address
+    def get_data(svc):
+        """return common data as dict"""
+        return {'proto': svc.proto, 'port': svc.port, 'name': svc.name, 'state': svc.state, 'info': json.dumps(svc.info)}
 
-    if kwargs['long'] and kwargs['iponly']:
-        current_app.logger.error('--iponly and --long are mutualy exclusive options')
+    if kwargs['long'] and kwargs['short']:
+        current_app.logger.error('--short and --long are mutualy exclusive options')
         sys.exit(1)
 
     query = Service.query
     if kwargs['filter']:
         query = apply_filters(query, filter_parser.parse(kwargs['filter']), do_auto_join=False)
 
-    fmt, fndata = '%s://%s:%d', data_default
-    if kwargs['iponly']:
-        fmt, fndata = '%s', data_iponly
+    fmt = '{proto}://{host}:{port}'
+    if kwargs['short']:
+        fmt = '{host}'
     elif kwargs['long']:
-        fmt, fndata = '%s://%s:%d %s %s %s', data_long
+        fmt = '{proto}://{host}:{port} {name} {state} {info}'
+
     for tmp in query.all():
-        print(fmt % fndata(tmp))
+        print(fmt.format(**get_data(tmp), host=get_host(tmp, kwargs['hostnames'])))
 
 
 @storage_command.command(name='service-cleanup', help='cleanup services; remove all in "filtered" state')
