@@ -8,9 +8,9 @@ import json
 import re
 from abc import ABC, abstractmethod
 from ipaddress import ip_address, ip_network
-from urllib.parse import urlparse
+from urllib.parse import urlunparse, urlparse
 
-from flask import current_app, request, url_for
+from flask import current_app, request
 from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
 from werkzeug.exceptions import HTTPException
 
@@ -112,22 +112,28 @@ class SnerJSONEncoder(json.JSONEncoder):
 
 def relative_referrer():
     """makes relative relative from absolute"""
-    return urlparse(request.referrer)._replace(scheme='', netloc='').geturl() if request.referrer else None
+
+    if request.referrer:
+        url = urlparse(request.referrer)
+        return urlunparse(('', '', url.path, url.params, url.query, url.fragment))
+    return None
 
 
-def valid_next_url(url):
+def valid_next_url(nexturl):
     """validates next= and return_url= urls"""
 
-    parsed_url = urlparse(url)
+    url = urlparse(nexturl)
 
     # accept only relative URLs
-    if parsed_url.netloc:
+    if url.scheme or url.netloc:
         return False
 
-    # valid for current application, but omit extra url parameters
-    map_adapter = current_app.url_map.bind(current_app.config['SERVER_NAME'] or '')
+    # validate for current application, cope with application_root, but only path not the query params
+    path = url.path
+    if current_app.config['APPLICATION_ROOT'] != '/':  # pragma: no cover  ; unable to test
+        path = path.replace(current_app.config['APPLICATION_ROOT'], '', 1)
     try:
-        map_adapter.match(parsed_url.path)
+        current_app.url_map.bind('').match(path)
     except HTTPException:
         return False
 
