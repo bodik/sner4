@@ -112,7 +112,7 @@ class SnerJSONEncoder(json.JSONEncoder):
 
 def relative_referrer():
     """makes relative relative from absolute"""
-    return request.referrer.replace(url_for('index_route', _external=True), '/') if request.referrer else None
+    return urlparse(request.referrer)._replace(scheme='', netloc='').geturl() if request.referrer else None
 
 
 def valid_next_url(url):
