@@ -51,7 +51,7 @@ def test_import_nessus_command(runner):
     result = runner.invoke(storage_command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
+    host_id = re.search(r'parsed item: <Host (?P<hostid>\d+):', result.output).group('hostid')
     host = Host.query.filter(Host.id == host_id).one_or_none()
     assert host
     assert host.os == 'Microsoft Windows Vista'
@@ -59,10 +59,6 @@ def test_import_nessus_command(runner):
     tmpvuln = Vuln.query.join(Service).filter(Vuln.host == host, Service.port == 443, Vuln.xtype == 'nessus.104631').one_or_none()
     assert tmpvuln
     assert 'CVE-1900-0000' in tmpvuln.refs
-
-    # test adding additional hostnames
-    result = runner.invoke(storage_command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple-hostname.xml'])
-    assert result.exit_code == 0
     note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
     assert note
     assert len(json.loads(note.data)) == 2

@@ -1,4 +1,5 @@
 coverage
+defusedxml
 fido2
 file-magic
 flake8
@@ -9,9 +10,9 @@ flask-wtf
 jsonschema
 lark-parser
 lxml
-git+https://github.com/bodik/nessus-report-parser.git@latest_cummulative#egg=nessus_report_parser
 psycopg2
 pylint
+pytenable
 pytest<4.0
 pytest-flask
 pytest-selenium

@@ -11,7 +11,6 @@ from ipaddress import ip_address, ip_network
 from urllib.parse import urlunparse, urlparse
 
 from flask import current_app, request
-from nessus_report_parser.model.report_item import ReportItem as nessus_report_ReportItem
 from werkzeug.exceptions import HTTPException
 
 from sner.agent.modules import Manymap
@@ -100,9 +99,6 @@ class SnerJSONEncoder(json.JSONEncoder):
     def default(self, o):  # pylint: disable=method-hidden
         if isinstance(o, (ExclFamily, SeverityEnum, datetime.timedelta)):
             return str(o)
-
-        if isinstance(o, nessus_report_ReportItem):
-            return o.__dict__
 
         if isinstance(o, datetime.date):
             return o.strftime('%Y-%m-%dT%H:%M:%S')
