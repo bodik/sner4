@@ -86,7 +86,7 @@ class NessusParser(ParserBase):
     def _import_service(report_item, host):
         """pull service to storage"""
 
-        if 'port' not in report_item:
+        if report_item['port'] == 0:
             return None
 
         service = Service.query.filter(

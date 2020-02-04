@@ -60,5 +60,73 @@
 </plugin_output>
 </ReportItem>
 </ReportHost>
+<ReportHost name="127.128.129.130"><HostProperties>
+<tag name="LastUnauthenticatedResults">1578312081</tag>
+<tag name="Credentialed_Scan">false</tag>
+<tag name="policy-used">Basic Network Scan</tag>
+<tag name="os">other</tag>
+<tag name="patch-summary-total-cves">0</tag>
+<tag name="HOST_END_TIMESTAMP">1578312081</tag>
+<tag name="HOST_END">Mon Jan  6 13:01:21 2020</tag>
+<tag name="host-fqdn">serverz.localhost</tag>
+<tag name="host-rdns">serverz.localhost</tag>
+<tag name="host-ip">127.128.129.130</tag>
+<tag name="HOST_START_TIMESTAMP">1578311552</tag>
+<tag name="HOST_START">Mon Jan  6 12:52:32 2020</tag>
+</HostProperties>
+<ReportItem port="0" svc_name="general" protocol="tcp" severity="0" pluginID="19506" pluginName="Nessus Scan Information" pluginFamily="Settings">
+<agent>all</agent>
+<always_run>1</always_run>
+<description>This plugin displays, for each tested host, information about the scan itself :
+
+  - The version of the plugin set.
+  - The type of scanner (Nessus or Nessus Home).
+  - The version of the Nessus Engine.
+  - The port scanner(s) used.
+  - The port range scanned.
+  - Whether credentialed or third-party patch management     checks are possible.
+  - The date of the scan.
+  - The duration of the scan.
+  - The number of hosts scanned in parallel.
+  - The number of checks done in parallel.</description>
+<fname>scan_info.nasl</fname>
+<plugin_modification_date>2019/12/03</plugin_modification_date>
+<plugin_name>Nessus Scan Information</plugin_name>
+<plugin_publication_date>2005/08/26</plugin_publication_date>
+<plugin_type>summary</plugin_type>
+<risk_factor>None</risk_factor>
+<script_version>1.93</script_version>
+<solution>n/a</solution>
+<synopsis>This plugin displays information about the Nessus scan.</synopsis>
+<plugin_output>Information about this scan :
+
+Nessus version : 8.8.0
+Plugin feed version : 202001031930
+Scanner edition used : Nessus
+Scan type : Normal
+Scan policy used : Basic Network Scan
+Scanner IP : 127.128.129.130
+Port scanner(s) : nessus_syn_scanner
+Port range : default
+Thorough tests : no
+Experimental tests : no
+Paranoia level : 1
+Report verbosity : 1
+Safe checks : yes
+Optimize the test : yes
+Credentialed checks : no
+Patch management checks : None
+CGI scanning : disabled
+Web application tests : disabled
+Max hosts : 30
+Max checks : 4
+Recv timeout : 5
+Backports : None
+Allow post-scan editing: Yes
+Scan Start Date : 2020/1/6 12:52 CET
+Scan duration : 515 sec
+</plugin_output>
+</ReportItem>
+</ReportHost>
 </Report>
 </NessusClientData_v2>
