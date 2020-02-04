@@ -4,7 +4,6 @@ storage commands tests
 """
 
 import json
-import re
 
 from sner.server import db
 from sner.server.command.storage import storage_command
@@ -25,9 +24,7 @@ def test_import_job_output(runner):
     result = runner.invoke(storage_command, ['import', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
-    host = Host.query.filter(Host.id == host_id).one_or_none()
-    assert host
+    Host.query.one()
 
 
 def test_import_nmap_command(runner):
@@ -36,9 +33,7 @@ def test_import_nmap_command(runner):
     result = runner.invoke(storage_command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
-    host = Host.query.filter(Host.id == host_id).one_or_none()
-    assert host
+    host = Host.query.one()
     assert host.os == 'Linux 3.8 - 4.6'
     assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
     tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one_or_none()
@@ -51,17 +46,14 @@ def test_import_nessus_command(runner):
     result = runner.invoke(storage_command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed item: <Host (?P<hostid>\d+):', result.output).group('hostid')
-    host = Host.query.filter(Host.id == host_id).one_or_none()
-    assert host
+    host = Host.query.one()
     assert host.os == 'Microsoft Windows Vista'
+    assert len(host.vulns) == 2
     assert sorted([x.port for x in host.services]) == [443]
-    tmpvuln = Vuln.query.join(Service).filter(Vuln.host == host, Service.port == 443, Vuln.xtype == 'nessus.104631').one_or_none()
-    assert tmpvuln
+    tmpvuln = Vuln.query.join(Service).filter(Vuln.host == host, Service.port == 443, Vuln.xtype == 'nessus.104631').one()
     assert 'CVE-1900-0000' in tmpvuln.refs
-    note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
-    assert note
-    assert len(json.loads(note.data)) == 2
+    note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one()
+    assert len(json.loads(note.data)) == 3
 
 
 def test_import_manymap_command_zipfile(runner):
@@ -70,9 +62,7 @@ def test_import_manymap_command_zipfile(runner):
     result = runner.invoke(storage_command, ['import', 'manymap', 'tests/server/data/parser-manymap-job.zip'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
-    host = Host.query.filter(Host.id == host_id).one_or_none()
-    assert host
+    host = Host.query.one()
     assert host.services[0].port == 18000
     assert host.services[0].info == 'product: Werkzeug httpd version: 0.15.5 extrainfo: Python 3.7.3'
 
@@ -83,9 +73,7 @@ def test_import_manymap_command_plaintext(runner):
     result = runner.invoke(storage_command, ['import', 'manymap', 'tests/server/data/parser-manymap-output-1.xml'])
     assert result.exit_code == 0
 
-    host_id = re.search(r'parsed host: <Host (?P<hostid>\d+):', result.output).group('hostid')
-    host = Host.query.filter(Host.id == host_id).one_or_none()
-    assert host
+    Host.query.one()
 
 
 def test_flush_command(runner, test_service, test_vuln, test_note):
