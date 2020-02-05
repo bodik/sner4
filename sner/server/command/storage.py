@@ -5,7 +5,6 @@ storage commands
 
 import json
 import os
-import re
 import sys
 from csv import DictWriter, QUOTE_ALL
 from io import StringIO
@@ -39,9 +38,9 @@ def vuln_report():
             'SN': lambda d: 'SN-' + d
         }
         try:
-            matched = re.match(r'(.*?)\-(.*)', ref)
-            return refgen[matched.group(1)](matched.group(2))
-        except (AttributeError, KeyError):
+            matched = ref.split('-', maxsplit=1)
+            return refgen[matched[0]](matched[1])
+        except (IndexError, KeyError):
             pass
         return ref
 
