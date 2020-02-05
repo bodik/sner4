@@ -6,7 +6,7 @@
 {% block script %}
 <script type="text/javascript">
 	var dt_host_list_table_options = {
-		'ajax': {'url': "{{ url_for('storage.host_list_json_route') }}", 'method': 'POST'},
+		'ajax': {'url': "{{ url_for('storage.host_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			dt_column('id', {'visible': false}),
 			dt_column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
