@@ -12,7 +12,7 @@ from io import StringIO
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy import func, or_
+from sqlalchemy import case, cast, func, or_
 from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
@@ -45,7 +45,8 @@ def vuln_report():
         return ref
 
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
-    endpoint_hostname = func.concat_ws(':', Host.hostname, Service.port)
+    endpoint_hostname = func.concat_ws(
+        ':', case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=cast(Host.address, db.String)), Service.port)
     # unnesting refs should be implemented as
     # SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln
     #   LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE
@@ -66,28 +67,22 @@ def vuln_report():
         .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
 
-    output_buffer = StringIO()
     fieldnames = [
         'id', 'asset', 'vulnerability', 'severity', 'advisory', 'state',
         'endpoint_address', 'description', 'tags', 'endpoint_hostname', 'references']
+    output_buffer = StringIO()
     output = DictWriter(output_buffer, fieldnames, restval='', quoting=QUOTE_ALL)
 
     output.writeheader()
     for row in query.all():
         rdata = row._asdict()
 
-        # set asset name. 'misc' if many, otherwise existing from hostname or address
-        if (len(rdata['endpoint_hostname'] or []) > 1) or (len(rdata['endpoint_address'] or []) > 1):
-            rdata['asset'] = 'misc'
+        if (len(rdata['endpoint_address']) == 1) and (len(rdata['endpoint_hostname']) == 1):
+            rdata['asset'] = rdata['endpoint_hostname'][0]
         else:
-            tmp = (rdata['endpoint_hostname'] or []) + (rdata['endpoint_address'] or [])
-            if tmp:
-                rdata['asset'] = tmp[0]
-
-        # cast array cols to lines
+            rdata['asset'] = 'misc'
         for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
             rdata[col] = '\n'.join(rdata[col] or [])
-
         rdata['references'] = '\n'.join([url_for_ref(ref) for ref in rdata['references'] or []])
 
         output.writerow(rdata)

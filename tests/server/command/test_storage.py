@@ -92,12 +92,11 @@ def test_report_command(runner, test_vuln):
     """test vuln report command"""
 
     # additional test data required for 'misc' test (eg. multiple endpoints having same vuln)
-    host = Host(address='127.3.3.1', hostname='testhost2.testdomain.tests')
-    db.session.add(host)
-    db.session.add(Vuln(host=host, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
-    host = Host(address='127.3.3.2', hostname='testhost2.testdomain.tests')
-    db.session.add(host)
-    db.session.add(Vuln(host=host, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
+    host1 = Host(address='127.3.3.1', hostname='testhost2.testdomain.tests')
+    host2 = Host(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    db.session.add(host1, host2)
+    db.session.add(Vuln(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
+    db.session.add(Vuln(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
     db.session.commit()
 
     result = runner.invoke(storage_command, ['report'])
