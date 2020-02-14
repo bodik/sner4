@@ -6,10 +6,11 @@ auth forms
 from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, StringField, SubmitField, ValidationError
+from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, SubmitField, ValidationError
 from wtforms.validators import EqualTo, InputRequired, Length, Optional
 from wtforms.widgets import CheckboxInput, ListWidget
 
+from sner.server.form import StringNoneField
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
@@ -36,7 +37,7 @@ class MultiCheckboxField(SelectMultipleField):
 class LoginForm(FlaskForm):
     """login form"""
 
-    username = StringField('Username')
+    username = StringNoneField('Username')
     password = PasswordField('Password')
     submit = SubmitField('Login')
 
@@ -44,16 +45,16 @@ class LoginForm(FlaskForm):
 class TotpCodeForm(FlaskForm):
     """totp code form"""
 
-    code = StringField('TOTP Code', [InputRequired()], render_kw={'autocomplete': 'off'})
+    code = StringNoneField('TOTP Code', [InputRequired()], render_kw={'autocomplete': 'off'})
     submit = SubmitField('Login')
 
 
 class UserForm(FlaskForm):
     """user edit form"""
 
-    username = StringField('Username', [InputRequired(), Length(min=1, max=250)])
+    username = StringNoneField('Username', [InputRequired(), Length(min=1, max=250)])
     password = PasswordField('Password', [Optional(), strong_password])
-    email = StringField('Email', [Length(max=250)])
+    email = StringNoneField('Email', [Length(max=250)])
     active = BooleanField('Active')
     roles = MultiCheckboxField('Roles')
     submit = SubmitField('Save')
@@ -82,12 +83,12 @@ class WebauthnRegisterForm(FlaskForm):
     """webauthn register token form"""
 
     attestation = HiddenField('Attestation', [InputRequired()])
-    name = StringField('Name', [Length(max=250)])
+    name = StringNoneField('Name', [Length(max=250)])
     submit = SubmitField('Register', render_kw={'disabled': True})
 
 
 class WebauthnEditForm(FlaskForm):
     """webauthn edit token form"""
 
-    name = StringField('Name', [Length(max=250)])
+    name = StringNoneField('Name', [Length(max=250)])
     submit = SubmitField('Save')

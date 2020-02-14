@@ -4,7 +4,7 @@ flask forms
 """
 
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField
+from wtforms import StringField, TextAreaField
 
 
 class TextAreaListField(TextAreaField):
@@ -17,6 +17,15 @@ class TextAreaListField(TextAreaField):
     # value from form
     def process_formdata(self, valuelist):
         self.data = valuelist[0].splitlines() if valuelist else []  # pylint: disable=attribute-defined-outside-init
+
+
+class StringNoneField(StringField):
+    """stringfield converting empty string to None"""
+
+    # value from form
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = valuelist[0] or None  # pylint: disable=attribute-defined-outside-init
 
 
 class ButtonForm(FlaskForm):

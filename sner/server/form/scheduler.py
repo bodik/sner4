@@ -7,11 +7,11 @@ import re
 from ipaddress import ip_network
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, SelectField, StringField, SubmitField, TextAreaField, ValidationError
+from wtforms import BooleanField, IntegerField, SelectField, SubmitField, TextAreaField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import InputRequired, Length, NumberRange
 
-from sner.server.form import TextAreaListField
+from sner.server.form import StringNoneField, TextAreaListField
 from sner.server.model.scheduler import ExclFamily, Task
 
 
@@ -45,8 +45,8 @@ def tasks():
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringField('Name', [InputRequired(), Length(min=1, max=250)])
-    module = StringField('Module', [InputRequired(), Length(min=1, max=250)])
+    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
+    module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
     params = TextAreaField('Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
@@ -54,7 +54,7 @@ class TaskForm(FlaskForm):
 class QueueForm(FlaskForm):
     """queue edit form"""
 
-    name = StringField('Name', [InputRequired(), Length(min=1, max=250)])
+    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     task = QuerySelectField('Task', [InputRequired()], query_factory=tasks, allow_blank=False, get_label='name')
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
@@ -73,7 +73,7 @@ class ExclForm(FlaskForm):
     """exclustion edit form"""
 
     family = SelectField('Family', [InputRequired(), valid_excl_family], choices=ExclFamily.choices(), coerce=ExclFamily.coerce)
-    value = StringField('Value', [InputRequired(), Length(min=1), valid_excl_value])
+    value = StringNoneField('Value', [InputRequired(), Length(min=1), valid_excl_value])
     comment = TextAreaField('Comment')
     submit = SubmitField('Save')
 

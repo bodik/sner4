@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {#- https://github.com/carlnewton/bootstrap-wtf/ -#}
 
-{% set text_field_types = 'DateField', 'DateTimeField', 'DecimalField', 'FloatField', 'IntegerField', 'PasswordField', 'SelectField', 'SelectMultipleField', 'StringField', 'TextAreaField', 'TextAreaListField', 'TextField' %}
+{% set text_field_types = 'DateField', 'DateTimeField', 'DecimalField', 'FloatField', 'IntegerField', 'PasswordField', 'SelectField', 'SelectMultipleField', 'StringField', 'StringNoneField', 'TextAreaField', 'TextAreaListField', 'TextField' %}
 {% set other_field_types = 'BooleanField', 'FileField', 'RadioField', 'SubmitField' %}
 
 {% macro bootstrap_form(form, form_groups=True, placeholders=True, labels=True, errors=True, horizontal=False) -%}
