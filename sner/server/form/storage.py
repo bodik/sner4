@@ -43,9 +43,9 @@ class ServiceForm(FlaskForm):
     """service edit form"""
 
     host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
-    proto = StringField('Proto', [InputRequired(), Length(min=1, max=50)])
+    proto = StringField('Proto', [InputRequired(), Length(min=1, max=250)])
     port = IntegerField('Port', [InputRequired(), NumberRange(min=0, max=65535)])
-    state = StringField('State', [Length(max=50)])
+    state = StringField('State', [Length(max=250)])
     name = StringField('Name', [Length(max=250)])
     info = StringField('Info')
     comment = TextAreaField('Comment')

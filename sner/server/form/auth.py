@@ -89,5 +89,5 @@ class WebauthnRegisterForm(FlaskForm):
 class WebauthnEditForm(FlaskForm):
     """webauthn edit token form"""
 
-    name = StringField('Name', [Length(max=500)])
+    name = StringField('Name', [Length(max=250)])
     submit = SubmitField('Save')

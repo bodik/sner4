@@ -37,9 +37,9 @@ class Service(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
-    proto = db.Column(db.String(50), nullable=False)
+    proto = db.Column(db.String(250), nullable=False)
     port = db.Column(db.Integer, nullable=False)
-    state = db.Column(db.String(50))
+    state = db.Column(db.String(250))
     name = db.Column(db.String(250))
     info = db.Column(db.Text)
     comment = db.Column(db.Text)
