@@ -12,16 +12,11 @@ class LinesField(TextAreaField):
 
     # value to form
     def _value(self):
-        if self.data:
-            return '\n'.join(self.data)
-        return ''
+        return '\n'.join(self.data) if self.data else ''
 
     # value from form
     def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = valuelist[0].splitlines()  # pylint: disable=attribute-defined-outside-init
-        else:
-            self.data = []  # pylint: disable=attribute-defined-outside-init
+        self.data = valuelist[0].splitlines() if valuelist else []  # pylint: disable=attribute-defined-outside-init
 
 
 class ButtonForm(FlaskForm):
