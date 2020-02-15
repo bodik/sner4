@@ -19,13 +19,22 @@ class TextAreaListField(TextAreaField):
         self.data = valuelist[0].splitlines() if valuelist else []  # pylint: disable=attribute-defined-outside-init
 
 
-class StringNoneField(StringField):
-    """stringfield converting empty string to None"""
+class EmptyToNoneFieldMixin():  # pylint: disable=too-few-public-methods
+    """empty string to none casting mixin"""
 
     # value from form
     def process_formdata(self, valuelist):
+        """cast empty string to none"""
         if valuelist:
-            self.data = valuelist[0] or None  # pylint: disable=attribute-defined-outside-init
+            self.data = None if valuelist[0] == '' else valuelist[0]  # pylint: disable=attribute-defined-outside-init
+
+
+class StringNoneField(EmptyToNoneFieldMixin, StringField):
+    """customized stringfield"""
+
+
+class TextAreaNoneField(EmptyToNoneFieldMixin, TextAreaField):
+    """customized textareafield"""
 
 
 class ButtonForm(FlaskForm):

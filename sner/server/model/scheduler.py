@@ -22,7 +22,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
     module = db.Column(db.String(250), nullable=False)
-    params = db.Column(db.Text, nullable=False)
+    params = db.Column(db.Text)
 
     queues = relationship('Queue', back_populates='task', cascade='delete,delete-orphan', passive_deletes=True)
 

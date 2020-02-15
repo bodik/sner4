@@ -4,10 +4,10 @@ flask forms
 """
 
 from flask_wtf import FlaskForm
-from wtforms import FieldList, HiddenField, IntegerField, SelectField, SubmitField, TextAreaField, ValidationError
+from wtforms import FieldList, HiddenField, IntegerField, SelectField, SubmitField, ValidationError
 from wtforms.validators import AnyOf, InputRequired, IPAddress, Length, NumberRange, Optional
 
-from sner.server.form import StringNoneField, TextAreaListField
+from sner.server.form import StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.model.storage import Host, Service, SeverityEnum
 
 
@@ -34,7 +34,7 @@ class HostForm(FlaskForm):
     address = StringNoneField('Address', [InputRequired(), IPAddress(ipv4=True, ipv6=True)])
     hostname = StringNoneField('Hostname', [Length(max=256)])
     os = StringNoneField('Os')
-    comment = TextAreaField('Comment')
+    comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()
 
@@ -48,7 +48,7 @@ class ServiceForm(FlaskForm):
     state = StringNoneField('State', [Length(max=250)])
     name = StringNoneField('Name', [Length(max=250)])
     info = StringNoneField('Info')
-    comment = TextAreaField('Comment')
+    comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()
 
@@ -61,11 +61,11 @@ class VulnForm(FlaskForm):
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
     xtype = StringNoneField('xType', [Length(max=250)])
     severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
-    descr = TextAreaField('Descr', render_kw={'rows': '5'})
-    data = TextAreaField('Data', render_kw={'rows': '5'})
+    descr = TextAreaNoneField('Descr', render_kw={'rows': '5'})
+    data = TextAreaNoneField('Data', render_kw={'rows': '5'})
     refs = TextAreaListField('Refs', render_kw={'rows': '5'})
     tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor'})
-    comment = TextAreaField('Comment')
+    comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()
 
@@ -76,8 +76,8 @@ class NoteForm(FlaskForm):
     host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
     service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
     xtype = StringNoneField('xType', [Length(max=250)])
-    data = TextAreaField('Data', render_kw={'rows': '20'})
-    comment = TextAreaField('Comment')
+    data = TextAreaNoneField('Data', render_kw={'rows': '20'})
+    comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()
 

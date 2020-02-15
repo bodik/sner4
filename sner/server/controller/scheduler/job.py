@@ -127,7 +127,11 @@ def job_assign_route(queue_id=None):
         db.session.commit()
         return jsonify({})
 
-    assignment = {'id': str(uuid4()), 'module': queue.task.module, 'params': queue.task.params, 'targets': assigned_targets}
+    assignment = {
+        'id': str(uuid4()),
+        'module': queue.task.module,
+        'params': '' if queue.task.params is None else queue.task.params,
+        'targets': assigned_targets}
     job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
     db.session.add(job)
     db.session.commit()

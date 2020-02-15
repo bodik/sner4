@@ -7,11 +7,11 @@ import re
 from ipaddress import ip_network
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, SelectField, SubmitField, TextAreaField, ValidationError
+from wtforms import BooleanField, IntegerField, SelectField, SubmitField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import InputRequired, Length, NumberRange
 
-from sner.server.form import StringNoneField, TextAreaListField
+from sner.server.form import StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.model.scheduler import ExclFamily, Task
 
 
@@ -47,7 +47,7 @@ class TaskForm(FlaskForm):
 
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
-    params = TextAreaField('Parameters', render_kw={'rows': '10'})
+    params = TextAreaNoneField('Parameters', render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
 
@@ -74,13 +74,13 @@ class ExclForm(FlaskForm):
 
     family = SelectField('Family', [InputRequired(), valid_excl_family], choices=ExclFamily.choices(), coerce=ExclFamily.coerce)
     value = StringNoneField('Value', [InputRequired(), Length(min=1), valid_excl_value])
-    comment = TextAreaField('Comment')
+    comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
 
 
 class ExclImportForm(FlaskForm):
     """exclusions list import form"""
 
-    data = TextAreaField('Data', [InputRequired()], render_kw={'rows': '10'})
+    data = TextAreaNoneField('Data', [InputRequired()], render_kw={'rows': '10'})
     replace = BooleanField('Replace')
     submit = SubmitField('Import')
