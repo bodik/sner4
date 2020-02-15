@@ -9,7 +9,7 @@ import pytest
 from flask import url_for
 from flask_wtf import FlaskForm
 
-from sner.server.form import LinesField
+from sner.server.form import TextAreaListField
 from sner.server.model.scheduler import Excl, ExclFamily
 from sner.server.utils import ExclMatcher, valid_next_url
 from tests.server import DummyPostData
@@ -20,7 +20,7 @@ def test_linesfield(app):  # pylint: disable=unused-argument
 
     class Xform(FlaskForm):
         """form test instance"""
-        a = LinesField()
+        a = TextAreaListField()
 
     form = Xform(DummyPostData({'a': 'a\nb'}))
     assert isinstance(form.a.data, list)

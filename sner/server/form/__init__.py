@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import TextAreaField
 
 
-class LinesField(TextAreaField):
+class TextAreaListField(TextAreaField):
     """textarea transparently handling list of items"""
 
     # value to form

@@ -11,7 +11,7 @@ from wtforms import BooleanField, IntegerField, SelectField, StringField, Submit
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import InputRequired, Length, NumberRange
 
-from sner.server.form import LinesField
+from sner.server.form import TextAreaListField
 from sner.server.model.scheduler import ExclFamily, Task
 
 
@@ -65,7 +65,7 @@ class QueueForm(FlaskForm):
 class QueueEnqueueForm(FlaskForm):
     """queue enqueue form"""
 
-    targets = LinesField('Targets', [InputRequired()], render_kw={'rows': '10'})
+    targets = TextAreaListField('Targets', [InputRequired()], render_kw={'rows': '10'})
     submit = SubmitField('Enqueue')
 
 
