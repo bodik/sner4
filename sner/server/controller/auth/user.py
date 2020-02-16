@@ -86,11 +86,10 @@ def user_edit_route(user_id):
 def user_delete_route(user_id):
     """delete user"""
 
-    user = User.query.get(user_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.delete(user)
+        db.session.delete(User.query.get(user_id))
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
 

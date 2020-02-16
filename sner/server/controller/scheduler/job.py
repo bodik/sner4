@@ -164,11 +164,10 @@ def job_output_route():
 def job_delete_route(job_id):
     """delete job"""
 
-    job = Job.query.get(job_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        job_delete(job)
+        job_delete(Job.query.get(job_id))
         return redirect(url_for('scheduler.job_list_route'))
 
     return render_template('button-delete.html', form=form)

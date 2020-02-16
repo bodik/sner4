@@ -102,9 +102,9 @@ def note_edit_route(note_id):
 def note_delete_route(note_id):
     """delete note"""
 
-    note = Note.query.get(note_id)
     form = ButtonForm()
     if form.validate_on_submit():
+        note = Note.query.get(note_id)
         db.session.delete(note)
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=note.host_id))

@@ -210,8 +210,8 @@ def profile_webauthn_delete_route(webauthn_id):
 
     form = ButtonForm()
     if form.validate_on_submit():
-        cred = WebauthnCredential.query.filter(WebauthnCredential.user_id == current_user.id, WebauthnCredential.id == webauthn_id).one()
-        db.session.delete(cred)
+        db.session.delete(
+            WebauthnCredential.query.filter(WebauthnCredential.user_id == current_user.id, WebauthnCredential.id == webauthn_id).one())
         db.session.commit()
         return redirect(url_for('auth.profile_route'))
 

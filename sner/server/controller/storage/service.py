@@ -97,10 +97,10 @@ def service_edit_route(service_id):
 def service_delete_route(service_id):
     """delete service"""
 
-    service = Service.query.get(service_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
+        service = Service.query.get(service_id)
         db.session.delete(service)
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=service.host_id))

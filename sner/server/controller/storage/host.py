@@ -95,11 +95,10 @@ def host_edit_route(host_id):
 def host_delete_route(host_id):
     """delete host"""
 
-    host = Host.query.get(host_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.delete(host)
+        db.session.delete(Host.query.get(host_id))
         db.session.commit()
         return redirect(url_for('storage.host_list_route'))
 

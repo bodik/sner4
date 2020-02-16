@@ -18,15 +18,6 @@ from sner.server.model.scheduler import Queue, Task
 from sner.server.sqlafilter import filter_parser
 
 
-def task_delete(task):
-    """task delete; delete all queues and respective jobs in cascade (deals with output files)"""
-
-    for queue in task.queues:
-        queue_delete(queue)
-    db.session.delete(task)
-    db.session.commit()
-
-
 @blueprint.route('/task/list')
 @role_required('operator')
 def task_list_route():
@@ -92,13 +83,16 @@ def task_edit_route(task_id):
 @blueprint.route('/task/delete/<task_id>', methods=['GET', 'POST'])
 @role_required('operator')
 def task_delete_route(task_id):
-    """delete task"""
+    """delete task; delete all queues and respective jobs in cascade (deals with output files)"""
 
-    task = Task.query.get(task_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        task_delete(task)
+        task = Task.query.get(task_id)
+        for queue in task.queues:
+            queue_delete(queue)
+        db.session.delete(task)
+        db.session.commit()
         return redirect(url_for('scheduler.task_list_route'))
 
     return render_template('button-delete.html', form=form)

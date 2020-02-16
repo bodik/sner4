@@ -128,11 +128,10 @@ def queue_enqueue_route(queue_id):
 def queue_flush_route(queue_id):
     """queue flush; flush all targets from queue"""
 
-    queue = Queue.query.get(queue_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.query(Target).filter(Target.queue_id == queue.id).delete()
+        db.session.query(Target).filter(Target.queue_id == queue_id).delete()
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
@@ -144,11 +143,10 @@ def queue_flush_route(queue_id):
 def queue_prune_route(queue_id):
     """queue prune; delete all queue jobs"""
 
-    queue = Queue.query.get(queue_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        for job in queue.jobs:
+        for job in Queue.query.get(queue_id).jobs:
             job_delete(job)
         return redirect(url_for('scheduler.queue_list_route'))
 
@@ -160,11 +158,10 @@ def queue_prune_route(queue_id):
 def queue_delete_route(queue_id):
     """queue delete"""
 
-    queue = Queue.query.get(queue_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        queue_delete(queue)
+        queue_delete(Queue.query.get(queue_id))
         return redirect(url_for('scheduler.queue_list_route'))
 
     return render_template('button-delete.html', form=form)

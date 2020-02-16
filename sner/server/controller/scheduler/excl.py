@@ -93,11 +93,10 @@ def excl_edit_route(excl_id):
 def excl_delete_route(excl_id):
     """delete exclusion"""
 
-    excl = Excl.query.get(excl_id)
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.delete(excl)
+        db.session.delete(Excl.query.get(excl_id))
         db.session.commit()
         return redirect(url_for('scheduler.excl_list_route'))
 

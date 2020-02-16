@@ -99,9 +99,9 @@ def vuln_edit_route(vuln_id):
 def vuln_delete_route(vuln_id):
     """delete vuln"""
 
-    vuln = Vuln.query.get(vuln_id)
     form = ButtonForm()
     if form.validate_on_submit():
+        vuln = Vuln.query.get(vuln_id)
         db.session.delete(vuln)
         db.session.commit()
         return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
