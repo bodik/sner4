@@ -31,9 +31,14 @@ def test_profile_route(cl_user):
 def test_profile_changepassword_route(cl_user):
     """user profile change password"""
 
-    tmp_password = PWS().generate()
+    cur_password = PWS().generate()
+    new_password = PWS().generate()
+    user = User.query.filter(User.username == 'pytest_user').one()
+    user.password = cur_password
+    db.session.commit()
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form['current_password'] = cur_password
     form['password1'] = '1'
     form['password2'] = '2'
     response = form.submit()
@@ -41,6 +46,7 @@ def test_profile_changepassword_route(cl_user):
     assert response.lxml.xpath('//*[@class="text-danger" and text()="Passwords does not match."]')
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form['current_password'] = cur_password
     form['password1'] = 'weak'
     form['password2'] = 'weak'
     response = form.submit()
@@ -48,13 +54,21 @@ def test_profile_changepassword_route(cl_user):
     assert response.lxml.xpath('//*[@class="text-danger" and contains(text(), "Password too short.")]')
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
-    form['password1'] = tmp_password
-    form['password2'] = tmp_password
+    form['current_password'] = '1'
+    form['password1'] = new_password
+    form['password2'] = new_password
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'Invalid current password.\');")]')
+
+    form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form['current_password'] = cur_password
+    form['password1'] = new_password
+    form['password2'] = new_password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
-
-    user = User.query.filter(User.username == 'pytest_user').one_or_none()
-    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(user.password)), user.password)
+    user = User.query.filter(User.username == 'pytest_user').one()
+    assert PWS.compare(PWS.hash(new_password, PWS.get_salt(user.password)), user.password)
 
 
 def test_profile_totp_route_enable(cl_user):

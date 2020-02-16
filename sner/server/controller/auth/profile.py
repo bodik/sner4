@@ -22,6 +22,7 @@ from sner.server.controller.auth import blueprint, role_required, TOTPImpl, weba
 from sner.server.form import ButtonForm
 from sner.server.form.auth import TotpCodeForm, UserChangePasswordForm, WebauthnRegisterForm, WebauthnEditForm
 from sner.server.model.auth import User, WebauthnCredential
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 from sner.server.utils import SnerJSONEncoder
 
 
@@ -47,10 +48,14 @@ def profile_changepassword_route():
     form = UserChangePasswordForm()
     if form.validate_on_submit():
         user = User.query.filter(User.id == current_user.id).one()
-        user.password = form.password1.data
-        db.session.commit()
-        flash('Password changed.', 'info')
-        return redirect(url_for('auth.profile_route'))
+
+        if not PWS.compare(PWS.hash(form.current_password.data, PWS.get_salt(user.password)), user.password):
+            flash('Invalid current password.', 'error')
+        else:
+            user.password = form.password1.data
+            db.session.commit()
+            flash('Password changed.', 'info')
+            return redirect(url_for('auth.profile_route'))
 
     return render_template('auth/profile/changepassword.html', form=form)
 
