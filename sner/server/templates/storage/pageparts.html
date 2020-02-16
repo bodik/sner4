@@ -28,7 +28,11 @@
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
 <script id="storage.pagepart-service_list_filter_info_link.hbs" type="text/x-handlebars-template">
-	<a href='{{> storage.service_list_route_filter_info filter_value=info_encoded}}'>{{info}}</a>
+	{{# if info}}
+		<a href='{{> storage.service_list_route_filter_info filter_value=info_encoded}}'>{{info}}</a>
+	{{ else }}
+		<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="glyphicon glyphicon-list"></span></a>
+	{{/if}}
 </script>
 
 <script id="storage.pagepart-vuln_link.hbs" type="text/x-handlebars-template">
@@ -99,6 +103,7 @@
 
 	Handlebars.registerPartial('storage.service_add_route', Flask.url_for('storage.service_add_route', {'host_id': '{%raw%}{{host_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.service_list_route_filter_info', Flask.url_for('storage.service_list_route', {'filter': '{%raw%}Service.info ilike "{{filter_value}}%"{%endraw%}'}));
+	Handlebars.registerPartial('storage.service_list_route_filter_info_null', Flask.url_for('storage.service_list_route', {'filter': 'Service.info is_null ""'}));
 	Handlebars.registerPartial('storage.service_edit_route', Flask.url_for('storage.service_edit_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
 	Handlebars.registerPartial('storage.service_delete_route', Flask.url_for('storage.service_delete_route', {'service_id': '{%raw%}{{service_id}}{%endraw%}'}));
 
