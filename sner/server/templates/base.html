@@ -3,13 +3,13 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>{% block title %}{% endblock %} - sner4</title>
 
 
-	<script type="text/javascript" src="{{ url_for('static', filename='jquery/jquery-3.2.1.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='jquery/jquery-3.4.1.min.js') }}"></script>
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
@@ -17,12 +17,12 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='toastr/toastr.min.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='toastr/toastr.min.js') }}"></script>
 
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.css') }}" />
-	<script type="text/javascript" src="{{ url_for('static', filename='datatables/jquery.dataTables.min.js') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.bootstrap.min.js') }}"></script>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/select.dataTables.min.css') }}" />
-	<script type="text/javascript" src="{{ url_for('static', filename='datatables/dataTables.select.min.js') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='datatables/plugin.ellipsis.js') }}"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/css/dataTables.bootstrap4.min.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables/css/select.bootstrap4.min.css') }}" />
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/js/jquery.dataTables.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/js/dataTables.bootstrap4.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/js/dataTables.select.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='datatables/js/plugin.ellipsis.js') }}"></script>
 
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tageditor/jquery.tag-editor.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='tageditor/jquery.caret.min.js') }}"></script>
@@ -31,9 +31,8 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
 
 	<style>
-		/* menu image */
-		.navbar-brand { padding: 0px; }
-		.navbar-brand img { height: 100%; padding: 5px; width: auto; }
+		/* content vs navbar spacing */
+		body { padding-top: 5rem; }
 
 		/* required items on forms */
 		div.form-group.required label.control-label:after { content:"*"; color:red; }
@@ -282,70 +281,74 @@
 	{% block script %}{% endblock %}
 </head>
 <body>
-	<nav class="navbar navbar-default">
-	<div class="container-fluid">
-        	<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="{{ url_for('index_route') }}"><img src="{{ url_for('static', filename='logo.png') }}"></a>
-		</div>
-		<div id="navbar" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+		<a class="navbar-brand" href="{{ url_for('index_route') }}">sner4</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+			<ul class="navbar-nav mr-auto">
 			{% if current_user.is_authenticated %}
 				{% if current_user.has_role('operator') %}
-				<li><a href="{{ url_for('scheduler.excl_list_route') }}">sch:Exclusions</a></li>
-				<li><a href="{{ url_for('scheduler.task_list_route') }}">sch:Tasks</a></li>
-				<li><a href="{{ url_for('scheduler.queue_list_route') }}">sch:Queues</a></li>
-				<li><a href="{{ url_for('scheduler.job_list_route') }}">sch:Jobs</a></li>
-				<li><a href="{{ url_for('storage.host_list_route') }}">st:Hosts</a></li>
-				<li><a href="{{ url_for('storage.service_list_route') }}">st:Services</a></li>
-				<li><a href="{{ url_for('storage.service_grouped_route', crop=3) }}">st:Services grouped</a></li>
-				<li><a href="{{ url_for('storage.vuln_list_route') }}">st:Vulns</a></li>
-				<li><a href="{{ url_for('storage.vuln_grouped_route') }}">st:Vulns grouped</a></li>
-				<li><a href="{{ url_for('storage.note_list_route') }}">st:Notes</a></li>
-				<li><a href="{{ url_for('storage.host_vizdns_route', crop=1) }}">st:Hosts:vizdns</a></li>
-				<li><a href="{{ url_for('storage.service_vizports_route') }}">st:Services:vizports</a></li>
-				<li><a href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">st:Services:vizinfos</a></li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="dropdownScheduler" data-toggle="dropdown">Scheduler</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a>
+						<a class="dropdown-item" href="{{ url_for('scheduler.task_list_route') }}">Tasks</a>
+						<a class="dropdown-item" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a>
+						<a class="dropdown-item" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a>
+					</div>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="dropdownStorage" data-toggle="dropdown">Storage</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="{{ url_for('storage.host_list_route') }}">Hosts</a>
+						<a class="dropdown-item" href="{{ url_for('storage.service_list_route') }}">Services</a>
+						<a class="dropdown-item" href="{{ url_for('storage.service_grouped_route', crop=3) }}">Services grouped</a>
+						<a class="dropdown-item" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a>
+						<a class="dropdown-item" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a>
+						<a class="dropdown-item" href="{{ url_for('storage.note_list_route') }}">Notes</a>
+					</div>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="dropdownVisualizations" data-toggle="dropdown">Visualizations</a>
+					<div class="dropdown-menu">
+						<a class="dropdown-item" href="{{ url_for('storage.host_vizdns_route', crop=1) }}">DNS Names</a>
+						<a class="dropdown-item" href="{{ url_for('storage.service_vizports_route') }}">Ports</a>
+						<a class="dropdown-item" href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">Service infos</a>
+					</div>
+				</li>
 				{% endif %}
 			{% endif %}
 			</ul>
 
-			<ul class="nav navbar-nav navbar-right">
+			<ul class="navbar-nav">
 			{% if config['DEBUG'] %}
-				<li><a title="debug is on"><span class="text-warning glyphicon glyphicon-warning-sign"></span></a></li>
+				<li><span class="nav-link text-warning">debug enabled</span></li>
 			{% endif %}
 			{% if not current_user.is_authenticated %}
 				<li><a href="{{ url_for('auth.login_route') }}">Login</a></li>
 			{% else %}
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-						<span class="glyphicon glyphicon-user"></span>
-						<strong>{{ current_user.username }}</strong>
-						<span class="glyphicon glyphicon-chevron-down"></span>
-					</a>
-					<ul class="dropdown-menu">
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="dropdownUser" data-toggle="dropdown">{{ current_user.username }}</a>
+					<div class="dropdown-menu dropdown-menu-right">
 					{% if current_user.has_role('admin') %}
-						<li><a href="{{ url_for('auth.user_list_route') }}">Users</a></li>
-						<li role="separator" class="divider"></li>
+						<a class="dropdown-item" href="{{ url_for('auth.user_list_route') }}">Manage users</a>
 					{% endif %}
-						<li><a href="{{ url_for('auth.profile_route') }}">Profile</a></li>
-						<li><a href="{{ url_for('auth.logout_route') }}">Logout</a></li>
-					</ul>
+						<a class="dropdown-item" href="{{ url_for('auth.profile_route') }}">Profile</a>
+						<a class="dropdown-item" href="{{ url_for('auth.logout_route') }}">Logout</a>
+					</div>
 				</li>
 			{% endif %}
 			</ul>
-		</div><!--/.nav-collapse -->
-	</div>
+		</div>
 	</nav>
 
-	<div class="container-fluid">
+	<main role="main" class="container-fluid">
 		{% block content %}
 		{% endblock %}
-	</div>
+	</main><!-- /.container -->
 
 	<script type="text/javascript">
 		toastr.options = {
@@ -360,8 +363,8 @@
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					<h4 class="modal-title"></h4>
+					<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
 				</div>
 				<div class="modal-body"></div>
 			</div>
