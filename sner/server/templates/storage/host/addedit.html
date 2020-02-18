@@ -1,21 +1,18 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Host add/edit{% endblock %}
 
 {% block content %}
-<div class="hosts">
-	<h1>Host add/edit</h1>
+{{ cm.breadcrumbs(['Storage', 'Hosts', 'Add or edit']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ form.return_url }}
-		{{ b_wtf.bootstrap_field(form.address, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.hostname, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.os, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form class="form-horizontal" method="post">
+	{{ form.csrf_token }}
+	{{ form.return_url }}
+	{{ b_wtf.bootstrap_field(form.address, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.hostname, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.os, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

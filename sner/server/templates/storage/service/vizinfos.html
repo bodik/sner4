@@ -10,10 +10,6 @@
 
 {% block style %}
 <style>
-.toolbar {
-	text-align: center;
-	margin-bottom: 0.5em;
-}
 svg {
 	border:1px solid lightgrey;
 }
@@ -21,39 +17,41 @@ svg {
 {% endblock %}
 
 {% block content %}
+{{ cm.breadcrumbs(['Visuals', 'Service infos']) }}
 <!--
 	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
 	https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js
 	https://github.com/jasondavies/d3-cloud
 -->
-<div class="services">
-	<div class="toolbar">
-		<div class="btn-group">
-			<a class="btn btn-xs btn-default disabled">view:</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="view:normal">normal</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="view:inverse">inverse</a>
-		</div>
-
-		<div class="btn-group">
-			<a class="btn btn-xs btn-default disabled">crop at:</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:2">2</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:3">3</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:4">4</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:5">5</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="crop:">no crop</a>
-		</div>
-
-		<div class="btn-group">
-			<a class="btn btn-xs btn-default disabled">limit:</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:10">10</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:30">30</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:40">40</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:50">50</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:100">100</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:200">200</a>
-			<a class="btn btn-xs btn-default abutton_modify_view" data-args="limit:">no limit</a>
-		</div>
+<div class="text-right py-1">
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">view:</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="view:normal">normal</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="view:inverse">inverse</a>
 	</div>
+
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">crop at:</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:2">2</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:3">3</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:4">4</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:5">5</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:">no crop</a>
+	</div>
+
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">limit:</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:10">10</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:30">30</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:40">40</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:50">50</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:100">100</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:200">200</a>
+		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:">no limit</a>
+	</div>
+</div>
+
+<div id="visual">
 	<svg></svg>
 </div>
 
@@ -64,8 +62,8 @@ if (!url_params.has('view')) { url_params.set('view', 'normal'); }
 
 /* graph */
 var color = d3.scaleOrdinal(d3.schemeCategory20);
-var width = $('.services')[0].clientWidth;
-var height = 0.8 * window.innerHeight;
+var width = $('#visual')[0].clientWidth;
+var height = 0.77 * window.innerHeight;
 var svg = d3.select('svg')
 	.attr('width', width)
 	.attr('height', height);

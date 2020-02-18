@@ -9,10 +9,6 @@
 
 {% block style %}
 <style type="text/css">
-.toolbar {
-	text-align: center;
-	margin-bottom: 0.5em;
-}
 svg {
 	border:1px solid lightgrey;
 }
@@ -27,6 +23,7 @@ svg {
 {% endblock %}
 
 {% block content %}
+{{ cm.breadcrumbs(['Visuals', 'DNS Tree']) }}
 <!--
 	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
 	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
@@ -34,16 +31,17 @@ svg {
 	https://bl.ocks.org/rofrischmann/74e3b61530c350d1ec1771416249a535
 	https://bl.ocks.org/mbostock/1129492
 -->
-<div class="hosts">
-	<div class="toolbar">
-		<div class="btn-group">
-			<a class="btn btn-xs btn-default disabled">crop:</a>
-			{% set active_crop = request.args.get('crop', 0)|int %}
-			{% for level in range(0,3) %}
-			<a class="btn btn-xs btn-default{% if active_crop == level %} active{% endif %}" href="{{ url_for('storage.host_vizdns_route', crop=level) }}">{{level}}</a>
-			{% endfor %}
-		</div>
+<div class="text-right py-1">
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">crop:</a>
+		{% set active_crop = request.args.get('crop', 0)|int %}
+		{% for level in range(0,3) %}
+		<a class="btn btn-outline-secondary{% if active_crop == level %} active{% endif %}" href="{{ url_for('storage.host_vizdns_route', crop=level) }}">{{level}}</a>
+		{% endfor %}
 	</div>
+</div>
+
+<div id="visual">
 	<svg></svg>
 </div>
 
@@ -51,8 +49,8 @@ svg {
 var colors = d3.scaleOrdinal(d3.schemeCategory20);
 var radius = 5;
 
-var width = $(".hosts")[0].clientWidth;
-var height = 0.8*window.innerHeight;
+var width = $("#visual")[0].clientWidth;
+var height = 0.77 * window.innerHeight;
 var svg = d3.select('svg')
 	.attr('width', width)
 	.attr('height', height);

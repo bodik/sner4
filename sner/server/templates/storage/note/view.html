@@ -4,31 +4,35 @@
 {% block title %}Note view {{ note.host.address }} {{note.xtype}}{% endblock %}
 
 {% block content %}
-<div class="notes">
-	<h1>
-		Note {{ note.host.address }} {{ note.xtype }}
-		<small>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
-			{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
-		</small>
-	</h1>
+{{ cm.breadcrumbs(['Storage', 'Notes', 'View', note.xtype, '%s %s' % (note.host.address, note.host.hostname)]) }}
 
-	<div>
-		<dl class="dl-horizontal">
-		<dt>host address</dt><dd class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</dd>
-		<dt>host hostname</dt><dd>{{ note.host.hostname }}</dd>
-		<dt>service</dt><dd>{{ note.service }}</dd>
-		<dt>xtype</dt><dd>{{ note.xtype }}</dd>
-		<dt>comment</dt><dd>{{ note.comment }}</dd>
-		</dl>
-	</div>
+<div class="text-right">
+	<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><i class="fas fa-edit"></i></a>
+	{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
+</div>
 
-	<div>
-	{% if note.xtype and (note.xtype.startswith('nessus.') or note.xtype.startswith('nmap.'))  %}
-		<pre>{{ note.data|json_indent }}</pre>
-	{% else %}
-		{{ note.data }}
-	{% endif %}
-	</div>
+<dl class="row">
+	<dt class="col-1">host address</dt>
+	<dd class="col-11 render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</dd>
+
+	<dt class="col-1">host hostname</dt>
+	<dd class="col-11">{{ note.host.hostname }}</dd>
+
+	<dt class="col-1">service</dt>
+	<dd class="col-11">{{ note.service }}</dd>
+
+	<dt class="col-1">xtype</dt>
+	<dd class="col-11">{{ note.xtype }}</dd>
+
+	<dt class="col-1">comment</dt>
+	<dd class="col-11">{{ note.comment }}</dd>
+</dl>
+
+<div>
+{% if note.xtype and (note.xtype.startswith('nessus.') or note.xtype.startswith('nmap.'))  %}
+	<pre>{{ note.data|json_indent }}</pre>
+{% else %}
+	{{ note.data }}
+{% endif %}
 </div>
 {% endblock %}

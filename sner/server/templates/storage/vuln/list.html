@@ -38,41 +38,37 @@
 
 
 {% block content %}
-<div class="vulns">
-	<h1>Vulns list{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.vuln_list_route') }}">unfilter</a></small>{% endif %}</h1>
+{{ cm.breadcrumbs(['Storage', 'Vulns', 'List']) }}
 
-	<div id="vuln_list_table_toolbar" class="dt_toolbar">
-		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default disabled">action:</a>
-			<a class="btn btn-xs btn-default abutton_selectall">All</a>
-			<a class="btn btn-xs btn-default abutton_selectnone">None</a>
-			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</a>
-			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="report"><span class="glyphicon glyphicon-tag"></span> Report</a>
-			<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> ToDo</a>
-			<a class="btn btn-xs btn-default abutton_deletemulti"><span class="glyphicon glyphicon-trash text-alert"></span></a>
-			<div class="btn-group">
-				<a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li><a class="abutton_untagmulti" data-tag="info">Untag Info</a></li>
-					<li><a class="abutton_untagmulti" data-tag="report">Untag Report</a></li>
-					<li><a class="abutton_untagmulti" data-tag="todo">Untag ToDo</a></li>
-				</ul>
-			</div>
-		</div>
-
-		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default disabled">filter:</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
-		</div>
-
-		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
-		</div>
+<div id="vuln_list_table_toolbar" class="dt_toolbar">
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+		<a class="btn btn-outline-secondary abutton_selectall">All</a>
+		<a class="btn btn-outline-secondary abutton_selectnone">None</a>
 	</div>
-
-	<table id="vuln_list_table" class="table table-hover table-responsive table-condensed"></table>
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="info">Info</a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="report">Report</a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="todo">ToDo</a>
+	</div>
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="info">Info</a></li>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="report">Report</a></li>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="todo">Todo</a></li>
+	</div>
+	<a class="btn btn-outline-secondary abutton_deletemulti"><i class="fas fa-trash text-danger"></i></a>
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
+		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.vuln_list_route') }}">unfilter</a>{% endif %}</h1>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
+	</div>
+	<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
 </div>
+
+<table id="vuln_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

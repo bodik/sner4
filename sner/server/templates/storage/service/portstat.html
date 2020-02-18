@@ -1,44 +1,35 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 <h2>Port {{port}}</h2>
 
-<h3>Stats</h3>
-<dl class="dl-horizontal">
-	{% for proto, count in stats %}
-	<dt>{{ proto }}</dt><dd>{{ count }}</dd>
-	{% endfor %}
-</dl>
+<div class="py-1">
+{% for proto, count in stats %}
+	<a class="btn btn-outline-secondary" href="{{ url_for('storage.service_list_route', filter='Service.proto=="%s"'|format(proto)) }}">{{ proto }} <span class="badge badge-secondary">{{ count }}</span></a>
+{% endfor %}
+</div>
 
 {% if infos  %}
 <h3>Infos</h3>
-<table class="table table-condensed table-hover borderless">
-<tbody>
+
+<table class="table table-hover table-sm borderless">
+	<tbody>
 	{% for info, count in infos %}
-	<tr>
-		<td><a href="{{ url_for('storage.service_list_route', filter='Service.info=="%s"'|format(info)) }}">{{ info }}</a></td>
-		<td>{{ count }}</td>
-	</tr>
+		<tr>
+			<td><a href="{{ url_for('storage.service_list_route', filter='Service.info=="%s"'|format(info)) }}">{{ info }}</a></td>
+			<td>{{ count }}</td>
+		</tr>
 	{% endfor %}
-</tbody>
+	</tbody>
 </table>
 {% endif %}
 
 <h3>Hosts</h3>
-<table class="table table-condensed table-hover borderless">
-<tbody>
+<table class="table table-hover table-sm borderless">
+	<tbody>
 	{% for host_address, host_hostname, host_id in hosts %}
-	<tr>
-		<td><a href="{{ url_for('storage.host_view_route', host_id=host_id) }}">{{ host_address }}</a></td>
-		<td>{{ host_hostname|default('', true) }}</td>
-	</tr>
+		<tr>
+			<td><a href="{{ url_for('storage.host_view_route', host_id=host_id) }}">{{ host_address }}</a></td>
+			<td>{{ host_hostname|default('', true) }}</td>
+		</tr>
 	{% endfor %}
-</tbody>
+	</tbody>
 </table>
-
-{% if comments  %}
-<h3>Comments</h3>
-<ul>
-	{% for comment in comments %}
-	<li>{{comment[0]}}</li>
-	{% endfor %}
-</ul>
-{% endif %}

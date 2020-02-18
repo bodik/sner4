@@ -30,52 +30,50 @@ table.borderless tbody tr td { border: none; }
 
 		$('#portstates').on('shown.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "true"); });
 		$('#portstates').on('hidden.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "false"); });
-		$('#portstates').toggleClass('in', localStorage.getItem('service_vizports_portstates_collapse') === "true");
+		$('#portstates').toggleClass('show', localStorage.getItem('service_vizports_portstates_collapse') === "true");
 	});
 </script> 
 {% endblock %}
 
 {% block content %}
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h4 class="panel-title"><a data-toggle="collapse" href="#portstates">Services port states</a></h4>
-	</div>
+{{ cm.breadcrumbs(['Visuals', 'Ports']) }}
 
-	<div id="portstates" class="panel-collapse collapse">
-		<div class="panel-body">
-			<table class="dt_static table table-condensed table-hover">
+<div class="card">
+	<h5 class="card-header">
+		<a data-toggle="collapse" href="#portstates">Services port states</a>
+		{% if 'filter' in request.args %}<a class="btn btn-info btn-sm" href="{{ url_for('storage.service_vizports_route') }}">unfilter</a>{% endif %}
+	</h5>
+	<div class="card-body collapse" id="portstates">
+		<table class="dt_static table table-condensed table-hover">
 			<thead>
 				<tr>
-				<th>port state</th>
-				<th>state count</th>
-				<th class="no-sort">_buttons</th>
+					<th>port state</th>
+					<th>state count</th>
+					<th class="no-sort">_buttons</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for state, count in portstates %}
 				<tr>
-				<td>{{ state }}</td>
-				<td>{{ count }}</td>
-				<td>
-					<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(state)) }}"><span class="glyphicon glyphicon-filter"></span></a>
-					<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(state)) }}"><span class="glyphicon glyphicon-list"></span></a>
-				</td>
+					<td>{{ state }}</td>
+					<td>{{ count }}</td>
+					<td>
+						<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(state)) }}"><i class="fas fa-filter"></i></a>
+						<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(state)) }}"><i class="fas fa-list"></i></a>
+					</td>
 				</tr>
 				{% endfor %}
 			</tbody>
-			</table>
-		</div>
+		</table>
 	</div>
 </div>
 
-<h2>Services port map{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.service_vizports_route') }}">unfilter</a></small>{% endif %}</h2>
-<div class="row">
+<div class="row py-1">
 	<div class="col-md-6">
 		{% for tmp in portmap %}
 		<a class="portmap_item" href="{{ url_for('storage.service_list_route', filter='Service.port=="%s"'|format(tmp['port'])) }}" style="font-size: {{ tmp['size'] }}px" data-port="{{ tmp['port'] }}">{{ tmp['port'] }}</a>&nbsp;
 		{% endfor %}
 	</div>
-
-	<div id="port_detail" class="col-md-6"></div>
+	<div class="col-md-6" id="port_detail"></div>
 </div>
 {% endblock %}

@@ -28,9 +28,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="services">
-	<h1>Services list{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a></small>{% endif %}</h1>
+{{ cm.breadcrumbs(['Storage', 'Services', 'List']) }}
 
-	<table id="service_list_table" class="table table-hover table-responsive table-condensed"></table>
+<div id="service_list_table_toolbar" class="dt_toolbar">
+	{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a>{% endif %}
 </div>
+
+<table id="service_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

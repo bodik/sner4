@@ -26,16 +26,15 @@
 {% endblock %}
 
 {% block content %}
-<div class="notes">
-	<h1>Notes list{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('storage.note_list_route') }}">unfilter</a></small>{% endif %}</h1>
+{{ cm.breadcrumbs(['Storage', 'Notes', 'List']) }}
 
-	<div id="note_list_table_toolbar" class="dt_toolbar">
-		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default disabled">filter:</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
-		</div>
+<div id="note_list_table_toolbar" class="dt_toolbar">
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
+		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.note_list_route') }}">unfilter</a>{% endif %}
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
 	</div>
-
-	<table id="note_list_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
 </div>
+
+<table id="note_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

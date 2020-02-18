@@ -7,11 +7,11 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-			localStorage.setItem('host_view_active_tab', $(e.target).attr('href'));
+			localStorage.setItem('host_view_tabs_active', $(e.target).attr('href'));
 		});
-		var active_tab = localStorage.getItem('host_view_active_tab');
+		var active_tab = localStorage.getItem('host_view_tabs_active');
 		if (!active_tab) { active_tab = $('a[data-toggle="tab"]').first().attr('href'); }
-		$('#host_view a[href="' + active_tab + '"]').tab('show');
+		$('#host_view_tabs a[href="' + active_tab + '"]').tab('show');
 
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
 			$.fn.dataTable.tables({visible: true, api: true}).columns.adjust();
@@ -21,146 +21,151 @@
 {% endblock %}
 
 {% block content %}
-<div class="hosts">
-	<h1>
-		Host {{host.address}} ({{host.hostname}})
-		<small>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.service_add_route', host_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Service</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Vuln</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}"><span class="glyphicon glyphicon-plus"></span> Note</a>
-			<a class="btn btn-xs btn-default" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><span class="glyphicon glyphicon-edit"></span></a>
-			{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
-		</small>
-	</h1>
+{{ cm.breadcrumbs(['Storage', 'Hosts', 'View', '%s %s' % (host.address, host.hostname)]) }}
 
-	<div>
-		<dl class="dl-horizontal">
-		<dt>os</dt><dd>{{ host.os }}</dd>
-		<dt>comment</dt><dd>{{ host.comment }}</dd>
-		<dt>created</dt><dd>{{ host.created|datetime }}</dd>
-		<dt>modified</dt><dd>{{ host.modified|datetime }}</dd>
-		<dt>external data</dt>
-			<dd>
-				<a rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
-				<a rel="noreferrer" href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
-				<a rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
-				<a rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
-				<a rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
-			</dd>
-		</dl>
+<div class="text-right">
+	<div class="btn-group">
+		<a class="btn btn-outline-primary disabled"><i class="fas fa-plus"></i></a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.service_add_route', host_id=host.id) }}">Service</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}">Vuln</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}">Note</a>
+	</div>
+	<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><i class="fas fa-edit"></i></a>
+	{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
+</div>
+
+<dl class="row">
+	<dt class="col-1">os</dt>
+	<dd class="col-11">{{ host.os }}</dd>
+
+	<dt class="col-1">comment</dt>
+	<dd class="col-11">{{ host.comment }}</dd>
+
+	<dt class="col-1">created</dt>
+	<dd class="col-11">{{ host.created|datetime }}</dd>
+
+	<dt class="col-1">modified</dt>
+	<dd class="col-11">{{ host.modified|datetime }}</dd>
+
+	<dt class="col-1">external data</dt>
+	<dd class="col-11">
+		<a rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
+		<a rel="noreferrer" href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
+		<a rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
+		<a rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
+		<a rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
+	</dd>
+</dl>
+
+
+<ul class="nav nav-tabs" id="host_view_tabs">
+	<li class="nav-item"><a class="nav-link" href="#services" data-toggle="tab">Services</a></li>
+	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns</a></li>
+	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes</a></li>
+</ul>
+
+<div class="tab-content">
+	<div class="tab-pane" id="services">
+		<table id="host_view_service_table" class="table table-hover table-sm" width="100%"></table>
+		<script type="text/javascript">
+			var dt_host_view_service_table_options = {
+				'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'columns': [
+					dt_column('id', {'visible': false}),
+					dt_column('host_id', {'visible': false}),
+					dt_column('host_address', {'visible': false}),
+					dt_column('host_hostname', {'visible': false}),
+					dt_column('proto'),
+					dt_column('port'),
+					dt_column('name'),
+					dt_column('state'),
+					dt_column('info'),
+					dt_column('comment'),
+					dt_column_buttons(storage_pagepart_service_controls)
+				],
+				'order': [[5, 'asc']]
+			};
+			$(document).ready(function() {
+				var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_service_table_options));
+			});
+		</script>
 	</div>
 
-
-	<ul class="nav nav-tabs" role="tablist" id="host_view">
-		<li role="presentation" class=""><a href="#services" role="tab" data-toggle="tab">Services</a></li>
-		<li role="presentation" class=""><a href="#vulns" role="tab" data-toggle="tab">Vulns</a></li>
-		<li role="presentation" class=""><a href="#notes" role="tab" data-toggle="tab">Notes</a></li>
-	</ul>
-
-	<div class="tab-content">
-		<div role="tabpanel" class="tab-pane" id="services">
-			<table id="host_view_service_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
-			<script type="text/javascript">
-				var dt_host_view_service_table_options = {
-					'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
-					'columns': [
-						dt_column('id', {'visible': false}),
-						dt_column('host_id', {'visible': false}),
-						dt_column('host_address', {'visible': false}),
-						dt_column('host_hostname', {'visible': false}),
-						dt_column('proto'),
-						dt_column('port'),
-						dt_column('name'),
-						dt_column('state'),
-						dt_column('info'),
-						dt_column('comment'),
-						dt_column_buttons(storage_pagepart_service_controls)
-					],
-					'order': [[5, 'asc']]
-				};
-				$(document).ready(function() {
-					var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_service_table_options));
-				});
-			</script>
-		</div>
-
-
-		<div role="tabpanel" class="tab-pane" id="vulns">
-			<div id="host_view_vuln_table_toolbar" class="dt_toolbar">
-				<div class="btn-group" role="group">
-					<a class="btn btn-xs btn-default disabled">action:</a>
-					<a class="btn btn-xs btn-default abutton_selectall">All</a>
-					<a class="btn btn-xs btn-default abutton_selectnone">None</a>
-					<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="info"><span class="glyphicon glyphicon-tag"></span> Info</a>
-					<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="report"><span class="glyphicon glyphicon-tag"></span> Report</a>
-					<a class="btn btn-xs btn-default abutton_tagmulti" data-tag="todo"><span class="glyphicon glyphicon-tag"></span> ToDo</a>
-					<a class="btn btn-xs btn-default abutton_deletemulti"><span class="glyphicon glyphicon-trash text-alert"></span></a>
-					<div class="btn-group">
-						<a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
-						<ul class="dropdown-menu">
-							<li><a class="abutton_untagmulti" data-tag="info">Untag Info</a></li>
-							<li><a class="abutton_untagmulti" data-tag="report">Untag Report</a></li>
-							<li><a class="abutton_untagmulti" data-tag="todo">Untag ToDo</a></li>
-						</ul>
-					</div>
-				</div>
+	<div class="tab-pane" id="vulns">
+		<div id="host_view_vuln_table_toolbar" class="dt_toolbar">
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+				<a class="btn btn-outline-secondary abutton_selectall">All</a>
+				<a class="btn btn-outline-secondary abutton_selectnone">None</a>
 			</div>
-			<table id="host_view_vuln_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
-			<script type="text/javascript">
-				var dt_host_view_vuln_table_options = {
-					'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
-					'columns': [
-						dt_column_select(),
-						dt_column('id', {'visible': false}),
-						dt_column('host_id', {'visible': false}),
-						dt_column('host_address', {'visible': false}),
-						dt_column('host_hostname', {'visible': false}),
-						dt_column('service'),
-						dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
-						dt_column('xtype'),
-						dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
-						dt_column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
-						dt_column('tags'),
-						dt_column('comment'),
-						dt_column_buttons(storage_pagepart_vuln_controls)
-					],
-					'order': [[1, 'asc']],
-					'select': {'style': 'multi', 'selector': 'td:first-child'}
-				};
-				$(document).ready(function() {
-					var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_vuln_table_options));
-					$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, action_selectall);
-					$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, action_selectnone);
-					$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, action_tag_by_id);
-					$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
-					$('#host_view_vuln_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, action_tag_by_id);
-				});
-			</script>
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+				<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="info">Info</a>
+				<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="report">Report</a>
+				<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="todo">Todo</a>
+			</div>
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
+				<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="info">Info</a>
+				<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="report" >Report</a>
+				<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="todo">ToDo</a>
+			</div>
+			<a class="btn btn-outline-secondary abutton_deletemulti"><i class="fas fa-trash text-danger"></i></a>
 		</div>
+		<table id="host_view_vuln_table" class="table table-hover table-sm" width="100%"></table>
+		<script type="text/javascript">
+			var dt_host_view_vuln_table_options = {
+				'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'columns': [
+					dt_column_select(),
+					dt_column('id', {'visible': false}),
+					dt_column('host_id', {'visible': false}),
+					dt_column('host_address', {'visible': false}),
+					dt_column('host_hostname', {'visible': false}),
+					dt_column('service'),
+					dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
+					dt_column('xtype'),
+					dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
+					dt_column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
+					dt_column('tags'),
+					dt_column('comment'),
+					dt_column_buttons(storage_pagepart_vuln_controls)
+				],
+				'order': [[1, 'asc']],
+				'select': {'style': 'multi', 'selector': 'td:first-child'}
+			};
+			$(document).ready(function() {
+				var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_vuln_table_options));
+				$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, action_selectall);
+				$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, action_selectnone);
+				$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, action_tag_by_id);
+				$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
+				$('#host_view_vuln_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, action_tag_by_id);
+			});
+		</script>
+	</div>
 
-
-		<div role="tabpanel" class="tab-pane" id="notes">
-			<table id="host_view_note_table" class="table table-hover table-responsive table-condensed" width="100%"></table>
-			<script type="text/javascript">
-				var dt_host_view_note_table_options = {
-					'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
-					'columns': [
-						dt_column('id', {'visible': false}),
-						dt_column('host_id', {'visible': false}),
-						dt_column('host_address', {'visible': false}),
-						dt_column('host_hostname', {'visible': false}),
-						dt_column('service'),
-						dt_column('xtype'),
-						dt_column('data', {'className': 'forcewrap'}),
-						dt_column('comment'),
-						dt_column_buttons(storage_pagepart_note_controls)
-					]
-				};
-				$(document).ready(function() {
-					var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_note_table_options));
-				});
-			</script>
-		</div>
+	<div class="tab-pane" id="notes">
+		<table id="host_view_note_table" class="table table-hover table-sm" width="100%"></table>
+		<script type="text/javascript">
+			var dt_host_view_note_table_options = {
+				'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'columns': [
+					dt_column('id', {'visible': false}),
+					dt_column('host_id', {'visible': false}),
+					dt_column('host_address', {'visible': false}),
+					dt_column('host_hostname', {'visible': false}),
+					dt_column('service'),
+					dt_column('xtype'),
+					dt_column('data', {'className': 'forcewrap'}),
+					dt_column('comment'),
+					dt_column_buttons(storage_pagepart_note_controls)
+				]
+			};
+			$(document).ready(function() {
+				var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_note_table_options));
+			});
+		</script>
 	</div>
 </div>
 {% endblock %}

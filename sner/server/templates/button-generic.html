@@ -1,6 +1,6 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% import "bootstrap_wtf.html" as b_wtf %}
-<form class="form-horizontal" style="display: inline;"{% if form_url %} action="{{ form_url }}"{% endif %} method="post">
+<form class="form-inline" style="display: inline;" {% if form_url %}action="{{ form_url }}"{% endif %} method="post">
 	{{ b_wtf.bootstrap_form(form) }}
-	<button class="btn btn-xs btn-default" type="submit"> {{ button_caption }}</button>
+	<button class="btn btn-outline-secondary" type="submit">{{ button_caption }}</button>
 </form>

@@ -3,61 +3,70 @@
 <script id="storage.pagepart-host_link.hbs" type="text/x-handlebars-template">
 	<a href="{{> storage.host_view_route host_id=host_id}}">{{host_address}}</a>
 </script>
+
 <script id="storage.pagepart-host_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> storage.host_edit_route host_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<div class="btn-group">
-		<a class="btn btn-xs btn-default dropdown-toggle host-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
-		<ul class="dropdown-menu dropdown-menu-right">
-			<li><a href="{{> storage.service_add_route host_id=id}}">Add service</a></li>
-			<li><a href="{{> storage.vuln_add_route model_name='host' model_id=id}}">Add vuln</a></li>
-			<li><a href="{{> storage.note_add_route model_name='host' model_id=id}}">Add note</a></li>
-		</ul>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
+		<a class="btn btn-outline-secondary" href="{{> storage.service_add_route host_id=id}}">Service</a>
+		<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='host' model_id=id}}">Vuln</a>
+		<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='host' model_id=id}}">Note</a>
 	</div>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.host_delete_route host_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> storage.host_edit_route host_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.host_delete_route host_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
 
 <script id="storage.pagepart-service_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> storage.service_edit_route service_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<div class="btn-group">
-		<a class="btn btn-xs btn-default dropdown-toggle service-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
-		<ul class="dropdown-menu dropdown-menu-right">
-			<li><a href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Add vuln</a></li>
-			<li><a href="{{> storage.note_add_route model_name='service' model_id=id}}">Add note</a></li>
-		</ul>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
+		<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Vuln</a>
+		<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='service' model_id=id}}">Note</a>
 	</div>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.service_delete_route service_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
+
 <script id="storage.pagepart-service_list_filter_info_link.hbs" type="text/x-handlebars-template">
 	{{# if info}}
 		<a href='{{> storage.service_list_route_filter_info filter_value=info_encoded}}'>{{info}}</a>
 	{{ else }}
-		<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="glyphicon glyphicon-list"></span></a>
+		<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="fas fa-list"></span></a>
 	{{/if}}
 </script>
 
 <script id="storage.pagepart-vuln_link.hbs" type="text/x-handlebars-template">
 	<a href="{{> storage.vuln_view_route vuln_id=id}}">{{name}}</a>
 </script>
+
 <script id="storage.pagepart-severity_label.hbs" type="text/x-handlebars-template">
-	<span class="label {{color_for_severity severity}}">{{severity}}</span>
+	<span class="badge {{color_for_severity severity}}">{{severity}}</span>
 </script>
+
 <script id="storage.pagepart-vuln_refs.hbs" type="text/x-handlebars-template">
 {{#each refs}}
 	<a rel="noreferrer" href="{{url_for_ref this}}">{{text_for_ref this}}</a>
 {{/each}}
 </script>
 <script id="storage.pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> storage.vuln_edit_route vuln_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
+
 <script id="storage.pagepart-vuln_list_filter_name_link.hbs" type="text/x-handlebars-template">
 	<a href='{{> storage.vuln_list_route_filter_name filter_value=name_encoded}}'>{{name}}</a>
 </script>
 
 <script id="storage.pagepart-note_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> storage.note_view_route note_id=id}}"><span class="glyphicon glyphicon-eye-open"></span></a>
-	<a class="btn btn-xs btn-default" href="{{> storage.note_edit_route note_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> storage.note_delete_route note_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}"><i class="fas fa-eye"></i></a>
+		<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
 {% endraw %}
 <script type="text/javascript">
@@ -92,8 +101,8 @@
 	 * get class for severity label
 	 */
 	Handlebars.registerHelper('color_for_severity', function(severity) {
-		var colors = {'unknown': 'label-default', 'info': 'label-primary', 'low': 'label-success', 'medium': 'label-info', 'high': 'label-warning', 'critical': 'label-danger'};
-		return (severity in colors) ? colors[severity] : 'label-default';
+		var colors = {'unknown': 'badge-secondary', 'info': 'badge-light', 'low': 'badge-info', 'medium': 'badge-primary', 'high': 'badge-warning', 'critical': 'badge-danger'};
+		return (severity in colors) ? colors[severity] : 'badge-secondary';
 	});
 
 	/* hbs partials to pass flask endpoint uris to hbs templates */
