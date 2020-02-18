@@ -23,9 +23,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="tasks">
-	<h1>Tasks list <a class="btn btn-xs btn-default" href="{{ url_for('scheduler.task_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+{{ cm.breadcrumbs(['Scheduler', 'Tasks', 'List']) }}
 
-	<table id="task_list_table" class="table table-hover table-responsive table-condensed"></table>
+<div class="text-right">
+	<a class="btn btn-outline-primary" href="{{ url_for('scheduler.task_add_route') }}">Add</a>
 </div>
+
+<table id="task_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

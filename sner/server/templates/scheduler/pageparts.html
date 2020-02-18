@@ -1,35 +1,28 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% raw %}
-<script id="scheduler.pagepart-task_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> scheduler.task_edit_route task_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<div class="btn-group">
-		<a class="btn btn-xs btn-default dropdown-toggle task-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
-		<ul class="dropdown-menu dropdown-menu-right">
-			<li><a href="{{> scheduler.queue_add_route task_id=id}}">Add queue</a></li>
-		</ul>
-	</div>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.task_delete_route task_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
-</script>
-<script id="scheduler.pagepart-queue_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> scheduler.queue_edit_route queue_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<div class="btn-group">
-		<a class="btn btn-xs btn-default dropdown-toggle queue-controls-dropdown" data-toggle="dropdown"><span class="caret"></span></a>
-		<ul class="dropdown-menu dropdown-menu-right">
-			<li><a href="{{> scheduler.queue_enqueue_route queue_id=id}}" title="Put targets to queue">Enqueue</a></li>
-			<li><a class="abutton_queueflush_by_url" data-url="{{> scheduler.queue_flush_route queue_id=id}}" title="Flush all targets from queue">Flush</a></li>
-			<li><a class="abutton_queueprune_by_url" data-url="{{> scheduler.queue_prune_route queue_id=id}}" title="Delete all jobs associated with queue">Prune</a></li>
-		</ul>
-	</div>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.queue_delete_route queue_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
-</script>
-<script id="scheduler.pagepart-job_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.job_delete_route job_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
-</script>
 <script id="scheduler.pagepart-excl_controls.hbs" type="text/x-handlebars-template">
 	<div class="btn-group btn-group-sm">
 		<a class="btn btn-outline-secondary" href="{{> scheduler.excl_edit_route excl_id=id}}"><i class="fas fa-edit"></i></a>
 		<a class="btn btn-outline-danger abutton_delete_by_url" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 	</div>
+</script>
+
+<script id="scheduler.pagepart-task_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-outline-secondary" href="{{> scheduler.task_edit_route task_id=id}}"><i class="fas fa-edit"></i></a>
+	<a class="btn btn-outline-secondary" href="{{> scheduler.queue_add_route task_id=id}}">Add queue</a>
+	<a class="btn btn-outline-danger abutton_delete_by_url" data-url="{{> scheduler.task_delete_route task_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+</script>
+
+<script id="scheduler.pagepart-queue_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-outline-secondary" href="{{> scheduler.queue_edit_route queue_id=id}}"><i class="fas fa-edit"></i></a>
+	<a class="btn btn-outline-secondary" href="{{> scheduler.queue_enqueue_route queue_id=id}}" title="Put targets to queue">Enqueue</a>
+	<a class="btn btn-outline-secondary abutton_queueflush_by_url" href="#" data-url="{{> scheduler.queue_flush_route queue_id=id}}" title="Flush all targets from queue">Flush</a>
+	<a class="btn btn-outline-secondary abutton_queueprune_by_url" href="#" data-url="{{> scheduler.queue_prune_route queue_id=id}}" title="Delete all jobs associated with queue">Prune</a>
+	<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> scheduler.queue_delete_route queue_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+</script>
+
+<script id="scheduler.pagepart-job_controls.hbs" type="text/x-handlebars-template">
+	<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> scheduler.job_delete_route job_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 </script>
 {% endraw %}
 <script type="text/javascript">

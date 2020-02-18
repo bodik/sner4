@@ -1,18 +1,15 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Exclusions import{% endblock %}
 
 {% block content %}
-<div class="excls">
-	<h1>Exclusions import</h1>
+{{ cm.breadcrumbs(['Scheduler', 'Exclusions', 'Import']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.replace, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form class="form-horizontal" method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.replace, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

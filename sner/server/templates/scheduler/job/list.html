@@ -27,15 +27,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="jobs">
-	<h1>Jobs list{% if 'filter' in request.args %} <small><a class="btn btn-xs btn-info" href="{{ url_for('scheduler.job_list_route') }}">unfilter</a></small>{% endif %}</h1>
+{{ cm.breadcrumbs(['Scheduler', 'Jobs', 'List']) }}
 
-	<div id="job_list_table_toolbar" class="dt_toolbar">
-		<div class="btn-group" role="group">
-			<a class="btn btn-xs btn-default" href="{{ url_for('scheduler.job_list_route', filter='Job.retval is_null ""') }}">Running</a>
-		</div>
+
+<div id="job_list_table_toolbar" class="dt_toolbar">
+	{% if 'filter' in request.args %}<a class="btn btn-outline-info" href="{{ url_for('scheduler.job_list_route') }}">unfilter</a>{% endif %}
+	<div class="btn-group" role="group">
+		<a class="btn btn-outline-secondary disabled" href="#">filter:</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('scheduler.job_list_route', filter='Job.retval is_null ""') }}">Running</a>
 	</div>
-
-	<table id="job_list_table" class="table table-hover table-responsive table-condensed"></table>
 </div>
+
+<table id="job_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

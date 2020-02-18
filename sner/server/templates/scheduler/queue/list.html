@@ -32,9 +32,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="queues">
-	<h1>Queues list <a class="btn btn-xs btn-default" href="{{ url_for('scheduler.queue_add_route') }}"><span class="glyphicon glyphicon-plus"></span> Add</a></h1>
+{{ cm.breadcrumbs(['Scheduler', 'Queues', 'List']) }}
 
-	<table id="queue_list_table" class="table table-hover table-responsive table-condensed"></table>
+<div class="text-right">
+	<a class="btn btn-outline-primary" href="{{ url_for('scheduler.queue_add_route') }}">Add</a>
 </div>
+
+<table id="queue_list_table" class="table table-hover table-sm"></table>
 {% endblock %}

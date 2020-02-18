@@ -22,13 +22,7 @@
 {% endblock %}
 
 {% block content %}
-<nav>
-	<ol class="breadcrumb">
-		<li class="breadcrumb-item"><a href="#">Scheduler</a></li>
-		<li class="breadcrumb-item"><a href="#">Exclusions</a></li>
-		<li class="breadcrumb-item active">List</li>
-	</ol>
-</nav>
+{{ cm.breadcrumbs(['Scheduler', 'Exclusions', 'List']) }}
 
 <div class="text-right">
 	<a class="btn btn-outline-primary" href="{{ url_for('scheduler.excl_add_route') }}">Add</a>

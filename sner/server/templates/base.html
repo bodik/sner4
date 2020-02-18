@@ -1,4 +1,6 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% import "bootstrap_wtf.html" as b_wtf %}
+{% import "common_macros.html" as cm %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,7 +39,7 @@
 		body { padding-top: 4rem; }
 
 		/* required items on forms */
-		div.form-group.required label.control-label:after { content:"*"; color:red; }
+		div.form-group.required label:after { content:"*"; color:red; }
 
 		/* tag-editor same borders as other bootstraped input */
 		.tag-editor { border: 1px solid #ccc; border-radius: 4px; }
@@ -293,34 +295,30 @@
 			<ul class="navbar-nav mr-auto">
 			{% if current_user.is_authenticated %}
 				{% if current_user.has_role('operator') %}
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" id="dropdownScheduler" data-toggle="dropdown">Scheduler</a>
-					<div class="dropdown-menu">
-						<a class="dropdown-item" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a>
-						<a class="dropdown-item" href="{{ url_for('scheduler.task_list_route') }}">Tasks</a>
-						<a class="dropdown-item" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a>
-						<a class="dropdown-item" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a>
-					</div>
-				</li>
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" id="dropdownStorage" data-toggle="dropdown">Storage</a>
-					<div class="dropdown-menu">
-						<a class="dropdown-item" href="{{ url_for('storage.host_list_route') }}">Hosts</a>
-						<a class="dropdown-item" href="{{ url_for('storage.service_list_route') }}">Services</a>
-						<a class="dropdown-item" href="{{ url_for('storage.service_grouped_route', crop=3) }}">Services grouped</a>
-						<a class="dropdown-item" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a>
-						<a class="dropdown-item" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a>
-						<a class="dropdown-item" href="{{ url_for('storage.note_list_route') }}">Notes</a>
-					</div>
-				</li>
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" id="dropdownVisualizations" data-toggle="dropdown">Visualizations</a>
-					<div class="dropdown-menu">
-						<a class="dropdown-item" href="{{ url_for('storage.host_vizdns_route', crop=1) }}">DNS Names</a>
-						<a class="dropdown-item" href="{{ url_for('storage.service_vizports_route') }}">Ports</a>
-						<a class="dropdown-item" href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">Service infos</a>
-					</div>
-				</li>
+					{%- set subsystem = request.endpoint.split('.')[0] -%}
+					<li class="nav-item"><a class="nav-link{% if subsystem == 'scheduler' %} active{% endif %}" href="{{ url_for('scheduler.task_list_route') }}" title="Scheduler"><i class="fas fa-binoculars"></i></a></li>
+					<li class="nav-item"><a class="nav-link{% if subsystem == 'storage' %} active{% endif %}" href="{{ url_for('storage.host_list_route') }}" title="Storage"><i class="fas fa-database"></i></a></li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" title="Visualizations" id="dropdownVisualizations" data-toggle="dropdown"><i class="fas fa-eye"></i></a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="{{ url_for('storage.host_vizdns_route', crop=1) }}">DNS Names</a>
+							<a class="dropdown-item" href="{{ url_for('storage.service_vizports_route') }}">Ports</a>
+							<a class="dropdown-item" href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">Service infos</a>
+						</div>
+					</li>
+					{%- if subsystem == 'scheduler' -%}
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.task_list_route') }}">Tasks</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a></li>
+					{%- elif subsystem == 'storage' -%}
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.host_list_route') }}">Hosts</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_list_route') }}">Services</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_grouped_route', crop=3) }}">Services grouped</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.note_list_route') }}">Notes</a></li>
+					{%- endif -%}
 				{% endif %}
 			{% endif %}
 			</ul>

@@ -1,17 +1,14 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Queue enqueue{% endblock %}
 
 {% block content %}
-<div class="queues">
-	<h1>Queue enqueue</h1>
+{{ cm.breadcrumbs(['Scheduler', 'Queues', 'Enqueue']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.targets, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form class="form-horizontal" method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.targets, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

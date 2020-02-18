@@ -5,15 +5,13 @@
 {% block title %}Task add/edit{% endblock %}
 
 {% block content %}
-<div class="tasks">
-	<h1>Task add/edit</h1>
+{{ cm.breadcrumbs(['Scheduler', 'Tasks', 'Add or edit']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.module, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.params, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form class="form-horizontal" method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.module, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.params, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}
