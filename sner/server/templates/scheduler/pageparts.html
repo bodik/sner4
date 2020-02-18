@@ -26,8 +26,10 @@
 	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.job_delete_route job_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
 </script>
 <script id="scheduler.pagepart-excl_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> scheduler.excl_edit_route excl_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> scheduler.excl_edit_route excl_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-danger abutton_delete_by_url" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
 {% endraw %}
 <script type="text/javascript">
