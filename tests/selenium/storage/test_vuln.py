@@ -97,12 +97,12 @@ def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint
 
     sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_vuln_tag_set") and text()="Info"]').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(
-        EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-label") and contains(text(), "info")]')))
+        EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]')))
     vuln = Vuln.query.get(test_vuln.id)
     assert 'info' in vuln.tags
 
-    sl_operator.find_element_by_xpath('//span[contains(@class, "tag-label") and contains(text(), "info")]/a[@class="abutton_vuln_tag_unset"]').click()
-    assert not sl_operator.find_elements_by_xpath('//span[contains(@class, "tag-label") and contains(text(), "info")]')
+    sl_operator.find_element_by_xpath('//span[contains(@class, "tag-badge") and contains(text(), "info")]/a[@class="abutton_vuln_tag_unset"]').click()
+    assert not sl_operator.find_elements_by_xpath('//span[contains(@class, "tag-badge") and contains(text(), "info")]')
     db.session.refresh(vuln)
     assert 'info' not in vuln.tags
 
