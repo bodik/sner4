@@ -1,6 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Two-factor authentication setup{% endblock %}
 
@@ -9,35 +8,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile">
-	<h1>Two-factor authentication setup ({% if secret %}enable{% else %}disable{% endif %})</h1>
+{{ cm.breadcrumbs(['Auth', 'Profile', '2-factor authentication setup (%s)' % 'enable' if secret else 'disable']) }}
 
-	<div>
-		To enable two-factor authentication::
-		<ol>
-			<li>Scan the barcode or add the text seed to your authenticator.</li>
-			<li>Verify pairing with one code.</li>
-		</ol>
-	</div>
-
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-
-		{% if secret %}
-		<div class="form-group">
-			<label class="col-sm-2 control-label">Secret</label>
-			<div class="col-sm-10"><p class="form-control-static">{{ secret }}</p></div>
-		</div>
-		<div class="form-group">
-			<label class="col-sm-2 control-label">Secret QR code</label>
-			<div class="col-sm-10"><p class="form-control-static">
-				<img id="2faqrcode"><script>$('#2faqrcode').attr('src', new QRious({value: '{{provisioning_url|safe}}', size: 200}).toDataURL());</script>
-			</p></div>
-		</div>
-		{% endif %}
-
-		{{ b_wtf.bootstrap_field(form.code, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
+<div>
+	To enable two-factor authentication::
+	<ol>
+		<li>Scan the barcode or add the text seed to your authenticator.</li>
+		<li>Verify pairing with one code.</li>
+	</ol>
 </div>
+
+<form method="post">
+	{{ form.csrf_token }}
+
+	{% if secret %}
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">Secret</label>
+		<div class="col-sm-10"><div class="form-control-plaintext">{{ secret }}</div></div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">Secret QR code</label>
+		<div class="col-sm-10"><div class="form-control-plaintext">
+			<img id="2faqrcode"><script>$('#2faqrcode').attr('src', new QRious({value: '{{provisioning_url|safe}}', size: 200}).toDataURL());</script>
+		</div></div>
+	</div>
+	{% endif %}
+
+	{{ b_wtf.bootstrap_field(form.code, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

@@ -46,7 +46,7 @@ class TotpCodeForm(FlaskForm):
     """totp code form"""
 
     code = StringNoneField('TOTP Code', [InputRequired()], render_kw={'autocomplete': 'off'})
-    submit = SubmitField('Login')
+    submit = SubmitField()
 
 
 class UserForm(FlaskForm):

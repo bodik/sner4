@@ -1,6 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Webauthn credential register{% endblock %}
 
@@ -40,7 +39,7 @@
 		var form = $('#webauthn_register_form')[0];
 		form.attestation.value = array_buffer_to_base64(CBOR.encode(attestation_data));
 		form.submit.disabled = false;
-		$('#webauthn_register_form p[name="attestation_data_status"')[0].innerHTML = '<span style="color: green;">Prepared</span>';
+		$('#webauthn_register_form p[name="attestation_data_status"')[0].innerHTML = '<span class="text-success">Prepared</span>';
 	}
 
 	$(document).ready(function() {
@@ -58,27 +57,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile">
-	<h1>Register new Webauthn credential</h1>
+{{ cm.breadcrumbs(['Auth', 'Profile', 'Webauthn', 'Register credential']) }}
 
-	<div>
-		To register new credential:
-		<ol>
-			<li>Insert/connect authenticator and verify user presence.</li>
-			<li>Optionaly set comment for the new credential.</li>
-			<li>Submit the registration.</li>
-		</ol>
-	</div>
-
-	<form id="webauthn_register_form" class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		<div class="form-group">
-			<label class="col-sm-2 control-label">Registration data</label>
-			<div class="col-sm-10"><p class="form-control-static" name="attestation_data_status"><span style="color: orange;">To be prepared</span></p></div>
-		</div>
-		{{ b_wtf.bootstrap_field(form.attestation, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
+<div>
+	To register new credential:
+	<ol>
+		<li>Insert/connect authenticator and verify user presence.</li>
+		<li>Optionaly set comment for the new credential.</li>
+		<li>Submit the registration.</li>
+	</ol>
 </div>
+
+<form id="webauthn_register_form" method="post">
+	{{ form.csrf_token }}
+	<div class="form-group">
+		<label class="col-sm-2 col-form-label">Registration data</label>
+		<div class="col-sm-10"><div class="form-control-plaintext" name="attestation_data_status"><span class="text-warning">To be prepared</span></div></div>
+	</div>
+	{{ b_wtf.bootstrap_field(form.attestation, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

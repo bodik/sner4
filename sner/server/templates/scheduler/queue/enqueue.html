@@ -6,7 +6,7 @@
 {% block content %}
 {{ cm.breadcrumbs(['Scheduler', 'Queues', 'Enqueue']) }}
 
-<form class="form-horizontal" method="post">
+<form method="post">
 	{{ form.csrf_token }}
 	{{ b_wtf.bootstrap_field(form.targets, horizontal=True) }}
 	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}

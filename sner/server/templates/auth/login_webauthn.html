@@ -1,6 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Login Webauthn{% endblock %}
 
@@ -62,19 +61,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="auths">
-	<h1>Login with Webautn credential</h1>
-	<div>
-		To login with registered Webauthn authenticator
-		<ol>
-			<li>Insert/connect the authenticator and verify user presence.</li>
-			<li>If authenticator gets rejected, refresh the page and try again.</li>
-			<li>If none of you authenticator works, login normaly with password.</li>
-		</ol>
-	</div>
-	<form id="webauthn_login_form" class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.assertion, horizontal=True) }}
-	</form>
+<h1>Login with Webautn credential</h1>
+<div>
+	To login with registered Webauthn authenticator
+	<ol>
+		<li>Insert/connect the authenticator and verify user presence.</li>
+		<li>If authenticator gets rejected, refresh the page and try again.</li>
+		<li>If none of you authenticator works, login normaly with password.</li>
+	</ol>
 </div>
+<form id="webauthn_login_form" method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.assertion, horizontal=True) }}
+</form>
 {% endblock %}

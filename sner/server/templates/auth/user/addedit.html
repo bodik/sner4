@@ -1,28 +1,30 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}User add/edit{% endblock %}
 
 {% block style %}
 <style>
-#roles li { list-style-type: none; }
-#roles li label { font-weight: initial; }
+/* default ul/li bootstrap4 style does not play well with wtforms ListWidget */
+ul.multiple_checkbox_field {
+	padding-left: 0;
+	padding-top: .5rem !important;
+	margin-bottom: 0;
+}
+ul.multiple_checkbox_field li { list-style-type: none; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="users">
-	<h1>User add/edit</h1>
+{{ cm.breadcrumbs(['Auth', 'Users', 'Add or edit']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.email, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.roles, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.active, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.email, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.roles, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.active, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

@@ -1,17 +1,14 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Webauthn credential edit{% endblock %}
 
 {% block content %}
-<div class="profile">
-	<h1>Webauthn credential</h1>
+{{ cm.breadcrumbs(['Auth', 'Profile', 'Webauthn', 'Edit credential']) }}
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}

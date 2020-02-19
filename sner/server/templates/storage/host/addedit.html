@@ -6,7 +6,7 @@
 {% block content %}
 {{ cm.breadcrumbs(['Storage', 'Hosts', 'Add or edit']) }}
 
-<form class="form-horizontal" method="post">
+<form method="post">
 	{{ form.csrf_token }}
 	{{ form.return_url }}
 	{{ b_wtf.bootstrap_field(form.address, horizontal=True) }}

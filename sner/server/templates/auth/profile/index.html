@@ -1,6 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}User profile{% endblock %}
 
@@ -27,28 +26,27 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile">
-	<h1>User profile</h1>
-	<dl class="dl-horizontal">
-		<dt>username</dt>
-		<dd>{{ user.username }} <a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_changepassword_route') }}">Change password</a></dd>
+{{ cm.breadcrumbs(['Auth', 'Profile', 'Index']) }}
 
-		<dt>email</dt>
-		<dd>{{ user.email }}</dd>
+<dl class="row">
+	<dt class="col-1">username</dt>
+	<dd class="col-11">{{ user.username }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_changepassword_route') }}">Change password</a></dd>
 
-		<dt>2fa authentication</dt>
-		<dd>
-		{% if user.totp %}{% set tfa_state = ('enabled', 'Disable') %}{% else %}{% set tfa_state = ['disabled', 'Enable'] %}{% endif %}
-		{{ tfa_state[0] }} <a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_totp_route') }}">{{ tfa_state[1] }}</a>
-		</dd>
+	<dt class="col-1">email</dt>
+	<dd class="col-11">{{ user.email }}</dd>
 
-		<dt>webauthn credentials</dt>
-		<dd>
-			<div id="profile_webauthn_table_toolbar" class="dt_toolbar">
-				<a class="btn btn-xs btn-default" href="{{ url_for('auth.profile_webauthn_register_route') }}">Register new</a>
-			</div>
-			<table id="profile_webauthn_table" class="table table-hover table-responsive table-condensed"></table>
-		</dd>
-	</dl>
-</div>
+	<dt class="col-2">2fa authentication</dt>
+	<dd class="col-10">
+	{% if user.totp %}{% set tfa_state = ('enabled', 'Disable') %}{% else %}{% set tfa_state = ['disabled', 'Enable'] %}{% endif %}
+	{{ tfa_state[0] }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_totp_route') }}">{{ tfa_state[1] }}</a>
+	</dd>
+
+	<dt class="col-1">webauthn credentials</dt>
+	<dd class="col-11">
+		<div id="profile_webauthn_table_toolbar" class="dt_toolbar">
+			<a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_webauthn_register_route') }}">Register new</a>
+		</div>
+		<table id="profile_webauthn_table" class="table table-hover table-sm"></table>
+	</dd>
+</dl>
 {% endblock %}

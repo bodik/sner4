@@ -1,15 +1,21 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% raw %}
 <script id="auth.pagepart-user_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> auth.user_edit_route user_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> auth.user_delete_route user_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> auth.user_edit_route user_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> auth.user_delete_route user_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
+
 <script id="auth.pagepart-user_apikey_controls.hbs" type="text/x-handlebars-template">
-	{{apikey}} <a class="btn btn-xs btn-default abutton_userapikey_by_url" data-url="{{> auth.user_apikey_route user_id=user_id action=action}}">{{capitalize action}}</a>
+	{{apikey}} <a class="btn btn-outline-secondary btn-sm abutton_userapikey_by_url" data-url="{{> auth.user_apikey_route user_id=user_id action=action}}">{{capitalize action}}</a>
 </script>
+
 <script id="auth.pagepart-profile_webauthn_controls.hbs" type="text/x-handlebars-template">
-	<a class="btn btn-xs btn-default" href="{{> auth.profile_webauthn_edit_route webauthn_id=id}}"><span class="glyphicon glyphicon-edit"></span></a>
-	<a class="btn btn-xs btn-default abutton_delete_by_url" data-url="{{> auth.profile_webauthn_delete_route webauthn_id=id}}"><span class="glyphicon glyphicon-trash text-alert"></span></a>
+	<div class="btn-group btn-group-sm">
+		<a class="btn btn-outline-secondary" href="{{> auth.profile_webauthn_edit_route webauthn_id=id}}"><i class="fas fa-edit"></i></a>
+		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> auth.profile_webauthn_delete_route webauthn_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+	</div>
 </script>
 {% endraw %}
 <script type="text/javascript">

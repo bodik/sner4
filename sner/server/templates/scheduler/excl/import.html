@@ -6,7 +6,7 @@
 {% block content %}
 {{ cm.breadcrumbs(['Scheduler', 'Exclusions', 'Import']) }}
 
-<form class="form-horizontal" method="post">
+<form method="post">
 	{{ form.csrf_token }}
 	{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
 	{{ b_wtf.bootstrap_field(form.replace, horizontal=True) }}

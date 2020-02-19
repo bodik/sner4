@@ -5,14 +5,12 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="auths">
-	<h1>Login</h1>
+<h1>Login</h1>
 
-	<form class="form-horizontal" method="post">
-		{{ form.csrf_token }}
-		{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
-	</form>
-</div>
+<form method="post">
+	{{ form.csrf_token }}
+	{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
+	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
 {% endblock %}
