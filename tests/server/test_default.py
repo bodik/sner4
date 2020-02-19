@@ -15,8 +15,8 @@ from sner.server.utils import ExclMatcher, valid_next_url
 from tests.server import DummyPostData
 
 
-def test_linesfield(app):  # pylint: disable=unused-argument
-    """tests linefield custom form field"""
+def test_textarealistfield(app):  # pylint: disable=unused-argument
+    """tests TextAreaListField form field"""
 
     class Xform(FlaskForm):
         """form test instance"""
