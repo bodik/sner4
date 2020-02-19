@@ -12,15 +12,72 @@
 
 {% macro bootstrap_field(field, label=True, placeholder=True, errors=True, horizontal=False) %}
 	{%- if field.type in text_field_types -%}
-		{{ bootstrap_field_text(field, label, placeholder, errors, horizontal) }}
+		{{ bootstrap_field_common(field, label, placeholder, errors, horizontal) }}
 	{%- elif field.type == 'SubmitField' -%}
 		{{ bootstrap_field_submit(field, errors, horizontal) }}
 	{%- elif field.type == 'BooleanField' -%}
 		{{ bootstrap_field_boolean(field, errors, horizontal) }}
+	{%- elif field.type == 'MultiCheckboxField' -%}
+		{{ bootstrap_field_common(field, label, placeholder, errors, horizontal, 'multiple_checkbox_field') }}
 	{%- else -%}
 		{{ field }}
 	{%- endif -%}
 {%- endmacro -%}
+
+
+{% macro bootstrap_field_common(field, label=True, placeholder=True, errors=True, horizontal=False, field_classes='form-control') %}
+	{%- set label_classes = False -%}
+	{%- set label_output = '' -%}
+	{%- set field_placeholder = False -%}
+	{%- set error_output = '' -%}
+	{%- set form_group_classes = 'form-group' -%}
+
+	{%- if label -%}
+		{%- if horizontal -%}
+			{%- set label_classes = 'col-sm-2 col-form-label' -%}
+		{%- endif -%}
+		{%- set label_output = field.label(class_=label_classes) -%}
+	{%- endif -%}
+
+	{%- if placeholder -%}
+		{%- set field_placeholder= field.label.text -%}
+	{%- endif -%}
+
+	{%- if errors and field.errors -%}
+		{%- set field_classes = field_classes + ' is-invalid' -%}
+
+		{%- if field.errors|count == 1 -%}
+			{%- set error_output = '<div class="invalid-feedback">%s</div>' % field.errors[0] -%}
+		{%- else -%}
+			{%- set error_acc = [] -%}
+			{%- for error in field.errors -%}
+				{{- error_acc.append('<li>%s</li>' % error) -}}
+			{%- endfor -%}
+			{%- set error_output = '<ul class="invalid-feedback">%s</ul>' % error_acc|join('') -%}
+                {%- endif -%}
+        {%- endif -%}
+
+	{%- set output = field(class_=field_classes, placeholder=field_placeholder, id=False) -%}
+	{%- if field.description -%}
+		{%- set output = output + '<small class="form-text text-muted">%s</small>' % field.description -%}
+	{%- endif -%}
+
+	{%- if horizontal -%}
+		{%- set output = label_output + '<div class="col-sm-10">%s</div>' % (output + error_output) -%}
+	{%- else -%}
+		{%- set output = label_output + output + error_output -%}
+	{%- endif -%}
+
+	{%- if horizontal -%}
+		{% set form_group_classes = form_group_classes + ' row' %}
+	{%- endif -%}
+	{%- if field.flags.required -%}
+		{% set form_group_classes = form_group_classes + ' required' %}
+	{%- endif -%}
+        {% set output = '<div class="%s">%s</div>' % (form_group_classes, output) %}
+
+	{{ output|safe }}
+{%- endmacro %}
 
 
 {% macro bootstrap_field_submit(field, errors=True, horizontal=False) %}
@@ -70,60 +127,3 @@
 
 	{{ output|safe }}
 {%- endmacro -%}
-
-
-{% macro bootstrap_field_text(field, label=True, placeholder=True, errors=True, horizontal=False) %}
-	{%- set label_classes = False -%}
-	{%- set label_output = '' -%}
-	{%- set field_classes = 'form-control' -%}
-	{%- set field_placeholder = False -%}
-	{%- set error_output = '' -%}
-	{%- set form_group_classes = 'form-group' -%}
-
-
-	{%- if label -%}
-		{%- if horizontal -%}
-			{%- set label_classes = 'col-sm-2 col-form-label' -%}
-		{%- endif -%}
-		{%- set label_output = field.label(class_=label_classes) -%}
-	{%- endif -%}
-
-	{%- if placeholder -%}
-		{%- set field_placeholder= field.label.text -%}
-	{%- endif -%}
-
-	{%- if errors and field.errors -%}
-		{%- set field_classes = field_classes + ' is-invalid' -%}
-
-		{%- if field.errors|count == 1 -%}
-			{%- set error_output = '<div class="invalid-feedback">%s</div>' % field.errors[0] -%}
-		{%- else -%}
-			{%- set error_acc = [] -%}
-			{%- for error in field.errors -%}
-				{{- error_acc.append('<li>%s</li>' % error) -}}
-			{%- endfor -%}
-			{%- set error_output = '<ul class="invalid-feedback">%s</ul>' % error_acc|join('') -%}
-                {%- endif -%}
-        {%- endif -%}
-
-	{%- set output = field(class_=field_classes, placeholder=field_placeholder, id=False) -%}
-	{%- if field.description -%}
-		{%- set output = output + '<small class="form-text text-muted">%s</small>' % field.description -%}
-	{%- endif -%}
-
-	{%- if horizontal -%}
-		{%- set output = label_output + '<div class="col-sm-10">%s</div>' % (output + error_output) -%}
-	{%- else -%}
-		{%- set output = label_output + output + error_output -%}
-	{%- endif -%}
-
-	{%- if horizontal -%}
-		{% set form_group_classes = form_group_classes + ' row' %}
-	{%- endif -%}
-	{%- if field.flags.required -%}
-		{% set form_group_classes = form_group_classes + ' required' %}
-	{%- endif -%}
-        {% set output = '<div class="%s">%s</div>' % (form_group_classes, output) %}
-
-	{{ output|safe }}
-{%- endmacro %}
