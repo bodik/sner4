@@ -5,7 +5,7 @@ controller service
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import desc, func
+from sqlalchemy import func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_filters import apply_filters
 
@@ -17,6 +17,14 @@ from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
 from sner.server.sqlafilter import filter_parser
 from sner.server.utils import relative_referrer, valid_next_url
+
+
+def service_info_column(crop):
+    """return optionally cropped service.info column"""
+
+    if crop:
+        return func.array_to_string(func.string_to_array(Service.info, ' ', type_=postgresql.ARRAY(db.String))[1:int(crop)], ' ')
+    return Service.info
 
 
 @blueprint.route('/service/list')
@@ -117,12 +125,7 @@ def service_grouped_route():
 def service_grouped_json_route():
     """view grouped services, data endpoint"""
 
-    if request.args.get('crop'):
-        crop = request.args.get('crop', type=int)
-        info_column = func.array_to_string(func.string_to_array(Service.info, ' ', type_=postgresql.ARRAY(db.String))[1:crop], ' ')
-    else:
-        info_column = Service.info
-
+    info_column = service_info_column(request.args.get('crop'))
     columns = [
         ColumnDT(info_column, mData='info'),
         ColumnDT(func.count(Service.id), mData='nr_services', global_search=False),
@@ -133,31 +136,3 @@ def service_grouped_json_route():
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(services)
-
-
-@blueprint.route('/service/vizinfos')
-@role_required('operator')
-def service_vizinfos_route():
-    """generate word cloud for service.info"""
-
-    return render_template('storage/service/vizinfos.html')
-
-
-@blueprint.route('/service/vizinfos.json')
-@role_required('operator')
-def service_vizinfos_json_route():
-    """service info visualization json data endpoint"""
-
-    if request.args.get('crop'):
-        crop = request.args.get('crop', type=int)
-        info_column = func.array_to_string(func.string_to_array(Service.info, ' ', type_=postgresql.ARRAY(db.String))[1:crop], ' ')
-    else:
-        info_column = Service.info
-
-    query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')) \
-        .filter(Service.info != '', Service.info != None).group_by(info_column).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
-
-    if request.args.get('limit'):
-        query = query.limit(request.args.get('limit'))
-
-    return jsonify([{'info': info, 'count': count} for info, count in query.all()])

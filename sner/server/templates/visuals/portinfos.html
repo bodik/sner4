@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Visuals / Service infos{% endblock %}
+{% block title %}Visuals / Port infos{% endblock %}
 
 {% block script %}
 <script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
@@ -17,7 +17,7 @@ svg {
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Visuals', 'Service infos']) }}
+{{ cm.breadcrumbs(['Visuals', 'Port infos']) }}
 <!--
 	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
 	https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js
@@ -79,7 +79,7 @@ var processing = svg.append('g')
 		.text('Processing graph ...');
 
 /* generate graph layout */
-d3.json(Flask.url_for('storage.service_vizinfos_json_route') + window.location.search, function(data) {
+d3.json(Flask.url_for('visuals.portinfos_json_route') + window.location.search, function(data) {
 	var counts = data.map(function(d) { return d.count; });
 	var max = Math.max.apply(null, counts);
 	var min = Math.min.apply(null, counts);

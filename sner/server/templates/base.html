@@ -294,30 +294,29 @@
 			<ul class="navbar-nav mr-auto">
 			{% if current_user.is_authenticated %}
 				{% if current_user.has_role('operator') %}
-					{%- set subsystem = request.endpoint.split('.')[0] -%}
-					<li class="nav-item"><a class="nav-link{% if subsystem == 'scheduler' %} active{% endif %}" href="{{ url_for('scheduler.task_list_route') }}" title="Scheduler"><i class="fas fa-binoculars"></i></a></li>
-					<li class="nav-item"><a class="nav-link{% if subsystem == 'storage' %} active{% endif %}" href="{{ url_for('storage.host_list_route') }}" title="Storage"><i class="fas fa-database"></i></a></li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" title="Visualizations" id="dropdownVisualizations" data-toggle="dropdown"><i class="fas fa-eye"></i></a>
-						<div class="dropdown-menu">
-							<a class="dropdown-item" href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">Service infos</a>
-						</div>
-					</li>
-					{%- if subsystem == 'scheduler' -%}
+					{%- set active_subsystem = request.endpoint.split('.')[0] -%}
+					{%- for subsystem, route, icon in [
+						('scheduler', 'scheduler.task_list_route', 'fa-tasks'),
+						('storage', 'storage.host_list_route', 'fa-database'),
+						('visuals', 'visuals.index_route', 'fa-image')] -%}
+						<li class="nav-item"><a class="nav-link{% if subsystem == active_subsystem %} active{% endif %}" href="{{ url_for(route) }}" title="{{ subsystem|capitalize }}"><i class="fas {{ icon }}"></i></a></li>
+					{%- endfor -%}
+					{%- if active_subsystem == 'scheduler' -%}
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.task_list_route') }}">Tasks</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a></li>
-					{%- elif subsystem == 'storage' -%}
+					{%- elif active_subsystem == 'storage' -%}
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.host_list_route') }}">Hosts</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_list_route') }}">Services</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_grouped_route', crop=3) }}">Services grouped</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.note_list_route') }}">Notes</a></li>
-					{%- elif subsystem == 'visuals' -%}
+					{%- elif active_subsystem == 'visuals' -%}
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.dnstree_route', crop=1) }}">DNS tree</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portmap_route') }}">Portmap</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portinfos_route') }}">Port infos</a></li>
 					{%- endif -%}
 				{% endif %}
 			{% endif %}
@@ -328,7 +327,7 @@
 				<li><span class="nav-link text-warning">debug enabled</span></li>
 			{% endif %}
 			{% if not current_user.is_authenticated %}
-				<li><a href="{{ url_for('auth.login_route') }}">Login</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login_route') }}">Login</a></li>
 			{% else %}
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="dropdownUser" data-toggle="dropdown">{{ current_user.username }}</a>
