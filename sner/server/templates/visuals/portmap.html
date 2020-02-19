@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Visuals / Ports{% endblock %}
+{% block title %}Visuals / Portmap{% endblock %}
 
 {% block style %}
 <style>
@@ -23,25 +23,28 @@ table.borderless tbody tr td { border: none; }
 	$(document).ready(function() {
 		$('.portmap_item').on('mouseenter', function() {
 			$.ajax({
-				url: Flask.url_for('storage.service_portstat_route', {'port': $(this).attr('data-port')}),
+				url: Flask.url_for('visuals.portmap_portstat_route', {'port': $(this).attr('data-port')}),
 				success: function (data, status, jqXHR) { $('#port_detail').html(data);	}
 			});
 		});
 
-		$('#portstates').on('shown.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "true"); });
-		$('#portstates').on('hidden.bs.collapse', function() { localStorage.setItem('service_vizports_portstates_collapse', "false"); });
-		$('#portstates').toggleClass('show', localStorage.getItem('service_vizports_portstates_collapse') === "true");
+		$('#portstates').on('shown.bs.collapse', function() { localStorage.setItem('portmap_portstates_collapse', "true"); });
+		$('#portstates').on('hidden.bs.collapse', function() { localStorage.setItem('portmap_portstates_collapse', "false"); });
+		$('#portstates').toggleClass('show', localStorage.getItem('portmap_portstates_collapse') === "true");
 	});
 </script> 
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Visuals', 'Ports']) }}
+{{ cm.breadcrumbs(['Visuals', 'Portmap']) }}
+
+<div class="dt_toolbar">
+	{% if 'filter' in request.args %}<a class="btn btn-info btn-sm" href="{{ url_for('visuals.portmap_route') }}">unfilter</a>{% endif %}
+</div>
 
 <div class="card">
 	<h5 class="card-header">
 		<a data-toggle="collapse" href="#portstates">Services port states</a>
-		{% if 'filter' in request.args %}<a class="btn btn-info btn-sm" href="{{ url_for('storage.service_vizports_route') }}">unfilter</a>{% endif %}
 	</h5>
 	<div class="card-body collapse" id="portstates">
 		<table class="dt_static table table-condensed table-hover">
@@ -58,7 +61,7 @@ table.borderless tbody tr td { border: none; }
 					<td>{{ state }}</td>
 					<td>{{ count }}</td>
 					<td>
-						<a href="{{ url_for('storage.service_vizports_route', filter='Service.state=="%s"'|format(state)) }}"><i class="fas fa-filter"></i></a>
+						<a href="{{ url_for('visuals.portmap_route', filter='Service.state=="%s"'|format(state)) }}"><i class="fas fa-filter"></i></a>
 						<a href="{{ url_for('storage.service_list_route', filter='Service.state=="%s"'|format(state)) }}"><i class="fas fa-list"></i></a>
 					</td>
 				</tr>

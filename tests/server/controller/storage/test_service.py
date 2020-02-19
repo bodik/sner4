@@ -117,27 +117,6 @@ def test_service_grouped_json_route(cl_operator, test_service):
     assert response_data['data'][0]['info'] == ' '.join(test_service.info.split(' ')[:2])
 
 
-def test_service_vizports_route(cl_operator, test_service):
-    """service vizports route test"""
-
-    response = cl_operator.get(url_for('storage.service_vizports_route'))
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
-
-    response = cl_operator.get(url_for('storage.service_vizports_route', filter='Service.state=="%s"' % test_service.state))
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
-
-
-def test_service_portstat_route(cl_operator, test_service):
-    """service portstat route test"""
-
-    response = cl_operator.get(url_for('storage.service_portstat_route', port=test_service.port))
-    assert response.status_code == HTTPStatus.OK
-
-    assert response.lxml.xpath('//td/a[text()="%s"]' % test_service.info)
-
-
 def test_service_vizinfos_route(cl_operator):
     """service vizinfos route test"""
 

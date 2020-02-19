@@ -10,5 +10,5 @@ blueprint = Blueprint('visuals', __name__)  # pylint: disable=invalid-name
 
 
 import sner.server.controller.visuals.dnstree  # noqa: E402  pylint: disable=wrong-import-position
-import sner.server.controller.visuals.service_ports  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.controller.visuals.portmap  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.controller.visuals.service_infos  # noqa: E402,F401  pylint: disable=wrong-import-position
