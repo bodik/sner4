@@ -18,7 +18,6 @@ def test_task_list_route(cl_operator):
 
     response = cl_operator.get(url_for('scheduler.task_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Tasks list' in response
 
 
 def test_task_list_json_route(cl_operator, test_task):

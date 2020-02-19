@@ -22,7 +22,6 @@ def test_job_list_route(cl_operator):
 
     response = cl_operator.get(url_for('scheduler.job_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Jobs list' in response
 
 
 def test_job_list_json_route(cl_operator, test_job):

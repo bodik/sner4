@@ -17,7 +17,6 @@ def test_note_list_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.note_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Notes list' in response
 
 
 def test_note_list_json_route(cl_operator, test_note):
@@ -85,5 +84,3 @@ def test_note_view_route(cl_operator, test_note):
 
     response = cl_operator.get(url_for('storage.note_view_route', note_id=test_note.id))
     assert response.status_code == HTTPStatus.OK
-
-    assert '<dt>xtype</dt><dd>%s</dd>' % test_note.xtype in response

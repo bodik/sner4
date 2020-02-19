@@ -19,7 +19,6 @@ def test_user_list_route(cl_admin):
 
     response = cl_admin.get(url_for('auth.user_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Users list' in response
 
 
 def test_user_list_json_route(cl_admin, test_user):

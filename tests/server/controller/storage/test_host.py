@@ -17,7 +17,6 @@ def test_host_list_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.host_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Hosts list' in response
 
 
 def test_host_list_json_route(cl_operator, test_host):
@@ -105,5 +104,3 @@ def test_host_view_route(cl_operator, test_host):
 
     response = cl_operator.get(url_for('storage.host_view_route', host_id=test_host.id))
     assert response.status_code == HTTPStatus.OK
-
-    assert 'Host %s (%s)' % (test_host.address, test_host.hostname) in response

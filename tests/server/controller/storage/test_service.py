@@ -17,7 +17,6 @@ def test_service_list_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.service_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Services list' in response
 
 
 def test_service_list_json_route(cl_operator, test_service):
@@ -91,7 +90,6 @@ def test_service_grouped_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.service_grouped_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Services grouped' in response
 
 
 def test_service_grouped_json_route(cl_operator, test_service):

@@ -25,7 +25,6 @@ def test_profile_route(cl_user):
 
     response = cl_user.get(url_for('auth.profile_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>User profile' in response
 
 
 def test_profile_changepassword_route(cl_user):
@@ -39,11 +38,11 @@ def test_profile_changepassword_route(cl_user):
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
     form['current_password'] = cur_password
-    form['password1'] = '1'
-    form['password2'] = '2'
+    form['password1'] = 'AlongPassword1'
+    form['password2'] = 'AlongPassword2'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//*[@class="text-danger" and text()="Passwords does not match."]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Passwords does not match."]')
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
     form['current_password'] = cur_password
@@ -51,7 +50,7 @@ def test_profile_changepassword_route(cl_user):
     form['password2'] = 'weak'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//*[@class="text-danger" and contains(text(), "Password too short.")]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Password too short.")]')
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form
     form['current_password'] = '1'
@@ -78,7 +77,7 @@ def test_profile_totp_route_enable(cl_user):
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//p[@class="text-danger" and text()="Invalid code (enable)"]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code (enable)"]')
 
     response = cl_user.get(url_for('auth.profile_totp_route'))
     secret = cl_user.app.session_interface.open_session(cl_user.app, response.request)['totp_new_secret']
@@ -102,7 +101,7 @@ def test_profile_totp_route_disable(cl_user):
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//p[@class="text-danger" and text()="Invalid code (disable)"]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code (disable)"]')
 
     form = cl_user.get(url_for('auth.profile_totp_route')).form
     form['code'] = TOTPImpl(tmp_secret).current_code()

@@ -103,7 +103,7 @@ def test_login_totp(client, test_user):
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//p[@class="text-danger" and text()="Invalid code"]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code"]')
 
     form = response.form
     form['code'] = TOTPImpl(tmp_secret).current_code()

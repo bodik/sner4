@@ -18,7 +18,6 @@ def test_vuln_list_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.vuln_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Vulns list' in response
 
 
 def test_vuln_list_json_route(cl_operator, test_vuln):
@@ -134,7 +133,6 @@ def test_vuln_grouped_route(cl_operator):
 
     response = cl_operator.get(url_for('storage.vuln_grouped_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Vulns grouped' in response
 
 
 def test_vuln_grouped_json_route(cl_operator, test_vuln):

@@ -17,7 +17,6 @@ def test_excl_list_route(cl_operator):
 
     response = cl_operator.get(url_for('scheduler.excl_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//h1[contains(text(), "Exclusions list")]')
 
 
 def test_excl_list_json_route(cl_operator, test_excl_network):
@@ -59,21 +58,21 @@ def test_excl_add_route(cl_operator):
     form['family'].force_value('invalid')
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//*[@class="text-danger" and text()="Invalid family"]')
+    assert response.lxml.xpath('//ul[@class="invalid-feedback"]/li[text()="Invalid family"]')
 
     form = cl_operator.get(url_for('scheduler.excl_add_route')).form
     form['family'] = 'network'
     form['value'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//p[@class="text-danger" and contains(text(), "does not appear to be an IPv4 or IPv6 network")]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "does not appear to be an IPv4 or IPv6 network")]')
 
     form = cl_operator.get(url_for('scheduler.excl_add_route')).form
     form['family'] = 'regex'
     form['value'] = '('
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//p[@class="text-danger" and text()="Invalid regex"]')
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid regex"]')
 
 
 def test_excl_edit_route(cl_operator, test_excl_network):

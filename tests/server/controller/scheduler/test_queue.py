@@ -18,7 +18,6 @@ def test_queue_list_route(cl_operator, test_target):
 
     response = cl_operator.get(url_for('scheduler.queue_list_route'))
     assert response.status_code == HTTPStatus.OK
-    assert '<h1>Queues list' in response
 
 
 def test_queue_list_json_route(cl_operator, test_queue):
