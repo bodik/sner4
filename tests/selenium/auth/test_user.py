@@ -35,6 +35,9 @@ def test_user_apikey_route(live_server, sl_admin, test_user):  # pylint: disable
     sl_admin.get(url_for('auth.user_list_route', _external=True))
     dt_rendered(sl_admin, 'user_list_table', test_user.username)
 
+    # disable fade, the timing interferes with the test
+    sl_admin.execute_script('$("div#modal-global").toggleClass("fade")')
+
     sl_admin.find_element_by_xpath('//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=test_user.id, action='generate')).click()
     WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(
         EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))

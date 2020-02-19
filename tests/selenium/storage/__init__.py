@@ -41,19 +41,19 @@ def check_vulns_multiactions(selenium, dt_id):
 
     # one cloud be be tagged
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[1]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(text(), "Info")]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Info"]').click()
     dt_elem = dt_wait_processing(selenium, dt_id)
     assert Vuln.query.filter(Vuln.name == 'vuln 1', Vuln.tags.any('info')).one_or_none()
 
     # or the other one
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[2]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(text(), "Report")]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Report"]').click()
     dt_elem = dt_wait_processing(selenium, dt_id)
     assert Vuln.query.filter(Vuln.name == 'vuln 2', Vuln.tags.any('report')).one_or_none()
 
     # both might be tagged at the same time
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(text(), "ToDo")]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Todo"]').click()
     dt_elem = dt_wait_processing(selenium, dt_id)
     assert Vuln.query.filter(Vuln.tags.any('todo')).count() == 2
 

@@ -39,7 +39,7 @@
 		var form = $('#webauthn_register_form')[0];
 		form.attestation.value = array_buffer_to_base64(CBOR.encode(attestation_data));
 		form.submit.disabled = false;
-		$('#webauthn_register_form p[name="attestation_data_status"')[0].innerHTML = '<span class="text-success">Prepared</span>';
+		$('#webauthn_register_form div[name="attestation_data_status"]')[0].innerHTML = '<span class="text-success">Prepared</span>';
 	}
 
 	$(document).ready(function() {

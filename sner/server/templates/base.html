@@ -38,6 +38,10 @@
 		/* content vs navbar spacing */
 		body { padding-top: 4rem; }
 
+		/* navbar logo */
+		.navbar-brand { padding: 0; }
+		.navbar-brand img { height: 2rem; }
+
 		/* required items on forms */
 		div.form-group.required label:after { content:"*"; color:red; }
 
@@ -289,7 +293,7 @@
 </head>
 <body>
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-		<a class="navbar-brand" href="{{ url_for('index_route') }}">sner4</a>
+		<a class="navbar-brand" href="{{ url_for('index_route') }}"><img src="{{ url_for('static', filename='logo.png') }}"></a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault">
 			<span class="navbar-toggler-icon"></span>
 		</button>

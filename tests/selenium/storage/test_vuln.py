@@ -4,10 +4,13 @@ selenium ui tests for storage.vuln component
 """
 
 from flask import url_for
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server import db
 from sner.server.model.storage import Vuln
-from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing
+from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, WEBDRIVER_WAIT
 from tests.selenium.storage import check_select_rows, check_vulns_multiactions
 
 
@@ -92,8 +95,9 @@ def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint
 
     sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
 
-    sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_vuln_tag_set") and contains(text(), "Info")]').click()
-    assert sl_operator.find_elements_by_xpath('//span[contains(@class, "label") and contains(text(), "info")]')
+    sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_vuln_tag_set") and text()="Info"]').click()
+    WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(
+        EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-label") and contains(text(), "info")]')))
     vuln = Vuln.query.get(test_vuln.id)
     assert 'info' in vuln.tags
 

@@ -55,7 +55,7 @@ $(document).ready(function() {
 	<dt class="col-1">tags</dt>
 	<dd class="col-11">
 	{% for tag in vuln.tags|sort %}
-		<span class="label label-light tag-label">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><span class="glyphicon glyphicon-remove text-default"></span></a></span>
+		<span class="label label-light tag-label">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><i class="fas fa-trash"></i></a></span>
 	{% endfor %}
 	</dd>
 

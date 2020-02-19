@@ -4,7 +4,6 @@ selenium ui tests for scheduler.queue component
 """
 
 from flask import url_for
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -34,8 +33,6 @@ def test_queue_list_route_inrow_flush(live_server, sl_operator, test_target):  #
 
     sl_operator.get(url_for('scheduler.queue_list_route', _external=True))
     dt_wait_processing(sl_operator, dt_id)
-    sl_operator.find_element_by_class_name('queue-controls-dropdown').click()
-    WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.CLASS_NAME, 'abutton_queueflush_by_url')))
     sl_operator.find_element_by_id(dt_id).find_element_by_class_name('abutton_queueflush_by_url').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.alert_is_present())
     sl_operator.switch_to.alert.accept()

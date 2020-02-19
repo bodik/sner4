@@ -42,7 +42,7 @@ def test_host_view_route_vulns_list(live_server, sl_operator, test_vuln):  # pyl
     """host view tabbed vulns dt test; render and inrow delete"""
 
     sl_operator.get(url_for('storage.host_view_route', host_id=test_vuln.host_id, _external=True))
-    sl_operator.find_element_by_xpath('//a[@role="tab" and text()="Vulns"]').click()
+    sl_operator.find_element_by_xpath('//ul[@id="host_view_tabs"]//a[@class="nav-link" and text()="Vulns"]').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.ID, 'host_view_vuln_table')))
     dt_rendered(sl_operator, 'host_view_vuln_table', test_vuln.comment)
 
@@ -54,7 +54,7 @@ def test_host_view_route_notes_list(live_server, sl_operator, test_note):  # pyl
     """host view tabbed notes dt test; render and inrow delete"""
 
     sl_operator.get(url_for('storage.host_view_route', host_id=test_note.host_id, _external=True))
-    sl_operator.find_element_by_xpath('//a[@role="tab" and text()="Notes"]').click()
+    sl_operator.find_element_by_xpath('//ul[@id="host_view_tabs"]//a[@class="nav-link" and text()="Notes"]').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.ID, 'host_view_note_table')))
     dt_rendered(sl_operator, 'host_view_note_table', test_note.comment)
 
@@ -66,7 +66,7 @@ def test_host_view_route_vulns_list_selectrows(live_server, sl_operator, test_vu
     """host view tabbed vulns dt test; selections"""
 
     sl_operator.get(url_for('storage.host_view_route', host_id=test_vulns_multiaction[0].host_id, _external=True))
-    sl_operator.find_element_by_xpath('//a[@role="tab" and text()="Vulns"]').click()
+    sl_operator.find_element_by_xpath('//ul[@id="host_view_tabs"]//a[@class="nav-link" and text()="Vulns"]').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.ID, 'host_view_vuln_table')))
     dt_rendered(sl_operator, 'host_view_vuln_table', test_vulns_multiaction[-1].comment)
 
@@ -77,7 +77,7 @@ def test_host_view_route_vulns_list_multiactions(live_server, sl_operator, test_
     """host view tabbed vulns dt test; multiactions"""
 
     sl_operator.get(url_for('storage.host_view_route', host_id=test_vulns_multiaction[0].host_id, _external=True))
-    sl_operator.find_element_by_xpath('//a[@role="tab" and text()="Vulns"]').click()
+    sl_operator.find_element_by_xpath('//ul[@id="host_view_tabs"]//a[@class="nav-link" and text()="Vulns"]').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.ID, 'host_view_vuln_table')))
     dt_rendered(sl_operator, 'host_view_vuln_table', test_vulns_multiaction[-1].comment)
 
