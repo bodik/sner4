@@ -8,11 +8,11 @@
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.name, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.task, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.group_size, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.priority, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.active, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.name, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.task, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.group_size, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.priority, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.active, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

@@ -1,5 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
-{% import "bootstrap_wtf.html" as b_wtf %}
+{% import "bootstrap_wtf.html" as bwtf %}
 {% import "common_macros.html" as cm %}
 <!DOCTYPE html>
 <html lang="en">
@@ -48,10 +48,12 @@
 		.forcewrap { word-wrap: break-word; word-break: break-all; white-space: normal; }
 
 		/* dt styling */
+		/* TODO: replace .dt_toolbar with bs4 py-x */
 		.dataTables_wrapper, .dt_toolbar { margin-top: 5px; margin-bottom: 5px; }
 		td.dt-nowrap { white-space: nowrap; }
 
 		/* other */
+		/* TODO: replace with bs4 */
 		.text-alert { color: red; }
 		.text-warning { color: orange; }
 		.text-default { color: black; }

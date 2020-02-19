@@ -72,6 +72,6 @@
 </div>
 <form id="webauthn_login_form" method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.assertion, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.assertion, horizontal=True) }}
 </form>
 {% endblock %}

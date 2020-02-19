@@ -1,6 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as b_wtf %}
 
 {% block title %}Login{% endblock %}
 
@@ -9,8 +8,8 @@
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.username, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.password, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

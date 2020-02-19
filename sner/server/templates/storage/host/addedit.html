@@ -9,10 +9,10 @@
 <form method="post">
 	{{ form.csrf_token }}
 	{{ form.return_url }}
-	{{ b_wtf.bootstrap_field(form.address, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.hostname, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.os, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.address, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.hostname, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.os, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

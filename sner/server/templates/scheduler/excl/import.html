@@ -8,8 +8,8 @@
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.replace, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.data, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.replace, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

@@ -14,12 +14,12 @@
 		<div class="col-sm-10"><div class="form-control-plaintext">{{ host.address }} ({{ host.hostname }}){% if service %} {{ service.port }}/{{ service.proto }}{% endif %}</div></div>
 	</div>
 	<div class="collapse" id="refs_collapse">
-		{{ b_wtf.bootstrap_field(form.host_id, horizontal=True) }}
-		{{ b_wtf.bootstrap_field(form.service_id, horizontal=True) }}
+		{{ bwtf.bootstrap_field(form.host_id, horizontal=True) }}
+		{{ bwtf.bootstrap_field(form.service_id, horizontal=True) }}
 	</div>
-	{{ b_wtf.bootstrap_field(form.xtype, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.data, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.xtype, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.data, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

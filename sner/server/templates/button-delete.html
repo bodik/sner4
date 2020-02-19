@@ -1,6 +1,6 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
-{% import "bootstrap_wtf.html" as b_wtf %}
+{% import "bootstrap_wtf.html" as bwtf %}
 <form class="form-inline" style="display: inline;" {% if form_url %}action="{{ form_url }}"{% endif %} method="post">
-	{{ b_wtf.bootstrap_form(form) }}
+	{{ bwtf.bootstrap_form(form) }}
 	<button class="btn btn-outline-primary" type="submit" onClick="return confirm('Really delete?')"><i class="fas fa-trash text-danger"></i></button>
 </form>

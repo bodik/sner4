@@ -20,11 +20,11 @@ ul.multiple_checkbox_field li { list-style-type: none; }
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.username, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.password, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.email, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.roles, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.active, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.username, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.password, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.email, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.roles, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.active, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}

@@ -8,9 +8,9 @@
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ b_wtf.bootstrap_field(form.family, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.value, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.comment, horizontal=True) }}
-	{{ b_wtf.bootstrap_field(form.submit, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.family, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.value, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
 </form>
 {% endblock %}
