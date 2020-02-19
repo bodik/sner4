@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Vuln view {{ vuln.name }}{% endblock %}
+{% block title %}Vulns / View / {{ vuln.host.address }} {{ vuln.host.hostname }} / {{ vuln.name }}{% endblock %}
 
 {% block script %}
 <script type="text/javascript">
@@ -19,7 +19,7 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Vulns', 'View', vuln.name, '%s %s' % (vuln.host.address, vuln.host.hostname)]) }}
+{{ cm.breadcrumbs(['Storage', 'Vulns', 'View', '%s %s' % (vuln.host.address, vuln.host.hostname), vuln.name]) }}
 
 <div class="text-right">
 	<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>

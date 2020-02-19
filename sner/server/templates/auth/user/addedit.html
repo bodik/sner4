@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}User add/edit{% endblock %}
+{% block title %}Users / Add or edit{% endblock %}
 
 {% block style %}
 <style>
@@ -16,7 +16,7 @@ ul.multiple_checkbox_field li { list-style-type: none; }
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Auth', 'Users', 'Add or edit']) }}
+{{ cm.breadcrumbs(['Users', 'Add or edit']) }}
 
 <form method="post">
 	{{ form.csrf_token }}

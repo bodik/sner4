@@ -1,10 +1,10 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Webauthn credential edit{% endblock %}
+{% block title %}User profile / Edit WebAuthn credential{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Auth', 'Profile', 'Webauthn', 'Edit credential']) }}
+{{ cm.breadcrumbs(['User profile', 'Edit WebAuthn credential']) }}
 
 <form method="post">
 	{{ form.csrf_token }}

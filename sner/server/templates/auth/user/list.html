@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Users list{% endblock %}
+{% block title %}Users / List{% endblock %}
 
 {% block script %}
 <script type="text/javascript">
@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Auth', 'Users', 'List']) }}
+{{ cm.breadcrumbs(['Users', 'List']) }}
 
 <div class="text-right">
 	<a class="btn btn-outline-primary" href="{{ url_for('auth.user_add_route') }}">Add</a>

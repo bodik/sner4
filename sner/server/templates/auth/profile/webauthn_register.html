@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Webauthn credential register{% endblock %}
+{% block title %}User profile / Register WebAuthn credential{% endblock %}
 
 {% block script %}
 <script src="{{ url_for('static', filename='cbor/cbor.js') }}"></script>
@@ -57,7 +57,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Auth', 'Profile', 'Webauthn', 'Register credential']) }}
+{{ cm.breadcrumbs(['User profile', 'Register WebAuthn credential']) }}
 
 <div>
 	To register new credential:

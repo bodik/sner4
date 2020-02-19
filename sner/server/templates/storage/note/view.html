@@ -1,10 +1,10 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Note view {{ note.host.address }} {{note.xtype}}{% endblock %}
+{% block title %}Notes / View / {{ note.host.address }} {{ note.host.hostname }} / {{ note.xtype }}{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Notes', 'View', note.xtype, '%s %s' % (note.host.address, note.host.hostname)]) }}
+{{ cm.breadcrumbs(['Storage', 'Notes', 'View', '%s %s' % (note.host.address, note.host.hostname), note.xtype]) }}
 
 <div class="text-right">
 	<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><i class="fas fa-edit"></i></a>

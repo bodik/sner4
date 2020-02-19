@@ -1,14 +1,14 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Two-factor authentication setup{% endblock %}
+{% block title %}User profile / 2-factor authentication setup{% endblock %}
 
 {% block script %}
 <script src="{{ url_for('static', filename='qrious/qrious.min.js') }}"></script>
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Auth', 'Profile', '2-factor authentication setup (%s)' % 'enable' if secret else 'disable']) }}
+{{ cm.breadcrumbs(['User profile', '2-factor authentication setup (%s)' % 'enable' if secret else 'disable']) }}
 
 <div>
 	To enable two-factor authentication::
