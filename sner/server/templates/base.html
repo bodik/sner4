@@ -300,7 +300,6 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" title="Visualizations" id="dropdownVisualizations" data-toggle="dropdown"><i class="fas fa-eye"></i></a>
 						<div class="dropdown-menu">
-							<a class="dropdown-item" href="{{ url_for('storage.host_vizdns_route', crop=1) }}">DNS Names</a>
 							<a class="dropdown-item" href="{{ url_for('storage.service_vizports_route') }}">Ports</a>
 							<a class="dropdown-item" href="{{ url_for('storage.service_vizinfos_route', view='normal', crop=3, limit=50) }}">Service infos</a>
 						</div>
@@ -317,6 +316,8 @@
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.note_list_route') }}">Notes</a></li>
+					{%- elif subsystem == 'visuals' -%}
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.dnstree_route', crop=1) }}">DNS Tree</a></li>
 					{%- endif -%}
 				{% endif %}
 			{% endif %}

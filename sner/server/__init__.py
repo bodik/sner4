@@ -80,6 +80,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
     from sner.server.controller import storage
     app.register_blueprint(storage.blueprint, url_prefix='/storage')
+    from sner.server.controller import visuals
+    app.register_blueprint(visuals.blueprint, url_prefix='/visuals')
 
     from sner.server.command.auth import auth_command
     app.cli.add_command(auth_command)

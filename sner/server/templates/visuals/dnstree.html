@@ -36,7 +36,7 @@ svg {
 		<a class="btn btn-outline-secondary disabled">crop:</a>
 		{% set active_crop = request.args.get('crop', 0)|int %}
 		{% for level in range(0,3) %}
-		<a class="btn btn-outline-secondary{% if active_crop == level %} active{% endif %}" href="{{ url_for('storage.host_vizdns_route', crop=level) }}">{{level}}</a>
+		<a class="btn btn-outline-secondary{% if active_crop == level %} active{% endif %}" href="{{ url_for('visuals.dnstree_route', crop=level) }}">{{level}}</a>
 		{% endfor %}
 	</div>
 </div>
@@ -86,7 +86,7 @@ var dragDrop = d3.drag()
 		node.fy = null;
 	});
 
-d3.json(Flask.url_for('storage.host_vizdns_json_route') + window.location.search, function(data) {
+d3.json(Flask.url_for('visuals.dnstree_json_route') + window.location.search, function(data) {
 	update(data.nodes, data.links);
 });
 

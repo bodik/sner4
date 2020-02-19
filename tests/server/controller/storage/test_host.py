@@ -82,23 +82,6 @@ def test_host_delete_route(cl_operator, test_host):
     assert not host
 
 
-def test_host_vizdns_route(cl_operator):
-    """host vizdns route test"""
-
-    response = cl_operator.get(url_for('storage.host_vizdns_route'))
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_host_vizdns_json_route(cl_operator, test_host):
-    """host vizdns.json route test"""
-
-    response = cl_operator.get(url_for('storage.host_vizdns_json_route', crop=0))
-    assert response.status_code == HTTPStatus.OK
-
-    response_data = json.loads(response.body.decode('utf-8'))
-    assert test_host.hostname.split('.')[0] in [tmp["name"] for tmp in response_data["nodes"]]
-
-
 def test_host_view_route(cl_operator, test_host):
     """host view route test"""
 
