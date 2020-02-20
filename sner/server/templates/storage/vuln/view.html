@@ -45,24 +45,29 @@ $(document).ready(function() {
 			<td>{{ vuln.service }}</td>
 		</tr>
 		<tr>
+			<th>xtype</th>
+			<td>{{ vuln.xtype }}</td>
+
 			<th>severity</th>
 			<td>
 				<span class="render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</span>
 			</td>
+		</tr>
+		<tr>
 			<th>refs</th>
 			<td>
 				<span class="render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
 			</td>
-		</tr>
-		<tr>
-			<th>comment</th>
-			<td>{{ vuln.comment }}</td>
 			<th>tags</th>
 			<td>
 			{% for tag in vuln.tags|sort %}
 				<span class="badge badge-secondary tag-badge">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><i class="fas fa-trash"></i></a></span>
 			{% endfor %}
 			</td>
+		</tr>
+		<tr>
+			<th>comment</th>
+			<td colspan="3">{{ vuln.comment }}</td>
 		</tr>
 	</tbody>
 </table>

@@ -11,22 +11,25 @@
 	</div>
 {% endcall %}
 
-<dl class="row">
-	<dt class="col-1">host address</dt>
-	<dd class="col-11 render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</dd>
-
-	<dt class="col-1">host hostname</dt>
-	<dd class="col-11">{{ note.host.hostname }}</dd>
-
-	<dt class="col-1">service</dt>
-	<dd class="col-11">{{ note.service }}</dd>
-
-	<dt class="col-1">xtype</dt>
-	<dd class="col-11">{{ note.xtype }}</dd>
-
-	<dt class="col-1">comment</dt>
-	<dd class="col-11">{{ note.comment }}</dd>
-</dl>
+<table class="table table-bordered table-sm w-auto">
+	<tbody>
+		<tr>
+			<th>host</th>
+			<td>
+				<span class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</span>
+				{{ note.host.hostname }}
+			</td>
+			<th>service</th>
+			<td>{{ note.service }}</td>
+		</tr>
+		<tr>
+			<th>xtype</th>
+			<td>{{ note.xtype }}</td>
+			<th>comment</th>
+			<td>{{ note.comment }}</td>
+		</tr>
+	</tbody>
+</table>
 
 <div>
 {% if note.xtype and (note.xtype.startswith('nessus.') or note.xtype.startswith('nmap.'))  %}

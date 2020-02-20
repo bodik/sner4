@@ -44,9 +44,18 @@
 
 <table class="table table-bordered table-sm w-auto">
 	<tbody>
-		<tr><th>os</th><td>{{ host.os }}</td></tr>
-		<tr><th>comment</th><td>{{ host.comment }}</td></tr>
-		<tr><th>ctime / mtime</th><td>{{ host.created|datetime }} / {{ host.modified|datetime }}</td></tr>
+		<tr>
+			<th>os</th>
+			<td>{{ host.os }}</td>
+		</tr>
+		<tr>
+			<th>ctime / mtime</th>
+			<td>{{ host.created|datetime }} / {{ host.modified|datetime }}</td>
+		</tr>
+		<tr>
+			<th>comment</th>
+			<td>{{ host.comment }}</td>
+		</tr>
 	</tbody>
 </table>
 
