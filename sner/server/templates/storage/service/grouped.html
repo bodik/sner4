@@ -9,7 +9,7 @@
 		'ajax': {'url': "{{ url_for('storage.service_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			dt_column('info', {'render': function (data, type, row, meta) { return storage_pagepart_service_list_filter_info_link({'info': row['info'], 'info_encoded': encodeURIComponent(row['info'])}); }}),
-			dt_column('nr_services')
+			dt_column('cnt_services')
 		],
 		'order': [[1, 'desc']]
 	};

@@ -128,7 +128,7 @@ def service_grouped_json_route():
     info_column = service_info_column(request.args.get('crop'))
     columns = [
         ColumnDT(info_column, mData='info'),
-        ColumnDT(func.count(Service.id), mData='nr_services', global_search=False),
+        ColumnDT(func.count(Service.id), mData='cnt_services', global_search=False),
     ]
     query = db.session.query().select_from(Service).group_by(info_column)
     if 'filter' in request.values:

@@ -11,7 +11,7 @@
 			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
 			dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
 			dt_column('tags'),
-			dt_column('nr_vulns')
+			dt_column('cnt_vulns')
 		]
 	};
 	$(document).ready(function() {

@@ -12,9 +12,9 @@
 			dt_column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
 			dt_column('hostname'),
 			dt_column('os'),
-			dt_column('nr_svcs'),
-			dt_column('nr_vulns'),
-			dt_column('nr_notes'),
+			dt_column('cnt_s'),
+			dt_column('cnt_v'),
+			dt_column('cnt_n'),
 			dt_column('comment'),
 			dt_column_buttons(storage_pagepart_host_controls)
 		]
