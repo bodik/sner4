@@ -124,7 +124,7 @@
 					dt_column('host_hostname', {'visible': false}),
 					dt_column('service'),
 					dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
-					dt_column('xtype'),
+					dt_column('xtype', {'visible': false}),
 					dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
 					dt_column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
 					dt_column('tags'),
