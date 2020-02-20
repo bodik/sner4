@@ -34,5 +34,5 @@
 	{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a>{% endif %}
 </div>
 
-<table id="service_list_table" class="table table-hover table-sm"></table>
+<table id="service_list_table" class="table table-hover table-sm" width="100%"></table>
 {% endblock %}
