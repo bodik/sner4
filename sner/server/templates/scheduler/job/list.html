@@ -27,7 +27,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Scheduler', 'Jobs', 'List']) }}
+{% call cm.heading(['Jobs']) %}{% endcall %}
 
 <div id="job_list_table_toolbar" class="dt_toolbar">
 	<div class="btn-group" role="group">

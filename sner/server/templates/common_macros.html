@@ -1,10 +1,11 @@
-{%- macro breadcrumbs(path) -%}
-<nav>
-	<ol class="breadcrumb mb-0 py-2">
+{%- macro heading(path) -%}
+<div class="d-flex align-items-center mb-2">
+	<ol class="breadcrumb flex-grow-1 py-2 mb-0">
 		{%- for item in path[:-1] -%}
 		<li class="breadcrumb-item">{{ item }}</li>
 		{%- endfor -%}
-		<li class="breadcrumb-item active">{{ path[-1] }}</li>
+		<li class="breadcrumb-item font-weight-bold">{{ path[-1] }}</li>
 	</ol>
-</nav>
+	{{ caller() }}
+</div>
 {%- endmacro -%}

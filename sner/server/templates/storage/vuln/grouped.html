@@ -22,7 +22,7 @@
 
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Vulns', 'Grouped']) }}
+{% call cm.heading(['Vulns', 'Grouped']) %}{% endcall %}
 
 <div id="vuln_grouped_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">

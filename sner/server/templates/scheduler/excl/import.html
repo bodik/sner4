@@ -4,7 +4,7 @@
 {% block title %}Exclusions / Import{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Scheduler', 'Exclusions', 'Import']) }}
+{% call cm.heading(['Exclusions', 'Import']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

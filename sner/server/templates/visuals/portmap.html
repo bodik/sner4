@@ -36,7 +36,7 @@ table.borderless tbody tr td { border: none; }
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Visuals', 'Portmap']) }}
+{% call cm.heading(['Visuals', 'Portmap']) %}{% endcall %}
 
 <div class="dt_toolbar">
 	{% if 'filter' in request.args %}<a class="btn btn-info btn-sm" href="{{ url_for('visuals.portmap_route') }}">unfilter</a>{% endif %}

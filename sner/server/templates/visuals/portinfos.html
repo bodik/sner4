@@ -17,7 +17,8 @@ svg {
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Visuals', 'Port infos']) }}
+{% call cm.heading(['Visuals', 'Port infos']) %}{% endcall %}
+
 <!--
 	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
 	https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js

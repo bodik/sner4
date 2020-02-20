@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Notes', 'List']) }}
+{% call cm.heading(['Notes']) %}{% endcall %}
 
 <div id="note_list_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">

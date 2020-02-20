@@ -4,7 +4,7 @@
 {% block title %}Exclusions / Add or edit{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Scheduler', 'Exclusions', 'Add or edit']) }}
+{% call cm.heading(['Exclusions', 'Add or edit']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

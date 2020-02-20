@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Services', 'List']) }}
+{% call cm.heading(['Services']) %}{% endcall %}
 
 <div id="service_list_table_toolbar" class="dt_toolbar">
 	{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.service_list_route') }}">unfilter</a>{% endif %}

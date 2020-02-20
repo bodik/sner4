@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['User profile', '2-factor authentication setup (%s)' % 'enable' if secret else 'disable']) }}
+{% call cm.heading(['User profile', '2-factor authentication setup (%s)' % 'enable' if secret else 'disable']) %}{% endcall %}
 
 <div>
 	To enable two-factor authentication::

@@ -4,7 +4,7 @@
 {% block title %}Login TOTP{% endblock %}
 
 {% block content %}
-<h1>Login with TOTP code (2FA)</h1>
+{% call cm.heading(['Login with 2FA']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

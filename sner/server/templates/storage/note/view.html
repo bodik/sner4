@@ -4,12 +4,12 @@
 {% block title %}Notes / View / {{ note.host.address }} {{ note.host.hostname }} / {{ note.xtype }}{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Notes', 'View', '%s %s' % (note.host.address, note.host.hostname), note.xtype]) }}
-
-<div class="text-right">
-	<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><i class="fas fa-edit"></i></a>
-	{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
-</div>
+{% call cm.heading(['Note', '%s %s' % (note.host.address, note.host.hostname), note.xtype]) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><i class="fas fa-edit"></i></a>
+		{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
+	</div>
+{% endcall %}
 
 <dl class="row">
 	<dt class="col-1">host address</dt>

@@ -23,7 +23,7 @@ svg {
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Visuals', 'DNS Tree']) }}
+{% call cm.heading(['Visuals', 'DNS Tree']) %}{% endcall %}
 <!--
 	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
 	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811

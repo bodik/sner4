@@ -57,7 +57,7 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['User profile', 'Register WebAuthn credential']) }}
+{% call cm.heading(['User profile', 'Register WebAuthn credential']) %}{% endcall %}
 
 <div>
 	To register new credential:

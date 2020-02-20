@@ -21,10 +21,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center mb-2">
-	<div class="flex-fill">
-		{{ cm.breadcrumbs(['Storage', 'Hosts', 'View', '%s %s' % (host.address, host.hostname)]) }}
-	</div>
+{% call cm.heading(['Host', '%s %s' % (host.address, host.hostname)]) %}
 	<div class="pl-2">
 		<div class="btn-group">
 			<a class="btn btn-light disabled"><i class="fas fa-external-link-alt text-link"></i></a>
@@ -43,7 +40,7 @@
 		<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><i class="fas fa-edit"></i></a>
 		{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
-</div>
+{% endcall %}
 
 <table class="table table-bordered table-sm w-auto">
 	<tbody>

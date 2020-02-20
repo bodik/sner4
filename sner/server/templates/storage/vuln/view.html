@@ -19,10 +19,7 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center mb-2">
-	<div class="flex-fill">
-		{{ cm.breadcrumbs(['Storage', 'Vulns', 'View', '%s %s' % (vuln.host.address, vuln.host.hostname), '%s (%s)' % (vuln.name, vuln.xtype)]) }}
-	</div>
+{% call cm.heading(['Vuln', '%s %s' % (vuln.host.address, vuln.host.hostname), '%s (%s)' % (vuln.name, vuln.xtype)]) %}
 	<div class="pl-2">
 		<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>
 		<div class="btn-group">
@@ -34,8 +31,7 @@ $(document).ready(function() {
 		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><i class="fas fa-edit"></i></a>
 		{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
-</div>
-
+{% endcall %}
 
 <table class="table table-bordered table-sm w-auto">
 	<tbody>

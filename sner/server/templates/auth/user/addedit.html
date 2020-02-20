@@ -16,7 +16,7 @@ ul.multiple_checkbox_field li { list-style-type: none; }
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Users', 'Add or edit']) }}
+{% call cm.heading(['Users', 'Add or edit']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

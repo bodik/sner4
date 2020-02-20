@@ -4,7 +4,7 @@
 {% block title %}Vulns / Add or edit{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Vulns', 'Add or edit']) }}
+{% call cm.heading(['Vulns', 'Add or edit']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

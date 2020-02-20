@@ -4,7 +4,7 @@
 {% block title %}Queues / Enqueue{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Scheduler', 'Queues', 'Enqueue']) }}
+{% call cm.heading(['Queues', 'Enqueue']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

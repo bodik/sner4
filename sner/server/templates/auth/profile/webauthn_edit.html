@@ -4,7 +4,7 @@
 {% block title %}User profile / Edit WebAuthn credential{% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['User profile', 'Edit WebAuthn credential']) }}
+{% call cm.heading(['User profile', 'Edit WebAuthn credential']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}

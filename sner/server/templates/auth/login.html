@@ -4,7 +4,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
+{% call cm.heading(['Login']) %}{% endcall %}
 
 <form method="post">
 	{{ form.csrf_token }}
