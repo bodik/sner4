@@ -32,10 +32,13 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Scheduler', 'Queues', 'List']) }}
-
-<div class="text-right">
-	<a class="btn btn-outline-primary" href="{{ url_for('scheduler.queue_add_route') }}">Add</a>
+<div class="d-flex align-items-center mb-2">
+	<div class="flex-fill">
+		{{ cm.breadcrumbs(['Scheduler', 'Queues', 'List']) }}
+	</div>
+	<div class="pl-2">
+		<a class="btn btn-outline-primary" href="{{ url_for('scheduler.queue_add_route') }}">Add</a>
+	</div>
 </div>
 
 <table id="queue_list_table" class="table table-hover table-sm" width="100%"></table>

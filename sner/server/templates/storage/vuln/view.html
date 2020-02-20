@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Vulns / View / {{ vuln.host.address }} {{ vuln.host.hostname }} / {{ vuln.name }}{% endblock %}
+{% block title %}Vulns / View / {{ vuln.host.address }} {{ vuln.host.hostname }} / {{ vuln.name }} ({{ vuln.xtype }}){% endblock %}
 
 {% block script %}
 <script type="text/javascript">
@@ -19,49 +19,57 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Vulns', 'View', '%s %s' % (vuln.host.address, vuln.host.hostname), vuln.name]) }}
-
-<div class="text-right">
-	<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>
-	<div class="btn-group">
-		<a class="btn btn-outline-primary disabled"><i class="fas fa-tag"></i></a>
-		<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'>Info</a>
-		<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'report', 'ids-0': vuln.id}|tojson }}'>Report</a>
-		<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'todo', 'ids-0': vuln.id}|tojson }}'>Todo</a>
+<div class="d-flex align-items-center mb-2">
+	<div class="flex-fill">
+		{{ cm.breadcrumbs(['Storage', 'Vulns', 'View', '%s %s' % (vuln.host.address, vuln.host.hostname), '%s (%s)' % (vuln.name, vuln.xtype)]) }}
 	</div>
-	<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><i class="fas fa-edit"></i></a>
-	{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
+	<div class="pl-2">
+		<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>
+		<div class="btn-group">
+			<a class="btn btn-outline-primary disabled"><i class="fas fa-tag text-primary"></i></a>
+			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'>Info</a>
+			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'report', 'ids-0': vuln.id}|tojson }}'>Report</a>
+			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'todo', 'ids-0': vuln.id}|tojson }}'>Todo</a>
+		</div>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><i class="fas fa-edit"></i></a>
+		{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
+	</div>
 </div>
 
-<dl class="row">
-	<dt class="col-1">host address</dt>
-	<dd class="col-11 render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</dd>
 
-	<dt class="col-2">host hostname</dt>
-	<dd class="col-10">{{ vuln.host.hostname }}</dd>
-
-	<dt class="col-1">service</dt>
-	<dd class="col-11">{{ vuln.service }}</dd>
-
-	<dt class="col-1">xtype</dt>
-	<dd class="col-11">{{ vuln.xtype }}</dd>
-
-	<dt class="col-1">severity</dt>
-	<dd class="col-11 render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</dd>
-
-	<dt class="col-1">refs</dt>
-	<dd class="col-11 render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</dd>
-
-	<dt class="col-1">tags</dt>
-	<dd class="col-11">
-	{% for tag in vuln.tags|sort %}
-		<span class="badge badge-secondary tag-badge">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><i class="fas fa-trash"></i></a></span>
-	{% endfor %}
-	</dd>
-
-	<dt class="col-1">comment</dt>
-	<dd class="col-11">{{ vuln.comment }}</dd>
-</dl>
+<table class="table table-bordered table-sm w-auto">
+	<tbody>
+		<tr>
+			<th>host</th>
+			<td>
+				<span class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</span>
+				{{ vuln.host.hostname }}
+			</td>
+			<th>service</th>
+			<td>{{ vuln.service }}</td>
+		</tr>
+		<tr>
+			<th>severity</th>
+			<td>
+				<span class="render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</span>
+			</td>
+			<th>refs</th>
+			<td>
+				<span class="render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
+			</td>
+		</tr>
+		<tr>
+			<th>comment</th>
+			<td>{{ vuln.comment }}</td>
+			<th>tags</th>
+			<td>
+			{% for tag in vuln.tags|sort %}
+				<span class="badge badge-secondary tag-badge">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><i class="fas fa-trash"></i></a></span>
+			{% endfor %}
+			</td>
+		</tr>
+	</tbody>
+</table>
 
 <h2>Description</h2>
 <div>

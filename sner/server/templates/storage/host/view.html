@@ -21,49 +21,43 @@
 {% endblock %}
 
 {% block content %}
-{{ cm.breadcrumbs(['Storage', 'Hosts', 'View', '%s %s' % (host.address, host.hostname)]) }}
-
-<div class="text-right">
-	<div class="btn-group">
-		<a class="btn btn-outline-primary disabled"><i class="fas fa-plus text-primary"></i></a>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.service_add_route', host_id=host.id) }}">Service</a>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}">Vuln</a>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}">Note</a>
+<div class="d-flex align-items-center mb-2">
+	<div class="flex-fill">
+		{{ cm.breadcrumbs(['Storage', 'Hosts', 'View', '%s %s' % (host.address, host.hostname)]) }}
 	</div>
-	<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><i class="fas fa-edit"></i></a>
-	{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
+	<div class="pl-2">
+		<div class="btn-group">
+			<a class="btn btn-light disabled"><i class="fas fa-external-link-alt text-link"></i></a>
+			<a class="btn btn-light" rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
+			<a class="btn btn-light" rel="noreferrer" href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
+			<a class="btn btn-light" rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
+			<a class="btn btn-light" rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
+			<a class="btn btn-light" rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-primary disabled"><i class="fas fa-plus text-primary"></i></a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.service_add_route', host_id=host.id) }}">Service</a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}">Vuln</a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}">Note</a>
+		</div>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><i class="fas fa-edit"></i></a>
+		{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
+	</div>
 </div>
 
-<dl class="row">
-	<dt class="col-1">os</dt>
-	<dd class="col-11">{{ host.os }}</dd>
-
-	<dt class="col-1">comment</dt>
-	<dd class="col-11">{{ host.comment }}</dd>
-
-	<dt class="col-1">created</dt>
-	<dd class="col-11">{{ host.created|datetime }}</dd>
-
-	<dt class="col-1">modified</dt>
-	<dd class="col-11">{{ host.modified|datetime }}</dd>
-
-	<dt class="col-1">external data</dt>
-	<dd class="col-11">
-		<a rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
-		<a rel="noreferrer" href="https://nerd.cesnet.cz/nerd/ip/{{ host.address }}">nerd</a>
-		<a rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
-		<a rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
-		<a rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
-	</dd>
-</dl>
-
+<table class="table table-bordered table-sm w-auto">
+	<tbody>
+		<tr><th>os</th><td>{{ host.os }}</td></tr>
+		<tr><th>comment</th><td>{{ host.comment }}</td></tr>
+		<tr><th>ctime / mtime</th><td>{{ host.created|datetime }} / {{ host.modified|datetime }}</td></tr>
+	</tbody>
+</table>
 
 <ul class="nav nav-tabs" id="host_view_tabs">
 	<li class="nav-item"><a class="nav-link" href="#services" data-toggle="tab">Services</a></li>
 	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns</a></li>
 	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes</a></li>
 </ul>
-
 <div class="tab-content">
 	<div class="tab-pane" id="services">
 		<table id="host_view_service_table" class="table table-hover table-sm" width="100%"></table>

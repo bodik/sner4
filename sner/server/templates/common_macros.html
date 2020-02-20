@@ -1,6 +1,6 @@
 {%- macro breadcrumbs(path) -%}
 <nav>
-	<ol class="breadcrumb">
+	<ol class="breadcrumb mb-0 py-2">
 		{%- for item in path[:-1] -%}
 		<li class="breadcrumb-item">{{ item }}</li>
 		{%- endfor -%}
