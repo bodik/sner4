@@ -43,22 +43,22 @@
 <div id="vuln_list_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
-		<a class="btn btn-outline-secondary abutton_selectall">All</a>
-		<a class="btn btn-outline-secondary abutton_selectnone">None</a>
+		<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
+		<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
-		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="info">Info</a>
-		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="report">Report</a>
-		<a class="btn btn-outline-secondary abutton_tagmulti" data-tag="todo">Todo</a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" href="#" data-tag="info">Info</a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" href="#" data-tag="report">Report</a>
+		<a class="btn btn-outline-secondary abutton_tagmulti" href="#" data-tag="todo">Todo</a>
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
-		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="info">Info</a></li>
-		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="report">Report</a></li>
-		<a class="striked btn btn-outline-secondary abutton_untagmulti" data-tag="todo">Todo</a></li>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" href="#" data-tag="info">Info</a></li>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" href="#" data-tag="report">Report</a></li>
+		<a class="striked btn btn-outline-secondary abutton_untagmulti" href="#" data-tag="todo">Todo</a></li>
 	</div>
-	<a class="btn btn-outline-secondary abutton_deletemulti"><i class="fas fa-trash text-danger"></i></a>
+	<a class="btn btn-outline-secondary abutton_deletemulti" href="#"><i class="fas fa-trash text-danger"></i></a>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.vuln_list_route') }}">unfilter</a>{% endif %}</h1>
