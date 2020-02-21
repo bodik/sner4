@@ -20,6 +20,7 @@ class Host(db.Model):
     address = db.Column(postgresql.INET, nullable=False)
     hostname = db.Column(db.String(256))
     os = db.Column(db.Text)
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -42,6 +43,7 @@ class Service(db.Model):
     state = db.Column(db.String(250))
     name = db.Column(db.String(250))
     info = db.Column(db.Text)
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
 
     host = relationship('Host', back_populates='services')
@@ -93,6 +95,7 @@ class Note(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
     xtype = db.Column(db.String(250))
     data = db.Column(db.Text)
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
 
     host = relationship('Host', back_populates='notes')

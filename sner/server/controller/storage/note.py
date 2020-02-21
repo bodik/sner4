@@ -51,6 +51,7 @@ def note_list_json_route():
         ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
         ColumnDT(Note.xtype, mData='xtype'),
         ColumnDT(Note.data, mData='data'),
+        ColumnDT(Note.tags, mData='tags'),
         ColumnDT(Note.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]

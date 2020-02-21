@@ -53,6 +53,10 @@
 			<td>{{ host.created|datetime }} / {{ host.modified|datetime }}</td>
 		</tr>
 		<tr>
+			<th>tags</th>
+			<td>{{ host.tags }}</td>
+		</tr>
+		<tr>
 			<th>comment</th>
 			<td>{{ host.comment }}</td>
 		</tr>
@@ -80,6 +84,7 @@
 					dt_column('name'),
 					dt_column('state'),
 					dt_column('info'),
+					dt_column('tags'),
 					dt_column('comment'),
 					dt_column_buttons(storage_pagepart_service_controls)
 				],
@@ -158,6 +163,7 @@
 					dt_column('service'),
 					dt_column('xtype'),
 					dt_column('data', {'className': 'forcewrap'}),
+					dt_column('tags'),
 					dt_column('comment'),
 					dt_column_buttons(storage_pagepart_note_controls)
 				]

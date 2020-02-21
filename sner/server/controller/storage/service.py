@@ -50,6 +50,7 @@ def service_list_json_route():
         ColumnDT(Service.name, mData='name'),
         ColumnDT(Service.state, mData='state'),
         ColumnDT(Service.info, mData='info'),
+        ColumnDT(Service.tags, mData='tags'),
         ColumnDT(Service.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]

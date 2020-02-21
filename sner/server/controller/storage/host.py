@@ -42,6 +42,7 @@ def host_list_json_route():
         ColumnDT(func.coalesce(query_cnt_services.c.cnt, 0), mData='cnt_s', global_search=False),
         ColumnDT(func.coalesce(query_cnt_vulns.c.cnt, 0), mData='cnt_v', global_search=False),
         ColumnDT(func.coalesce(query_cnt_notes.c.cnt, 0), mData='cnt_n', global_search=False),
+        ColumnDT(Host.tags, mData='tags'),
         ColumnDT(Host.comment, mData='comment'),
         ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
     ]
