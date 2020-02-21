@@ -8,22 +8,22 @@
 	var dt_service_list_table_options = {
 		'ajax': {'url': "{{ url_for('storage.service_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('host_id', {'visible': false}),
-			dt_column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
-			dt_column('host_hostname'),
-			dt_column('proto'),
-			dt_column('port'),
-			dt_column('name'),
-			dt_column('state'),
-			dt_column('info'),
-			dt_column('tags'),
-			dt_column('comment'),
-			dt_column_buttons(storage_pagepart_service_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('host_id', {'visible': false}),
+			Sner.dt.column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
+			Sner.dt.column('host_hostname'),
+			Sner.dt.column('proto'),
+			Sner.dt.column('port'),
+			Sner.dt.column('name'),
+			Sner.dt.column('state'),
+			Sner.dt.column('info'),
+			Sner.dt.column('tags'),
+			Sner.dt.column('comment'),
+			Sner.dt.column_buttons(storage_pagepart_service_controls)
 		]
 	};
 	$(document).ready(function() {
-		var dt_service_list_table = $('#service_list_table').DataTable($.extend({}, dt_ajax_options, dt_service_list_table_options));
+		var dt_service_list_table = $('#service_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_service_list_table_options));
 	});
 </script>
 {% endblock %}

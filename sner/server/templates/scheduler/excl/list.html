@@ -8,15 +8,15 @@
 	var dt_excl_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.excl_list_json_route') }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('family'),
-			dt_column('value'),
-			dt_column('comment'),
-			dt_column_buttons(scheduler_pagepart_excl_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('family'),
+			Sner.dt.column('value'),
+			Sner.dt.column('comment'),
+			Sner.dt.column_buttons(scheduler_pagepart_excl_controls)
 		]
 	};
 	$(document).ready(function() {
-		var dt_excl_list_table = $('#excl_list_table').DataTable($.extend({}, dt_ajax_options, dt_excl_list_table_options));
+		var dt_excl_list_table = $('#excl_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_excl_list_table_options));
 	});
 </script>
 {% endblock %}

@@ -8,25 +8,25 @@
 	var dt_queue_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('name'),
-			dt_column('task_id', {'visible': false}),
-			dt_column('task_name'),
-			dt_column('group_size'),
-			dt_column('priority'),
-			dt_column('active'),
-			dt_column('nr_targets'),
-			dt_column('nr_jobs'),
-			dt_column_buttons(scheduler_pagepart_queue_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('name'),
+			Sner.dt.column('task_id', {'visible': false}),
+			Sner.dt.column('task_name'),
+			Sner.dt.column('group_size'),
+			Sner.dt.column('priority'),
+			Sner.dt.column('active'),
+			Sner.dt.column('nr_targets'),
+			Sner.dt.column('nr_jobs'),
+			Sner.dt.column_buttons(scheduler_pagepart_queue_controls)
 		],
 		'drawCallback': function (settings) {
-			dt_ajax_options['drawCallback'].call(this, settings); // call parent
-			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, action_submit_by_url);
-			this.find('td a.abutton_queueprune_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, action_submit_by_url);
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_by_url);
+			this.find('td a.abutton_queueprune_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, Sner.action_submit_by_url);
 		}
 	};
 	$(document).ready(function() {
-		var dt_queue_list_table = $('#queue_list_table').DataTable($.extend({}, dt_ajax_options, dt_queue_list_table_options));
+		var dt_queue_list_table = $('#queue_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_queue_list_table_options));
 	});
 </script>
 {% endblock %}

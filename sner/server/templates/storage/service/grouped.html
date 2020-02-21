@@ -8,13 +8,13 @@
 	var dt_service_grouped_table_options = {
 		'ajax': {'url': "{{ url_for('storage.service_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('info', {'render': function (data, type, row, meta) { return storage_pagepart_service_list_filter_info_link({'info': row['info'], 'info_encoded': encodeURIComponent(row['info'])}); }}),
-			dt_column('cnt_services')
+			Sner.dt.column('info', {'render': function (data, type, row, meta) { return storage_pagepart_service_list_filter_info_link({'info': row['info'], 'info_encoded': encodeURIComponent(row['info'])}); }}),
+			Sner.dt.column('cnt_services')
 		],
 		'order': [[1, 'desc']]
 	};
 	$(document).ready(function() {
-		var dt_service_grouped_table = $('#service_grouped_table').DataTable($.extend({}, dt_ajax_options, dt_service_grouped_table_options));
+		var dt_service_grouped_table = $('#service_grouped_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_service_grouped_table_options));
 	});
 </script>
 {% endblock %}

@@ -8,14 +8,14 @@
 	var dt_vuln_grouped_table_options = {
 		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
-			dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
-			dt_column('tags'),
-			dt_column('cnt_vulns')
+			Sner.dt.column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
+			Sner.dt.column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
+			Sner.dt.column('tags'),
+			Sner.dt.column('cnt_vulns')
 		]
 	};
 	$(document).ready(function() {
-		var dt_vuln_grouped_table = $('#vuln_grouped_table').DataTable($.extend({}, dt_ajax_options, dt_vuln_grouped_table_options));
+		var dt_vuln_grouped_table = $('#vuln_grouped_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_vuln_grouped_table_options));
 	});
 </script>
 {% endblock %}

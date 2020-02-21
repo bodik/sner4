@@ -8,16 +8,16 @@
 	var dt_task_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.task_list_json_route') }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('name'),
-			dt_column('module'),
-			dt_column('params'),
-			dt_column('nr_queues'),
-			dt_column_buttons(scheduler_pagepart_task_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('name'),
+			Sner.dt.column('module'),
+			Sner.dt.column('params'),
+			Sner.dt.column('nr_queues'),
+			Sner.dt.column_buttons(scheduler_pagepart_task_controls)
 		]
 	};
 	$(document).ready(function() {
-		var dt_task_list_table = $('#task_list_table').DataTable($.extend({}, dt_ajax_options, dt_task_list_table_options));
+		var dt_task_list_table = $('#task_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_task_list_table_options));
 	});
 </script>
 {% endblock %}

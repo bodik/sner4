@@ -6,29 +6,29 @@
 {% block script %}
 <script type="text/javascript">
 	function action_userapikey_by_url(event) {
-		sner_submit_form(event.target.closest('a').getAttribute('data-url'))
-			.done(function(data, textStatus, jqXHR) { sner_modal(data.title, data.detail); })
+		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
+			.done(function(data, textStatus, jqXHR) { Sner.modal(data.title, data.detail); })
 			.always(function() { event.data.dt.draw(); });
 	}
 
 	var dt_user_list_table_options = {
 		'ajax': {'url': "{{ url_for('auth.user_list_json_route') }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id'),
-			dt_column('username'),
-			dt_column('email'),
-			dt_column('apikey', {'render': function (data, type, row, meta) { return auth_pagepart_user_apikey_controls({'user_id': row['id'], 'apikey': row['apikey'], 'action': row['apikey'] ? 'revoke' : 'generate'}); }}),
-			dt_column('roles'),
-			dt_column('active'),
-			dt_column_buttons(auth_pagepart_user_controls)
+			Sner.dt.column('id'),
+			Sner.dt.column('username'),
+			Sner.dt.column('email'),
+			Sner.dt.column('apikey', {'render': function (data, type, row, meta) { return auth_pagepart_user_apikey_controls({'user_id': row['id'], 'apikey': row['apikey'], 'action': row['apikey'] ? 'revoke' : 'generate'}); }}),
+			Sner.dt.column('roles'),
+			Sner.dt.column('active'),
+			Sner.dt.column_buttons(auth_pagepart_user_controls)
 		],
 		'drawCallback': function (settings) {
-			dt_ajax_options['drawCallback'].call(this, settings); // call parent
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_userapikey_by_url').on('click', {'dt': this.api()}, action_userapikey_by_url);
 		}
 	};
 	$(document).ready(function() {
-		var dt_user_list_table = $('#user_list_table').DataTable($.extend({}, dt_ajax_options, dt_user_list_table_options));
+		var dt_user_list_table = $('#user_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_user_list_table_options));
 	});
 </script>
 {% endblock %}

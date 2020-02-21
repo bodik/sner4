@@ -38,7 +38,8 @@ def test_login_webauthn(live_server, selenium, test_user):  # pylint: disable=un
     WebDriverWait(selenium, WEBDRIVER_WAIT).until(js_variable_ready('window.pkcro_raw'))
     pkcro = cbor.decode(b64decode(selenium.execute_script('return window.pkcro_raw;').encode('utf-8')))
     assertion = device.get(pkcro, 'https://%s' % webauthn.rp.ident)
-    selenium.execute_script('authenticate_assertion(CBOR.decode(base64_to_array_buffer("%s")));' % b64encode(cbor.encode(assertion)).decode('utf-8'))
+    selenium.execute_script(
+        'authenticate_assertion(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(assertion)).decode('utf-8'))
     # and back to standard test codeflow
 
     WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))

@@ -75,23 +75,23 @@
 			var dt_host_view_service_table_options = {
 				'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
-					dt_column('id', {'visible': false}),
-					dt_column('host_id', {'visible': false}),
-					dt_column('host_address', {'visible': false}),
-					dt_column('host_hostname', {'visible': false}),
-					dt_column('proto'),
-					dt_column('port'),
-					dt_column('name'),
-					dt_column('state'),
-					dt_column('info'),
-					dt_column('tags'),
-					dt_column('comment'),
-					dt_column_buttons(storage_pagepart_service_controls)
+					Sner.dt.column('id', {'visible': false}),
+					Sner.dt.column('host_id', {'visible': false}),
+					Sner.dt.column('host_address', {'visible': false}),
+					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('proto'),
+					Sner.dt.column('port'),
+					Sner.dt.column('name'),
+					Sner.dt.column('state'),
+					Sner.dt.column('info'),
+					Sner.dt.column('tags'),
+					Sner.dt.column('comment'),
+					Sner.dt.column_buttons(storage_pagepart_service_controls)
 				],
 				'order': [[5, 'asc']]
 			};
 			$(document).ready(function() {
-				var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_service_table_options));
+				var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_service_table_options));
 			});
 		</script>
 	</div>
@@ -122,30 +122,30 @@
 			var dt_host_view_vuln_table_options = {
 				'ajax': {'url': "{{ url_for('storage.vuln_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
-					dt_column_select(),
-					dt_column('id', {'visible': false}),
-					dt_column('host_id', {'visible': false}),
-					dt_column('host_address', {'visible': false}),
-					dt_column('host_hostname', {'visible': false}),
-					dt_column('service'),
-					dt_column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
-					dt_column('xtype', {'visible': false}),
-					dt_column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
-					dt_column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
-					dt_column('tags'),
-					dt_column('comment'),
-					dt_column_buttons(storage_pagepart_vuln_controls)
+					Sner.dt.column_select(),
+					Sner.dt.column('id', {'visible': false}),
+					Sner.dt.column('host_id', {'visible': false}),
+					Sner.dt.column('host_address', {'visible': false}),
+					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('service'),
+					Sner.dt.column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
+					Sner.dt.column('xtype', {'visible': false}),
+					Sner.dt.column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
+					Sner.dt.column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
+					Sner.dt.column('tags'),
+					Sner.dt.column('comment'),
+					Sner.dt.column_buttons(storage_pagepart_vuln_controls)
 				],
 				'order': [[1, 'asc']],
 				'select': {'style': 'multi', 'selector': 'td:first-child'}
 			};
 			$(document).ready(function() {
-				var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_vuln_table_options));
-				$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, action_selectall);
-				$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, action_selectnone);
-				$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, action_tag_by_id);
-				$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, action_delete_by_id);
-				$('#host_view_vuln_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, action_tag_by_id);
+				var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_vuln_table_options));
+				$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, Sner.dt.selectall);
+				$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, Sner.dt.selectnone);
+				$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, Sner.action_tag_by_id);
+				$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, Sner.action_delete_by_id);
+				$('#host_view_vuln_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, Sner.action_tag_by_id);
 			});
 		</script>
 	</div>
@@ -156,20 +156,20 @@
 			var dt_host_view_note_table_options = {
 				'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
-					dt_column('id', {'visible': false}),
-					dt_column('host_id', {'visible': false}),
-					dt_column('host_address', {'visible': false}),
-					dt_column('host_hostname', {'visible': false}),
-					dt_column('service'),
-					dt_column('xtype'),
-					dt_column('data', {'className': 'forcewrap'}),
-					dt_column('tags'),
-					dt_column('comment'),
-					dt_column_buttons(storage_pagepart_note_controls)
+					Sner.dt.column('id', {'visible': false}),
+					Sner.dt.column('host_id', {'visible': false}),
+					Sner.dt.column('host_address', {'visible': false}),
+					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('service'),
+					Sner.dt.column('xtype'),
+					Sner.dt.column('data', {'className': 'forcewrap'}),
+					Sner.dt.column('tags'),
+					Sner.dt.column('comment'),
+					Sner.dt.column_buttons(storage_pagepart_note_controls)
 				]
 			};
 			$(document).ready(function() {
-				var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, dt_ajax_options, dt_host_view_note_table_options));
+				var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_note_table_options));
 			});
 		</script>
 	</div>

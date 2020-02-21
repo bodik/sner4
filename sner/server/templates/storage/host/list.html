@@ -8,20 +8,20 @@
 	var dt_host_list_table_options = {
 		'ajax': {'url': "{{ url_for('storage.host_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
-			dt_column('hostname'),
-			dt_column('os'),
-			dt_column('cnt_s'),
-			dt_column('cnt_v'),
-			dt_column('cnt_n'),
-			dt_column('tags'),
-			dt_column('comment'),
-			dt_column_buttons(storage_pagepart_host_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
+			Sner.dt.column('hostname'),
+			Sner.dt.column('os'),
+			Sner.dt.column('cnt_s'),
+			Sner.dt.column('cnt_v'),
+			Sner.dt.column('cnt_n'),
+			Sner.dt.column('tags'),
+			Sner.dt.column('comment'),
+			Sner.dt.column_buttons(storage_pagepart_host_controls)
 		]
 	};
 	$(document).ready(function() {
-		var dt_host_list_table = $('#host_list_table').DataTable($.extend({}, dt_ajax_options, dt_host_list_table_options));
+		var dt_host_list_table = $('#host_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_list_table_options));
 	});
 </script>
 {% endblock %}

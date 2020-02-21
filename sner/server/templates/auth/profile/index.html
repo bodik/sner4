@@ -8,10 +8,10 @@
 	var dt_profile_webauthn_table_options = {
 		'ajax': {'url': Flask.url_for('auth.profile_webauthn_list_json_route'), 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('name'),
-			dt_column('registered'),
-			dt_column_buttons(auth_pagepart_profile_webauthn_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('name'),
+			Sner.dt.column('registered'),
+			Sner.dt.column_buttons(auth_pagepart_profile_webauthn_controls)
 		],
 		'ordering': false,
 		'paging': false,
@@ -20,7 +20,7 @@
 	};
 
 	$(document).ready(function() {
-		var dt_profile_webauthn_table = $('#profile_webauthn_table').DataTable($.extend({}, dt_ajax_options, dt_profile_webauthn_table_options));
+		var dt_profile_webauthn_table = $('#profile_webauthn_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_profile_webauthn_table_options));
 	});
 </script>
 {% endblock %}

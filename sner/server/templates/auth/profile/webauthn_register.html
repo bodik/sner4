@@ -13,9 +13,9 @@
 	 */
 	function get_pkcco() {
 		return new Promise((resolve, reject) => {
-			sner_submit_form(Flask.url_for('auth.profile_webauthn_pkcco_route'))
+			Sner.submit_form(Flask.url_for('auth.profile_webauthn_pkcco_route'))
 				.done(function(data, textStatus, jqXHR) {
-					var pkcco = CBOR.decode(base64_to_array_buffer(data));
+					var pkcco = CBOR.decode(Sner.base64_to_array_buffer(data));
 					window.pkcco_raw = data; // CI helper for selenium tests
 					console.debug('credentials.create options:', pkcco);
 					resolve(pkcco);
@@ -37,7 +37,7 @@
 			'attestationObject': new Uint8Array(attestation.response.attestationObject)
 		};
 		var form = $('#webauthn_register_form')[0];
-		form.attestation.value = array_buffer_to_base64(CBOR.encode(attestation_data));
+		form.attestation.value = Sner.array_buffer_to_base64(CBOR.encode(attestation_data));
 		form.submit.disabled = false;
 		$('#webauthn_register_form div[name="attestation_data_status"]')[0].innerHTML = '<span class="text-success">Prepared</span>';
 	}

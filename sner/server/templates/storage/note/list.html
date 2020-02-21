@@ -8,20 +8,20 @@
 	var dt_note_list_table_options = {
 		'ajax': {'url': "{{ url_for('storage.note_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			dt_column('id', {'visible': false}),
-			dt_column('host_id', {'visible': false}),
-			dt_column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
-			dt_column('host_hostname'),
-			dt_column('service'),
-			dt_column('xtype'),
-			dt_column('data', {'className': 'forcewrap'}),
-			dt_column('tags'),
-			dt_column('comment'),
-			dt_column_buttons(storage_pagepart_note_controls)
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('host_id', {'visible': false}),
+			Sner.dt.column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
+			Sner.dt.column('host_hostname'),
+			Sner.dt.column('service'),
+			Sner.dt.column('xtype'),
+			Sner.dt.column('data', {'className': 'forcewrap'}),
+			Sner.dt.column('tags'),
+			Sner.dt.column('comment'),
+			Sner.dt.column_buttons(storage_pagepart_note_controls)
 		]
 	};
 	$(document).ready(function() {
-		var dt_note_list_table = $('#note_list_table').DataTable($.extend({}, dt_ajax_options, dt_note_list_table_options));
+		var dt_note_list_table = $('#note_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_note_list_table_options));
 	});
 </script>
 {% endblock %}

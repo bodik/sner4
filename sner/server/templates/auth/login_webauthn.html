@@ -13,9 +13,9 @@
 	 */
 	function get_pkcro() {
 		return new Promise((resolve, reject) => {
-			sner_submit_form(Flask.url_for('auth.login_webauthn_pkcro_route'))
+			Sner.submit_form(Flask.url_for('auth.login_webauthn_pkcro_route'))
 				.done(function(data, textStatus, jqXHR) {
-					var pkcro = CBOR.decode(base64_to_array_buffer(data));
+					var pkcro = CBOR.decode(Sner.base64_to_array_buffer(data));
 					window.pkcro_raw = data; // CI helper for selenium tests
 					console.debug('credentials.get options:', pkcro);
 					resolve(pkcro);
@@ -42,7 +42,7 @@
 		};
 
 		var form = $('#webauthn_login_form')[0];
-		form.assertion.value = array_buffer_to_base64(CBOR.encode(assertion_data));
+		form.assertion.value = Sner.array_buffer_to_base64(CBOR.encode(assertion_data));
 		form.submit();
 	}
 
@@ -62,6 +62,7 @@
 
 {% block content %}
 {% call cm.heading(['WebAuthn Login']) %}{% endcall %}
+
 <div>
 	To login with registered Webauthn authenticator
 	<ol>
@@ -70,6 +71,7 @@
 		<li>If none of you authenticator works, login normaly with password.</li>
 	</ol>
 </div>
+
 <form id="webauthn_login_form" method="post">
 	{{ form.csrf_token }}
 	{{ bwtf.bootstrap_field(form.assertion, horizontal=True) }}

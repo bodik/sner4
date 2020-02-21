@@ -32,6 +32,7 @@ def test_host_view_route_services_list(live_server, sl_operator, test_service): 
     """host view tabbed services dt tests; render and inrow delete"""
 
     sl_operator.get(url_for('storage.host_view_route', host_id=test_service.host_id, _external=True))
+    WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.visibility_of_element_located((By.ID, 'host_view_service_table')))
     dt_rendered(sl_operator, 'host_view_service_table', test_service.comment)
 
     dt_inrow_delete(sl_operator, 'host_view_service_table')

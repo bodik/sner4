@@ -35,6 +35,10 @@
 
 	<script type="text/javascript" src="{{ url_for('static', filename='handlebars/handlebars.min.js') }}"></script>
 
+	{{ JSGlue.include() }}
+
+	<script type="text/javascript" src="{{ url_for('static', filename='sner.js') }}"></script>
+
 	<style>
 		/* content vs navbar spacing */
 		body { padding-top: 4rem; }
@@ -60,225 +64,15 @@
 		.striked { text-decoration: line-through !important; }
 	</style>
 
-
-	{{ JSGlue.include() }}
-
-	<script type="text/javascript">
-		// ui helpers and callbacks
-		//
-		/**
-		 * encode ArrayBuffer to base64
-		 *
-		 * @param  {ArrayBuffer} buffer buffer to encode
-		 * @return {string}             encoded buffer
-		 */
-		function array_buffer_to_base64(buffer) {
-			return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-		}
-
-		/**
-		 * decode base64 data to ArrayBuffer
-		 *
-		 * @param  {string}      data data to decode
-		 * @return {ArrayBuffer}      decoded data
-		 */
-		function base64_to_array_buffer(data) {
-			return Uint8Array.from(atob(data), c => c.charCodeAt(0)).buffer;
-		}
-
-		/*
-		 * will rerender element with hbs acording to data attributes
-		 *  - data-hbs (hbs compiled template)
-		 *  - data-hbs_context (json context for the template)
-		 * @param {DOMElement} elem - element to rerender
-		 */
-		function render_hbs(elem) {
-			var hbs = elem.getAttribute('data-hbs');
-			var context = JSON.parse(elem.getAttribute('data-hbs_context'));
-			elem.innerHTML = window[hbs](context);
-		}
-
-		/*
-		 * sner submit form
-		 */
-		function sner_submit_form(url, data={}) {
-			data['csrf_token'] = $('meta[name="csrf-token"]').attr('content');
-			return $.ajax({"url": url,"type": "POST", "data": data})
-				.fail(function(xhr, status, exception) { toastr.error(xhr.hasOwnProperty('responseJSON') ? xhr.responseJSON["title"] : 'Request failed'); });
-		}
-
-		/*
-		 * show global/shared modal with title and body
-		 */
-		function sner_modal(title, body) {
-			$('#modal-global .modal-title').html(title);
-			$('#modal-global .modal-body').html(body);
-			$('#modal-global').modal();
-		}
-
-		/*
-		 * action select all from table
-		 */
-		function action_selectall(event) { event.data.dt.rows(null, {'page': 'current'}).select(); }
-
-		/*
-		 * action select none from dt
-		 */
-		function action_selectnone(event) { event.data.dt.rows(null, {'page': 'current'}).deselect(); }
-
-		/*
-		 * action tag multiple items
-		 * @param {object} event - event with data {'dt': datatable instance, 'tag': string}
-		 */
-		function action_tag_by_id(event) {
-			var data = {
-				'tag': event.target.getAttribute('data-tag'),
-				'action': event.data.action
-			};
-			var ids = dt_get_selected_ids(event.data.dt);
-			if (ids.length == 0) {
-				toastr.warning('No items selected');
-				return Promise.resolve();
-			}
-			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
-
-			sner_submit_form(event.data.url, data)
-				.always(function() { event.data.dt.draw(); });
-		}
-
-		/**
-		 * action delete multiple items
-		 * @param {object} event - event with data {'dt': datatable instance}
-		 */
-		function action_delete_by_id(event) {
-			if (!confirm('Really delete?')) { return; }
-
-			var data = {};
-			var ids = dt_get_selected_ids(event.data.dt);
-			if (ids.length == 0) {
-				toastr.warning('No items selected');
-				return Promise.resolve();
-			}
-			for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
-
-			sner_submit_form(event.data.url, data)
-				.always(function() { event.data.dt.draw(); });
-		}
-
-		/**
-		 * action submit by url with confirmation dialog
-		 * @param {object} event - event with data {'dt': datatable instance, 'confirmation': string}
-		 */
-		function action_submit_by_url(event) {
-			var confirmation = event.data.hasOwnProperty('confirmation') ? event.data.confirmation : 'Are you sure?';
-			if (!confirm(confirmation)) { return; }
-
-			sner_submit_form(event.target.closest('a').getAttribute('data-url'))
-				.always(function() { event.data.dt.draw(); });
-		}
-
-
-		// ajaxed datatables helpers
-		//
-		/**
-		 * datatables select helper, returns array of selected rows/data ids
-		 * @param {object} dt - datatable instance
-		 */
-		function dt_get_selected_ids(dt) {
-			// would use .map return item[x], but it does not cleanup other row attrs
-			var ids = [];
-			dt.rows({'selected': true}).data().each(function(item) { ids.push(item['id']) });
-			return ids;
-		};
-
-		/**
-		 * datatables helper, toggles pagination if needed
-		 * @param {object} dt - datatable instance
-		 */
-		function dt_toggle_pagination(dt) {
-			var pagination = $('#'+dt.table().node().id+'_wrapper .dataTables_paginate');
-			if (dt.page.info().pages <= 1) { pagination.hide(); } else { pagination.show();	}
-		}
-
-		/**
-		 * datatables helper, generate object of basic column options and non-html rendering
-		 * @param {string} d - column name
-		 * @param {object} extra - extra data to inject into column definition
-		 */
-		function dt_column(d, extra={}) {
-			return $.extend({'name': d, 'title': d, 'data': d, 'render': $.fn.dataTable.render.text()}, extra);
-		}
-
-		/**
-		 * datatables helper, generate _select column definition
-		 */
-		function dt_column_select() { return {'name': '_select', 'title': '', 'data': null, 'defaultContent': '', 'orderable': false, 'className': 'select-checkbox'}; }
-
-		/**
-		 * datatables helper, generate _select column definition
-		 * @param {callback} render - function to render cell, typically compiled hbs template
-		 */
-		function dt_column_buttons(render_callback=null, extra={}) {
-			return $.extend({'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'className': 'dt-nowrap', 'render': function (data, type, row, meta) { return render_callback(row); }}, extra);
-		}
-
-		/**
-		 * datatables helper, default ajax enhanced dt options
-		 */
-		var dt_ajax_options = {
-			// general settings
-			'serverSide': true,
-			'processing': true,
-
-			// visuals
-			'dom': '<"row"<"col-sm-6"l><"col-sm-6"f>> <"row"<"col-sm-12"p>> <"row"<"col-sm-12"rt>> <"row"<"col-sm-6"i><"col-sm-6"p>>',
-			'info': true,
-			'paging': true,
-			'pageLength': 50,
-			'lengthMenu': [ 10, 50, 100, 200, 500, 1000 ],
-
-			// behaviors
-			'drawCallback': function (settings) {
-				dt_toggle_pagination(this.api());
-				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really delete?'}, action_submit_by_url);
-			},
-			'stateSave': true,
-			// paging might get broken when transiting from high page of non-filtered table to filtered one with few row, state key must reflect the filter
-			'stateSaveCallback': function(settings,data) { sessionStorage.setItem('DataTables_'+settings.sInstance+'_'+window.location.pathname+'_'+window.location.search, JSON.stringify(data)); },
-			'stateLoadCallback': function(settings) { return JSON.parse(sessionStorage.getItem('DataTables_'+settings.sInstance+'_'+window.location.pathname+'_'+window.location.search)); }
-		};
-
-
-		// simple static static datatables
-		//
-		var dt_static_options = {
-			'columnDefs': [ {
-				'targets': 'no-sort',
-				'orderable': false,
-			} ],
-			'order': [[0, 'asc']],
-			'paging': false,
-			'info': false
-		};
-
-
-		// common startups
-		//
-		$(document).ready(function() {
-			if (typeof dt_static_custom !== 'undefined') {
-				dt_static_options = $.extend({}, dt_static_options, dt_static_custom);
-			}
-			$('.dt_static').DataTable(dt_static_options);
-
-			$('.tageditor').tagEditor({'delimiter': '\n'});
-			$('.render_hbs').each(function(index, elem) { render_hbs(elem); });
-		});
-	</script>
-
-
 	{% include 'auth/pageparts.html' %}
 	{% include 'scheduler/pageparts.html' %}
 	{% include 'storage/pageparts.html' %}
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			Sner.app_startup();
+		});
+	</script>
 
 	{% block style %}{% endblock %}
 	{% block script %}{% endblock %}
@@ -351,7 +145,7 @@
 
 	<script type="text/javascript">
 		toastr.options = {
-			"positionClass": "toast-top-right",
+			'positionClass': 'toast-top-right',
 		};
 		{% for category, message in get_flashed_messages(with_categories=true) %}
 		toastr['{{ category }}']('{{ message }}');

@@ -7,7 +7,7 @@
 <script type="text/javascript">
 function action_vuln_tag(event) {
 	var data = JSON.parse(event.target.closest('a').getAttribute('data-tagaction'));
-	sner_submit_form(Flask.url_for('storage.vuln_tag_by_id_route'), data)
+	Sner.submit_form(Flask.url_for('storage.vuln_tag_by_id_route'), data)
 		.always(function() { window.location.reload(); });
 }
 

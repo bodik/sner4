@@ -26,7 +26,7 @@ def test_profile_webauthn_register_route(live_server, sl_user):  # pylint: disab
     WebDriverWait(sl_user, WEBDRIVER_WAIT).until(js_variable_ready('window.pkcco_raw'))
     pkcco = cbor.decode(b64decode(sl_user.execute_script('return window.pkcco_raw;').encode('utf-8')))
     attestation = device.create(pkcco, 'https://%s' % webauthn.rp.ident)
-    sl_user.execute_script('pack_attestation(CBOR.decode(base64_to_array_buffer("%s")));' % b64encode(cbor.encode(attestation)).decode('utf-8'))
+    sl_user.execute_script('pack_attestation(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(attestation)).decode('utf-8'))
     # and back to standard test codeflow
     sl_user.find_element_by_xpath('//form[@id="webauthn_register_form"]//input[@name="name"]').send_keys('pytest token')
     sl_user.find_element_by_xpath('//form[@id="webauthn_register_form"]//input[@type="submit"]').click()
