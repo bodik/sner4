@@ -95,7 +95,7 @@ class SnerDatatablesModule {
 		event.data.dt.rows(null, {'page': 'current'}).select();
 	}
 
-	/*
+	/**
 	 * Select none from table
 	 *
 	 * @param {Object} event jquery event, event.data.dt datatable instance reference required
@@ -119,17 +119,18 @@ class SnerDatatablesModule {
 	}
 
 	/**
-	 * returns array of selected rows/data ids
+	 * returns selected row ids as form data
 	 *
 	 * @param {object} dt - datatable instance
 	 */
-	get_selected_ids(dt) {
-		// would use .map return item[x], but it does not cleanup other row attrs
-		var ids = [];
-		dt.rows({'selected': true}).data().each(
-			(item) => { ids.push(item['id']) }
-		);
-		return ids;
+	selected_ids_form_data(dt) {
+		var data = {};
+		var i = 0;
+		dt.rows({'selected': true}).data().each(function(item) {
+			data['ids-'+i] = item['id'];
+			i++;
+		});
+		return data;
 	}
 }
 
@@ -216,23 +217,19 @@ class SnerModule {
 
 	/* ACTION FUNCTIONS, BUTTON EVENT HANDLERS */
 
-	/*
+	/**
 	 * tag multiple items
 	 *
 	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string}
 	 */
 	action_tag_by_id(event) {
-		var data = {
-			'tag': event.target.getAttribute('data-tag'),
-			'action': event.data.action
-		};
-		var ids = Sner.dt.get_selected_ids(event.data.dt);
-		if (ids.length == 0) {
+		var data = Sner.dt.selected_ids_form_data(event.data.dt);
+		if ($.isEmptyObject(data)) {
 			toastr.warning('No items selected');
 			return Promise.resolve();
 		}
-		for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
-
+		data['tag'] = event.target.getAttribute('data-tag');
+		data['action'] = event.data.action;
 		Sner.submit_form(event.data.url, data)
 			.always(function() { event.data.dt.draw(); });
 	}
@@ -245,14 +242,11 @@ class SnerModule {
 	action_delete_by_id(event) {
 		if (!confirm('Really delete?')) { return; }
 
-		var data = {};
-		var ids = Sner.dt.get_selected_ids(event.data.dt);
-		if (ids.length == 0) {
+		var data = Sner.dt.selected_ids_form_data(event.data.dt);
+		if ($.isEmptyObject(data)) {
 			toastr.warning('No items selected');
 			return Promise.resolve();
 		}
-		for (var i = 0; i < ids.length; i++) { data['ids-'+i] = ids[i]; }
-
 		Sner.submit_form(event.data.url, data)
 			.always(function() { event.data.dt.draw(); });
 	}

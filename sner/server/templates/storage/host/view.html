@@ -68,6 +68,7 @@
 	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns</a></li>
 	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes</a></li>
 </ul>
+
 <div class="tab-content">
 	<div class="tab-pane" id="services">
 		<table id="host_view_service_table" class="table table-hover table-sm" width="100%"></table>
@@ -144,8 +145,8 @@
 				$('#host_view_vuln_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vuln_table}, Sner.dt.selectall);
 				$('#host_view_vuln_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vuln_table}, Sner.dt.selectnone);
 				$('#host_view_vuln_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'set'}, Sner.action_tag_by_id);
-				$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': "{{ url_for('storage.vuln_delete_by_id_route') }}"}, Sner.action_delete_by_id);
 				$('#host_view_vuln_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_tag_by_id_route'), 'action': 'unset'}, Sner.action_tag_by_id);
+				$('#host_view_vuln_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_host_view_vuln_table, 'url': Flask.url_for('storage.vuln_delete_by_id_route')}, Sner.action_delete_by_id);
 			});
 		</script>
 	</div>
