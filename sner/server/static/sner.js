@@ -32,7 +32,7 @@ class SnerDatatablesModule {
 			'drawCallback': function (settings) {
 				// note this holds a datatable instance here
 				Sner.dt.toggle_pagination(this.api());
-				this.find('td a.abutton_delete_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really delete?'}, Sner.action_submit_by_url);
+				this.find('td a.abutton_submit_dataurl_delete').on('click', {'dt': this.api(), 'confirmation': 'Really delete?'}, Sner.action_submit_dataurl);
 			},
 			'stateSave': true,
 			// paging might get broken when transiting from high page of non-filtered table to filtered one with few row, state key must reflect the filter
@@ -218,6 +218,19 @@ class SnerModule {
 	/* ACTION FUNCTIONS, BUTTON EVENT HANDLERS */
 
 	/**
+	 * submit form to data-url of an A element with confirmation dialogue
+	 *
+	 * @param {object} event jquery event. data required {'dt': datatable instance, 'confirmation': string}
+	 */
+	action_submit_dataurl(event) {
+		var confirmation = event.data.hasOwnProperty('confirmation') ? event.data.confirmation : 'Are you sure?';
+		if (!confirm(confirmation)) { return; }
+
+		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
+			.always(function() { event.data.dt.draw(); });
+	}
+
+	/**
 	 * tag multiple items
 	 *
 	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string}
@@ -248,19 +261,6 @@ class SnerModule {
 			return Promise.resolve();
 		}
 		Sner.submit_form(event.data.url, data)
-			.always(function() { event.data.dt.draw(); });
-	}
-
-	/**
-	 * submit form to data-url of an A element with confirmation dialogue
-	 *
-	 * @param {object} event jquery event. data required {'dt': datatable instance, 'confirmation': string}
-	 */
-	action_submit_by_url(event) {
-		var confirmation = event.data.hasOwnProperty('confirmation') ? event.data.confirmation : 'Are you sure?';
-		if (!confirm(confirmation)) { return; }
-
-		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
 			.always(function() { event.data.dt.draw(); });
 	}
 }

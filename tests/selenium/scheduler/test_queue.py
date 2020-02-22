@@ -33,7 +33,7 @@ def test_queue_list_route_inrow_flush(live_server, sl_operator, test_target):  #
 
     sl_operator.get(url_for('scheduler.queue_list_route', _external=True))
     dt_wait_processing(sl_operator, dt_id)
-    sl_operator.find_element_by_id(dt_id).find_element_by_class_name('abutton_queueflush_by_url').click()
+    sl_operator.find_element_by_id(dt_id).find_element_by_class_name('abutton_submit_dataurl_queueflush').click()
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.alert_is_present())
     sl_operator.switch_to.alert.accept()
     dt_wait_processing(sl_operator, dt_id)

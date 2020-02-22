@@ -37,7 +37,7 @@ def dt_inrow_delete(selenium, dt_id, index=0):
     """test delete row/item rendered in _buttons by default ajaxed datatables"""
 
     dt_wait_processing(selenium, dt_id)
-    selenium.find_element_by_id(dt_id).find_elements_by_class_name('abutton_delete_by_url')[index].click()
+    selenium.find_element_by_id(dt_id).find_elements_by_class_name('abutton_submit_dataurl_delete')[index].click()
     WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.alert_is_present())
     selenium.switch_to.alert.accept()
     dt_wait_processing(selenium, dt_id)

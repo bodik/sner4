@@ -5,7 +5,7 @@
 
 {% block script %}
 <script type="text/javascript">
-	function action_userapikey_by_url(event) {
+	function action_userapikey(event) {
 		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
 			.done(function(data, textStatus, jqXHR) { Sner.modal(data.title, data.detail); })
 			.always(function() { event.data.dt.draw(); });
@@ -24,7 +24,7 @@
 		],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
-			this.find('td a.abutton_userapikey_by_url').on('click', {'dt': this.api()}, action_userapikey_by_url);
+			this.find('td a.abutton_userapikey').on('click', {'dt': this.api()}, action_userapikey);
 		}
 	};
 	$(document).ready(function() {

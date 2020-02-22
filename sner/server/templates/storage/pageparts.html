@@ -13,7 +13,7 @@
 	</div>
 	<div class="btn-group btn-group-sm">
 		<a class="btn btn-outline-secondary" href="{{> storage.host_edit_route host_id=id}}"><i class="fas fa-edit"></i></a>
-		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.host_delete_route host_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+		<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.host_delete_route host_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 	</div>
 </script>
 
@@ -25,7 +25,7 @@
 	</div>
 	<div class="btn-group btn-group-sm">
 		<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
-		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+		<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 	</div>
 </script>
 
@@ -53,7 +53,7 @@
 <script id="storage.pagepart-vuln_controls.hbs" type="text/x-handlebars-template">
 	<div class="btn-group btn-group-sm">
 		<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}"><i class="fas fa-edit"></i></a>
-		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+		<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 	</div>
 </script>
 
@@ -65,7 +65,7 @@
 	<div class="btn-group btn-group-sm">
 		<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}"><i class="fas fa-eye"></i></a>
 		<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}"><i class="fas fa-edit"></i></a>
-		<a class="btn btn-outline-secondary abutton_delete_by_url" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+		<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 	</div>
 </script>
 {% endraw %}

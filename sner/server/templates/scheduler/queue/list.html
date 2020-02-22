@@ -21,8 +21,8 @@
 		],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
-			this.find('td a.abutton_queueflush_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_by_url);
-			this.find('td a.abutton_queueprune_by_url').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, Sner.action_submit_by_url);
+			this.find('td a.abutton_submit_dataurl_queueflush').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_dataurl);
+			this.find('td a.abutton_submit_dataurl_queueprune').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, Sner.action_submit_dataurl);
 		}
 	};
 	$(document).ready(function() {
