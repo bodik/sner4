@@ -1,4 +1,5 @@
 /* This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. */
+'use strict';
 
 /*
  * sner ui function bundled to simple modules
@@ -8,10 +9,32 @@
  * soft concept here. On the first occurence of troubles (datatables callback this(dt instance)
  * vs. event callbacks this(event element) we should fall back to Revealing Module Pattern immediatelly.
  */
-'use strict';
+
+
+class SnerComponentBase {
+	constructor() {
+		this.partials = {};
+		this.helpers = {};
+		this.hbs = {};
+	}
+
+	setup() {
+		/* register partial routes */
+		for (var [name, params] of Object.entries(this.partials)) {
+			Handlebars.registerPartial(name, Flask.url_for(...params));
+		};
+		/* register helpers */
+		for (var [name, impl] of Object.entries(this.helpers)) {
+			Handlebars.registerHelper(name, impl);
+		};
+		/* compile templates */
+		for (var [name, src] of Object.entries(this.hbs_source)) {
+			this.hbs[name] = Handlebars.compile(src);
+		};
+	}
+}
 
 class SnerDatatablesModule {
-
 	constructor() {
 		/**
 		 * default ajaxed datatables options
@@ -137,19 +160,31 @@ class SnerDatatablesModule {
 
 class SnerModule {
 	constructor() {
+		/* register all flask-jsglue routes as partials */
+		for (var [index, [route_name, route_parts, route_args]] of Object.entries(Flask._endpoints)) {
+			var template_context = {};
+			route_args.forEach((item) => {
+				template_context[item] = `{{${item}}}`;
+			});
+			Handlebars.registerPartial(route_name, Flask.url_for(route_name, template_context));
+		};
+
+		/* create all compound modules and components */
 		this.dt = new SnerDatatablesModule();
+		this.auth = new SnerAuthComponent();
+		this.scheduler = new SnerSchedulerComponent();
+		this.storage = new SnerStorageComponent();
+
+		/* hook app components startup */
+		$(document).ready(function() {
+			var dt_static_options = $.extend({}, Sner.dt.static_options, (typeof dt_static_custom !== 'undefined' ? dt_static_custom : {}));
+			$('.dt_static').DataTable(dt_static_options);
+
+			$('.tageditor').tagEditor({'delimiter': '\n'});
+			$('.render_hbs').each(function(index, elem) { Sner.render_hbs(elem); });
+		});
 	}
 
-	/**
-	 * common app components startup
-	 */
-	app_startup() {
-		var dt_static_options = $.extend({}, Sner.dt.static_options, (typeof dt_static_custom !== 'undefined' ? dt_static_custom : {}));
-		$('.dt_static').DataTable(dt_static_options);
-
-		$('.tageditor').tagEditor({'delimiter': '\n'});
-		$('.render_hbs').each(function(index, elem) { Sner.render_hbs(elem); });
-	}
 
 	/* WEBAUTHN UTILS */
 
@@ -188,6 +223,7 @@ class SnerModule {
 		$('#modal-global').modal();
 	}
 
+
 	/**
 	 * Will rerender hbs with context taken from data-hbs attributes.
 	 * The element must contain 'data-hbs' attribute (hbs compiled template name) and 'data-hbs_context' attribute (context data encoded in json)
@@ -195,9 +231,15 @@ class SnerModule {
 	 * @param {DOMElement} elem data and output enclosing element reference
 	 */
 	render_hbs(elem) {
+		/**
+		 * function resolver helper
+		 * https://stackoverflow.com/a/43849204/8326867
+		 */
+		function _function_by_path(object, path, defaultValue=console.error) { return path.split('.').reduce((o, p) => o ? o[p] : defaultValue, object); };
+
 		var hbs = elem.getAttribute('data-hbs');
 		var context = JSON.parse(elem.getAttribute('data-hbs_context'));
-		elem.innerHTML = window[hbs](context);
+		elem.innerHTML = _function_by_path(Sner, hbs)(context);
 	}
 
 	/**
@@ -264,6 +306,3 @@ class SnerModule {
 			.always(function() { event.data.dt.draw(); });
 	}
 }
-
-/* NOTE: should be a const, but selenium.execute_script does not recognize the library object in that case with ReferenceError */
-var Sner = new SnerModule();

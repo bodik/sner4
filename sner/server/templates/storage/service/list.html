@@ -10,7 +10,7 @@
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('host_id', {'visible': false}),
-			Sner.dt.column('host_address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link(row); }}),
+			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
 			Sner.dt.column('host_hostname'),
 			Sner.dt.column('proto'),
 			Sner.dt.column('port'),
@@ -19,7 +19,7 @@
 			Sner.dt.column('info'),
 			Sner.dt.column('tags'),
 			Sner.dt.column('comment'),
-			Sner.dt.column_buttons(storage_pagepart_service_controls)
+			Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 		]
 	};
 	$(document).ready(function() {

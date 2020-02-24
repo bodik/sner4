@@ -1,0 +1,96 @@
+/* This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. */
+'use strict';
+
+class SnerStorageComponent extends SnerComponentBase {
+	constructor() {
+		super();
+
+		this.partials = {
+			'storage.service_list_route_filter_info': ['storage.service_list_route', {'filter': 'Service.info ilike "{{filter_value}}%"'}],
+			'storage.service_list_route_filter_info_null': ['storage.service_list_route', {'filter': 'Service.info is_null ""'}],
+			'storage.vuln_list_route_filter_name': ['storage.vuln_list_route', {'filter': 'Vuln.name=="{{filter_value}}"'}]
+		};
+
+		this.helpers = {
+			/* generate url for ref; python version used during export must remain in sync */
+			'url_for_ref': function(ref) {
+				var refgen = {
+					'URL': (d) => d,
+					'CVE': (d) => 'https://cvedetails.com/cve/CVE-' + d,
+					'NSS': (d) => 'https://www.tenable.com/plugins/nessus/' + d,
+					'BID': (d) => 'http://www.securityfocus.com/bid/' + d,
+					'CERT': (d) => 'https://www.kb.cert.org/vuls/id/' + d,
+					'EDB': (d) => 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
+					'SN': (d) => Flask.url_for('storage.note_view_route', {'note_id': d})
+				};
+				try {
+					var matched = ref.match(/(.*?)\-(.*)/);
+					return refgen[matched[1]](matched[2])
+				} catch (err) {
+					//pass
+				}
+				return '#';
+			},
+			/* generate text for ref */
+			'text_for_ref': function(ref) {
+				return (ref.startsWith('URL-')) ? 'URL' : ref;
+			},
+			/* get class for severity label */
+			'color_for_severity': function(severity) {
+				var colors = {'unknown': 'badge-secondary', 'info': 'badge-light', 'low': 'badge-info', 'medium': 'badge-primary', 'high': 'badge-warning', 'critical': 'badge-danger'};
+				return (severity in colors) ? colors[severity] : 'badge-secondary';
+			}
+		};
+
+		this.hbs_source = {
+			'host_link': `<a href="{{> storage.host_view_route host_id=host_id}}">{{host_address}}</a>`,
+			'host_controls': `
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.service_add_route host_id=id}}">Service</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='host' model_id=id}}">Vuln</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='host' model_id=id}}">Note</a>
+				</div>
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" href="{{> storage.host_edit_route host_id=id}}"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.host_delete_route host_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+				</div>`,
+
+			'service_controls': `
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Vuln</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='service' model_id=id}}">Note</a>
+				</div>
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+				</div>`,
+			'service_list_filter_info_link': `
+				{{# if info}}
+					<a href='{{> storage.service_list_route_filter_info filter_value=info_encoded}}'>{{info}}</a>
+				{{ else }}
+					<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="fas fa-list"></span></a>
+				{{/if}}`,
+
+			'vuln_link': `<a href="{{> storage.vuln_view_route vuln_id=id}}">{{name}}</a>`,
+			'severity_label': `<span class="badge {{color_for_severity severity}}">{{severity}}</span>`,
+			'vuln_refs': `{{#each refs}}<a rel="noreferrer" href="{{url_for_ref this}}">{{text_for_ref this}}</a> {{/each}}`,
+			'vuln_controls': `
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+				</div>`,
+			'vuln_list_filter_name_link': `<a href='{{> storage.vuln_list_route_filter_name filter_value=name_encoded}}'>{{name}}</a>`,
+
+			'note_controls': `
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}"><i class="fas fa-eye"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+			</div>`,
+		};
+
+		super.setup();
+	}
+}

@@ -37,7 +37,14 @@
 
 	{{ JSGlue.include() }}
 
-	<script type="text/javascript" src="{{ url_for('static', filename='sner.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.auth.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.scheduler.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.storage.js') }}"></script>
+	<script type="text/javascript">
+		/* NOTE: might be const here, but it does not work inside selenium */
+		var Sner = new SnerModule();
+	</script>
 
 	<style>
 		/* content vs navbar spacing */
@@ -63,16 +70,6 @@
 		/* other */
 		.striked { text-decoration: line-through !important; }
 	</style>
-
-	{% include 'auth/pageparts.html' %}
-	{% include 'scheduler/pageparts.html' %}
-	{% include 'storage/pageparts.html' %}
-
-	<script type="text/javascript">
-		$(document).ready(function() {
-			Sner.app_startup();
-		});
-	</script>
 
 	{% block style %}{% endblock %}
 	{% block script %}{% endblock %}

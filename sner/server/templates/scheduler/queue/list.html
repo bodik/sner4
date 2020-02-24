@@ -17,7 +17,7 @@
 			Sner.dt.column('active'),
 			Sner.dt.column('nr_targets'),
 			Sner.dt.column('nr_jobs'),
-			Sner.dt.column_buttons(scheduler_pagepart_queue_controls)
+			Sner.dt.column_buttons(Sner.scheduler.hbs.queue_controls)
 		],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent

@@ -9,7 +9,7 @@
 		'ajax': {'url': "{{ url_for('storage.host_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
-			Sner.dt.column('address', {'render': function (data, type, row, meta) { return storage_pagepart_host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
+			Sner.dt.column('address', {'render': function (data, type, row, meta) { return Sner.storage.hbs.host_link({'host_id': row['id'], 'host_address': row['address']}); }}),
 			Sner.dt.column('hostname'),
 			Sner.dt.column('os'),
 			Sner.dt.column('cnt_s'),
@@ -17,7 +17,7 @@
 			Sner.dt.column('cnt_n'),
 			Sner.dt.column('tags'),
 			Sner.dt.column('comment'),
-			Sner.dt.column_buttons(storage_pagepart_host_controls)
+			Sner.dt.column_buttons(Sner.storage.hbs.host_controls)
 		]
 	};
 	$(document).ready(function() {

@@ -87,7 +87,7 @@
 					Sner.dt.column('info'),
 					Sner.dt.column('tags'),
 					Sner.dt.column('comment'),
-					Sner.dt.column_buttons(storage_pagepart_service_controls)
+					Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 				],
 				'order': [[5, 'asc']]
 			};
@@ -129,13 +129,13 @@
 					Sner.dt.column('host_address', {'visible': false}),
 					Sner.dt.column('host_hostname', {'visible': false}),
 					Sner.dt.column('service'),
-					Sner.dt.column('name', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_link(row); }}),
+					Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_link(row); }}),
 					Sner.dt.column('xtype', {'visible': false}),
-					Sner.dt.column('severity', {'render': function (data, type, row, meta) { return storage_pagepart_severity_label(row); }}),
-					Sner.dt.column('refs', {'render': function (data, type, row, meta) { return storage_pagepart_vuln_refs(row); }}),
+					Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
+					Sner.dt.column('refs', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_refs(row); }}),
 					Sner.dt.column('tags'),
 					Sner.dt.column('comment'),
-					Sner.dt.column_buttons(storage_pagepart_vuln_controls)
+					Sner.dt.column_buttons(Sner.storage.hbs.vuln_controls)
 				],
 				'order': [[1, 'asc']],
 				'select': {'style': 'multi', 'selector': 'td:first-child'}
@@ -166,7 +166,7 @@
 					Sner.dt.column('data', {'className': 'forcewrap'}),
 					Sner.dt.column('tags'),
 					Sner.dt.column('comment'),
-					Sner.dt.column_buttons(storage_pagepart_note_controls)
+					Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 				]
 			};
 			$(document).ready(function() {

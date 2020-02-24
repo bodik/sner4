@@ -38,7 +38,7 @@ $(document).ready(function() {
 		<tr>
 			<th>host</th>
 			<td>
-				<span class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</span>
+				<span class="render_hbs" data-hbs="storage.hbs.host_link" data-hbs_context='{{ {'host_id': vuln.host.id, 'host_address': vuln.host.address}|tojson }}'>{{ vuln.host.address }}</span>
 				{{ vuln.host.hostname }}
 			</td>
 			<th>service</th>
@@ -50,13 +50,13 @@ $(document).ready(function() {
 
 			<th>severity</th>
 			<td>
-				<span class="render_hbs" data-hbs="storage_pagepart_severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</span>
+				<span class="render_hbs" data-hbs="storage.hbs.severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</span>
 			</td>
 		</tr>
 		<tr>
 			<th>refs</th>
 			<td>
-				<span class="render_hbs" data-hbs="storage_pagepart_vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
+				<span class="render_hbs" data-hbs="storage.hbs.vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
 			</td>
 			<th>tags</th>
 			<td>

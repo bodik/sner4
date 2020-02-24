@@ -17,10 +17,10 @@
 			Sner.dt.column('id'),
 			Sner.dt.column('username'),
 			Sner.dt.column('email'),
-			Sner.dt.column('apikey', {'render': function (data, type, row, meta) { return auth_pagepart_user_apikey_controls({'user_id': row['id'], 'apikey': row['apikey'], 'action': row['apikey'] ? 'revoke' : 'generate'}); }}),
+			Sner.dt.column('apikey', {'render': function(data, type, row, meta) { return Sner.auth.hbs.user_apikey_controls({'user_id': row['id'], 'apikey': row['apikey'], 'action': row['apikey'] ? 'revoke' : 'generate'}); }}),
 			Sner.dt.column('roles'),
 			Sner.dt.column('active'),
-			Sner.dt.column_buttons(auth_pagepart_user_controls)
+			Sner.dt.column_buttons(Sner.auth.hbs.user_controls)
 		],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
