@@ -9,6 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.model.storage import Host
+from tests.server.controller.storage import check_annotate
 from tests.server.model.storage import create_test_host
 
 
@@ -80,6 +81,12 @@ def test_host_delete_route(cl_operator, test_host):
 
     host = Host.query.filter(Host.id == test_host.id).one_or_none()
     assert not host
+
+
+def test_host_annotate_route(cl_operator, test_host):
+    """host annotate route test"""
+
+    check_annotate(cl_operator, 'storage.host_annotate_route', test_host)
 
 
 def test_host_view_route(cl_operator, test_host):

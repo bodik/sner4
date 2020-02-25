@@ -10,6 +10,7 @@ from flask import url_for
 
 from sner.server.model.storage import Vuln
 from tests.server import get_csrf_token
+from tests.server.controller.storage import check_annotate
 from tests.server.model.storage import create_test_vuln
 
 
@@ -85,6 +86,12 @@ def test_vuln_delete_route(cl_operator, test_vuln):
 
     vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
     assert not vuln
+
+
+def test_vuln_annotate_route(cl_operator, test_vuln):
+    """vuln annotate route test"""
+
+    check_annotate(cl_operator, 'storage.vuln_annotate_route', test_vuln)
 
 
 def test_vuln_view_route(cl_operator, test_vuln):

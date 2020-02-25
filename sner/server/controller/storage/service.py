@@ -11,7 +11,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.auth import role_required
-from sner.server.controller.storage import blueprint
+from sner.server.controller.storage import annotate_model, blueprint
 from sner.server.form import ButtonForm
 from sner.server.form.storage import ServiceForm
 from sner.server.model.storage import Host, Service
@@ -111,6 +111,13 @@ def service_delete_route(service_id):
         return redirect(url_for('storage.host_view_route', host_id=service.host_id))
 
     return render_template('button-delete.html', form=form)
+
+
+@blueprint.route('/service/annotate/<model_id>', methods=['GET', 'POST'])
+@role_required('operator')
+def service_annotate_route(model_id):
+    """annotate service"""
+    return annotate_model(Service, model_id)
 
 
 @blueprint.route('/service/grouped')

@@ -17,10 +17,14 @@
 			Sner.dt.column('name'),
 			Sner.dt.column('state'),
 			Sner.dt.column('info'),
-			Sner.dt.column('tags'),
-			Sner.dt.column('comment'),
+			Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
-		]
+		],
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.service_annotate_route'}, Sner.storage.action_annotate);
+		}
 	};
 	$(document).ready(function() {
 		var dt_service_list_table = $('#service_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_service_list_table_options));

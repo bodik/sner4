@@ -3,11 +3,14 @@
 selenium storage ui tests shared functions
 """
 
+from flask import url_for
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server.model.storage import Vuln
-from tests.selenium import dt_wait_processing, WEBDRIVER_WAIT
+from tests.selenium import dt_rendered, dt_wait_processing, no_ajax_pending, WEBDRIVER_WAIT
 
 
 def check_select_rows(selenium, dt_id):
@@ -64,3 +67,22 @@ def check_vulns_multiactions(selenium, dt_id):
     selenium.switch_to.alert.accept()
     dt_wait_processing(selenium, dt_id)
     assert not Vuln.query.all()
+
+
+def check_annotate(slnt, route_name, table_name, test_model):
+    """check annotate functionality"""
+
+    slnt.get(url_for(route_name, _external=True))
+    dt_rendered(slnt, table_name, test_model.comment)
+
+    # disable fade, the timing interferes with the test
+    slnt.execute_script('$("div#modal-global").toggleClass("fade")')
+    ActionChains(slnt).double_click(slnt.find_element_by_xpath('//td[contains(@class, "abutton_annotate")]')).perform()
+    WebDriverWait(slnt, WEBDRIVER_WAIT).until(
+        EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Annotate"]')))
+
+    slnt.find_element_by_css_selector('#modal-global form textarea[name="comment"]').send_keys('annotated comment')
+    slnt.find_element_by_css_selector('#modal-global form').submit()
+    WebDriverWait(slnt, WEBDRIVER_WAIT).until(no_ajax_pending())
+
+    assert 'annotated comment' in test_model.__class__.query.get(test_model.id).comment

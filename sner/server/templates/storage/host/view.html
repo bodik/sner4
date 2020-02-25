@@ -85,11 +85,15 @@
 					Sner.dt.column('name'),
 					Sner.dt.column('state'),
 					Sner.dt.column('info'),
-					Sner.dt.column('tags'),
-					Sner.dt.column('comment'),
+					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 				],
-				'order': [[5, 'asc']]
+				'order': [[5, 'asc']],
+				'drawCallback': function (settings) {
+					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.service_annotate_route'}, Sner.storage.action_annotate);
+				}
 			};
 			$(document).ready(function() {
 				var dt_host_view_service_table = $('#host_view_service_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_service_table_options));
@@ -133,12 +137,16 @@
 					Sner.dt.column('xtype', {'visible': false}),
 					Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
 					Sner.dt.column('refs', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_refs(row); }}),
-					Sner.dt.column('tags'),
-					Sner.dt.column('comment'),
+					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.vuln_controls)
 				],
 				'order': [[1, 'asc']],
-				'select': {'style': 'multi', 'selector': 'td:first-child'}
+				'select': {'style': 'multi', 'selector': 'td:first-child'},
+				'drawCallback': function (settings) {
+					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.vuln_annotate_route'}, Sner.storage.action_annotate);
+				}
 			};
 			$(document).ready(function() {
 				var dt_host_view_vuln_table = $('#host_view_vuln_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_vuln_table_options));
@@ -164,10 +172,14 @@
 					Sner.dt.column('service'),
 					Sner.dt.column('xtype'),
 					Sner.dt.column('data', {'className': 'forcewrap'}),
-					Sner.dt.column('tags'),
-					Sner.dt.column('comment'),
+					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
-				]
+				],
+				'drawCallback': function (settings) {
+					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.note_annotate_route'}, Sner.storage.action_annotate);
+				}
 			};
 			$(document).ready(function() {
 				var dt_host_view_note_table = $('#host_view_note_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_host_view_note_table_options));

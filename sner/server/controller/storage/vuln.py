@@ -16,7 +16,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server import db
 from sner.server.command.storage import vuln_report
 from sner.server.controller.auth import role_required
-from sner.server.controller.storage import blueprint, get_related_models
+from sner.server.controller.storage import annotate_model, blueprint, get_related_models
 from sner.server.form import ButtonForm
 from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
@@ -107,6 +107,13 @@ def vuln_delete_route(vuln_id):
         return redirect(url_for('storage.host_view_route', host_id=vuln.host_id))
 
     return render_template('button-delete.html', form=form)
+
+
+@blueprint.route('/vuln/annotate/<model_id>', methods=['GET', 'POST'])
+@role_required('operator')
+def vuln_annotate_route(model_id):
+    """annotate vuln"""
+    return annotate_model(Vuln, model_id)
 
 
 @blueprint.route('/vuln/view/<vuln_id>')

@@ -1,0 +1,8 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% import "bootstrap_wtf.html" as bwtf %}
+<form method="post" action="{{ request.url }}">
+	{{ form.csrf_token }}
+	{{ bwtf.bootstrap_field(form.tags, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>

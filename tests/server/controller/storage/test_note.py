@@ -9,6 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.model.storage import Note
+from tests.server.controller.storage import check_annotate
 from tests.server.model.storage import create_test_note
 
 
@@ -77,6 +78,12 @@ def test_note_delete_route(cl_operator, test_note):
 
     note = Note.query.filter(Note.id == test_note.id).one_or_none()
     assert not note
+
+
+def test_note_annotate_route(cl_operator, test_note):
+    """note annotate route test"""
+
+    check_annotate(cl_operator, 'storage.note_annotate_route', test_note)
 
 
 def test_note_view_route(cl_operator, test_note):

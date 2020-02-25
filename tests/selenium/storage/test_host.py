@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server.model.storage import Host, Note, Service, Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, WEBDRIVER_WAIT
-from tests.selenium.storage import check_select_rows, check_vulns_multiactions
+from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
 
 
 def test_host_list_route(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
@@ -26,6 +26,12 @@ def test_host_list_route_inrow_delete(live_server, sl_operator, test_host):  # p
     sl_operator.get(url_for('storage.host_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'host_list_table')
     assert not Host.query.filter(Host.id == test_host.id).one_or_none()
+
+
+def test_host_list_route_annotate(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
+    """annotate test"""
+
+    check_annotate(sl_operator, 'storage.host_list_route', 'host_list_table', test_host)
 
 
 def test_host_view_route_services_list(live_server, sl_operator, test_service):  # pylint: disable=unused-argument

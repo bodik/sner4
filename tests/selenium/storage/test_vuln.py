@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from sner.server import db
 from sner.server.model.storage import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, WEBDRIVER_WAIT
-from tests.selenium.storage import check_select_rows, check_vulns_multiactions
+from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
 
 
 def check_vulns_filtering(selenium, dt_id):
@@ -67,6 +67,12 @@ def test_vuln_list_route_inrow_delete(live_server, sl_operator, test_vuln):  # p
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'vuln_list_table')
     assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+
+
+def test_vuln_list_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+    """annotate test"""
+
+    check_annotate(sl_operator, 'storage.vuln_list_route', 'vuln_list_table', test_vuln)
 
 
 def test_vuln_list_route_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument

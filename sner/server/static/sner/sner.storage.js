@@ -93,4 +93,26 @@ class SnerStorageComponent extends SnerComponentBase {
 
 		super.setup();
 	}
+
+	/**
+	 * annotate model using modal dialogue with ajaxed html fragment
+	 *
+	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
+	 */
+	action_annotate(event) {
+		var rowdata = event.data.dt.row($(this).parents('tr')).data();
+		$.ajax(Flask.url_for(event.data.route_name, {'model_id': rowdata['id']}))
+			.done(function(data, textStatus, jqXHR) {
+				Sner.modal('Annotate', data);
+				$('#modal-global .tageditor').tagEditor({'delimiter': '\n'});
+				$('#modal-global form').on('submit', function(event) {
+					Sner.submit_form($(this).attr('action'), $(this).serializeArray())
+						.always(function() { $('#modal-global').modal('toggle'); });
+					event.preventDefault();
+				});
+				$('#modal-global').on('hidden.bs.modal', function() {
+					event.data.dt.draw('page');
+				});
+			});
+	}
 }

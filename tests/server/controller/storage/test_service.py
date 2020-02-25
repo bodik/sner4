@@ -9,6 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.model.storage import Service
+from tests.server.controller.storage import check_annotate
 from tests.server.model.storage import create_test_service
 
 
@@ -83,6 +84,12 @@ def test_service_delete_route(cl_operator, test_service):
 
     service = Service.query.filter(Service.id == test_service.id).one_or_none()
     assert not service
+
+
+def test_service_annotate_route(cl_operator, test_service):
+    """service annotate route test"""
+
+    check_annotate(cl_operator, 'storage.service_annotate_route', test_service)
 
 
 def test_service_grouped_route(cl_operator):

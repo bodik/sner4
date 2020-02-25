@@ -97,3 +97,11 @@ class TagByIdForm(FlaskForm):
     ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
     tag = StringNoneField('tag', [InputRequired()])
     action = StringNoneField('action', [InputRequired(), AnyOf(['set', 'unset'])])
+
+
+class AnnotateForm(FlaskForm):
+    """generic annotation form; update tags and comments"""
+
+    tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor'})
+    comment = TextAreaNoneField('Comment')
+    submit = SubmitField('Save')

@@ -18,12 +18,16 @@
 			Sner.dt.column('xtype', {'visible': false}),
 			Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
 			Sner.dt.column('refs', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_refs(row); }}),
-			Sner.dt.column('tags'),
-			Sner.dt.column('comment'),
+			Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.vuln_controls)
 		],
 		'order': [[1, 'asc']],
-		'select': {'style': 'multi', 'selector': 'td:first-child'}
+		'select': {'style': 'multi', 'selector': 'td:first-child'},
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.vuln_annotate_route'}, Sner.storage.action_annotate);
+		}
 	};
 	$(document).ready(function() {
 		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_vuln_list_table_options));
