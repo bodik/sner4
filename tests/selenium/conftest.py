@@ -27,7 +27,7 @@ def firefox_options(firefox_options):  # pylint: disable=redefined-outer-name
     return firefox_options
 
 
-def selenium_in_roles(selenium, roles):
+def selenium_in_roles(sclnt, roles):
     """create user role and login selenium to role(s)"""
 
     tmp_password = str(uuid4())
@@ -35,13 +35,13 @@ def selenium_in_roles(selenium, roles):
     db.session.add(tmp_user)
     db.session.commit()
 
-    selenium.get(url_for('auth.login_route', _external=True))
-    selenium.find_element_by_xpath('//form//input[@name="username"]').send_keys(tmp_user.username)
-    selenium.find_element_by_xpath('//form//input[@name="password"]').send_keys(tmp_password)
-    selenium.find_element_by_xpath('//form//input[@type="submit"]').click()
-    WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
+    sclnt.get(url_for('auth.login_route', _external=True))
+    sclnt.find_element_by_xpath('//form//input[@name="username"]').send_keys(tmp_user.username)
+    sclnt.find_element_by_xpath('//form//input[@name="password"]').send_keys(tmp_password)
+    sclnt.find_element_by_xpath('//form//input[@type="submit"]').click()
+    WebDriverWait(sclnt, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
 
-    return selenium
+    return sclnt
 
 
 @pytest.fixture

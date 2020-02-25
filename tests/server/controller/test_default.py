@@ -11,16 +11,16 @@ from flask import url_for
 from requests.utils import dict_from_cookiejar
 
 
-def create_timedout_session(client):
+def create_timedout_session(clnt):
     """creates timed out session"""
 
-    sid = client.app.session_interface._generate_sid()
-    session_path = os.path.join(client.app.session_interface.storage, sid)
+    sid = clnt.app.session_interface._generate_sid()
+    session_path = os.path.join(clnt.app.session_interface.storage, sid)
 
-    os.makedirs(client.app.session_interface.storage)
+    os.makedirs(clnt.app.session_interface.storage)
     with open(session_path, 'w') as ftmp:
         ftmp.write('{}')
-    timedout = time() - client.app.session_interface.max_idle_time - 1
+    timedout = time() - clnt.app.session_interface.max_idle_time - 1
     os.utime(session_path, (timedout, timedout))
 
     return sid, session_path
