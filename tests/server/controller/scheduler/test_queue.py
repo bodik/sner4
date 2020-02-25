@@ -49,8 +49,7 @@ def test_queue_add_route(cl_operator, test_task):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    queue = Queue.query.filter(Queue.name == test_queue.name).one_or_none()
-    assert queue
+    queue = Queue.query.filter(Queue.name == test_queue.name).one()
     assert queue.name == test_queue.name
 
 
@@ -62,8 +61,7 @@ def test_queue_edit_route(cl_operator, test_queue):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
-    assert queue.name == form['name'].value
+    assert Queue.query.get(test_queue.id).name == form['name'].value
 
 
 def test_queue_enqueue_route(cl_operator, test_queue):
@@ -76,7 +74,7 @@ def test_queue_enqueue_route(cl_operator, test_queue):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+    queue = Queue.query.get(test_queue.id)
     assert len(queue.targets) == 1
     assert queue.targets[0].target == test_target.target
 
@@ -90,8 +88,7 @@ def test_queue_flush_route(cl_operator, test_target):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    queue = Queue.query.filter(Queue.id == test_queue_id).one_or_none()
-    assert not queue.targets
+    assert not Queue.query.get(test_queue_id).targets
 
 
 def test_queue_prune_route(cl_operator, test_job_completed):
@@ -118,6 +115,5 @@ def test_queue_delete_route(cl_operator, test_job_completed):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
-    assert not queue
+    assert not Queue.query.get(test_queue.id)
     assert not os.path.exists(test_queue_data_abspath)

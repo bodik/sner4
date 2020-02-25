@@ -46,13 +46,13 @@ def check_vulns_multiactions(sclnt, dt_id):
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[1]').click()
     toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Info"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert Vuln.query.filter(Vuln.name == 'vuln 1', Vuln.tags.any('info')).one_or_none()
+    assert Vuln.query.filter(Vuln.name == 'vuln 1', Vuln.tags.any('info')).one()
 
     # or the other one
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[2]').click()
     toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Report"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert Vuln.query.filter(Vuln.name == 'vuln 2', Vuln.tags.any('report')).one_or_none()
+    assert Vuln.query.filter(Vuln.name == 'vuln 2', Vuln.tags.any('report')).one()
 
     # both might be tagged at the same time
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()

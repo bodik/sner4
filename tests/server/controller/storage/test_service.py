@@ -51,8 +51,7 @@ def test_service_add_route(cl_operator, test_host):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    service = Service.query.filter(Service.info == test_service.info).one_or_none()
-    assert service
+    service = Service.query.filter(Service.info == test_service.info).one()
     assert service.proto == test_service.proto
     assert service.port == test_service.port
     assert service.info == test_service.info
@@ -69,8 +68,7 @@ def test_service_edit_route(cl_operator, test_service):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    service = Service.query.filter(Service.id == test_service.id).one_or_none()
-    assert service
+    service = Service.query.get(test_service.id)
     assert service.state == form['state'].value
     assert service.info == form['info'].value
 
@@ -82,8 +80,7 @@ def test_service_delete_route(cl_operator, test_service):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    service = Service.query.filter(Service.id == test_service.id).one_or_none()
-    assert not service
+    assert not Service.query.get(test_service.id)
 
 
 def test_service_annotate_route(cl_operator, test_service):

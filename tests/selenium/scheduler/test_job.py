@@ -21,4 +21,4 @@ def test_job_list_route_inrow_delete(live_server, sl_operator, test_job):  # pyl
 
     sl_operator.get(url_for('scheduler.job_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'job_list_table')
-    assert not Job.query.filter(Job.id == test_job.id).one_or_none()
+    assert not Job.query.get(test_job.id)

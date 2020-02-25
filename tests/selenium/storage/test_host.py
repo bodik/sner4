@@ -25,7 +25,7 @@ def test_host_list_route_inrow_delete(live_server, sl_operator, test_host):  # p
 
     sl_operator.get(url_for('storage.host_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'host_list_table')
-    assert not Host.query.filter(Host.id == test_host.id).one_or_none()
+    assert not Host.query.get(test_host.id)
 
 
 def test_host_list_route_annotate(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
@@ -43,7 +43,7 @@ def test_host_view_route_services_list(live_server, sl_operator, test_service): 
     dt_rendered(sl_operator, 'host_view_service_table', test_service.comment)
 
     dt_inrow_delete(sl_operator, 'host_view_service_table')
-    assert not Service.query.filter(Service.id == test_service.id).one_or_none()
+    assert not Service.query.get(test_service.id)
 
 
 def test_host_view_route_vulns_list(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
@@ -55,7 +55,7 @@ def test_host_view_route_vulns_list(live_server, sl_operator, test_vuln):  # pyl
     dt_rendered(sl_operator, 'host_view_vuln_table', test_vuln.comment)
 
     dt_inrow_delete(sl_operator, 'host_view_vuln_table')
-    assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+    assert not Vuln.query.get(test_vuln.id)
 
 
 def test_host_view_route_notes_list(live_server, sl_operator, test_note):  # pylint: disable=unused-argument
@@ -67,7 +67,7 @@ def test_host_view_route_notes_list(live_server, sl_operator, test_note):  # pyl
     dt_rendered(sl_operator, 'host_view_note_table', test_note.comment)
 
     dt_inrow_delete(sl_operator, 'host_view_note_table')
-    assert not Note.query.filter(Note.id == test_note.id).one_or_none()
+    assert not Note.query.get(test_note.id)
 
 
 def test_host_view_route_vulns_list_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument

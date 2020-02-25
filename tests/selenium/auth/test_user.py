@@ -26,7 +26,7 @@ def test_user_list_route_inrow_delete(live_server, sl_admin, test_user):  # pyli
     sl_admin.get(url_for('auth.user_list_route', _external=True))
     # in this test-case there are multiple items in the table (current_user, test_user), hence index which to delete has to be used
     dt_inrow_delete(sl_admin, 'user_list_table', 1)
-    assert not User.query.filter(User.id == test_user.id).one_or_none()
+    assert not User.query.get(test_user.id)
 
 
 def test_user_apikey_route(live_server, sl_admin, test_user):  # pylint: disable=unused-argument
@@ -44,7 +44,7 @@ def test_user_apikey_route(live_server, sl_admin, test_user):  # pylint: disable
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
     WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
     dt_rendered(sl_admin, 'user_list_table', test_user.username)
-    user = User.query.filter(User.id == test_user.id).one_or_none()
+    user = User.query.get(test_user.id)
     assert user.apikey
     db.session.expunge(user)
 
@@ -54,5 +54,4 @@ def test_user_apikey_route(live_server, sl_admin, test_user):  # pylint: disable
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
     WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
     dt_rendered(sl_admin, 'user_list_table', test_user.username)
-    user = User.query.filter(User.id == test_user.id).one_or_none()
-    assert not user.apikey
+    assert not User.query.get(test_user.id).apikey

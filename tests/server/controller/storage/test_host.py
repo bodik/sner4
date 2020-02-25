@@ -49,8 +49,7 @@ def test_host_add_route(cl_operator):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    host = Host.query.filter(Host.hostname == test_host.hostname).one_or_none()
-    assert host
+    host = Host.query.filter(Host.hostname == test_host.hostname).one()
     assert host.hostname == test_host.hostname
     assert host.os == test_host.os
     assert host.comment == test_host.comment
@@ -66,8 +65,7 @@ def test_host_edit_route(cl_operator, test_host):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    host = Host.query.filter(Host.id == test_host.id).one_or_none()
-    assert host
+    host = Host.query.get(test_host.id)
     assert host.hostname == form['hostname'].value
     assert host.comment is None
 
@@ -79,8 +77,7 @@ def test_host_delete_route(cl_operator, test_host):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    host = Host.query.filter(Host.id == test_host.id).one_or_none()
-    assert not host
+    assert not Host.query.get(test_host.id)
 
 
 def test_host_annotate_route(cl_operator, test_host):

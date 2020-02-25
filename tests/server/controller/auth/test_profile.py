@@ -188,5 +188,4 @@ def test_profile_webauthn_delete_route(cl_user):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    wncred = WebauthnCredential.query.filter(WebauthnCredential.id == test_wncred.id).one_or_none()
-    assert not wncred
+    assert not WebauthnCredential.query.get(test_wncred.id)

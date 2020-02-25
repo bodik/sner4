@@ -48,16 +48,14 @@ def test_job_assign_route(client, apikey, test_queue):
     response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_id=test_queue.id), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
-    assert len(queue.jobs) == 1
+    assert len(Queue.query.get(test_queue.id).jobs) == 1
 
     # assign from queue by name
     persist_and_detach(create_test_target(test_queue))
     response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_id=test_queue.name), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    queue = Queue.query.filter(Queue.name == test_queue.name).one_or_none()
-    assert len(queue.jobs) == 2
+    assert len(Queue.query.filter(Queue.name == test_queue.name).one().jobs) == 2
 
     # assign from non-existent queue
     response = client.get(
@@ -85,10 +83,8 @@ def test_job_assign_highest_priority_route(client, apikey, test_task):
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
 
-    queue = Queue.query.filter(Queue.id == queue1.id).one_or_none()
-    assert len(queue.jobs) == 0
-    queue = Queue.query.filter(Queue.id == queue2.id).one_or_none()
-    assert len(queue.jobs) == 1
+    assert len(Queue.query.get(queue1.id).jobs) == 0
+    assert len(Queue.query.get(queue2.id).jobs) == 1
 
 
 def test_job_assign_with_blacklist(client, apikey, test_queue, test_excl_network):
@@ -99,11 +95,10 @@ def test_job_assign_with_blacklist(client, apikey, test_queue, test_excl_network
 
     response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
-    assignment = json.loads(response.body.decode('utf-8'))
 
-    queue = Queue.query.filter(Queue.id == test_queue.id).one_or_none()
-    assert len(queue.jobs) == 1
+    assert len(Queue.query.get(test_queue.id).jobs) == 1
     assert not Target.query.all()
+    assignment = json.loads(response.body.decode('utf-8'))
     assert len(assignment['targets']) == 1
 
     persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
@@ -121,7 +116,7 @@ def test_job_output_route(client, apikey, test_job):
         headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
 
-    job = Job.query.filter(Job.id == test_job.id).one_or_none()
+    job = Job.query.get(test_job.id)
     assert job.retval == 12345
     with open(job.output_abspath, 'r') as ftmp:
         assert ftmp.read() == 'a-test-file-contents'
@@ -139,6 +134,5 @@ def test_job_delete_route(cl_operator, test_job_completed):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    job = Job.query.filter(Job.id == test_job_completed.id).one_or_none()
-    assert not job
+    assert not Job.query.get(test_job_completed.id)
     assert not os.path.exists(test_job_completed_output_abspath)

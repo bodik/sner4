@@ -48,8 +48,7 @@ def test_note_add_route(cl_operator, test_host, test_service):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    note = Note.query.filter(Note.data == test_note.data).one_or_none()
-    assert note
+    note = Note.query.filter(Note.data == test_note.data).one()
     assert note.xtype == test_note.xtype
     assert note.data == test_note.data
     assert note.comment == test_note.comment
@@ -64,8 +63,7 @@ def test_note_edit_route(cl_operator, test_note):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    note = Note.query.filter(Note.id == test_note.id).one_or_none()
-    assert note
+    note = Note.query.get(test_note.id)
     assert note.data == form['data'].value
 
 
@@ -76,8 +74,7 @@ def test_note_delete_route(cl_operator, test_note):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    note = Note.query.filter(Note.id == test_note.id).one_or_none()
-    assert not note
+    assert not Note.query.get(test_note.id)
 
 
 def test_note_annotate_route(cl_operator, test_note):

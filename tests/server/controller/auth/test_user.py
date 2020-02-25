@@ -51,8 +51,7 @@ def test_user_add_route(cl_admin):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    user = User.query.filter(User.username == test_user.username).one_or_none()
-    assert user
+    user = User.query.filter(User.username == test_user.username).one()
     assert user.username == test_user.username
     assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(user.password)), user.password)
     assert user.active == test_user.active
@@ -68,8 +67,7 @@ def test_user_edit_route(cl_admin, test_user):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    user = User.query.filter(User.username == form['username'].value).one_or_none()
-    assert user
+    user = User.query.filter(User.username == form['username'].value).one()
     assert user.username == form['username'].value
     assert not user.roles
 
@@ -81,8 +79,7 @@ def test_user_delete_route(cl_admin, test_user):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    user = User.query.filter(User.username == test_user.username).one_or_none()
-    assert not user
+    assert not User.query.filter(User.username == test_user.username).one_or_none()
 
 
 def test_user_apikey_route(cl_admin, test_user):
@@ -92,13 +89,11 @@ def test_user_apikey_route(cl_admin, test_user):
 
     response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='generate'), data)
     assert response.status_code == HTTPStatus.OK
-    user = User.query.filter(User.id == test_user.id).one_or_none()
-    assert user.apikey
+    assert User.query.get(test_user.id).apikey
 
     response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='revoke'), data)
     assert response.status_code == HTTPStatus.OK
-    user = User.query.filter(User.id == test_user.id).one_or_none()
-    assert not user.apikey
+    assert not User.query.get(test_user.id).apikey
 
     response = cl_admin.post(url_for('auth.user_apikey_route', user_id=test_user.id, action='invalid'), status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST

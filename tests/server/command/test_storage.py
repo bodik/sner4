@@ -36,7 +36,7 @@ def test_import_nmap_command(runner):
     host = Host.query.one()
     assert host.os == 'Linux 3.8 - 4.6'
     assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
-    tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one_or_none()
+    tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one()
     assert 'PIPELINING' in json.loads(tmpnote.data)['output']
 
 
@@ -132,7 +132,7 @@ def test_host_cleanup_command(runner):
 def test_service_list_command(runner, test_service):
     """test services listing"""
 
-    host = Host.query.filter(Host.id == test_service.host_id).one()
+    host = Host.query.get(test_service.host_id)
 
     result = runner.invoke(storage_command, ['service-list', '--long', '--short'])
     assert result.exit_code == 1

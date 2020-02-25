@@ -43,6 +43,5 @@ def test_run_with_liveserver(tmpworkdir, live_server, apikey, test_dummy_target)
     result = agent_main(['--server', live_server.url(), '--apikey', apikey, '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
     assert result == 0
 
-    job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one_or_none()
-    assert job
+    job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one()
     assert test_dummy_target.target in file_from_zip(job.output_abspath, 'assignment.json').decode('utf-8')

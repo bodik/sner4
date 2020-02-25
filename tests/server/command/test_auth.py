@@ -16,5 +16,5 @@ def test_auth_passwordreset_command(runner, test_user):
     result = runner.invoke(auth_command, ['reset-password', test_user.username])
     assert result.exit_code == 0
 
-    user = User.query.filter(User.username == test_user.username).one_or_none()
+    user = User.query.filter(User.username == test_user.username).one()
     assert user.password != test_user.password

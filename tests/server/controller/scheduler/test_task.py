@@ -48,8 +48,7 @@ def test_task_add_route(cl_operator):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    task = Task.query.filter(Task.name == test_task.name).one_or_none()
-    assert task
+    task = Task.query.filter(Task.name == test_task.name).one()
     assert task.name == test_task.name
     assert task.module == test_task.module
     assert task.params == test_task.params
@@ -64,8 +63,7 @@ def test_task_edit_route(cl_operator, test_task):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    task = Task.query.filter(Task.id == test_task.id).one_or_none()
-    assert task
+    task = Task.query.get(test_task.id)
     assert task.name == form['name'].value
     assert 'added_parameter' in task.params
 
@@ -82,6 +80,5 @@ def test_task_delete_route(cl_operator, test_job_completed):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    task = Task.query.filter(Task.id == test_task.id).one_or_none()
-    assert not task
+    assert not Task.query.get(test_task.id)
     assert not os.path.exists(test_queue_data_abspath)

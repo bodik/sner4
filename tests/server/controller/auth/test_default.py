@@ -22,7 +22,7 @@ def test_login(client, test_user):
     """test login"""
 
     tmp_password = PWS().generate()
-    tmp = User.query.filter(User.id == test_user.id).one_or_none()
+    tmp = User.query.get(test_user.id)
     tmp.password = tmp_password
     db.session.commit()
 
@@ -56,7 +56,7 @@ def test_unauthorized(client, test_user):
     """test for not logged in, redirect and final login"""
 
     tmp_password = PWS().generate()
-    tmp = User.query.filter(User.id == test_user.id).one_or_none()
+    tmp = User.query.get(test_user.id)
     tmp.password = tmp_password
     db.session.commit()
 
@@ -84,7 +84,7 @@ def test_login_totp(client, test_user):
 
     tmp_password = PWS().generate()
     tmp_secret = TOTPImpl.random_base32()
-    tmp = User.query.filter(User.id == test_user.id).one_or_none()
+    tmp = User.query.get(test_user.id)
     tmp.password = tmp_password
     tmp.totp = tmp_secret
     db.session.commit()

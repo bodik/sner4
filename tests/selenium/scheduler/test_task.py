@@ -21,4 +21,4 @@ def test_task_list_route_inrow_delete(live_server, sl_operator, test_task):  # p
 
     sl_operator.get(url_for('scheduler.task_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'task_list_table')
-    assert not Task.query.filter(Task.id == test_task.id).one_or_none()
+    assert not Task.query.get(test_task.id)

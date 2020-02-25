@@ -66,7 +66,7 @@ def test_vuln_list_route_inrow_delete(live_server, sl_operator, test_vuln):  # p
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'vuln_list_table')
-    assert not Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
+    assert not Vuln.query.get(test_vuln.id)
 
 
 def test_vuln_list_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument

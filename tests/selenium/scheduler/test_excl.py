@@ -21,4 +21,4 @@ def test_excl_list_route_inrow_delete(live_server, sl_operator, test_excl_networ
 
     sl_operator.get(url_for('scheduler.excl_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'excl_list_table')
-    assert not Excl.query.filter(Excl.id == test_excl_network.id).one_or_none()
+    assert not Excl.query.get(test_excl_network.id)

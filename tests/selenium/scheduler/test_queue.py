@@ -23,7 +23,7 @@ def test_queue_list_route_inrow_delete(live_server, sl_operator, test_queue):  #
 
     sl_operator.get(url_for('scheduler.queue_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'queue_list_table')
-    assert not Queue.query.filter(Queue.id == test_queue.id).one_or_none()
+    assert not Queue.query.get(test_queue.id)
 
 
 def test_queue_list_route_inrow_flush(live_server, sl_operator, test_target):  # pylint: disable=unused-argument
@@ -37,4 +37,4 @@ def test_queue_list_route_inrow_flush(live_server, sl_operator, test_target):  #
     WebDriverWait(sl_operator, WEBDRIVER_WAIT).until(EC.alert_is_present())
     sl_operator.switch_to.alert.accept()
     dt_wait_processing(sl_operator, dt_id)
-    assert not Queue.query.filter(Queue.id == test_target.queue_id).one_or_none().targets
+    assert not Queue.query.get(test_target.queue_id).targets

@@ -49,8 +49,7 @@ def test_excl_add_route(cl_operator):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    excl = Excl.query.filter(Excl.value == test_excl_network.value).one_or_none()
-    assert excl
+    excl = Excl.query.filter(Excl.value == test_excl_network.value).one()
     assert excl.family == test_excl_network.family
     assert excl.value == test_excl_network.value
 
@@ -83,7 +82,7 @@ def test_excl_edit_route(cl_operator, test_excl_network):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    excl = Excl.query.filter(Excl.id == test_excl_network.id).one_or_none()
+    excl = Excl.query.filter(Excl.id == test_excl_network.id).one()
     assert 'added comment' in excl.comment
 
 
@@ -94,8 +93,7 @@ def test_excl_delete_route(cl_operator, test_excl_network):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    excl = Excl.query.filter(Excl.id == test_excl_network.id).one_or_none()
-    assert not excl
+    assert not Excl.query.filter(Excl.id == test_excl_network.id).one_or_none()
 
 
 def test_excl_export_route(cl_operator, test_excl_network):

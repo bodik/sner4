@@ -22,7 +22,7 @@ def test_note_list_route_inrow_delete(live_server, sl_operator, test_note):  # p
 
     sl_operator.get(url_for('storage.note_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'note_list_table')
-    assert not Note.query.filter(Note.id == test_note.id).one_or_none()
+    assert not Note.query.get(test_note.id)
 
 
 def test_note_list_route_annotate(live_server, sl_operator, test_note):  # pylint: disable=unused-argument

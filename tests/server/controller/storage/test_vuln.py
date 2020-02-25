@@ -53,8 +53,7 @@ def test_vuln_add_route(cl_operator, test_host, test_service):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    vuln = Vuln.query.filter(Vuln.name == test_vuln.name).one_or_none()
-    assert vuln
+    vuln = Vuln.query.filter(Vuln.name == test_vuln.name).one()
     assert vuln.xtype == test_vuln.xtype
     assert vuln.severity == test_vuln.severity
     assert vuln.refs == test_vuln.refs
@@ -71,8 +70,7 @@ def test_vuln_edit_route(cl_operator, test_vuln):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-    assert vuln
+    vuln = Vuln.query.get(test_vuln.id)
     assert vuln.name == form['name'].value
     assert len(vuln.tags) == 3
 
@@ -84,8 +82,7 @@ def test_vuln_delete_route(cl_operator, test_vuln):
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-    assert not vuln
+    assert not Vuln.query.get(test_vuln.id)
 
 
 def test_vuln_annotate_route(cl_operator, test_vuln):
@@ -109,8 +106,7 @@ def test_delete_by_id_route(cl_operator, test_vuln):
     data = {'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
     response = cl_operator.post(url_for('storage.vuln_delete_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
-    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-    assert not vuln
+    assert not Vuln.query.get(test_vuln.id)
 
     response = cl_operator.post(url_for('storage.vuln_delete_by_id_route'), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -122,14 +118,12 @@ def test_tag_by_id_route(cl_operator, test_vuln):
     data = {'tag': 'testtag', 'action': 'set', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
     response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
-    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-    assert 'testtag' in vuln.tags
+    assert 'testtag' in Vuln.query.get(test_vuln.id).tags
 
     data = {'tag': 'testtag', 'action': 'unset', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
     response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
     assert response.status_code == HTTPStatus.OK
-    vuln = Vuln.query.filter(Vuln.id == test_vuln.id).one_or_none()
-    assert 'testtag' not in vuln.tags
+    assert 'testtag' not in Vuln.query.get(test_vuln.id).tags
 
     response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
