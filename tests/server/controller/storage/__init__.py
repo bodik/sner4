@@ -8,10 +8,10 @@ from http import HTTPStatus
 from flask import url_for
 
 
-def check_annotate(client, route_name, test_model):
+def check_annotate(clnt, route_name, test_model):
     """check annotate functionality"""
 
-    form = client.get(url_for(route_name, model_id=test_model.id)).form
+    form = clnt.get(url_for(route_name, model_id=test_model.id)).form
     form['tags'] = 'tag1\ntag2'
     form['comment'] = 'annotated'
     response = form.submit()
