@@ -104,7 +104,14 @@ class SnerDatatablesModule {
 	 */
 	column_buttons(render_callback=null, extra={}) {
 		return $.extend(
-			{'name': '_buttons', 'title': '_buttons', 'data': '_buttons', 'orderable': false, 'className': 'dt-nowrap', 'render': function(data, type, row, meta) { return render_callback(row); }},
+			{
+				'name': '_buttons',
+				'title': '_buttons',
+				'data': '_buttons',
+				'orderable': false,
+				'className': 'dt-nowrap',
+				'render': function(data, type, row, meta) { return render_callback(row); }
+			},
 			extra
 		);
 	}
