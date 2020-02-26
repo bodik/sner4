@@ -9,3 +9,18 @@
 	{{ caller() }}
 </div>
 {%- endmacro -%}
+
+{%- macro addtag_buttons(aa) -%}
+<div class="form-group row">
+	<div class="col-sm-10 offset-sm-2">
+		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Info</a>
+		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Report</a>
+		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Todo</a>
+	</div>
+</div>
+<script type="text/javascript">
+	$('.abutton_addtag').on('click', function(event) {
+		$('textarea[name="tags"]').tagEditor('addTag', event.target.text, true);
+	});
+</script>
+{%- endmacro -%}

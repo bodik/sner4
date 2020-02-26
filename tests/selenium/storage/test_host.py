@@ -34,6 +34,16 @@ def test_host_list_route_annotate(live_server, sl_operator, test_host):  # pylin
     check_annotate(sl_operator, 'storage.host_list_route', 'host_list_table', test_host)
 
 
+def test_host_edit_route_addtag(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
+    """addtag buttons test"""
+
+    sl_operator.get(url_for('storage.host_edit_route', host_id=test_host.id, _external=True))
+    assert 'todo' not in test_host.tags
+    sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_addtag") and text()="Todo"]').click()
+    sl_operator.find_element_by_xpath('//form//input[@type="submit"]').click()
+    assert 'todo' in Host.query.get(test_host.id).tags
+
+
 def test_host_view_route_services_list(live_server, sl_operator, test_service):  # pylint: disable=unused-argument
     """host view tabbed services dt tests; render and inrow delete"""
 
