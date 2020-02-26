@@ -71,7 +71,7 @@ def job_list_json_route():
 
 
 # routed by api blueprint
-def job_assign_route(queue_id=None):
+def job_assign_route(queue_ident=None):
     """assign job for worker"""
 
     def wait_for_lock(table):
@@ -88,11 +88,11 @@ def job_assign_route(queue_id=None):
 
     # select active queue; by id or highest priority queue with targets
     query = Queue.query.filter(Queue.active)
-    if queue_id:
-        if queue_id.isnumeric():
-            queue = query.filter(Queue.id == int(queue_id)).one_or_none()
+    if queue_ident:
+        if queue_ident.isnumeric():
+            queue = query.filter(Queue.id == int(queue_ident)).one_or_none()
         else:
-            queue = query.filter(Queue.name == queue_id).order_by(Queue.priority.desc()).first()
+            queue = query.filter(Queue.name == queue_ident).order_by(Queue.priority.desc()).first()
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 

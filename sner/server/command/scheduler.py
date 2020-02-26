@@ -15,13 +15,12 @@ from sner.server.controller.scheduler.job import job_delete
 from sner.server.model.scheduler import Job, Queue, Target
 
 
-def queuebyx(queueid):
+def queuebyx(queue_ident):
     """get queue by id or name"""
-    if queueid.isnumeric():
-        queue = Queue.query.filter(Queue.id == int(queueid)).one_or_none()
-    else:
-        queue = Queue.query.filter(Queue.name == queueid).one_or_none()
-    return queue
+
+    if queue_ident.isnumeric():
+        return Queue.query.get(int(queue_ident))
+    return Queue.query.filter(Queue.name == queue_ident).one_or_none()
 
 
 @click.group(name='scheduler', help='sner.server scheduler management')
