@@ -33,7 +33,7 @@ def test_host_list_route_annotate(live_server, sl_operator, test_host):  # pylin
 
     sl_operator.get(url_for('storage.host_list_route', _external=True))
     dt_rendered(sl_operator, 'host_list_table', test_host.comment)
-    check_annotate(sl_operator, 'abutton_annotate', test_host)
+    check_annotate(sl_operator, 'abutton_annotate_dt', test_host)
 
 
 def test_host_edit_route_addtag(live_server, sl_operator, test_host):  # pylint: disable=unused-argument

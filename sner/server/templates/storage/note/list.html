@@ -15,13 +15,13 @@
 			Sner.dt.column('service'),
 			Sner.dt.column('xtype'),
 			Sner.dt.column('data', {'className': 'forcewrap'}),
-			Sner.dt.column('tags', {'className': 'abutton_annotate', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
-			Sner.dt.column('comment', {'className': 'abutton_annotate'}),
+			Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate_dt'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 		],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
-			this.find('td.abutton_annotate').on('dblclick', {'dt': this.api(), 'route_name': 'storage.note_annotate_route'}, Sner.storage.action_annotate);
+			this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.note_annotate_route'}, Sner.storage.action_annotate_dt);
 		}
 	};
 	$(document).ready(function() {

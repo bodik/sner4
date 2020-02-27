@@ -30,4 +30,4 @@ def test_service_list_route_annotate(live_server, sl_operator, test_service):  #
 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
     dt_rendered(sl_operator, 'service_list_table', test_service.comment)
-    check_annotate(sl_operator, 'abutton_annotate', test_service)
+    check_annotate(sl_operator, 'abutton_annotate_dt', test_service)

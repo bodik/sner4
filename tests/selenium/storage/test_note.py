@@ -30,7 +30,7 @@ def test_note_list_route_annotate(live_server, sl_operator, test_note):  # pylin
 
     sl_operator.get(url_for('storage.note_list_route', _external=True))
     dt_rendered(sl_operator, 'note_list_table', test_note.comment)
-    check_annotate(sl_operator, 'abutton_annotate', test_note)
+    check_annotate(sl_operator, 'abutton_annotate_dt', test_note)
 
 
 def test_note_view_route_annotate(live_server, sl_operator, test_note):  # pylint: disable=unused-argument

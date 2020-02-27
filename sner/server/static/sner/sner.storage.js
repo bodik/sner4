@@ -113,7 +113,7 @@ class SnerStorageComponent extends SnerComponentBase {
 	 *
 	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
 	 */
-	action_annotate(event) {
+	action_annotate_dt(event) {
 		Sner.storage._action_annotate(
 			event.data.route_name,
 			event.data.dt.row($(this).parents('tr')).data()['id'],

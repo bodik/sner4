@@ -73,7 +73,7 @@ def test_vuln_list_route_annotate(live_server, sl_operator, test_vuln):  # pylin
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
-    check_annotate(sl_operator, 'abutton_annotate', test_vuln)
+    check_annotate(sl_operator, 'abutton_annotate_dt', test_vuln)
 
 
 def test_vuln_list_route_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
