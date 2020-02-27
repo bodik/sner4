@@ -17,7 +17,7 @@
 			Sner.dt.column('name'),
 			Sner.dt.column('state'),
 			Sner.dt.column('info'),
-			Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+			Sner.dt.column('tags', {'className': 'abutton_annotate', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 			Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 		],

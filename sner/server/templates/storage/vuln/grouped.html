@@ -10,7 +10,7 @@
 		'columns': [
 			Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
 			Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
-			Sner.dt.column('tags'),
+			Sner.dt.column('tags', {'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 			Sner.dt.column('cnt_vulns')
 		]
 	};

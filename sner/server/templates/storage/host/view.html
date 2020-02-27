@@ -54,7 +54,7 @@
 		</tr>
 		<tr>
 			<th>tags</th>
-			<td>{{ host.tags }}</td>
+			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': host.tags}|tojson }}'>{{ host.tags }}</td>
 		</tr>
 		<tr>
 			<th>comment</th>
@@ -85,7 +85,7 @@
 					Sner.dt.column('name'),
 					Sner.dt.column('state'),
 					Sner.dt.column('info'),
-					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('tags', {'className': 'abutton_annotate', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 				],
@@ -137,7 +137,7 @@
 					Sner.dt.column('xtype', {'visible': false}),
 					Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
 					Sner.dt.column('refs', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_refs(row); }}),
-					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('tags', {'className': 'abutton_annotate', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.vuln_controls)
 				],
@@ -172,7 +172,7 @@
 					Sner.dt.column('service'),
 					Sner.dt.column('xtype'),
 					Sner.dt.column('data', {'className': 'forcewrap'}),
-					Sner.dt.column('tags', {'className': 'abutton_annotate'}),
+					Sner.dt.column('tags', {'className': 'abutton_annotate', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 					Sner.dt.column('comment', {'className': 'abutton_annotate'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 				],

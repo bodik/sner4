@@ -8,7 +8,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from sner.server import db
 from sner.server.model.storage import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, WEBDRIVER_WAIT
 from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
@@ -106,11 +105,6 @@ def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint
         EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]')))
     vuln = Vuln.query.get(test_vuln.id)
     assert 'info' in vuln.tags
-
-    sl_operator.find_element_by_xpath('//span[contains(@class, "tag-badge") and contains(text(), "info")]/a[@class="abutton_vuln_tag_unset"]').click()
-    assert not sl_operator.find_elements_by_xpath('//span[contains(@class, "tag-badge") and contains(text(), "info")]')
-    db.session.refresh(vuln)
-    assert 'info' not in vuln.tags
 
 
 def test_vuln_grouped_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument

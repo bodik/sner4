@@ -36,13 +36,27 @@ class SnerStorageComponent extends SnerComponentBase {
 				return (ref.startsWith('URL-')) ? 'URL' : ref;
 			},
 			/* get class for severity label */
-			'color_for_severity': function(severity) {
-				var colors = {'unknown': 'badge-secondary', 'info': 'badge-light', 'low': 'badge-info', 'medium': 'badge-primary', 'high': 'badge-warning', 'critical': 'badge-danger'};
-				return (severity in colors) ? colors[severity] : 'badge-secondary';
+			'color_for_severity': function(item) {
+				var colors = {
+					'unknown': 'badge-secondary',
+					'info': 'badge-light',
+					'low': 'badge-info',
+					'medium': 'badge-primary',
+					'high': 'badge-warning',
+					'critical': 'badge-danger'
+				};
+				return (item in colors) ? colors[item] : 'badge-secondary';
+			},
+			/* get class for tag label */
+			'color_for_tag': function(item) {
+				var colors = {'todo': 'badge-warning', 'report': 'badge-danger'};
+				return (item in colors) ? colors[item] : 'badge-secondary';
 			}
 		};
 
 		this.hbs_source = {
+			'tag_labels': `{{#each tags}}<span class="badge {{color_for_tag this}} tag-badge">{{this}}</span> {{/each}}`,
+
 			'host_link': `<a href="{{> storage.host_view_route host_id=host_id}}">{{host_address}}</a>`,
 			'host_controls': `
 				<div class="btn-group btn-group-sm">

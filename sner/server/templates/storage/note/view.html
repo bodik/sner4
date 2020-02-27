@@ -16,7 +16,7 @@
 		<tr>
 			<th>host</th>
 			<td>
-				<span class="render_hbs" data-hbs="storage_pagepart_host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</span>
+				<span class="render_hbs" data-hbs="storage.hbs.host_link" data-hbs_context='{{ {'host_id': note.host.id, 'host_address': note.host.address}|tojson }}'>{{ note.host.address }}</span>
 				{{ note.host.hostname }}
 			</td>
 			<th>service</th>
@@ -26,7 +26,7 @@
 			<th>xtype</th>
 			<td>{{ note.xtype }}</td>
 			<th>tags</th>
-			<td>{{ note.tags }}</td>
+			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': note.tags}|tojson }}'>{{ note.tags }}</td>
 		</tr>
 		<tr>
 			<th>comment</th>

@@ -13,7 +13,6 @@ function action_vuln_tag(event) {
 
 $(document).ready(function() {
 	$('.abutton_vuln_tag_set').on('click', action_vuln_tag);
-	$('.abutton_vuln_tag_unset').on('click', action_vuln_tag);
 });
 </script>
 {% endblock %}
@@ -59,11 +58,7 @@ $(document).ready(function() {
 				<span class="render_hbs" data-hbs="storage.hbs.vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
 			</td>
 			<th>tags</th>
-			<td>
-			{% for tag in vuln.tags|sort %}
-				<span class="badge badge-secondary tag-badge">{{ tag }} <a class="abutton_vuln_tag_unset" data-tagaction='{{ {'action': 'unset', 'tag': tag, 'ids-0': vuln.id}|tojson }}'><i class="fas fa-trash"></i></a></span>
-			{% endfor %}
-			</td>
+			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': vuln.tags}|tojson }}'>{{ vuln.tags }}</td>
 		</tr>
 		<tr>
 			<th>comment</th>
