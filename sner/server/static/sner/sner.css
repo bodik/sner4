@@ -1,0 +1,59 @@
+/* This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. */
+
+/* content vs navbar spacing */
+body {
+	padding-top: 3rem;
+}
+
+.navbar-brand {
+	padding: 0;
+}
+.navbar-brand img {
+	height: 1.8rem;
+}
+
+.toast-top-right {
+	top: 3rem;
+}
+
+
+/* required items on forms */
+div.form-group.required label:after {
+	content:"*"; color:red;
+}
+
+
+/* tag-editor borders match bootstrap inputs styling */
+.tag-editor {
+	border: 1px solid #ccc;
+	border-radius: .25rem;
+}
+
+
+/* note data may contain very long unwrapable data */
+.forcewrap {
+	word-wrap: break-word;
+	word-break: break-all;
+	white-space: normal;
+}
+
+
+/* datatables styling */
+.dataTables_wrapper, .dt_toolbar {
+	margin-top: .3rem;
+	margin-bottom: .3rem;
+}
+
+td.dt-nowrap {
+	white-space: nowrap;
+}
+
+
+/* other */
+.striked {
+	text-decoration: line-through !important;
+}
+
+td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover {
+	border-right: 2px dotted #ffc107;
+}

@@ -37,6 +37,7 @@
 
 	{{ JSGlue.include() }}
 
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='sner/sner.css') }}" />
 	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.auth.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='sner/sner.scheduler.js') }}"></script>
@@ -45,37 +46,6 @@
 		/* NOTE: might be const here, but it does not work inside selenium */
 		var Sner = new SnerModule();
 	</script>
-
-	<style>
-		/* content vs navbar spacing */
-		body { padding-top: 3rem; }
-
-		/* navbar logo */
-		.navbar-brand { padding: 0; }
-		.navbar-brand img { height: 1.8rem; }
-
-		/* required items on forms */
-		div.form-group.required label:after { content:"*"; color:red; }
-
-		/* tag-editor same borders as other bootstraped input */
-		.tag-editor { border: 1px solid #ccc; border-radius: .25rem; }
-
-		/* note data may contain very long unwrapable data */
-		.forcewrap { word-wrap: break-word; word-break: break-all; white-space: normal; }
-
-		/* dt styling */
-		.dataTables_wrapper, .dt_toolbar { margin-top: .3rem; margin-bottom: .3rem; }
-		td.dt-nowrap { white-space: nowrap; }
-
-		/* override toastr placement */
-		.toast-top-right { top: 3rem; }
-
-		/* other */
-		.striked { text-decoration: line-through !important; }
-		td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover {
-			border-right: 2px dotted #ffc107;
-		}
-	</style>
 
 	{% block style %}{% endblock %}
 	{% block script %}{% endblock %}
