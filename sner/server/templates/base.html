@@ -67,6 +67,9 @@
 		.dataTables_wrapper, .dt_toolbar { margin-top: .3rem; margin-bottom: .3rem; }
 		td.dt-nowrap { white-space: nowrap; }
 
+		/* override toastr placement */
+		.toast-top-right { top: 3rem; }
+
 		/* other */
 		.striked { text-decoration: line-through !important; }
 		td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover {
@@ -146,6 +149,7 @@
 	<script type="text/javascript">
 		toastr.options = {
 			'positionClass': 'toast-top-right',
+			'progressBar': true,
 		};
 		{% for category, message in get_flashed_messages(with_categories=true) %}
 		toastr['{{ category }}']('{{ message }}');
