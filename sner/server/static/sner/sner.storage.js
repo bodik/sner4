@@ -137,11 +137,11 @@ class SnerStorageComponent extends SnerComponentBase {
 				$('#modal-global .tageditor').tagEditor({'delimiter': '\n'});
 				$('#modal-global form').on('submit', function(event) {
 					Sner.submit_form($(this).attr('action'), $(this).serializeArray())
-						.always(function() { $('#modal-global').modal('toggle'); });
+						.always(function() {
+							$('#modal-global').modal('toggle');
+							after_update_cb();
+						});
 					event.preventDefault();
-				});
-				$('#modal-global').on('hidden.bs.modal', function() {
-					after_update_cb();
 				});
 			});
 	}
