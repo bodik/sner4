@@ -3,14 +3,13 @@
 selenium storage ui tests shared functions
 """
 
-from flask import url_for
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server.model.storage import Vuln
-from tests.selenium import dt_rendered, dt_wait_processing, no_ajax_pending, WEBDRIVER_WAIT
+from tests.selenium import dt_wait_processing, no_ajax_pending, WEBDRIVER_WAIT
 
 
 def check_select_rows(sclnt, dt_id):
@@ -69,15 +68,12 @@ def check_vulns_multiactions(sclnt, dt_id):
     assert not Vuln.query.all()
 
 
-def check_annotate(sclnt, route_name, table_name, test_model):
+def check_annotate(sclnt, annotate_elem_class, test_model):
     """check annotate functionality"""
-
-    sclnt.get(url_for(route_name, _external=True))
-    dt_rendered(sclnt, table_name, test_model.comment)
 
     # disable fade, the timing interferes with the test
     sclnt.execute_script('$("div#modal-global").toggleClass("fade")')
-    ActionChains(sclnt).double_click(sclnt.find_element_by_xpath('//td[contains(@class, "abutton_annotate")]')).perform()
+    ActionChains(sclnt).double_click(sclnt.find_element_by_xpath('//td[contains(@class, "%s")]' % annotate_elem_class)).perform()
     WebDriverWait(sclnt, WEBDRIVER_WAIT).until(
         EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Annotate"]')))
 

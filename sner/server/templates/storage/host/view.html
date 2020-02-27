@@ -6,6 +6,7 @@
 {% block script %}
 <script type="text/javascript">
 	$(document).ready(function() {
+		/* retain last tab */
 		$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
 			localStorage.setItem('host_view_tabs_active', $(e.target).attr('href'));
 		});
@@ -13,9 +14,12 @@
 		if (!active_tab) { active_tab = $('a[data-toggle="tab"]').first().attr('href'); }
 		$('#host_view_tabs a[href="' + active_tab + '"]').tab('show');
 
+		/* resize dt */
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
 			$.fn.dataTable.tables({visible: true, api: true}).columns.adjust();
 		});
+
+		$('.abutton_annotate_view').on('dblclick', Sner.storage.action_annotate_view);
 	});
 </script>
 {% endblock %}
@@ -54,11 +58,20 @@
 		</tr>
 		<tr>
 			<th>tags</th>
-			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': host.tags}|tojson }}'>{{ host.tags }}</td>
+			<td
+				class="render_hbs abutton_annotate_view"
+				data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': host.tags}|tojson }}'
+				data-annotate_route="storage.host_annotate_route" data-model_id="{{host.id}}">
+				{{ host.tags }}
+			</td>
 		</tr>
 		<tr>
 			<th>comment</th>
-			<td>{{ host.comment }}</td>
+			<td
+				class="abutton_annotate_view"
+				data-annotate_route="storage.host_annotate_route" data-model_id="{{host.id}}">
+				{{ host.comment }}
+			</td>
 		</tr>
 	</tbody>
 </table>

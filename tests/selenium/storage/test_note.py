@@ -26,6 +26,15 @@ def test_note_list_route_inrow_delete(live_server, sl_operator, test_note):  # p
 
 
 def test_note_list_route_annotate(live_server, sl_operator, test_note):  # pylint: disable=unused-argument
-    """annotate test"""
+    """test annotation from list route"""
 
-    check_annotate(sl_operator, 'storage.note_list_route', 'note_list_table', test_note)
+    sl_operator.get(url_for('storage.note_list_route', _external=True))
+    dt_rendered(sl_operator, 'note_list_table', test_note.comment)
+    check_annotate(sl_operator, 'abutton_annotate', test_note)
+
+
+def test_note_view_route_annotate(live_server, sl_operator, test_note):  # pylint: disable=unused-argument
+    """test note annotation from view route"""
+
+    sl_operator.get(url_for('storage.note_view_route', note_id=test_note.id, _external=True))
+    check_annotate(sl_operator, 'abutton_annotate_view', test_note)

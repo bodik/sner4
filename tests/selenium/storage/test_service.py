@@ -26,6 +26,8 @@ def test_service_list_route_inrow_delete(live_server, sl_operator, test_service)
 
 
 def test_service_list_route_annotate(live_server, sl_operator, test_service):  # pylint: disable=unused-argument
-    """annotate test"""
+    """test annotation from list route"""
 
-    check_annotate(sl_operator, 'storage.service_list_route', 'service_list_table', test_service)
+    sl_operator.get(url_for('storage.service_list_route', _external=True))
+    dt_rendered(sl_operator, 'service_list_table', test_service.comment)
+    check_annotate(sl_operator, 'abutton_annotate', test_service)

@@ -29,9 +29,11 @@ def test_host_list_route_inrow_delete(live_server, sl_operator, test_host):  # p
 
 
 def test_host_list_route_annotate(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
-    """annotate test"""
+    """test annotation from list route"""
 
-    check_annotate(sl_operator, 'storage.host_list_route', 'host_list_table', test_host)
+    sl_operator.get(url_for('storage.host_list_route', _external=True))
+    dt_rendered(sl_operator, 'host_list_table', test_host.comment)
+    check_annotate(sl_operator, 'abutton_annotate', test_host)
 
 
 def test_host_edit_route_addtag(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
@@ -42,6 +44,13 @@ def test_host_edit_route_addtag(live_server, sl_operator, test_host):  # pylint:
     sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_addtag") and text()="Todo"]').click()
     sl_operator.find_element_by_xpath('//form//input[@type="submit"]').click()
     assert 'todo' in Host.query.get(test_host.id).tags
+
+
+def test_host_view_route_annotate(live_server, sl_operator, test_host):  # pylint: disable=unused-argument
+    """test host annotation from view route"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=test_host.id, _external=True))
+    check_annotate(sl_operator, 'abutton_annotate_view', test_host)
 
 
 def test_host_view_route_services_list(live_server, sl_operator, test_service):  # pylint: disable=unused-argument

@@ -69,9 +69,11 @@ def test_vuln_list_route_inrow_delete(live_server, sl_operator, test_vuln):  # p
 
 
 def test_vuln_list_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
-    """annotate test"""
+    """test annotation from list route"""
 
-    check_annotate(sl_operator, 'storage.vuln_list_route', 'vuln_list_table', test_vuln)
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
+    check_annotate(sl_operator, 'abutton_annotate', test_vuln)
 
 
 def test_vuln_list_route_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
@@ -105,6 +107,13 @@ def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint
         EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]')))
     vuln = Vuln.query.get(test_vuln.id)
     assert 'info' in vuln.tags
+
+
+def test_vuln_view_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+    """test vuln annotation from view route"""
+
+    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
+    check_annotate(sl_operator, 'abutton_annotate_view', test_vuln)
 
 
 def test_vuln_grouped_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument

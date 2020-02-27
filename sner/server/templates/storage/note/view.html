@@ -3,6 +3,14 @@
 
 {% block title %}Notes / View / {{ note.host.address }} {{ note.host.hostname }} / {{ note.xtype }}{% endblock %}
 
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.abutton_annotate_view').on('dblclick', Sner.storage.action_annotate_view);
+});
+</script>
+{% endblock %}
+
 {% block content %}
 {% call cm.heading(['Note', '%s %s' % (note.host.address, note.host.hostname), note.xtype]) %}
 	<div class="pl-2">
@@ -26,11 +34,20 @@
 			<th>xtype</th>
 			<td>{{ note.xtype }}</td>
 			<th>tags</th>
-			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': note.tags}|tojson }}'>{{ note.tags }}</td>
+			<td
+				class="render_hbs abutton_annotate_view"
+				data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': note.tags}|tojson }}'
+				data-annotate_route="storage.note_annotate_route" data-model_id="{{note.id}}">
+				{{ note.tags }}
+			</td>
 		</tr>
 		<tr>
 			<th>comment</th>
-			<td colspan="3">{{ note.comment }}</td>
+			<td
+				class="abutton_annotate_view" colspan="3"
+				data-annotate_route="storage.note_annotate_route" data-model_id="{{note.id}}">
+				{{ note.comment }}
+			</td>
 		</tr>
 	</tbody>
 </table>

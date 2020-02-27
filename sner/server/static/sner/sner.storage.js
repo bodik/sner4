@@ -114,8 +114,24 @@ class SnerStorageComponent extends SnerComponentBase {
 	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
 	 */
 	action_annotate(event) {
-		var rowdata = event.data.dt.row($(this).parents('tr')).data();
-		$.ajax(Flask.url_for(event.data.route_name, {'model_id': rowdata['id']}))
+		Sner.storage._action_annotate(
+			event.data.route_name,
+			event.data.dt.row($(this).parents('tr')).data()['id'],
+			function() { event.data.dt.draw('page'); }
+		);
+	}
+
+
+	action_annotate_view(event) {
+		Sner.storage._action_annotate(
+			$(this).attr('data-annotate_route'),
+			$(this).attr('data-model_id'),
+			function() { window.location.reload(); }
+		);
+	}
+
+	_action_annotate(route_name, model_id, after_update_cb) {
+		$.ajax(Flask.url_for(route_name, {'model_id': model_id}))
 			.done(function(data, textStatus, jqXHR) {
 				Sner.modal('Annotate', data);
 				$('#modal-global .tageditor').tagEditor({'delimiter': '\n'});
@@ -125,7 +141,7 @@ class SnerStorageComponent extends SnerComponentBase {
 					event.preventDefault();
 				});
 				$('#modal-global').on('hidden.bs.modal', function() {
-					event.data.dt.draw('page');
+					after_update_cb();
 				});
 			});
 	}

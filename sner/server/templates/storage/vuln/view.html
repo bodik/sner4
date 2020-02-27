@@ -13,6 +13,7 @@ function action_vuln_tag(event) {
 
 $(document).ready(function() {
 	$('.abutton_vuln_tag_set').on('click', action_vuln_tag);
+	$('.abutton_annotate_view').on('dblclick', Sner.storage.action_annotate_view);
 });
 </script>
 {% endblock %}
@@ -58,11 +59,20 @@ $(document).ready(function() {
 				<span class="render_hbs" data-hbs="storage.hbs.vuln_refs" data-hbs_context='{{ {'refs': vuln.refs}|tojson }}'>{{ vuln.refs }}</span>
 			</td>
 			<th>tags</th>
-			<td class="render_hbs" data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': vuln.tags}|tojson }}'>{{ vuln.tags }}</td>
+			<td
+				class="render_hbs abutton_annotate_view"
+				data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': vuln.tags}|tojson }}'
+				data-annotate_route="storage.vuln_annotate_route" data-model_id="{{vuln.id}}">
+				{{ vuln.tags }}
+			</td>
 		</tr>
 		<tr>
 			<th>comment</th>
-			<td colspan="3">{{ vuln.comment }}</td>
+			<td
+				class="abutton_annotate_view" colspan="3"
+				data-annotate_route="storage.vuln_annotate_route" data-model_id="{{vuln.id}}">
+				{{ vuln.comment }}
+			</td>
 		</tr>
 	</tbody>
 </table>
