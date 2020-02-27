@@ -159,8 +159,10 @@ Web interface allows for CRUD operations on all models, filtering of list
 views, grouping of vulnerabilities and services by properties, basic condensed
 report datasheet generation (FLAB specific feature).
 
-Parsers are used to import agent output data (zip archives) of various formats
-to corresponding storage models. See the `server storage import` cli help.
+Parsers are used to import agent output data (zip archives) produced by
+modules. See the `server storage import` for help. Parsers can also import
+default output formats of various security tools and scanners (currently: nmap,
+nessus).
 
 
 #### Server: Visuals
