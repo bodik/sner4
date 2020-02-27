@@ -7,12 +7,11 @@ from base64 import b64decode, b64encode
 
 from fido2 import cbor
 from flask import url_for
-from selenium.webdriver.support.ui import WebDriverWait
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server import webauthn
 from sner.server.model.auth import User
-from tests.selenium import WEBDRIVER_WAIT
+from tests.selenium import webdriver_waituntil
 from tests.selenium.auth import js_variable_ready
 
 
@@ -23,7 +22,7 @@ def test_profile_webauthn_register_route(live_server, sl_user):  # pylint: disab
 
     sl_user.get(url_for('auth.profile_webauthn_register_route', _external=True))
     # some javascript code must be emulated
-    WebDriverWait(sl_user, WEBDRIVER_WAIT).until(js_variable_ready('window.pkcco_raw'))
+    webdriver_waituntil(sl_user, js_variable_ready('window.pkcco_raw'))
     pkcco = cbor.decode(b64decode(sl_user.execute_script('return window.pkcco_raw;').encode('utf-8')))
     attestation = device.create(pkcco, 'https://%s' % webauthn.rp.ident)
     sl_user.execute_script('pack_attestation(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(attestation)).decode('utf-8'))

@@ -6,10 +6,9 @@ selenium storage ui tests shared functions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server.model.storage import Vuln
-from tests.selenium import dt_wait_processing, no_ajax_pending, WEBDRIVER_WAIT
+from tests.selenium import dt_wait_processing, no_ajax_pending, webdriver_waituntil
 
 
 def check_select_rows(sclnt, dt_id):
@@ -62,7 +61,7 @@ def check_vulns_multiactions(sclnt, dt_id):
     # or deleted
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()
     toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_deletemulti")]').click()
-    WebDriverWait(sclnt, WEBDRIVER_WAIT).until(EC.alert_is_present())
+    webdriver_waituntil(sclnt, EC.alert_is_present())
     sclnt.switch_to.alert.accept()
     dt_wait_processing(sclnt, dt_id)
     assert not Vuln.query.all()
@@ -74,11 +73,10 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
     # disable fade, the timing interferes with the test
     sclnt.execute_script('$("div#modal-global").toggleClass("fade")')
     ActionChains(sclnt).double_click(sclnt.find_element_by_xpath('//td[contains(@class, "%s")]' % annotate_elem_class)).perform()
-    WebDriverWait(sclnt, WEBDRIVER_WAIT).until(
-        EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Annotate"]')))
+    webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Annotate"]')))
 
     sclnt.find_element_by_css_selector('#modal-global form textarea[name="comment"]').send_keys('annotated comment')
     sclnt.find_element_by_css_selector('#modal-global form').submit()
-    WebDriverWait(sclnt, WEBDRIVER_WAIT).until(no_ajax_pending())
+    webdriver_waituntil(sclnt, no_ajax_pending())
 
     assert 'annotated comment' in test_model.__class__.query.get(test_model.id).comment

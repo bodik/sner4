@@ -9,11 +9,10 @@ import pytest
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server import db
 from sner.server.model.auth import User
-from tests.selenium import WEBDRIVER_WAIT
+from tests.selenium import webdriver_waituntil
 from tests.server.model.auth import test_user  # noqa: F401  pylint: disable=unused-import
 from tests.server.model.scheduler import test_excl_network, test_job, test_queue, test_target, test_task  # noqa: F401  pylint: disable=unused-import
 from tests.server.model.storage import test_host, test_note, test_service, test_vuln  # noqa: F401  pylint: disable=unused-import
@@ -39,7 +38,7 @@ def selenium_in_roles(sclnt, roles):
     sclnt.find_element_by_xpath('//form//input[@name="username"]').send_keys(tmp_user.username)
     sclnt.find_element_by_xpath('//form//input[@name="password"]').send_keys(tmp_password)
     sclnt.find_element_by_xpath('//form//input[@type="submit"]').click()
-    WebDriverWait(sclnt, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
+    webdriver_waituntil(sclnt, EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
 
     return sclnt
 

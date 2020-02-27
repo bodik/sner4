@@ -6,11 +6,10 @@ selenium ui tests for auth.user component
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server import db
 from sner.server.model.auth import User
-from tests.selenium import dt_inrow_delete, dt_rendered, WEBDRIVER_WAIT
+from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 
 
 def test_user_list_route(live_server, sl_admin, test_user):  # pylint: disable=unused-argument
@@ -39,19 +38,17 @@ def test_user_apikey_route(live_server, sl_admin, test_user):  # pylint: disable
     sl_admin.execute_script('$("div#modal-global").toggleClass("fade")')
 
     sl_admin.find_element_by_xpath('//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=test_user.id, action='generate')).click()
-    WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(
-        EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
+    webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
-    WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
     dt_rendered(sl_admin, 'user_list_table', test_user.username)
     user = User.query.get(test_user.id)
     assert user.apikey
     db.session.expunge(user)
 
     sl_admin.find_element_by_xpath('//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=test_user.id, action='revoke')).click()
-    WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(
-        EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
+    webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
-    WebDriverWait(sl_admin, WEBDRIVER_WAIT).until(EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
     dt_rendered(sl_admin, 'user_list_table', test_user.username)
     assert not User.query.get(test_user.id).apikey

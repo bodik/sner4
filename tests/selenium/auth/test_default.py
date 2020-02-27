@@ -11,12 +11,11 @@ from soft_webauthn import SoftWebauthnDevice
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from sner.server import webauthn
 from sner.server.model.auth import WebauthnCredential
 from tests import persist_and_detach
-from tests.selenium import WEBDRIVER_WAIT
+from tests.selenium import webdriver_waituntil
 from tests.selenium.auth import js_variable_ready
 
 
@@ -35,11 +34,11 @@ def test_login_webauthn(live_server, selenium, test_user):  # pylint: disable=un
     selenium.find_element_by_xpath('//form//input[@type="submit"]').click()
 
     # some javascript code must be emulated
-    WebDriverWait(selenium, WEBDRIVER_WAIT).until(js_variable_ready('window.pkcro_raw'))
+    webdriver_waituntil(selenium, js_variable_ready('window.pkcro_raw'))
     pkcro = cbor.decode(b64decode(selenium.execute_script('return window.pkcro_raw;').encode('utf-8')))
     assertion = device.get(pkcro, 'https://%s' % webauthn.rp.ident)
     selenium.execute_script(
         'authenticate_assertion(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(assertion)).decode('utf-8'))
     # and back to standard test codeflow
 
-    WebDriverWait(selenium, WEBDRIVER_WAIT).until(EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
+    webdriver_waituntil(selenium, EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
