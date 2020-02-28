@@ -1,5 +1,9 @@
 # sner4 changelog
 
+## 0.1.1 - package upgrades
+
+* removed direct calling live_server fixture, replacet with httpserver fixture
+
 
 ## 0.1.0 - newui
 
