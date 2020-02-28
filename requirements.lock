@@ -55,7 +55,7 @@ requests==2.23.0
 selenium==3.141.0
 semver==2.9.1
 six==1.14.0
-soft-webauthn==0.0.2
+soft-webauthn==0.0.3
 soupsieve==2.0
 SQLAlchemy==1.3.13
 sqlalchemy-datatables==2.0.1
