@@ -19,7 +19,7 @@ def auth_command():
     """auth commands click group/container"""
 
 
-@auth_command.command(name='reset-password', help='password reset')
+@auth_command.command(name='reset-password', help='reset password')
 @click.argument('username')
 @with_appcontext
 def passwordreset(username):
@@ -27,10 +27,10 @@ def passwordreset(username):
 
     user = User.query.filter(User.username == username).one_or_none()
     if not user:
-        current_app.logger.error('no such queue')
+        current_app.logger.error('no such user')
         sys.exit(1)
 
     tmp_password = PWS().generate()
     user.password = tmp_password
     db.session.commit()
-    current_app.logger.info('password reset "%s:%s"' % (user.username, tmp_password))
+    current_app.logger.info('new password "%s:%s"' % (user.username, tmp_password))
