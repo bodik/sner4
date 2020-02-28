@@ -34,7 +34,7 @@ class ModuleBase(ABC):
     """
 
     def __init__(self):
-        self.log = logging.getLogger('sner.agent.module.%s' % __class__)
+        self.log = logging.getLogger('sner.agent.module.%s' % self.__class__.__name__)
         self.process = None
 
     @abstractmethod

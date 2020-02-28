@@ -123,7 +123,7 @@ class NessusParser(ParserBase):
 
         refs = []
         if 'cve' in report_item:
-            refs += [ref for ref in ensure_list(report_item['cve'])]
+            refs += ensure_list(report_item['cve'])
         if 'bid' in report_item:
             refs += ['BID-%s' % ref for ref in ensure_list(report_item['bid'])]
         if 'xref' in report_item:

@@ -183,7 +183,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                 assignment = response.json()
                 if not assignment:  # response-nowork
                     self.log.debug('get_assignment response-nowork')
-                    if self.oneshot:
+                    if self.oneshot:  # pylint: disable=no-else-break  ; improves readability for following pragma
                         break
                     else:  # pragma: no cover ; running over multiprocessing
                         sleep(self.backoff_time)

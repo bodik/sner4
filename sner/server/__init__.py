@@ -72,24 +72,24 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_message_category = 'warning'
     webauthn.init_app(app)
 
-    from sner.server.controller import api
+    from sner.server.controller import api  # pylint: disable=import-outside-toplevel
     app.register_blueprint(api.blueprint, url_prefix='/api')
-    from sner.server.controller import auth
+    from sner.server.controller import auth  # pylint: disable=import-outside-toplevel
     app.register_blueprint(auth.blueprint, url_prefix='/auth')
-    from sner.server.controller import scheduler
+    from sner.server.controller import scheduler  # pylint: disable=import-outside-toplevel
     app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
-    from sner.server.controller import storage
+    from sner.server.controller import storage  # pylint: disable=import-outside-toplevel
     app.register_blueprint(storage.blueprint, url_prefix='/storage')
-    from sner.server.controller import visuals
+    from sner.server.controller import visuals  # pylint: disable=import-outside-toplevel
     app.register_blueprint(visuals.blueprint, url_prefix='/visuals')
 
-    from sner.server.command.auth import auth_command
+    from sner.server.command.auth import auth_command  # pylint: disable=import-outside-toplevel
     app.cli.add_command(auth_command)
-    from sner.server.command.db import db_command
+    from sner.server.command.db import db_command  # pylint: disable=import-outside-toplevel
     app.cli.add_command(db_command)
-    from sner.server.command.scheduler import scheduler_command
+    from sner.server.command.scheduler import scheduler_command  # pylint: disable=import-outside-toplevel
     app.cli.add_command(scheduler_command)
-    from sner.server.command.storage import storage_command
+    from sner.server.command.storage import storage_command  # pylint: disable=import-outside-toplevel
     app.cli.add_command(storage_command)
 
     @app.route('/')
@@ -109,9 +109,9 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable
-        from sner.server.model.auth import User, WebauthnCredential
-        from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task
-        from sner.server.model.storage import Host, Note, Service, Vuln
+        from sner.server.model.auth import User, WebauthnCredential  # pylint: disable=import-outside-toplevel
+        from sner.server.model.scheduler import Excl, ExclFamily, Job, Queue, Target, Task  # pylint: disable=import-outside-toplevel
+        from sner.server.model.storage import Host, Note, Service, Vuln  # pylint: disable=import-outside-toplevel
         return {
             'app': app, 'db': db,
             'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
