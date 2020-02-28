@@ -1,6 +1,6 @@
 coverage
 defusedxml
-fido2
+fido2<0.8
 file-magic
 flake8
 flask
@@ -13,7 +13,7 @@ lxml
 psycopg2
 pylint
 pytenable
-pytest<4.0
+pytest
 pytest-flask
 pytest-httpserver
 pytest-selenium
