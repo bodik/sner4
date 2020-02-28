@@ -8,6 +8,7 @@ import os
 
 from datatables import ColumnDT, DataTables
 from flask import redirect, render_template, request, Response, url_for
+from sqlalchemy import literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -50,7 +51,7 @@ def job_list_json_route():
         ColumnDT(Job.time_start, mData='time_start'),
         ColumnDT(Job.time_end, mData='time_end'),
         ColumnDT((Job.time_end-Job.time_start), mData='time_taken'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Job).outerjoin(Queue)
     if 'filter' in request.values:

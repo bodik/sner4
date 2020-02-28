@@ -5,7 +5,7 @@ controller service
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import func
+from sqlalchemy import func, literal_column
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_filters import apply_filters
 
@@ -52,7 +52,7 @@ def service_list_json_route():
         ColumnDT(Service.info, mData='info'),
         ColumnDT(Service.tags, mData='tags'),
         ColumnDT(Service.comment, mData='comment'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Service).outerjoin(Host)
     if 'filter' in request.values:

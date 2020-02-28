@@ -11,6 +11,7 @@ from io import StringIO
 import psycopg2
 from datatables import ColumnDT, DataTables
 from flask import current_app, flash, redirect, render_template, request, Response, url_for
+from sqlalchemy import literal_column
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
@@ -45,7 +46,7 @@ def excl_list_json_route():
         ColumnDT(Excl.family, mData='family'),
         ColumnDT(Excl.value, mData='value'),
         ColumnDT(Excl.comment, mData='comment'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Excl)
     if 'filter' in request.values:

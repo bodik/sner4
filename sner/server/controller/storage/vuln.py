@@ -9,7 +9,7 @@ from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, Response, url_for
-from sqlalchemy import func
+from sqlalchemy import func, literal_column
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
@@ -38,7 +38,7 @@ def vuln_list_json_route():
     """list vulns, data endpoint"""
 
     columns = [
-        ColumnDT('1', mData='_select', search_method='none', global_search=False),
+        ColumnDT(literal_column('1'), mData='_select', search_method='none', global_search=False),
         ColumnDT(Vuln.id, mData='id'),
         ColumnDT(Host.id, mData='host_id'),
         ColumnDT(Host.address, mData='host_address'),
@@ -50,7 +50,7 @@ def vuln_list_json_route():
         ColumnDT(Vuln.refs, mData='refs'),
         ColumnDT(Vuln.tags, mData='tags'),
         ColumnDT(Vuln.comment, mData='comment'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Vuln).outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
     if 'filter' in request.values:

@@ -7,7 +7,7 @@ import json
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import func
+from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -53,7 +53,7 @@ def note_list_json_route():
         ColumnDT(Note.data, mData='data'),
         ColumnDT(Note.tags, mData='tags'),
         ColumnDT(Note.comment, mData='comment'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
     if 'filter' in request.values:

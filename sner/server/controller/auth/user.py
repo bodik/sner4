@@ -7,6 +7,7 @@ from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
+from sqlalchemy import literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -38,7 +39,7 @@ def user_list_json_route():
         ColumnDT(User.apikey.isnot(None), mData='apikey'),  # pylint: disable=no-member
         ColumnDT(User.roles, mData='roles'),
         ColumnDT(User.active, mData='active'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(User)
     if 'filter' in request.values:

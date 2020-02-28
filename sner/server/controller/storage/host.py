@@ -5,7 +5,7 @@ controller host
 
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import func
+from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -44,7 +44,7 @@ def host_list_json_route():
         ColumnDT(func.coalesce(query_cnt_notes.c.cnt, 0), mData='cnt_n', global_search=False),
         ColumnDT(Host.tags, mData='tags'),
         ColumnDT(Host.comment, mData='comment'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Host) \
         .outerjoin(query_cnt_services, Host.id == query_cnt_services.c.host_id) \

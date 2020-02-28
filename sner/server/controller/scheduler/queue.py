@@ -6,7 +6,7 @@ controller queue
 import os
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
-from sqlalchemy import func
+from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
@@ -55,7 +55,7 @@ def queue_list_json_route():
         ColumnDT(Queue.active, mData='active'),
         ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),
         ColumnDT(func.coalesce(query_nr_jobs.c.cnt, 0), mData='nr_jobs', global_search=False),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Queue) \
         .outerjoin(Task, Queue.task_id == Task.id) \

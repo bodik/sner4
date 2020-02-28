@@ -16,6 +16,7 @@ from fido2.client import ClientData
 from fido2.ctap2 import AttestationObject
 from flask import current_app, flash, redirect, render_template, request, Response, session, url_for
 from flask_login import current_user
+from sqlalchemy import literal_column
 
 from sner.server import db, webauthn
 from sner.server.controller.auth import blueprint, role_required, TOTPImpl, webauthn_credentials
@@ -129,7 +130,7 @@ def profile_webauthn_list_json_route():
         ColumnDT(WebauthnCredential.id, mData='id', search_method='none', global_search=False),
         ColumnDT(WebauthnCredential.registered, mData='registered'),
         ColumnDT(WebauthnCredential.name, mData='name'),
-        ColumnDT('1', mData='_buttons', search_method='none', global_search=False)
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(WebauthnCredential) \
         .filter(WebauthnCredential.user_id == current_user.id) \
