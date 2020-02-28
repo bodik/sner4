@@ -44,6 +44,7 @@ pytest==3.10.1
 pytest-base-url==1.4.1
 pytest-flask==0.15.0
 pytest-html==1.21.1
+pytest-httpserver==0.3.4
 pytest-metadata==1.8.0
 pytest-selenium==1.16.0
 pytest-variables==1.7.1

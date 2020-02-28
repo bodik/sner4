@@ -10,9 +10,7 @@ from http import HTTPStatus
 from time import sleep
 from uuid import uuid4
 
-import pytest
-from flask import _request_ctx_stack, Flask, jsonify
-from pytest_flask.fixtures import live_server
+from werkzeug.wrappers import Response
 
 from sner.agent import main as agent_main
 
@@ -53,35 +51,38 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
     assert 'MARKEDPROCESS' not in os.popen('ps -f').read()
 
 
-@pytest.fixture
-def simple_server(request, monkeypatch, pytestconfig):
-    """simple server for testing normal communication"""
+class SimpleServer():
+    """external server for agent comm tests"""
 
-    app = Flask('simple_server')
+    def __init__(self, server):
+        self.server = server
+        self.url = self.server.url_for('/')[:-1]
+        self.server.expect_request('/api/v1/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/api/v1/scheduler/job/output').respond_with_handler(self.handler_output)
 
-    @app.route('/api/v1/scheduler/job/assign')
-    def assign_route():  # pylint: disable=unused-variable
-        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code2':
-            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
-        return jsonify({'id': uuid4(), 'module': 'dummy', 'params': '', 'targets': []})
+    @staticmethod
+    def handler_assign(request):
+        """handle assign request"""
+        if request.headers.get('Authorization') != 'Apikey dummy':
+            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
+        return Response(json.dumps({'id': str(uuid4()), 'module': 'dummy', 'params': '', 'targets': []}))
 
-    @app.route('/api/v1/scheduler/job/output', methods=['POST'])
-    def output_route():  # pylint: disable=unused-variable
-        if _request_ctx_stack.top.request.headers.get('Authorization') != 'Apikey dummy-breaks-duplicate-code2':
-            return 'Unauthorized', HTTPStatus.UNAUTHORIZED
-        return '', HTTPStatus.OK
+    @staticmethod
+    def handler_output(request):
+        """handle output request"""
+        if request.headers.get('Authorization') != 'Apikey dummy':
+            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
+        return Response('', status=HTTPStatus.OK)
 
-    yield live_server(request, app, monkeypatch, pytestconfig)
 
-
-# using direct call to supply custom app for live_server
-@pytest.mark.filterwarnings('ignore:Fixture "live_server" called directly:DeprecationWarning')
-def test_shutdown(tmpworkdir, simple_server):  # pylint: disable=unused-argument,redefined-outer-name
+def test_shutdown(tmpworkdir, httpserver):  # pylint: disable=unused-argument,redefined-outer-name
     """test no-work, continuous job assignment and shutdown signal handling"""
+
+    sserver = SimpleServer(httpserver)
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
-        args=(['--server', simple_server.url(), '--apikey', 'dummy-breaks-duplicate-code2', '--debug'],))
+        args=(['--server', sserver.url, '--apikey', 'dummy', '--debug'],))
     proc_agent.start()
     sleep(1)
     assert proc_agent.is_alive()

@@ -15,6 +15,7 @@ pylint
 pytenable
 pytest<4.0
 pytest-flask
+pytest-httpserver
 pytest-selenium
 python-libnmap
 pyyaml
