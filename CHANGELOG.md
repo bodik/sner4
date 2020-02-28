@@ -3,6 +3,7 @@
 ## 0.1.1 - package upgrades
 
 * removed direct calling live_server fixture, replacet with httpserver fixture
+* updated all libraries to recent versions
 
 
 ## 0.1.0 - newui
