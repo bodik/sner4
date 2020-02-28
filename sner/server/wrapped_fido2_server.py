@@ -5,7 +5,8 @@ yubico fido2 server wrapped for flask factory pattern delayed configuration
 
 from socket import getfqdn
 
-from fido2.server import Fido2Server, RelyingParty
+from fido2.server import Fido2Server
+from fido2.webauthn import PublicKeyCredentialRpEntity
 
 
 class WrappedFido2Server(Fido2Server):
@@ -13,8 +14,9 @@ class WrappedFido2Server(Fido2Server):
 
     def __init__(self):
         """initialize with default rp name"""
-        super().__init__(RelyingParty(getfqdn()))
+        super().__init__(PublicKeyCredentialRpEntity(getfqdn(), '%s RP' % getfqdn()))
 
     def init_app(self, app):
         """reinitialize on factory pattern config request"""
-        super().__init__(RelyingParty(app.config['SERVER_NAME'] or getfqdn()))
+        ident = app.config['SERVER_NAME'] or getfqdn()
+        super().__init__(PublicKeyCredentialRpEntity(ident, '%s RP' % ident))

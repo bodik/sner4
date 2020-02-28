@@ -1,6 +1,6 @@
 coverage
 defusedxml
-fido2<0.8
+fido2
 file-magic
 flake8
 flask

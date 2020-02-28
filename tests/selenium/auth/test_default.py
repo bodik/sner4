@@ -23,7 +23,7 @@ def test_login_webauthn(live_server, selenium, test_user):  # pylint: disable=un
     """test login by webauthn"""
 
     device = SoftWebauthnDevice()
-    device.cred_init(webauthn.rp.ident, b'randomhandle')
+    device.cred_init(webauthn.rp.id, b'randomhandle')
     persist_and_detach(WebauthnCredential(
         user=test_user,
         user_handle=device.user_handle,
@@ -36,7 +36,7 @@ def test_login_webauthn(live_server, selenium, test_user):  # pylint: disable=un
     # some javascript code must be emulated
     webdriver_waituntil(selenium, js_variable_ready('window.pkcro_raw'))
     pkcro = cbor.decode(b64decode(selenium.execute_script('return window.pkcro_raw;').encode('utf-8')))
-    assertion = device.get(pkcro, 'https://%s' % webauthn.rp.ident)
+    assertion = device.get(pkcro, 'https://%s' % webauthn.rp.id)
     selenium.execute_script(
         'authenticate_assertion(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(assertion)).decode('utf-8'))
     # and back to standard test codeflow

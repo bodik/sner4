@@ -131,7 +131,7 @@ def test_profile_webauthn_register_route(cl_user):
     response = cl_user.get(url_for('auth.profile_webauthn_register_route'))
     # some javascript code must be emulated
     pkcco = cbor.decode(b64decode(cl_user.post(url_for('auth.profile_webauthn_pkcco_route'), {'csrf_token': get_csrf_token(cl_user)}).body))
-    attestation = device.create(pkcco, 'https://%s' % webauthn.rp.ident)
+    attestation = device.create(pkcco, 'https://%s' % webauthn.rp.id)
     attestation_data = {
         'clientDataJSON': attestation['response']['clientDataJSON'],
         'attestationObject': attestation['response']['attestationObject']}

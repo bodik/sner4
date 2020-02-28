@@ -118,7 +118,7 @@ def test_login_webauthn(client, test_user):
     """test login by webauthn"""
 
     device = SoftWebauthnDevice()
-    device.cred_init(webauthn.rp.ident, b'randomhandle')
+    device.cred_init(webauthn.rp.id, b'randomhandle')
     persist_and_detach(WebauthnCredential(
         user=test_user,
         user_handle=device.user_handle,
@@ -132,7 +132,7 @@ def test_login_webauthn(client, test_user):
     response = response.follow()
     # some javascript code muset be emulated
     pkcro = cbor.decode(b64decode(client.post(url_for('auth.login_webauthn_pkcro_route'), {'csrf_token': get_csrf_token(client)}).body))
-    assertion = device.get(pkcro, 'https://%s' % webauthn.rp.ident)
+    assertion = device.get(pkcro, 'https://%s' % webauthn.rp.id)
     assertion_data = {
         'credentialRawId': assertion['rawId'],
         'authenticatorData': assertion['response']['authenticatorData'],
