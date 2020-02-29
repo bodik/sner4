@@ -21,7 +21,8 @@ def create_test_task():
     return Task(
         name='test task name',
         module='test',
-        params='--arg1 abc --arg2')
+        params='--arg1 abc --arg2',
+        group_size=1)
 
 
 def create_test_queue(a_test_task):
@@ -31,7 +32,6 @@ def create_test_queue(a_test_task):
         name='queue name',
         task_id=a_test_task.id,
         task=a_test_task,
-        group_size=2,
         priority=10,
         active=True)
 

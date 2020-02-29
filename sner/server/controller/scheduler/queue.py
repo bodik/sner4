@@ -50,7 +50,6 @@ def queue_list_json_route():
         ColumnDT(Queue.name, mData='name'),
         ColumnDT(Task.id, mData='task_id'),
         ColumnDT(Task.name, mData='task_name'),
-        ColumnDT(Queue.group_size, mData='group_size'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
         ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),

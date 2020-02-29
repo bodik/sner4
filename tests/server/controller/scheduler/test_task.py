@@ -45,6 +45,7 @@ def test_task_add_route(cl_operator):
     form['name'] = test_task.name
     form['module'] = test_task.module
     form['params'] = test_task.params
+    form['group_size'] = test_task.group_size
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -52,6 +53,7 @@ def test_task_add_route(cl_operator):
     assert task.name == test_task.name
     assert task.module == test_task.module
     assert task.params == test_task.params
+    assert task.group_size == test_task.group_size
 
 
 def test_task_edit_route(cl_operator, test_task):

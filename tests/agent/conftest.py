@@ -37,9 +37,9 @@ def test_dummy_a():
 def test_dummy_target(test_dummy_a):  # pylint: disable=redefined-outer-name
     """dummy target fixture"""
 
-    task = Task(name='test_task', module=test_dummy_a['module'], params=test_dummy_a['params'])
+    task = Task(name='test_task', module=test_dummy_a['module'], params=test_dummy_a['params'], group_size=1)
     persist_and_detach(task)
-    queue = Queue(name='test_queue', task=task, group_size=1, priority=10, active=True)
+    queue = Queue(name='test_queue', task=task, priority=10, active=True)
     persist_and_detach(queue)
     target = Target(target=test_dummy_a['targets'][0], queue=queue)
     yield persist_and_detach(target)
@@ -60,9 +60,9 @@ def test_longrun_a():
 def test_longrun_target(test_longrun_a):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
-    task = Task(name='test_task', module=test_longrun_a['module'], params=test_longrun_a['params'])
+    task = Task(name='test_task', module=test_longrun_a['module'], params=test_longrun_a['params'], group_size=1)
     persist_and_detach(task)
-    queue = Queue(name='test_queue', task=task, group_size=1, priority=10, active=True)
+    queue = Queue(name='test_queue', task=task, priority=10, active=True)
     persist_and_detach(queue)
     target = Target(target=test_longrun_a['targets'][0], queue=queue)
     yield persist_and_detach(target)

@@ -48,9 +48,9 @@ def test_v1_scheduler_job_assign_route(client, apikey, test_queue):
 def test_v1_scheduler_job_assign_route_priority(client, apikey, test_task):
     """job assign route test"""
 
-    queue1 = Queue(name='queue1', task=test_task, group_size=1, priority=10, active=True)
+    queue1 = Queue(name='queue1', task=test_task, priority=10, active=True)
     persist_and_detach(queue1)
-    queue2 = Queue(name='queue2', task=test_task, group_size=1, priority=20, active=True)
+    queue2 = Queue(name='queue2', task=test_task, priority=20, active=True)
     persist_and_detach(queue2)
     persist_and_detach(create_test_target(queue1))
     persist_and_detach(create_test_target(queue2))
@@ -63,22 +63,11 @@ def test_v1_scheduler_job_assign_route_priority(client, apikey, test_task):
     assert len(Queue.query.get(queue2.id).jobs) == 1
 
 
-def test_v1_scheduler_job_assign_route_exlusion(client, apikey, test_queue, test_excl_network):
+def test_v1_scheduler_job_assign_route_exclusion(client, apikey, test_queue, test_excl_network):
     """job assign route test cleaning up excluded hosts"""
 
-    persist_and_detach(create_test_target(test_queue))
     persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
-
-    response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))
-    assert response.status_code == HTTPStatus.OK
-
-    assert len(Queue.query.get(test_queue.id).jobs) == 1
-    assert not Target.query.all()
-    assignment = json.loads(response.body.decode('utf-8'))
-    assert len(assignment['targets']) == 1
-
-    persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
-    response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))  # shoudl return response-nowork
+    response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
 

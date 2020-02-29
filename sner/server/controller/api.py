@@ -66,7 +66,7 @@ def v1_scheduler_job_assign_route(queue_ident=None):
     assigned_targets = []
     blacklist = ExclMatcher()
     while True:
-        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size).all()
+        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.task.group_size).all()
         if not targets:
             break
 
@@ -75,10 +75,10 @@ def v1_scheduler_job_assign_route(queue_ident=None):
             if blacklist.match(target.target):
                 continue
             assigned_targets.append(target.target)
-            if len(assigned_targets) == queue.group_size:
+            if len(assigned_targets) == queue.task.group_size:
                 break
 
-        if len(assigned_targets) == queue.group_size:
+        if len(assigned_targets) == queue.task.group_size:
             break
 
     if not assigned_targets:

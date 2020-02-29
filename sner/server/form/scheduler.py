@@ -48,6 +48,7 @@ class TaskForm(FlaskForm):
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
     params = TextAreaNoneField('Parameters', render_kw={'rows': '10'})
+    group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     submit = SubmitField('Save')
 
 
@@ -56,7 +57,6 @@ class QueueForm(FlaskForm):
 
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     task = QuerySelectField('Task', [InputRequired()], query_factory=tasks, allow_blank=False, get_label='name')
-    group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')
     submit = SubmitField('Save')

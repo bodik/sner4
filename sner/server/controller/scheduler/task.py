@@ -36,6 +36,7 @@ def task_list_json_route():
         ColumnDT(Task.name, mData='name'),
         ColumnDT(Task.module, mData='module'),
         ColumnDT(Task.params, mData='params'),
+        ColumnDT(Task.group_size, mData='group_size'),
         ColumnDT(func.count(Queue.id), mData='nr_queues', global_search=False),
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]

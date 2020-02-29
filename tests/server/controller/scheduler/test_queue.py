@@ -44,7 +44,6 @@ def test_queue_add_route(cl_operator, test_task):
     form = cl_operator.get(url_for('scheduler.queue_add_route')).form
     form['name'] = test_queue.name
     form['task'] = test_queue.task.id
-    form['group_size'] = test_queue.group_size
     form['priority'] = test_queue.priority
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND

@@ -23,6 +23,7 @@ class Task(db.Model):
     name = db.Column(db.String(250), nullable=False)
     module = db.Column(db.String(250), nullable=False)
     params = db.Column(db.Text)
+    group_size = db.Column(db.Integer, nullable=False)
 
     queues = relationship('Queue', back_populates='task', cascade='delete,delete-orphan', passive_deletes=True)
 
@@ -36,7 +37,6 @@ class Queue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id', ondelete='CASCADE'), nullable=False)
-    group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
 
