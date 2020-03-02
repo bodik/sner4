@@ -19,7 +19,7 @@ def create_test_task():
     """test task data"""
 
     return Task(
-        name='test task name',
+        name='testtaskname',
         module='test',
         params='--arg1 abc --arg2',
         group_size=1)
@@ -29,7 +29,7 @@ def create_test_queue(a_test_task):
     """test queue data"""
 
     return Queue(
-        name='queue name',
+        name='testqueue',
         task_id=a_test_task.id,
         task=a_test_task,
         priority=10,

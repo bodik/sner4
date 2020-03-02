@@ -8,8 +8,8 @@
 
 <form method="post">
 	{{ form.csrf_token }}
-	{{ bwtf.bootstrap_field(form.name, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.task, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.name, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.priority, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.active, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}

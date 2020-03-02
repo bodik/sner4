@@ -58,7 +58,7 @@ def test_queue_enqueue_command(runner, tmpworkdir, test_queue):
     assert result.exit_code == 0
     assert len(Queue.query.get(test_queue.id).targets) == 2
 
-    result = runner.invoke(scheduler_command, ['queue-enqueue', str(test_queue.name), test_target.target])
+    result = runner.invoke(scheduler_command, ['queue-enqueue', str(test_queue.ident), test_target.target])
     assert result.exit_code == 0
     assert len(Queue.query.get(test_queue.id).targets) == 3
 

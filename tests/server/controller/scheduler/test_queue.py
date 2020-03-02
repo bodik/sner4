@@ -23,17 +23,17 @@ def test_queue_list_route(cl_operator, test_target):
 def test_queue_list_json_route(cl_operator, test_queue):
     """queue list_json route test"""
 
-    response = cl_operator.post(url_for('scheduler.queue_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_queue.name})
+    response = cl_operator.post(url_for('scheduler.queue_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_queue.ident})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['name'] == test_queue.name
+    assert response_data['data'][0]['ident'] == test_queue.ident
 
     response = cl_operator.post(
-        url_for('scheduler.queue_list_json_route', filter='Queue.name=="%s"' % test_queue.name),
+        url_for('scheduler.queue_list_json_route', filter='Queue.ident=="%s"' % (test_queue.ident)),
         {'draw': 1, 'start': 0, 'length': 1})
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['name'] == test_queue.name
+    assert response_data['data'][0]['ident'] == test_queue.ident
 
 
 def test_queue_add_route(cl_operator, test_task):
@@ -50,6 +50,14 @@ def test_queue_add_route(cl_operator, test_task):
 
     queue = Queue.query.filter(Queue.name == test_queue.name).one()
     assert queue.name == test_queue.name
+
+    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
+    form['name'] = test_queue.name
+    form['task'] = test_queue.task.id
+    form['priority'] = test_queue.priority
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Queue identifier must be unique."]')
 
 
 def test_queue_edit_route(cl_operator, test_queue):

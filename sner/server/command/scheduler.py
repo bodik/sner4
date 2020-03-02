@@ -20,7 +20,7 @@ def queuebyx(queue_ident):
 
     if queue_ident.isnumeric():
         return Queue.query.get(int(queue_ident))
-    return Queue.query.filter(Queue.name == queue_ident).one_or_none()
+    return Queue.query.filter(Queue.ident == queue_ident).one_or_none()
 
 
 @click.group(name='scheduler', help='sner.server scheduler management')
@@ -56,14 +56,14 @@ def rangetocidr(start, end):
 
 
 @scheduler_command.command(name='queue-enqueue', help='add targets to queue')
-@click.argument('queue_id')
+@click.argument('queue_ident')
 @click.argument('argtargets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 @with_appcontext
-def queue_enqueue(queue_id, argtargets, **kwargs):
+def queue_enqueue(queue_ident, argtargets, **kwargs):
     """enqueue targets to queue"""
 
-    queue = queuebyx(queue_id)
+    queue = queuebyx(queue_ident)
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)

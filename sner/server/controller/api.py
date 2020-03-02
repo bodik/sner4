@@ -51,7 +51,7 @@ def v1_scheduler_job_assign_route(queue_ident=None):
         if queue_ident.isnumeric():
             queue = query.filter(Queue.id == int(queue_ident)).one_or_none()
         else:
-            queue = query.filter(Queue.name == queue_ident).order_by(Queue.priority.desc()).first()
+            queue = query.filter(Queue.ident == queue_ident).order_by(Queue.priority.desc()).first()
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 

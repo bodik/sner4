@@ -265,7 +265,7 @@ bin/server run
 4. Setup exclusions (*scheduler > exclusions > add | edit*)
 5. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
-	* cli: `bin/server scheduler queue-enqueue [queue_id | queue_name] --file=targets`
+	* cli: `bin/server scheduler queue-enqueue [queue_id | queue_ident] --file=targets`
 6. Run the agent `bin/agent &` (TODO: screen or systemd service)
 7. Monitor the queue until all jobs has been finished by agent
 8. Stop the agent `bin/agent --shutdown [PID]`
@@ -287,7 +287,7 @@ bin/server run
 #### Use-case: Basic dns recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns_recon' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns_recon.main' --file=-
 bin/agent --debug --queue 'dns recon'
 ```
 
@@ -299,7 +299,7 @@ Import gathered data after each step.
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_011 top10000 ack scan' --file=-
+        | bin/server scheduler queue-enqueue 'sner_011 top10000 ack scan.main' --file=-
     ```
 
 2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
@@ -307,17 +307,17 @@ Import gathered data after each step.
     ```
     # fast track
     bin/server storage service-list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic commonports' --file=-
+        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic.prio' --file=-
     # rest of the ports
     bin/server storage service-list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic normal' --file=-
+        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic.main' --file=-
     ```
 
 3. Re-queue services without identification for high intensity version scan.
 
     ```
     bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue-enqueue 'sner_025 inet version scan intense' --file=-
+        | bin/server scheduler queue-enqueue 'sner_025 inet version scan intense.main' --file=-
     ```
 
 4. Cleanup storage, remove services in filtered state (ack scan artifacts) and prune hosts without any data
@@ -337,15 +337,15 @@ Import gathered data after each step.
 ```
 # ftp sweep
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
-    | bin/server scheduler queue-enqueue 'sner_030 ftp sweep' --file=-
+    | bin/server scheduler queue-enqueue 'sner_030 ftp sweep.main' --file=-
 
 # http titles
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
-    | bin/server scheduler queue-enqueue 'sner_031 http titles' --file=-
+    | bin/server scheduler queue-enqueue 'sner_031 http titles.main' --file=-
 
 # ldap info
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
-    | bin/server scheduler queue-enqueue 'sner_032 ldap rootdse' --file=-
+    | bin/server scheduler queue-enqueue 'sner_032 ldap rootdse.main' --file=-
 ```
 
 ##### Manual

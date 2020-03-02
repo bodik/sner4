@@ -28,10 +28,10 @@ def test_v1_scheduler_job_assign_route(client, apikey, test_queue):
 
     # assign from queue by name
     persist_and_detach(create_test_target(test_queue))
-    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_ident=test_queue.name), headers=apikey_header(apikey))
+    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_ident=test_queue.ident), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.filter(Queue.name == test_queue.name).one().jobs) == 2
+    assert len(Queue.query.filter(Queue.ident == test_queue.ident).one().jobs) == 2
 
     # assign from non-existent queue
     response = client.get(

@@ -47,9 +47,7 @@ def queue_list_json_route():
     query_nr_jobs = db.session.query(Job.queue_id, func.count(Job.id).label('cnt')).group_by(Job.queue_id).subquery()
     columns = [
         ColumnDT(Queue.id, mData='id'),
-        ColumnDT(Queue.name, mData='name'),
-        ColumnDT(Task.id, mData='task_id'),
-        ColumnDT(Task.name, mData='task_name'),
+        ColumnDT(Queue.ident, mData='ident'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
         ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),

@@ -9,9 +9,7 @@
 		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
-			Sner.dt.column('name'),
-			Sner.dt.column('task_id', {'visible': false}),
-			Sner.dt.column('task_name'),
+			Sner.dt.column('ident'),
 			Sner.dt.column('priority'),
 			Sner.dt.column('active'),
 			Sner.dt.column('nr_targets'),
