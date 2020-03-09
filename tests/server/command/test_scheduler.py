@@ -16,7 +16,8 @@ def test_enumips_command(runner, tmpworkdir):
 
     test_path = 'enumips.txt'
     with open(test_path, 'w') as ftmp:
-        ftmp.write('127.0.0.132/30')
+        ftmp.write('127.0.0.132/30\n')
+        ftmp.write('127.0.1.123/32\n')
 
     result = runner.invoke(scheduler_command, ['enumips', '127.0.0.128/30', '--file', test_path])
     assert result.exit_code == 0
@@ -24,6 +25,7 @@ def test_enumips_command(runner, tmpworkdir):
     assert '127.0.0.129' in result.output
     assert '127.0.0.130' in result.output
     assert '127.0.0.133' in result.output
+    assert '127.0.1.123' in result.output
 
 
 def test_rangetocidr_command(runner, tmpworkdir):

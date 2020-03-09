@@ -38,7 +38,10 @@ def enumips(targets, **kwargs):
     if kwargs["file"]:
         targets += kwargs["file"].read().splitlines()
     for item in targets:
-        for tmp in ip_network(item).hosts():
+        network = ip_network(item)
+        if network.prefixlen == network.max_prefixlen:
+            print(network.network_address)
+        for tmp in network.hosts():
             print(tmp)
 
 
