@@ -51,6 +51,10 @@ svg {
 </div>
 
 <script>
+function remToPixels(rem) {
+	return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+
 // globals
 var url_params = new URLSearchParams(window.location.search);
 if (!url_params.has('crop')) { url_params.set('crop', '1'); }
@@ -61,7 +65,7 @@ var colors = d3.scaleOrdinal(d3.schemeCategory20);
 var radius = 5;
 
 var width = $("#visual")[0].clientWidth;
-var height = 0.8 * window.innerHeight;
+var height = window.innerHeight - remToPixels(9.0);
 var svg = d3.select('svg')
 	.attr('width', width)
 	.attr('height', height);
