@@ -77,9 +77,9 @@
 </table>
 
 <ul class="nav nav-tabs" id="host_view_tabs">
-	<li class="nav-item"><a class="nav-link" href="#services" data-toggle="tab">Services</a></li>
-	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns</a></li>
-	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes</a></li>
+	<li class="nav-item"><a class="nav-link" href="#services" data-toggle="tab">Services <span class="badge badge-pill badge-secondary">{{ host.services|length }}</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns <span class="badge badge-pill badge-secondary">{{ host.vulns|length }}</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes <span class="badge badge-pill badge-secondary">{{ host.notes|length }}</span></a></li>
 </ul>
 
 <div class="tab-content">
