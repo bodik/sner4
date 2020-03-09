@@ -34,10 +34,15 @@ svg {
 <div class="text-right py-1">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled">crop:</a>
-		{% set active_crop = request.args.get('crop', 0)|int %}
-		{% for level in range(0,3) %}
-		<a class="btn btn-outline-secondary{% if active_crop == level %} active{% endif %}" href="{{ url_for('visuals.dnstree_route', crop=level) }}">{{level}}</a>
-		{% endfor %}
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:0">0</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:1">1</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:2">2</a>
+	</div>
+
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">distance:</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="distance:100">100</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="distance:200">200</a>
 	</div>
 </div>
 
@@ -46,11 +51,17 @@ svg {
 </div>
 
 <script>
+// globals
+var url_params = new URLSearchParams(window.location.search);
+if (!url_params.has('crop')) { url_params.set('crop', '1'); }
+if (!url_params.has('distance')) { url_params.set('distance', '100'); }
+
+//graph
 var colors = d3.scaleOrdinal(d3.schemeCategory20);
 var radius = 5;
 
 var width = $("#visual")[0].clientWidth;
-var height = 0.77 * window.innerHeight;
+var height = 0.85 * window.innerHeight;
 var svg = d3.select('svg')
 	.attr('width', width)
 	.attr('height', height);
@@ -61,7 +72,7 @@ var textElements;
 
 var linkForce = d3.forceLink()
 	.id(function (link) { return link.id })
-	.distance(100).strength(1);
+	.distance(parseInt(url_params.get('distance'))).strength(1);
 
 var simulation = d3.forceSimulation()
 	.force('link', linkForce)
@@ -147,5 +158,8 @@ function ticked() {
 		.attr('x2', function (d) { return d.target.x })
 		.attr('y2', function (d) { return d.target.y });
 }
+
+// graph controls
+$('.abutton_modify_link').each(Sner.action_modify_link);
 </script>
 {% endblock %}

@@ -27,28 +27,28 @@ svg {
 <div class="text-right py-1">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled">view:</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="view:normal">normal</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="view:inverse">inverse</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="view:normal">normal</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="view:inverse">inverse</a>
 	</div>
 
 	<div class="btn-group">
-		<a class="btn btn-outline-secondary disabled">crop at:</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:2">2</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:3">3</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:4">4</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:5">5</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="crop:">no crop</a>
+		<a class="btn btn-outline-secondary disabled">crop:</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:2">2</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:3">3</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:4">4</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:5">5</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="crop:">no crop</a>
 	</div>
 
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled">limit:</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:10">10</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:30">30</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:40">40</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:50">50</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:100">100</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:200">200</a>
-		<a class="btn btn-outline-secondary abutton_modify_view" data-args="limit:">no limit</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:10">10</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:30">30</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:40">40</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:50">50</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:100">100</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:200">200</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:">no limit</a>
 	</div>
 </div>
 
@@ -57,11 +57,11 @@ svg {
 </div>
 
 <script>
-/* globals*/
+// globals
 var url_params = new URLSearchParams(window.location.search);
 if (!url_params.has('view')) { url_params.set('view', 'normal'); }
 
-/* graph */
+// graph
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 var width = $('#visual')[0].clientWidth;
 var height = 0.77 * window.innerHeight;
@@ -79,7 +79,7 @@ var processing = svg.append('g')
 		.style('text-anchor', 'middle')
 		.text('Processing graph ...');
 
-/* generate graph layout */
+// generate graph layout
 d3.json(Flask.url_for('visuals.portinfos_json_route') + window.location.search, function(data) {
 	var counts = data.map(function(d) { return d.count; });
 	var max = Math.max.apply(null, counts);
@@ -97,7 +97,7 @@ d3.json(Flask.url_for('visuals.portinfos_json_route') + window.location.search, 
 		.start();
 });
 
-/* computed layout draw callback */
+// computed layout draw callback
 function draw(words) {
 	d3.select('.wordcloud').selectAll('text')
 		.data(words)
@@ -113,18 +113,7 @@ function draw(words) {
 	d3.select('.processing').style('visibility', 'hidden');
 }
 
-/* graph controls. this might seem heavy, but to preserve all but selected request.args in jinja2 is not so nice/simple and requires 'do statement extension' */
-$('.abutton_modify_view').each(function(index, elem) {
-	var new_params = new URLSearchParams(url_params);
-	var [key, val] = elem.getAttribute('data-args').split(':');
-	if (val) {
-		new_params.set(key, val);
-		if (url_params.get(key) == val) { $(elem).addClass('active'); }
-	} else {
-		new_params.delete(key);
-		if (!url_params.has(key)) { $(elem).addClass('active'); }
-	}
-	elem.href = '?' + new_params.toString();
-});
+// graph controls
+$('.abutton_modify_link').each(Sner.action_modify_link);
 </script>
 {% endblock %}

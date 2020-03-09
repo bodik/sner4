@@ -312,4 +312,24 @@ class SnerModule {
 		Sner.submit_form(event.data.url, data)
 			.always(function() { event.data.dt.draw(); });
 	}
+
+	/*
+	 * modify link preserving other arguments
+	 */
+	action_modify_link(index, elem) {
+		if (typeof window.url_params === 'undefined') {
+			window.url_params = new URLSearchParams(window.location.search);
+		}
+
+		var new_params = new URLSearchParams(url_params);
+		var [key, val] = elem.getAttribute('data-args').split(':');
+		if (val) {
+			new_params.set(key, val);
+			if (window.url_params.get(key) == val) { $(elem).addClass('active'); }
+		} else {
+			new_params.delete(key);
+			if (!url_params.has(key)) { $(elem).addClass('active'); }
+		}
+		elem.href = '?' + new_params.toString();
+	}
 }
