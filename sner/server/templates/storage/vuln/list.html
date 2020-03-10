@@ -33,9 +33,9 @@
 		var dt_vuln_list_table = $('#vuln_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_vuln_list_table_options));
 		$('#vuln_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_vuln_list_table}, Sner.dt.selectall);
 		$('#vuln_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_vuln_list_table}, Sner.dt.selectnone);
-		$('#vuln_list_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_multiid_route'), 'action': 'set'}, Sner.action_tag_multiid);
-		$('#vuln_list_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_multiid_route'), 'action': 'unset'}, Sner.action_tag_multiid);
-		$('#vuln_list_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_delete_multiid_route')}, Sner.action_delete_multiid);
+		$('#vuln_list_table_toolbar .abutton_tagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_multiid_route'), 'action': 'set'}, Sner.storage.action_tag_multiid);
+		$('#vuln_list_table_toolbar .abutton_untagmulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_tag_multiid_route'), 'action': 'unset'}, Sner.storage.action_tag_multiid);
+		$('#vuln_list_table_toolbar .abutton_deletemulti').on('click', {'dt': dt_vuln_list_table, 'url': Flask.url_for('storage.vuln_delete_multiid_route')}, Sner.storage.action_delete_multiid);
 	});
 </script>
 {% endblock %}

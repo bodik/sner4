@@ -109,7 +109,41 @@ class SnerStorageComponent extends SnerComponentBase {
 	}
 
 	/**
-	 * annotate model using modal dialogue with ajaxed html fragment
+	 * tag multiple items
+	 *
+	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string}
+	 */
+	action_tag_multiid(event) {
+		var data = Sner.dt.selected_ids_form_data(event.data.dt);
+		if ($.isEmptyObject(data)) {
+			toastr.warning('No items selected');
+			return Promise.resolve();
+		}
+		data['tag'] = event.target.getAttribute('data-tag');
+		data['action'] = event.data.action;
+		Sner.submit_form(event.data.url, data)
+			.always(function() { event.data.dt.draw(); });
+	}
+
+	/**
+	 * delete multiple items
+	 *
+	 * @param {object} event jquery event. data required {'dt': datatable instance}
+	 */
+	action_delete_multiid(event) {
+		if (!confirm('Really delete?')) { return; }
+
+		var data = Sner.dt.selected_ids_form_data(event.data.dt);
+		if ($.isEmptyObject(data)) {
+			toastr.warning('No items selected');
+			return Promise.resolve();
+		}
+		Sner.submit_form(event.data.url, data)
+			.always(function() { event.data.dt.draw(); });
+	}
+
+	/**
+	 * annotate model using modal dialogue, called from datatable context
 	 *
 	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
 	 */
@@ -121,7 +155,11 @@ class SnerStorageComponent extends SnerComponentBase {
 		);
 	}
 
-
+	/**
+	 * annotate model using modal dialogue, called from model/view page
+	 *
+	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
+	 */
 	action_annotate_view(event) {
 		Sner.storage._action_annotate(
 			$(this).attr('data-annotate_route'),
@@ -130,6 +168,13 @@ class SnerStorageComponent extends SnerComponentBase {
 		);
 	}
 
+	/**
+	 * annotate model using modal dialogue implementation
+	 *
+	 * @param {string}   route_name      annotate route name
+	 * @param {string}   model_id        annotated model id
+	 * @param {function} after_update_cb content reload callback
+	 */
 	_action_annotate(route_name, model_id, after_update_cb) {
 		$.ajax(Flask.url_for(route_name, {'model_id': model_id}))
 			.done(function(data, textStatus, jqXHR) {
