@@ -4,6 +4,7 @@
 #    db: 'postgresql://user:password@localhost/sner'
 #    var: '/var/lib/sner'
 #    session_idletime: 3600
+#    tags: ['info', 'report', 'todo', 'reviewed', 'sslhell']
 #
 #agent:
 #    server: 'http://localhost:18000'

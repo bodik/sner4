@@ -13,11 +13,9 @@
 {%- macro addtag_buttons(aa) -%}
 <div class="form-group row">
 	<div class="col-sm-10 offset-sm-2">
-		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Info</a>
-		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Report</a>
-		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Todo</a>
-		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Reviewed</a>
-		<a class="btn btn-outline-secondary btn-sm abutton_addtag">Sslhell</a>
+	{% for tag in config['SNER_TAGS'] %}
+		<a class="btn btn-outline-secondary btn-sm abutton_addtag">{{ tag|capitalize }}</a>
+	{% endfor %}
 	</div>
 </div>
 <script type="text/javascript">
