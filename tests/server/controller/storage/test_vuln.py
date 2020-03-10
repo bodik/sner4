@@ -100,32 +100,32 @@ def test_vuln_view_route(cl_operator, test_vuln):
     assert '<pre>%s</pre>' % test_vuln.data in response
 
 
-def test_delete_by_id_route(cl_operator, test_vuln):
+def test_delete_multiid_route(cl_operator, test_vuln):
     """vuln multi delete route for ajaxed toolbars test"""
 
     data = {'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_delete_by_id_route'), data)
+    response = cl_operator.post(url_for('storage.vuln_delete_multiid_route'), data)
     assert response.status_code == HTTPStatus.OK
     assert not Vuln.query.get(test_vuln.id)
 
-    response = cl_operator.post(url_for('storage.vuln_delete_by_id_route'), {}, status='*')
+    response = cl_operator.post(url_for('storage.vuln_delete_multiid_route'), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_tag_by_id_route(cl_operator, test_vuln):
+def test_tag_multiid_route(cl_operator, test_vuln):
     """vuln multi tag route for ajaxed toolbars test"""
 
     data = {'tag': 'testtag', 'action': 'set', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
+    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), data)
     assert response.status_code == HTTPStatus.OK
     assert 'testtag' in Vuln.query.get(test_vuln.id).tags
 
     data = {'tag': 'testtag', 'action': 'unset', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), data)
+    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), data)
     assert response.status_code == HTTPStatus.OK
     assert 'testtag' not in Vuln.query.get(test_vuln.id).tags
 
-    response = cl_operator.post(url_for('storage.vuln_tag_by_id_route'), {}, status='*')
+    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 

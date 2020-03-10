@@ -18,7 +18,7 @@ from sner.server.command.storage import vuln_report
 from sner.server.controller.auth import role_required
 from sner.server.controller.storage import annotate_model, blueprint, get_related_models
 from sner.server.form import ButtonForm
-from sner.server.form.storage import IdsForm, TagByIdForm, VulnForm
+from sner.server.form.storage import MultiidForm, TagMultiidForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.sqlafilter import filter_parser
 from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
@@ -125,12 +125,12 @@ def vuln_view_route(vuln_id):
     return render_template('storage/vuln/view.html', vuln=vuln, button_form=ButtonForm())
 
 
-@blueprint.route('/vuln/delete_by_id', methods=['POST'])
+@blueprint.route('/vuln/delete_multiid', methods=['POST'])
 @role_required('operator')
-def vuln_delete_by_id_route():
+def vuln_delete_multiid_route():
     """delete multiple vulns route"""
 
-    form = IdsForm()
+    form = MultiidForm()
     if form.validate_on_submit():
         try:
             Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
@@ -143,12 +143,12 @@ def vuln_delete_by_id_route():
     return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
-@blueprint.route('/vuln/tag_by_id', methods=['POST'])
+@blueprint.route('/vuln/tag_multiid', methods=['POST'])
 @role_required('operator')
-def vuln_tag_by_id_route():
+def vuln_tag_multiid_route():
     """tag multiple route"""
 
-    form = TagByIdForm()
+    form = TagMultiidForm()
     if form.validate_on_submit():
         try:
             tag = form.tag.data

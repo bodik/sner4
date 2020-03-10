@@ -284,7 +284,7 @@ class SnerModule {
 	 *
 	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string}
 	 */
-	action_tag_by_id(event) {
+	action_tag_multiid(event) {
 		var data = Sner.dt.selected_ids_form_data(event.data.dt);
 		if ($.isEmptyObject(data)) {
 			toastr.warning('No items selected');
@@ -301,7 +301,7 @@ class SnerModule {
 	 *
 	 * @param {object} event jquery event. data required {'dt': datatable instance}
 	 */
-	action_delete_by_id(event) {
+	action_delete_multiid(event) {
 		if (!confirm('Really delete?')) { return; }
 
 		var data = Sner.dt.selected_ids_form_data(event.data.dt);

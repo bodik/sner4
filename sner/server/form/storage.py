@@ -85,13 +85,13 @@ class NoteForm(FlaskForm):
     return_url = HiddenField()
 
 
-class IdsForm(FlaskForm):
+class MultiidForm(FlaskForm):
     """ajax; generic multi-id form"""
 
     ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
 
 
-class TagByIdForm(FlaskForm):
+class TagMultiidForm(FlaskForm):
     """ajax; tagmulti action"""
 
     ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
