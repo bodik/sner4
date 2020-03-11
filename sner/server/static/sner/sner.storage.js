@@ -121,8 +121,8 @@ class SnerStorageComponent extends SnerComponentBase {
 		}
 		data['tag'] = event.target.getAttribute('data-tag');
 		data['action'] = event.data.action;
-		Sner.submit_form(event.data.url, data)
-			.always(function() { event.data.dt.draw(); });
+		Sner.submit_form(Flask.url_for(event.data.route_name), data)
+			.done(function() { event.data.dt.draw(); });
 	}
 
 	/**
@@ -138,8 +138,8 @@ class SnerStorageComponent extends SnerComponentBase {
 			toastr.warning('No items selected');
 			return Promise.resolve();
 		}
-		Sner.submit_form(event.data.url, data)
-			.always(function() { event.data.dt.draw(); });
+		Sner.submit_form(Flask.url_for(event.data.route_name), data)
+			.done(function() { event.data.dt.draw(); });
 	}
 
 	/**

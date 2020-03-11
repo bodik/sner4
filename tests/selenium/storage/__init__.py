@@ -42,25 +42,25 @@ def check_vulns_multiactions(sclnt, dt_id):
 
     # one cloud be be tagged
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[1]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Info"]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tag_multiid") and text()="Info"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert Vuln.query.filter(Vuln.name == 'vuln 1', Vuln.tags.any('info')).one()
 
     # or the other one
     dt_elem.find_element_by_xpath('(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[2]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Report"]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tag_multiid") and text()="Report"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert Vuln.query.filter(Vuln.name == 'vuln 2', Vuln.tags.any('report')).one()
 
     # both might be tagged at the same time
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tagmulti") and text()="Todo"]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_tag_multiid") and text()="Todo"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert Vuln.query.filter(Vuln.tags.any('todo')).count() == 2
 
     # or deleted
     toolbar_elem.find_element_by_xpath('//a[text()="All"]').click()
-    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_deletemulti")]').click()
+    toolbar_elem.find_element_by_xpath('//a[contains(@class, "abutton_delete_multiid")]').click()
     webdriver_waituntil(sclnt, EC.alert_is_present())
     sclnt.switch_to.alert.accept()
     dt_wait_processing(sclnt, dt_id)
