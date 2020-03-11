@@ -9,7 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.model.storage import Host
-from tests.server.controller.storage import check_annotate
+from tests.server.controller.storage import check_annotate, check_tag_multiid
 from tests.server.model.storage import create_test_host
 
 
@@ -91,3 +91,9 @@ def test_host_view_route(cl_operator, test_host):
 
     response = cl_operator.get(url_for('storage.host_view_route', host_id=test_host.id))
     assert response.status_code == HTTPStatus.OK
+
+
+def test_host_tag_multiid_route(cl_operator, test_host):
+    """host multi tag route for ajaxed toolbars test"""
+
+    check_tag_multiid(cl_operator, 'storage.host_tag_multiid_route', test_host)

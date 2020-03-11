@@ -10,7 +10,7 @@ from flask import url_for
 
 from sner.server.model.storage import Vuln
 from tests.server import get_csrf_token
-from tests.server.controller.storage import check_annotate
+from tests.server.controller.storage import check_annotate, check_tag_multiid
 from tests.server.model.storage import create_test_vuln
 
 
@@ -100,7 +100,7 @@ def test_vuln_view_route(cl_operator, test_vuln):
     assert '<pre>%s</pre>' % test_vuln.data in response
 
 
-def test_delete_multiid_route(cl_operator, test_vuln):
+def test_vuln_delete_multiid_route(cl_operator, test_vuln):
     """vuln multi delete route for ajaxed toolbars test"""
 
     data = {'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
@@ -112,21 +112,10 @@ def test_delete_multiid_route(cl_operator, test_vuln):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_tag_multiid_route(cl_operator, test_vuln):
+def test_vuln_tag_multiid_route(cl_operator, test_vuln):
     """vuln multi tag route for ajaxed toolbars test"""
 
-    data = {'tag': 'testtag', 'action': 'set', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), data)
-    assert response.status_code == HTTPStatus.OK
-    assert 'testtag' in Vuln.query.get(test_vuln.id).tags
-
-    data = {'tag': 'testtag', 'action': 'unset', 'ids-0': test_vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), data)
-    assert response.status_code == HTTPStatus.OK
-    assert 'testtag' not in Vuln.query.get(test_vuln.id).tags
-
-    response = cl_operator.post(url_for('storage.vuln_tag_multiid_route'), {}, status='*')
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    check_tag_multiid(cl_operator, 'storage.vuln_tag_multiid_route', test_vuln)
 
 
 def test_vuln_grouped_route(cl_operator):
