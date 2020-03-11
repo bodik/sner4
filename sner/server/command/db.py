@@ -199,6 +199,7 @@ def db_initdata():  # pylint: disable=too-many-statements
 
     db.session.add(Vuln(
         host=host,
+        service=Service.query.first(),
         name='vulnerability3',
         xtype='testxtype.124',
         severity=SeverityEnum.unknown,

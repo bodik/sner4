@@ -46,7 +46,7 @@ def vuln_report():
 
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
     endpoint_hostname = func.concat_ws(
-        ':', case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=cast(Host.address, db.String)), Service.port)
+        ':', case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address)), Service.port)
     # unnesting refs should be implemented as
     # SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln
     #   LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE
