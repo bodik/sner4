@@ -5,10 +5,10 @@ controller storage main module
 
 from http import HTTPStatus
 
-from flask import Blueprint, render_template
+from flask import Blueprint, jsonify, render_template
 
 from sner.server import db
-from sner.server.form.storage import AnnotateForm
+from sner.server.form.storage import AnnotateForm, TagMultiidForm
 from sner.server.model.storage import Host, Service
 
 
@@ -39,6 +39,24 @@ def annotate_model(model, model_id):
         return '', HTTPStatus.OK
 
     return render_template('storage/annotate.html', form=form)
+
+
+def tag_model_multiid(model_class):
+    """tag model by id"""
+
+    form = TagMultiidForm()
+    if form.validate_on_submit():
+        tag = form.tag.data
+        for item in model_class.query.filter(model_class.id.in_([tmp.data for tmp in form.ids.entries])).all():
+            # full assignment must be used for sqla to realize the change
+            if form.action.data == 'set':
+                item.tags = list(set((item.tags or []) + [tag]))
+            if form.action.data == 'unset':
+                item.tags = [x for x in item.tags if x != tag]
+        db.session.commit()
+        return '', HTTPStatus.OK
+
+    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 import sner.server.controller.storage.host  # noqa: E402  pylint: disable=wrong-import-position

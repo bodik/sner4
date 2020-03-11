@@ -101,7 +101,7 @@ def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint
 
     sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
 
-    sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_vuln_tag_set") and text()="Info"]').click()
+    sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_tag_view") and text()="Info"]').click()
     webdriver_waituntil(
         sl_operator, EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]')))
     vuln = Vuln.query.get(test_vuln.id)

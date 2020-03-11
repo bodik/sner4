@@ -143,6 +143,19 @@ class SnerStorageComponent extends SnerComponentBase {
 	}
 
 	/**
+	 * tag item. called from model/view page
+	 *
+	 * @param {object} event jquery event. data attributes required data-tag_route, data-tag_data
+	 */
+	action_tag_view(event) {
+		var elem = event.target.closest('a');
+		var route_name = elem.getAttribute('data-tag_route');
+		var data = JSON.parse(elem.getAttribute('data-tag_data'));
+		Sner.submit_form(Flask.url_for(route_name), data)
+			.done(function() { window.location.reload(); });
+	}
+
+	/**
 	 * annotate model using modal dialogue, called from datatable context
 	 *
 	 * @param {object} event jquery event. data required {'dt': datatable instance, 'route_name': annotation route name}
@@ -182,9 +195,11 @@ class SnerStorageComponent extends SnerComponentBase {
 				$('#modal-global .tageditor').tagEditor({'delimiter': '\n'});
 				$('#modal-global form').on('submit', function(event) {
 					Sner.submit_form($(this).attr('action'), $(this).serializeArray())
+						.done(function() {
+							after_update_cb();
+						})
 						.always(function() {
 							$('#modal-global').modal('toggle');
-							after_update_cb();
 						});
 					event.preventDefault();
 				});

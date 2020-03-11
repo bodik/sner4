@@ -10,7 +10,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.controller.auth import role_required
-from sner.server.controller.storage import annotate_model, blueprint
+from sner.server.controller.storage import annotate_model, blueprint, tag_model_multiid
 from sner.server.form import ButtonForm
 from sner.server.form.storage import HostForm
 from sner.server.model.storage import Host, Note, Service, Vuln
@@ -120,3 +120,10 @@ def host_view_route(host_id):
 
     host = Host.query.get(host_id)
     return render_template('storage/host/view.html', host=host, button_form=ButtonForm())
+
+
+@blueprint.route('/host/tag_multiid', methods=['POST'])
+@role_required('operator')
+def host_tag_multiid_route():
+    """tag multiple route"""
+    return tag_model_multiid(Host)

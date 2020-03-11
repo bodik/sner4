@@ -5,14 +5,8 @@
 
 {% block script %}
 <script type="text/javascript">
-function action_vuln_tag(event) {
-	var data = JSON.parse(event.target.closest('a').getAttribute('data-tagaction'));
-	Sner.submit_form(Flask.url_for('storage.vuln_tag_multiid_route'), data)
-		.always(function() { window.location.reload(); });
-}
-
 $(document).ready(function() {
-	$('.abutton_vuln_tag_set').on('click', action_vuln_tag);
+	$('.abutton_tag_view').on('click', Sner.storage.action_tag_view);
 	$('.abutton_annotate_view').on('dblclick', Sner.storage.action_annotate_view);
 });
 </script>
@@ -24,9 +18,12 @@ $(document).ready(function() {
 		<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>
 		<div class="btn-group">
 			<a class="btn btn-outline-primary disabled"><i class="fas fa-tag text-primary"></i></a>
-			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'>Info</a>
-			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'report', 'ids-0': vuln.id}|tojson }}'>Report</a>
-			<a class="btn btn-outline-primary abutton_vuln_tag_set" href="#" data-tagaction='{{ {'action': 'set', 'tag': 'todo', 'ids-0': vuln.id}|tojson }}'>Todo</a>
+			<a class="btn btn-outline-primary abutton_tag_view" href="#"
+				data-tag_route="storage.vuln_tag_multiid_route" data-tag_data='{{ {'action': 'set', 'tag': 'info', 'ids-0': vuln.id}|tojson }}'>Info</a>
+			<a class="btn btn-outline-primary abutton_tag_view" href="#"
+				data-tag_route="storage.vuln_tag_multiid_route" data-tag_data='{{ {'action': 'set', 'tag': 'report', 'ids-0': vuln.id}|tojson }}'>Report</a>
+			<a class="btn btn-outline-primary abutton_tag_view" href="#"
+				data-tag_route="storage.vuln_tag_multiid_route" data-tag_data='{{ {'action': 'set', 'tag': 'todo', 'ids-0': vuln.id}|tojson }}'>Todo</a>
 		</div>
 		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><i class="fas fa-edit"></i></a>
 		{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}

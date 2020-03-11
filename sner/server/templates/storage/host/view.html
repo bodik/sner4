@@ -19,6 +19,7 @@
 			$.fn.dataTable.tables({visible: true, api: true}).columns.adjust();
 		});
 
+		$('.abutton_tag_view').on('click', Sner.storage.action_tag_view);
 		$('.abutton_annotate_view').on('dblclick', Sner.storage.action_annotate_view);
 	});
 </script>
@@ -34,6 +35,11 @@
 			<a class="btn btn-light" rel="noreferrer" href="http://multirbl.valli.org/lookup/{{ host.address}}.html">multirbl.valli</a>
 			<a class="btn btn-light" rel="noreferrer" href="https://www.shodan.io/search?query={{ host.address }}">shodan</a>
 			<a class="btn btn-light" rel="noreferrer" href="https://www.talosintelligence.com/reputation_center/lookup?search={{ host.address }}">talos</a>
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-primary disabled"><i class="fas fa-tag text-primary"></i></a>
+			<a class="btn btn-outline-primary abutton_tag_view" href="#"
+				data-tag_route="storage.host_tag_multiid_route" data-tag_data='{{ {'action': 'set', 'tag': 'reviewed', 'ids-0': host.id}|tojson }}'>Reviewed</a>
 		</div>
 		<div class="btn-group">
 			<a class="btn btn-outline-primary disabled"><i class="fas fa-plus text-primary"></i></a>

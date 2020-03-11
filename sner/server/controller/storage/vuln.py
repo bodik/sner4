@@ -10,15 +10,14 @@ from http import HTTPStatus
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
 from sner.server import db
 from sner.server.command.storage import vuln_report
 from sner.server.controller.auth import role_required
-from sner.server.controller.storage import annotate_model, blueprint, get_related_models
+from sner.server.controller.storage import annotate_model, blueprint, get_related_models, tag_model_multiid
 from sner.server.form import ButtonForm
-from sner.server.form.storage import MultiidForm, TagMultiidForm, VulnForm
+from sner.server.form.storage import MultiidForm, VulnForm
 from sner.server.model.storage import Host, Service, Vuln
 from sner.server.sqlafilter import filter_parser
 from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
@@ -132,13 +131,9 @@ def vuln_delete_multiid_route():
 
     form = MultiidForm()
     if form.validate_on_submit():
-        try:
-            Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
-            db.session.commit()
-            return '', HTTPStatus.OK
-        except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
-            db.session.rollback()
-            return jsonify({'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
+        Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
+        db.session.commit()
+        return '', HTTPStatus.OK
 
     return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
@@ -147,24 +142,7 @@ def vuln_delete_multiid_route():
 @role_required('operator')
 def vuln_tag_multiid_route():
     """tag multiple route"""
-
-    form = TagMultiidForm()
-    if form.validate_on_submit():
-        try:
-            tag = form.tag.data
-            for vuln in Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).all():
-                # full assignment must be used for sqla to realize the change
-                if form.action.data == 'set':
-                    vuln.tags = list(set((vuln.tags or []) + [tag]))
-                if form.action.data == 'unset':
-                    vuln.tags = [x for x in vuln.tags if x != tag]
-            db.session.commit()
-            return '', HTTPStatus.OK
-        except SQLAlchemyError as e:  # pragma: no cover  ; unable to test
-            db.session.rollback()
-            return jsonify({'title': 'Action failed', 'detail': str(e)}), HTTPStatus.BAD_REQUEST
-
-    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return tag_model_multiid(Vuln)
 
 
 @blueprint.route('/vuln/grouped')
