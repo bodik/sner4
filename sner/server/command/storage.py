@@ -12,7 +12,7 @@ from io import StringIO
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy import case, cast, func, or_
+from sqlalchemy import case, func, or_
 from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
