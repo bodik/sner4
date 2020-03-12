@@ -75,10 +75,6 @@ def zipdir(path, zipto):
                     output_zip.write(filepath, arcname)
 
 
-class TerminateException(Exception):
-    """custom exception for termination from within tests"""
-
-
 class AgentBase(ABC):
     """base agent impl containing main (sub)process handling code"""
 
@@ -120,18 +116,14 @@ class AgentBase(ABC):
         os.makedirs(jobdir, mode=0o700)
         os.chdir(jobdir)
 
-        with self.terminate_context():
-            try:
-                self.module_instance = registered_modules[assignment['module']]()
-                retval = self.module_instance.run(assignment)
-            except TerminateException:  # pragma: no cover  ; test would require exact timing, not this time
-                self.terminate()
-                raise
-            except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
-                self.log.exception(e)
-                retval = 1
-            finally:
-                self.module_instance = None
+        try:
+            self.module_instance = registered_modules[assignment['module']]()
+            retval = self.module_instance.run(assignment)
+        except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
+            self.log.exception(e)
+            retval = 1
+        finally:
+            self.module_instance = None
 
         os.chdir(oldcwd)
         zipdir(jobdir, '%s.zip' % jobdir)
@@ -216,7 +208,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         """fetch, process and upload output for assignment given by server"""
 
         retval = 0
-        with self.shutdown_context():
+        with self.terminate_context(), self.shutdown_context():
             while self.loop:
                 assignment, retval = self.get_assignment()
 
@@ -246,8 +238,10 @@ class AssignableAgent(AgentBase):
         assignment.update(json.loads(kwargs['input_a']))
         jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
 
-        retval = self.process_assignment(assignment)
-        self.log.debug('processed, retval=%d', retval)
+        with self.terminate_context():
+            retval = self.process_assignment(assignment)
+            self.log.debug('processed, retval=%d', retval)
+
         return retval
 
 

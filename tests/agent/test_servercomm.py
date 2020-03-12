@@ -5,6 +5,7 @@ tests with various server communication test cases
 
 import json
 import multiprocessing
+import os
 import signal
 from contextlib import contextmanager
 from http import HTTPStatus
@@ -13,7 +14,7 @@ from uuid import uuid4
 
 from werkzeug.wrappers import Response
 
-from sner.agent import main as agent_main, TerminateException
+from sner.agent import main as agent_main
 
 
 @contextmanager
@@ -23,15 +24,13 @@ def terminate_after(time):
     Raised exception is designed not to be catched by module runner loop and should end agent properly from within.
     """
 
-    def raise_terminate(signum, frame):  # pylint: disable=unused-argument
-        raise TerminateException
+    def signal_terminate(signum, frame):  # pylint: disable=unused-argument
+        os.kill(os.getpid(), signal.SIGTERM)
 
-    signal.signal(signal.SIGALRM, raise_terminate)
+    signal.signal(signal.SIGALRM, signal_terminate)
     signal.alarm(time)
     try:
         yield
-    except TerminateException:
-        pass
     finally:
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
 
@@ -95,7 +94,7 @@ def test_empty_server_communication(tmpworkdir, live_server, apikey):  # pylint:
     assert proc_agent.pid
     assert proc_agent.is_alive()
     agent_main(['--terminate', str(proc_agent.pid)])
-    proc_agent.join(3)
+    proc_agent.join(4)
     assert not proc_agent.is_alive()
 
 
