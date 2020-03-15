@@ -1,4 +1,5 @@
 #!/bin/sh
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 set -e
 
 apt-get -y install git sudo make postgresql-all
