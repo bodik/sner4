@@ -1,5 +1,21 @@
 # sner4 changelog
 
+## 0.1.2 - prod feedbacks
+
+* fixes and refactorings
+  * storage/host/list missing unfilter
+  * enumips enumerate host addresses
+  * misc styling and cosmetic
+  * tests stabilization
+  * multiple ids components naming
+  * visuals internal refactoring
+
+* features
+  * new tags and configurable tag helpers buttons
+  * dynamic distance for dns tree graph
+  * badge numbers for models in host/view tabs
+
+
 ## 0.1.1 - package upgrades
 
 * removed direct calling live_server fixture, replacet with httpserver fixture
