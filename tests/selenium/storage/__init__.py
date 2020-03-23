@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.model.storage import Vuln
-from tests.selenium import dt_wait_processing, webdriver_waituntil
+from tests.selenium import dt_wait_processing, no_ajax_pending, webdriver_waituntil
 
 
 def check_select_rows(sclnt, dt_id):
@@ -78,5 +78,6 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
     sclnt.find_element_by_css_selector('#modal-global form textarea[name="comment"]').send_keys('annotated comment')
     sclnt.find_element_by_css_selector('#modal-global form').submit()
     webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sclnt, no_ajax_pending())
 
     assert 'annotated comment' in test_model.__class__.query.get(test_model.id).comment
