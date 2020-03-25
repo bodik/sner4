@@ -5,7 +5,7 @@ selenium ui tests for scheduler.excl component
 
 from flask import url_for
 
-from sner.server.model.scheduler import Excl
+from sner.server.scheduler.models import Excl
 from tests.selenium import dt_inrow_delete, dt_rendered
 
 

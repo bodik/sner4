@@ -3,7 +3,7 @@
 sner server wsgi wrapper
 """
 
-from sner.server import create_app
+from sner.server.app import create_app
 
 
 application = create_app()

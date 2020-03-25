@@ -7,7 +7,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from sner.server.model.storage import Vuln
+from sner.server.storage.models import Vuln
 from tests.selenium import dt_wait_processing, no_ajax_pending, webdriver_waituntil
 
 

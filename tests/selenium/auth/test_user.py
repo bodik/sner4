@@ -1,14 +1,14 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-selenium ui tests for auth.user component
+auth.views.user selenium tests
 """
 
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from sner.server import db
-from sner.server.model.auth import User
+from sner.server.auth.models import User
+from sner.server.extensions import db
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 
 

@@ -5,7 +5,7 @@ shared fixtures for storage component
 
 import pytest
 
-from sner.server.model.storage import SeverityEnum, Vuln
+from sner.server.storage.models import SeverityEnum, Vuln
 from tests import persist_and_detach
 
 

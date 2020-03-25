@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from sner.agent import main as agent_main
 from sner.lib import file_from_zip
-from sner.server.model.scheduler import Job
+from sner.server.scheduler.models import Job
 
 
 def test_version(tmpworkdir):  # pylint: disable=unused-argument

@@ -6,7 +6,7 @@ selenium ui tests for scheduler.queue component
 from flask import url_for
 from selenium.webdriver.support import expected_conditions as EC
 
-from sner.server.model.scheduler import Queue
+from sner.server.scheduler.models import Queue
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 
 

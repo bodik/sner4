@@ -9,9 +9,9 @@ import sys
 import libnmap.parser
 
 from sner.lib import is_zip, file_from_zip
-from sner.server import db
+from sner.server.extensions import db
 from sner.server.parser import ParserBase, register_parser
-from sner.server.model.storage import Host, Note, Service
+from sner.server.storage.models import Host, Note, Service
 
 
 @register_parser('nmap')  # pylint: disable=too-few-public-methods

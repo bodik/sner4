@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-controller auth.profile selenium tests
+auth.views.profile selenium tests
 """
 
 from base64 import b64decode, b64encode
@@ -9,8 +9,8 @@ from fido2 import cbor
 from flask import url_for
 from soft_webauthn import SoftWebauthnDevice
 
-from sner.server import webauthn
-from sner.server.model.auth import User
+from sner.server.auth.models import User
+from sner.server.extensions import webauthn
 from tests.selenium import webdriver_waituntil
 from tests.selenium.auth import js_variable_ready
 

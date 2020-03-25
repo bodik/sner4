@@ -9,9 +9,10 @@ from tempfile import mkdtemp
 
 import pytest
 
-from sner.server import db, create_app
-from sner.server.command.db import db_remove
-from sner.server.model.auth import User
+from sner.server.app import create_app
+from sner.server.auth.models import User
+from sner.server.extensions import db
+from sner.server.db_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 

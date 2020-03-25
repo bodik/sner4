@@ -7,7 +7,7 @@ from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from sner.server.model.storage import Vuln
+from sner.server.storage.models import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
 

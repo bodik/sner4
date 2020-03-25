@@ -5,7 +5,7 @@ selenium ui tests for scheduler.job component
 
 from flask import url_for
 
-from sner.server.model.scheduler import Job
+from sner.server.scheduler.models import Job
 from tests.selenium import dt_inrow_delete, dt_rendered
 
 
