@@ -4,7 +4,6 @@ scheduler job views
 """
 
 import json
-import os
 
 from datatables import ColumnDT, DataTables
 from flask import redirect, render_template, request, Response, url_for
@@ -14,19 +13,11 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
+from sner.server.scheduler.core import job_delete
 from sner.server.scheduler.models import Job, Queue
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import filter_parser
 from sner.server.utils import SnerJSONEncoder
-
-
-def job_delete(job):
-    """job delete; used by controller and respective command"""
-
-    if os.path.exists(job.output_abspath):
-        os.remove(job.output_abspath)
-    db.session.delete(job)
-    db.session.commit()
 
 
 @blueprint.route('/job/list')

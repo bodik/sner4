@@ -4,15 +4,15 @@ scheduler commands
 """
 
 import sys
-from ipaddress import ip_address, ip_network, summarize_address_range
+from ipaddress import ip_address, summarize_address_range
 
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server.extensions import db
+from sner.server.scheduler.core import job_delete, queue_enqueue, enumerate_network
 from sner.server.scheduler.models import Job, Queue, Target
-from sner.server.scheduler.views.job import job_delete
 
 
 def queuebyx(queue_ident):
@@ -31,24 +31,20 @@ def command():
 @command.command(name='enumips', help='enumerate ip address range')
 @click.argument('targets', nargs=-1)
 @click.option('--file', type=click.File('r'))
-def enumips(targets, **kwargs):
+def enumips_command(targets, **kwargs):
     """enumerate ip address range"""
 
     targets = list(targets)
-    if kwargs["file"]:
-        targets += kwargs["file"].read().splitlines()
-    for item in targets:
-        network = ip_network(item)
-        if network.prefixlen == network.max_prefixlen:
-            print(network.network_address)
-        for tmp in network.hosts():
-            print(tmp)
+    if kwargs['file']:
+        targets += kwargs['file'].read().splitlines()
+    for target in targets:
+        print('\n'.join(enumerate_network(target)))
 
 
 @command.command(name='rangetocidr', help='convert range specified addr space to series of cidr')
 @click.argument('start')
 @click.argument('end')
-def rangetocidr(start, end):
+def rangetocidr_command(start, end):
     """summarize net rage into cidrs"""
 
     for tmp in summarize_address_range(ip_address(start), ip_address(end)):
@@ -60,7 +56,7 @@ def rangetocidr(start, end):
 @click.argument('argtargets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 @with_appcontext
-def queue_enqueue(queue_ident, argtargets, **kwargs):
+def queue_enqueue_command(queue_ident, argtargets, **kwargs):
     """enqueue targets to queue"""
 
     queue = queuebyx(queue_ident)
@@ -69,23 +65,16 @@ def queue_enqueue(queue_ident, argtargets, **kwargs):
         sys.exit(1)
 
     argtargets = list(argtargets)
-    if kwargs["file"]:
-        argtargets += kwargs["file"].read().splitlines()
-
-    targets = []
-    for target in argtargets:
-        tmp = target.strip()
-        if tmp:
-            targets.append({'target': target, 'queue_id': queue.id})
-    db.session.bulk_insert_mappings(Target, targets)
-    db.session.commit()
+    if kwargs['file']:
+        argtargets.extend(kwargs['file'].read().splitlines())
+    queue_enqueue(queue, argtargets)
     sys.exit(0)
 
 
 @command.command(name='queue-flush', help='flush all targets from queue')
 @click.argument('queue_id')
 @with_appcontext
-def queue_flush(queue_id):
+def queue_flush_command(queue_id):
     """flush targets from queue"""
 
     queue = queuebyx(queue_id)
@@ -101,7 +90,7 @@ def queue_flush(queue_id):
 @command.command(name='queue-prune', help='delete all associated jobs')
 @click.argument('queue_id')
 @with_appcontext
-def queue_prune(queue_id):
+def queue_prune_command(queue_id):
     """delete all jobs associated with queue"""
 
     queue = queuebyx(queue_id)

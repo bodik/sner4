@@ -11,10 +11,10 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
+from sner.server.scheduler.core import queue_delete
 from sner.server.scheduler.forms import TaskForm
 from sner.server.scheduler.models import Queue, Task
 from sner.server.scheduler.views import blueprint
-from sner.server.scheduler.views.queue import queue_delete
 from sner.server.sqlafilter import filter_parser
 
 

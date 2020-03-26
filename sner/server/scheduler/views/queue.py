@@ -3,7 +3,6 @@
 scheduler queue views
 """
 
-import os
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
@@ -12,22 +11,11 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
+from sner.server.scheduler.core import job_delete, queue_delete, queue_enqueue
 from sner.server.scheduler.forms import QueueEnqueueForm, QueueForm
 from sner.server.scheduler.models import Job, Queue, Target, Task
 from sner.server.scheduler.views import blueprint
-from sner.server.scheduler.views.job import job_delete
 from sner.server.sqlafilter import filter_parser
-
-
-def queue_delete(queue):
-    """queue delete; delete all jobs in cascade (deals with output files)"""
-
-    for job in queue.jobs:
-        job_delete(job)
-    if os.path.exists(queue.data_abspath):
-        os.rmdir(queue.data_abspath)
-    db.session.delete(queue)
-    db.session.commit()
 
 
 @blueprint.route('/queue/list', methods=['GET'])
@@ -108,13 +96,7 @@ def queue_enqueue_route(queue_id):
     form = QueueEnqueueForm()
 
     if form.validate_on_submit():
-        targets = []
-        for target in form.data['targets']:
-            tmp = target.strip()
-            if tmp:
-                targets.append({'target': tmp, 'queue_id': queue.id})
-        db.session.bulk_insert_mappings(Target, targets)
-        db.session.commit()
+        queue_enqueue(queue, form.data['targets'])
         return redirect(url_for('scheduler.queue_list_route'))
 
     return render_template('scheduler/queue/enqueue.html', form=form)
