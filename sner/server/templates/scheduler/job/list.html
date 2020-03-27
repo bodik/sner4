@@ -9,8 +9,7 @@
 		'ajax': {'url': "{{ url_for('scheduler.job_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			Sner.dt.column('id'),
-			Sner.dt.column('queue_id', {'visible': false}),
-			Sner.dt.column('queue_name'),
+			Sner.dt.column('queue_ident'),
 			Sner.dt.column('assignment', {'render': $.fn.dataTable.render.ellipsis(100, false, true)}),
 			Sner.dt.column('retval'),
 			Sner.dt.column('time_start'),

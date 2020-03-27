@@ -35,8 +35,7 @@ def job_list_json_route():
 
     columns = [
         ColumnDT(Job.id, mData='id'),
-        ColumnDT(Queue.id, mData='queue_id'),
-        ColumnDT(Queue.name, mData='queue_name'),
+        ColumnDT(Queue.ident, mData='queue_ident'),
         ColumnDT(Job.assignment, mData='assignment'),
         ColumnDT(Job.retval, mData='retval'),
         ColumnDT(Job.time_start, mData='time_start'),
