@@ -54,7 +54,7 @@ def queue_list_json_route():
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
-@blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'])
+@blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'], endpoint='queue_add_route__task_id')
 @role_required('operator')
 def queue_add_route(task_id=None):
     """queue add"""

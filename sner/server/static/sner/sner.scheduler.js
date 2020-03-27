@@ -15,7 +15,7 @@ class SnerSchedulerComponent extends SnerComponentBase {
 			'task_controls': `
 				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> scheduler.task_edit_route task_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> scheduler.queue_add_route task_id=id}}">Add queue</a>
+					<a class="btn btn-outline-secondary" href="{{> scheduler.queue_add_route__task_id task_id=id}}">Add queue</a>
 					<a class="btn btn-outline-danger abutton_submit_dataurl_delete" data-url="{{> scheduler.task_delete_route task_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 
