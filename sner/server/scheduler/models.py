@@ -52,7 +52,7 @@ class Queue(db.Model):
     __table_args__ = (Index('uniq_ident', 'task_id', 'name', unique=True),)
 
     def __repr__(self):
-        return '<Queue %d: %s>' % (self.id, self.name)
+        return '<Queue %s: %s>' % (self.id, self.name)
 
     @property
     def data_abspath(self):
@@ -70,7 +70,7 @@ class Target(db.Model):
     queue = relationship('Queue', back_populates='targets')
 
     def __repr__(self):
-        return '<Target %d: %s>' % (self.id, self.target)
+        return '<Target %s: %s>' % (self.id, self.target)
 
 
 class Job(db.Model):
