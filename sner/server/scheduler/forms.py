@@ -11,8 +11,8 @@ from wtforms import BooleanField, IntegerField, SelectField, SubmitField, Valida
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import InputRequired, Length, NumberRange
 
-from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField, Unique
-from sner.server.scheduler.models import ExclFamily, Queue, Task
+from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField
+from sner.server.scheduler.models import ExclFamily, Task
 
 
 def valid_excl_family(form, field):  # pylint: disable=unused-argument
@@ -37,13 +37,6 @@ def valid_excl_value(form, field):
             raise ValidationError('Invalid regex')
 
 
-def valid_queue_ident(form, field):
-    """validate queue.ident uniqueness"""
-
-    if Queue.query.filter(Queue.task_id == form.task.data.id, Queue.name == field.data).one_or_none():
-        raise ValidationError('Queue identifier must be unique.')
-
-
 def tasks():
     """returns list of tasks for selectfiled"""
     return Task.query.all()
@@ -52,7 +45,7 @@ def tasks():
 class TaskForm(FlaskForm):
     """profile edit form"""
 
-    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250), Unique(Task.name)])
+    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
     params = TextAreaNoneField('Parameters', render_kw={'rows': '10'})
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
@@ -63,7 +56,7 @@ class QueueForm(FlaskForm):
     """queue edit form"""
 
     task = QuerySelectField('Task', [InputRequired()], query_factory=tasks, allow_blank=False, get_label='name')
-    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250), valid_queue_ident])
+    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')
     submit = SubmitField('Save')

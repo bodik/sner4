@@ -51,14 +51,6 @@ def test_queue_add_route(cl_operator, test_task):
     queue = Queue.query.filter(Queue.name == test_queue.name).one()
     assert queue.name == test_queue.name
 
-    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
-    form['name'] = test_queue.name
-    form['task'] = test_queue.task.id
-    form['priority'] = test_queue.priority
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Queue identifier must be unique."]')
-
 
 def test_queue_edit_route(cl_operator, test_queue):
     """queue edit route test"""

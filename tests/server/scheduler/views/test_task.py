@@ -55,13 +55,6 @@ def test_task_add_route(cl_operator):
     assert task.params == test_task.params
     assert task.group_size == test_task.group_size
 
-    form = cl_operator.get(url_for('scheduler.task_add_route')).form
-    form['name'] = test_task.name
-    form['module'] = test_task.module
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Must be unique."]')
-
 
 def test_task_edit_route(cl_operator, test_task):
     """task edit route test"""

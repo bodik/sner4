@@ -4,18 +4,7 @@ shared forms objects
 """
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, ValidationError
-
-
-class Unique():  # pylint: disable=too-few-public-methods
-    """validates uniqueness of a model property"""
-
-    def __init__(self, model_prop):
-        self.model_prop = model_prop
-
-    def __call__(self, form, field):
-        if self.model_prop.class_.query.filter(self.model_prop == field.data).one_or_none():
-            raise ValidationError('Must be unique.')
+from wtforms import StringField, TextAreaField
 
 
 class TextAreaListField(TextAreaField):
