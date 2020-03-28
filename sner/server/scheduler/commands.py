@@ -11,7 +11,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server.extensions import db
-from sner.server.scheduler.core import job_delete, queue_enqueue, enumerate_network
+from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue, Target
 
 

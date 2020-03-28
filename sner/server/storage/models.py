@@ -45,6 +45,8 @@ class Service(db.Model):
     info = db.Column(db.Text)
     tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     host = relationship('Host', back_populates='services')
     vulns = relationship('Vuln', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
@@ -79,6 +81,8 @@ class Vuln(db.Model):
     refs = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     host = relationship('Host', back_populates='vulns')
     service = relationship('Service', back_populates='vulns')
@@ -97,6 +101,8 @@ class Note(db.Model):
     data = db.Column(db.Text)
     tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     comment = db.Column(db.Text)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     host = relationship('Host', back_populates='notes')
     service = relationship('Service', back_populates='notes')
