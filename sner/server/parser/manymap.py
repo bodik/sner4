@@ -4,6 +4,7 @@ parsers to import from agent module manymap output to storage
 """
 
 import re
+from pathlib import Path
 from zipfile import ZipFile
 
 from sner.lib import is_zip, file_from_zip
@@ -24,5 +25,4 @@ class ManymapParser(NmapParser):
                 for ftmp in [fname for fname in fzip.namelist() if re.match(r'output\-[0-9]+\.xml', fname)]:
                     NmapParser._data_to_storage(file_from_zip(path, ftmp).decode('utf-8'))
         else:
-            with open(path, 'r') as ftmp:
-                ManymapParser._data_to_storage(ftmp.read())
+            ManymapParser._data_to_storage(Path(path).read_text())

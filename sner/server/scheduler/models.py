@@ -52,7 +52,7 @@ class Queue(db.Model):
     __table_args__ = (Index('uniq_ident', 'task_id', 'name', unique=True),)
 
     def __repr__(self):
-        return '<Queue %s: %s>' % (self.id, self.name)
+        return '<Queue %s: %s>' % (self.id, self.ident)
 
     @property
     def data_abspath(self):

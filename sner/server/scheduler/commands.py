@@ -5,12 +5,15 @@ scheduler commands
 
 import sys
 from ipaddress import ip_address, summarize_address_range
+from time import sleep
 
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server.extensions import db
+from sner.server.parser.manymap import ManymapParser
+from sner.server.parser.nmap import NmapParser
 from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue, Target
 
@@ -101,3 +104,34 @@ def queue_prune_command(queue_id):
     for job in Job.query.filter(Job.queue_id == queue.id).all():
         job_delete(job)
     sys.exit(0)
+
+
+PLANNER_DEFAULT_DATA_QUEUE = 'sner_210_data inet version scan basic.main'
+PLANNER_LOOP_SLEEP = 60
+
+
+@command.command(name='planner', help='run planner daemon')
+@with_appcontext
+@click.option('--oneshot', is_flag=True)
+def planner(**kwargs):
+    """run planner daemon"""
+
+    default_data_queue = Queue.query.filter(Queue.ident == PLANNER_DEFAULT_DATA_QUEUE).one()
+    disco_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_disco%'))
+    data_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_data%'))
+
+    loop = True
+    while loop:
+        for finished_job in Job.query.filter(Job.queue_id.in_(disco_queues_ids), Job.retval == 0).all():
+            current_app.logger.debug('parsing services from %s', finished_job)
+            queue_enqueue(default_data_queue, NmapParser.service_list(finished_job.output_abspath))
+            job_delete(finished_job)
+
+        for finished_job in Job.query.filter(Job.queue_id.in_(data_queues_ids), Job.retval == 0).all():
+            current_app.logger.debug('importing service scan from %s', finished_job)
+            ManymapParser.import_file(finished_job.output_abspath)
+            job_delete(finished_job)
+
+        sleep(PLANNER_LOOP_SLEEP)
+        if kwargs['oneshot']:
+            loop = False

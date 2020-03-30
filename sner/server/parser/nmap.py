@@ -5,10 +5,11 @@ parsers to import from agent outputs to storage
 
 import json
 import sys
+from pathlib import Path
 
 import libnmap.parser
 
-from sner.lib import is_zip, file_from_zip
+from sner.lib import format_host_address, file_from_zip, is_zip
 from sner.server.extensions import db
 from sner.server.parser import ParserBase, register_parser
 from sner.server.storage.models import Host, Note, Service
@@ -22,12 +23,27 @@ class NmapParser(ParserBase):
     def import_file(path):
         """import nmap data from file or archive"""
 
+        NmapParser._data_to_storage(NmapParser._rawdata_from_path(path))
+
+    @staticmethod
+    def service_list(path):
+        """parse path and returns list of services in manymap target format"""
+
+        services = []
+        report = libnmap.parser.NmapParser.parse_fromstring(NmapParser._rawdata_from_path(path))
+        for ihost in report.hosts:
+            for iservice in ihost.services:
+                services.append('%s://%s:%d' % (iservice.protocol, format_host_address(ihost.address), iservice.port))
+
+        return services
+
+    @staticmethod
+    def _rawdata_from_path(path):
+        """get path contents or output.xml from archive"""
+
         if is_zip(path):
-            data = file_from_zip(path, 'output.xml').decode('utf-8')
-        else:
-            with open(path, 'r') as ftmp:
-                data = ftmp.read()
-        NmapParser._data_to_storage(data)
+            return file_from_zip(path, 'output.xml').decode('utf-8')
+        return Path(path).read_text()
 
     @staticmethod
     def _data_to_storage(data):
@@ -106,9 +122,10 @@ class NmapParser(ParserBase):
 def debug_parser():  # pragma: no cover
     """cli helper, pull data from report and display"""
 
-    with open(sys.argv[1], 'r') as ftmp:
-        report = libnmap.parser.NmapParser.parse_fromstring(ftmp.read())
+    data = NmapParser._rawdata_from_path(sys.argv[1])  # pylint: disable=protected-access
+    report = libnmap.parser.NmapParser.parse_fromstring(data)
 
+    print('## default parser')
     for host in report.hosts:
         print('# host: %s' % host.hostnames)
         print('## host dict')
@@ -124,6 +141,9 @@ def debug_parser():  # pragma: no cover
             print(tmp.get_dict())
             print('#### service scripts_results')
             print(json.dumps(tmp.scripts_results, indent=2))
+
+    print('## service list parser')
+    print(NmapParser.service_list(sys.argv[1]))
 
 
 if __name__ == '__main__':  # pragma: no cover

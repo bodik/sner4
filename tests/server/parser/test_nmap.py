@@ -16,3 +16,16 @@ def test_xxe():
     # etree exception is masked by library to it's own exception type
     with pytest.raises(NmapParserException):
         NmapParser.import_file('tests/server/data/parser-nmap-xxe.xml')
+
+
+def test_service_list():
+    """check service list extraction"""
+
+    expected = [
+        'tcp://127.0.0.1:22',
+        'tcp://127.0.0.1:25',
+        'tcp://127.0.0.1:139',
+        'tcp://127.0.0.1:445',
+        'tcp://127.0.0.1:5432'
+    ]
+    assert NmapParser.service_list('tests/server/data/parser-nmap-output.xml') == expected

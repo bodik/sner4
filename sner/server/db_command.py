@@ -95,15 +95,15 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(task=task, name='main', priority=10))
 
     task = Task(
-        name='sner_010 top1000 ack scan',
+        name='sner_110_disco top1000 ack scan',
         module='nmap',
         params='-sA --top-ports 1000    -Pn --reason --min-hostgroup 400 --min-rate 4000 --max-rate 4500',
         group_size=400)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=12))
 
     task = Task(
-        name='sner_011 top10000 ack scan',
+        name='sner_111_disco top10000 ack scan',
         module='nmap',
         params='-sA --top-ports 10000    -Pn --reason --min-hostgroup 1000 --min-rate 8000 --max-rate 8500',
         group_size=1000)
@@ -113,45 +113,45 @@ def initdata():  # pylint: disable=too-many-statements
     # for sweeps max-rate and max-hostgroup are not really necessary because of how manymap works,
     # but we'll left it there for manual testing inspiration
     task = Task(
-        name='sner_020 inet version scan basic',
+        name='sner_210_data inet version scan basic',
         module='manymap',
-        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1',
+        params='-sV --version-intensity 4    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10',
         group_size=50)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=15))
     db.session.add(Queue(task=task, name='prio', priority=20))
 
     task = Task(
-        name='sner_025 inet version scan intense',
+        name='sner_211_data inet version scan intense',
         module='manymap',
-        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1',
+        params='-sV --version-intensity 8    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10',
         group_size=50)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=15))
 
     task = Task(
-        name='sner_030 ftp sweep',
+        name='sner_250_data ftp sweep',
         module='manymap',
-        params='-sC --script ftp-anon.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1',
+        params='-sC --script ftp-anon.nse    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10',
         group_size=50)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=15))
 
     task = Task(
-        name='sner_031 http titles',
+        name='sner_251_data http titles',
         module='manymap',
-        params='-sC --script http-title.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1',
+        params='-sC --script http-title.nse    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10',
         group_size=50)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=15))
 
     task = Task(
-        name='sner_032 ldap rootdse',
+        name='sner_252_data ldap rootdse',
         module='manymap',
-        params='-sC --script ldap-rootdse.nse    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1',
+        params='-sC --script ldap-rootdse.nse    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10',
         group_size=50)
     db.session.add(task)
-    db.session.add(Queue(task=task, name='main', priority=10))
+    db.session.add(Queue(task=task, name='main', priority=15))
 
     # storage test data
     host = Host(

@@ -25,10 +25,9 @@ class NessusParser(ParserBase):
     def import_file(path):
         """import nessus data from file"""
 
-        with open(path, 'r') as ftmp:
-            for item in NessusReportv2(ftmp):
-                tmp = NessusParser._import_report_item(item)
-                print('parsed item: %s %s' % (tmp.host, tmp))
+        for item in NessusReportv2(path):
+            tmp = NessusParser._import_report_item(item)
+            print('parsed item: %s %s' % (tmp.host, tmp))
         db.session.commit()
 
     @staticmethod
@@ -141,10 +140,9 @@ class NessusParser(ParserBase):
 def debug_parser():  # pragma: no cover
     """cli helper, pull data from report and display"""
 
-    with open(sys.argv[1], 'r') as ftmp:
-        report = NessusReportv2(ftmp)
-        for item in report:
-            pprint(item)
+    report = NessusReportv2(sys.argv[1])
+    for item in report:
+        pprint(item)
 
 
 if __name__ == '__main__':  # pragma: no cover

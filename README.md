@@ -299,7 +299,7 @@ Import gathered data after each step.
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_011 top10000 ack scan.main' --file=-
+        | bin/server scheduler queue-enqueue 'sner_111_disco top10000 ack scan.main' --file=-
     ```
 
 2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
@@ -307,17 +307,17 @@ Import gathered data after each step.
     ```
     # fast track
     bin/server storage service-list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic.prio' --file=-
+        | bin/server scheduler queue-enqueue 'sner_210_data inet version scan basic.prio' --file=-
     # rest of the ports
     bin/server storage service-list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_020 inet version scan basic.main' --file=-
+        | bin/server scheduler queue-enqueue 'sner_210_data inet version scan basic.main' --file=-
     ```
 
 3. Re-queue services without identification for high intensity version scan.
 
     ```
     bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue-enqueue 'sner_025 inet version scan intense.main' --file=-
+        | bin/server scheduler queue-enqueue 'sner_211_data inet version scan intense.main' --file=-
     ```
 
 4. Cleanup storage, remove services in filtered state (ack scan artifacts) and prune hosts without any data
@@ -337,15 +337,15 @@ Import gathered data after each step.
 ```
 # ftp sweep
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
-    | bin/server scheduler queue-enqueue 'sner_030 ftp sweep.main' --file=-
+    | bin/server scheduler queue-enqueue 'sner_250_data ftp sweep.main' --file=-
 
 # http titles
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
-    | bin/server scheduler queue-enqueue 'sner_031 http titles.main' --file=-
+    | bin/server scheduler queue-enqueue 'sner_251_data http titles.main' --file=-
 
 # ldap info
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
-    | bin/server scheduler queue-enqueue 'sner_032 ldap rootdse.main' --file=-
+    | bin/server scheduler queue-enqueue 'sner_252_data ldap rootdse.main' --file=-
 ```
 
 ##### Manual
@@ -354,13 +354,13 @@ Generally pure nmap can be used to do specific sweeps/scanning.
 
 ```
 # template
-nmap SCANTYPE TIMING(-Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1) TARGETING OUTPUT(-oA output)
+nmap SCANTYPE TIMING(-Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10) TARGETING OUTPUT(-oA output)
 
 # example
 bin/server storage service-list --filter 'Service.port == 22' --iponly > targets
 nmap \
     -sV --version-intensity 4 \
-    -Pn --reason --scan-delay 10 --max-rate 1 --max-hostgroup 1 \
+    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10 \
     -p T:22 -iL targets \
     -oA output
 bin/server storage import nmap output.xml
