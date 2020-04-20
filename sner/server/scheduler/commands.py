@@ -5,6 +5,8 @@ scheduler commands
 
 import sys
 from ipaddress import ip_address, summarize_address_range
+from pathlib import Path
+from shutil import copy2
 from time import sleep
 
 import click
@@ -119,17 +121,21 @@ def planner(**kwargs):
     default_data_queue = Queue.query.filter(Queue.ident == PLANNER_DEFAULT_DATA_QUEUE).one()
     disco_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_disco%'))
     data_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_data%'))
+    archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
+    archive_dir.mkdir(parents=True, exist_ok=True)
 
     loop = True
     while loop:
         for finished_job in Job.query.filter(Job.queue_id.in_(disco_queues_ids), Job.retval == 0).all():
             current_app.logger.debug('parsing services from %s', finished_job)
-            queue_enqueue(default_data_queue, NmapParser.service_list(finished_job.output_abspath))
+            queue_enqueue(default_data_queue, NmapParser.service_list(finished_job.output_abspath, exclude_states=['filtered', 'closed']))
+            copy2(finished_job.output_abspath, archive_dir)
             job_delete(finished_job)
 
         for finished_job in Job.query.filter(Job.queue_id.in_(data_queues_ids), Job.retval == 0).all():
             current_app.logger.debug('importing service scan from %s', finished_job)
             ManymapParser.import_file(finished_job.output_abspath)
+            copy2(finished_job.output_abspath, archive_dir)
             job_delete(finished_job)
 
         sleep(PLANNER_LOOP_SLEEP)

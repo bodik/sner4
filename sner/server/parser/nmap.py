@@ -26,14 +26,15 @@ class NmapParser(ParserBase):
         NmapParser._data_to_storage(NmapParser._rawdata_from_path(path))
 
     @staticmethod
-    def service_list(path):
+    def service_list(path, exclude_states=[]):
         """parse path and returns list of services in manymap target format"""
 
         services = []
         report = libnmap.parser.NmapParser.parse_fromstring(NmapParser._rawdata_from_path(path))
         for ihost in report.hosts:
             for iservice in ihost.services:
-                services.append('%s://%s:%d' % (iservice.protocol, format_host_address(ihost.address), iservice.port))
+                if iservice.state not in exclude_states:
+                    services.append('%s://%s:%d' % (iservice.protocol, format_host_address(ihost.address), iservice.port))
 
         return services
 
@@ -144,6 +145,9 @@ def debug_parser():  # pragma: no cover
 
     print('## service list parser')
     print(NmapParser.service_list(sys.argv[1]))
+
+    print('## service list parser filtered')
+    print(NmapParser.service_list(sys.argv[1], exclude_states=['filtered', 'closed']))
 
 
 if __name__ == '__main__':  # pragma: no cover
