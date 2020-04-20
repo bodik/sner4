@@ -26,8 +26,11 @@ class NmapParser(ParserBase):
         NmapParser._data_to_storage(NmapParser._rawdata_from_path(path))
 
     @staticmethod
-    def service_list(path, exclude_states=[]):
+    def service_list(path, exclude_states=None):
         """parse path and returns list of services in manymap target format"""
+
+        if exclude_states is None:
+            exclude_states = []
 
         services = []
         report = libnmap.parser.NmapParser.parse_fromstring(NmapParser._rawdata_from_path(path))
