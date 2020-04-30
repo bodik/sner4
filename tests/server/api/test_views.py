@@ -8,9 +8,11 @@ import json
 from http import HTTPStatus
 from ipaddress import ip_network
 
-from flask import url_for
+from flask import current_app, url_for
+from sqlalchemy import create_engine
 
 from sner.agent import apikey_header
+from sner.server.extensions import db
 from sner.server.scheduler.models import Job, Queue, Target
 from tests import persist_and_detach
 from tests.server.scheduler.models import create_test_target
@@ -70,6 +72,19 @@ def test_v1_scheduler_job_assign_route_exclusion(client, apikey, test_queue, tes
     response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
+
+
+def test_v1_scheduler_job_assign_locked(client, apikey, test_target):  # pylint: disable=unused-argument
+    """job assign route test lock handling"""
+
+    # flush current session and create new independent connection to simulate lock from other agent
+    db.session.commit()
+    with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
+        conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
+
+        response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
+        assert response.status_code == HTTPStatus.OK
+        assert not json.loads(response.body.decode('utf-8'))
 
 
 def test_v1_scheduler_job_output_route(client, apikey, test_job):

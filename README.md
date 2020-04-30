@@ -105,7 +105,7 @@ analysis or out-of-interface data management.
 #### Agent
 
 Agent wraps an existing tools with the communication (agent) and execution
-layer (modules). Generally, the agent instance draws assignment from server,
+layer (modules). Generally, the agent instance gets assignment from server,
 performs the task, marshalls output and delivers it to the server. Agent
 provides several modes of execution (default, one-time execution, handling
 specific queue) and main module provides functions for process handling

@@ -9,11 +9,12 @@ import json
 import os
 from datetime import datetime
 from http import HTTPStatus
+from random import random
 from time import sleep
 from uuid import uuid4
 
 import jsonschema
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 
@@ -27,42 +28,49 @@ from sner.server.utils import ExclMatcher
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
-@blueprint.route('/v1/scheduler/job/assign')
-@blueprint.route('/v1/scheduler/job/assign/<queue_ident>')
-@role_required('agent', api=True)
-def v1_scheduler_job_assign_route(queue_ident=None):
-    """assign job for worker"""
+def wait_for_lock(table_name):
+    """wait for database lock. lock must be released by caller either by commit or rollback"""
 
-    def wait_for_lock(table):
-        """wait for database lock"""
-        while True:
-            try:
-                db.session.execute('LOCK TABLE %s' % table)
-                break
-            except SQLAlchemyError:  # pragma: no cover  ; unable to test
-                db.session.rollback()
-                sleep(0.01)
+    counter = 3
+    while counter:
+        counter -= 1
+        try:
+            db.session.execute(f'LOCK TABLE {table_name} NOWAIT')
+            return True
+        except SQLAlchemyError:
+            db.session.rollback()
+            if counter:
+                sleep(random())
 
-    wait_for_lock(Target.__tablename__)
+    current_app.logger.warning('failed to acquire table lock')
+    return False
 
-    # select active queue; by id or highest priority queue with targets
+
+def assign_targets(queue_ident=None):
+    """
+    select queue and targets for job
+
+    :param str queue_ident: queue identification, targets are selected from the queue if specified
+    :return: tuple of queue and targets list or `None, None` if queue not found or to targets available
+    :rtype: (scheduler.Queue, list)
+    """
+
+    # Select active queue; by id or highest priority queue with targets.
     query = Queue.query.filter(Queue.active)
     if queue_ident:
         if queue_ident.isnumeric():
             queue = query.filter(Queue.id == int(queue_ident)).one_or_none()
         else:
-            queue = query.filter(Queue.ident == queue_ident).order_by(Queue.priority.desc()).first()
+            queue = query.filter(Queue.ident == queue_ident).one_or_none()
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 
     if not queue:
-        # release lock and return response-nowork
-        db.session.commit()
-        return jsonify({})
+        return None, None
 
-    # draw until group_size number of targets are selected or no targets left in queue
-    # blacklisted/excluded targets are discarded from queue in the process
-    # queue is drawed for queue.group_size each time for performance reasons
+    # Pop targets until `group_size` of targets are selected or no targets left in queue.
+    # Blacklisted/excluded targets are discarded from queue in the process.
+    # Queue is popped for queue.group_size each time for performance reasons.
     assigned_targets = []
     blacklist = ExclMatcher()
     while True:
@@ -81,8 +89,28 @@ def v1_scheduler_job_assign_route(queue_ident=None):
         if len(assigned_targets) == queue.task.group_size:
             break
 
+    return queue, assigned_targets
+
+
+@blueprint.route('/v1/scheduler/job/assign')
+@blueprint.route('/v1/scheduler/job/assign/<queue_ident>')
+@role_required('agent', api=True)
+def v1_scheduler_job_assign_route(queue_ident=None):
+    """
+    assign job for worker
+
+    :param str queue_ident: queue identification
+    :return: json encoded assignment or empty object
+    :rtype: flask.Response
+    """
+
+    if not wait_for_lock(Target.__tablename__):
+        # return response-nowork
+        return jsonify({})
+
+    queue, assigned_targets = assign_targets(queue_ident)
     if not assigned_targets:
-        # all targets might got blacklisted, release lock and return response-nowork
+        # release lock and return response-nowork
         db.session.commit()
         return jsonify({})
 
@@ -90,7 +118,8 @@ def v1_scheduler_job_assign_route(queue_ident=None):
         'id': str(uuid4()),
         'module': queue.task.module,
         'params': '' if queue.task.params is None else queue.task.params,
-        'targets': assigned_targets}
+        'targets': assigned_targets
+    }
     job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
     db.session.add(job)
     db.session.commit()
@@ -112,7 +141,8 @@ def v1_scheduler_job_output_route():
 
     job = Job.query.filter(Job.id == job_id).one_or_none()
     if job and (not job.retval):
-        # requests for invalid, deleted, repeated or clashing job ids are discarded, agent should delete the output on it's side as well
+        # requests for invalid, deleted, repeated or clashing job ids are discarded
+        # agent should delete the output on it's side as well
         job.retval = retval
         os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
         with open(job.output_abspath, 'wb') as ftmp:
