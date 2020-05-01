@@ -13,6 +13,7 @@ from uuid import uuid4
 from werkzeug.wrappers import Response
 
 from sner.agent import main as agent_main
+from sner.server.scheduler.models import Queue
 
 
 def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longrun_a):  # pylint: disable=unused-argument
@@ -39,7 +40,14 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
-        args=(['--server', live_server.url(), '--apikey', apikey, '--debug', '--queue', str(test_longrun_target.queue_id), '--oneshot'],))
+        args=([
+            '--server', live_server.url(),
+            '--apikey', apikey,
+            '--queue', Queue.query.get(test_longrun_target.queue_id).ident,
+            '--oneshot',
+            '--debug',
+        ],)
+    )
     proc_agent.start()
     sleep(1)
     assert proc_agent.pid

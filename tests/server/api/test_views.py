@@ -18,22 +18,16 @@ from tests import persist_and_detach
 from tests.server.scheduler.models import create_test_target
 
 
-def test_v1_scheduler_job_assign_route(client, apikey, test_queue):
+def test_v1_scheduler_job_assign_route(client, apikey, test_target):
     """job assign route test"""
 
-    # assign from queue by id
-    persist_and_detach(create_test_target(test_queue))
-    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_ident=test_queue.id), headers=apikey_header(apikey))
-    assert response.status_code == HTTPStatus.OK
-    assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.get(test_queue.id).jobs) == 1
+    test_queue = Target.query.get(test_target.id).queue
 
     # assign from queue by name
-    persist_and_detach(create_test_target(test_queue))
     response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_ident=test_queue.ident), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.filter(Queue.ident == test_queue.ident).one().jobs) == 2
+    assert len(Queue.query.filter(Queue.ident == test_queue.ident).one().jobs) == 1
 
     # assign from non-existent queue
     response = client.get(

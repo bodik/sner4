@@ -52,45 +52,42 @@ def test_queue_enqueue_command(runner, tmpworkdir, test_queue):  # pylint: disab
         ftmp.write(test_target.target)
         ftmp.write('\n \n ')
 
-    result = runner.invoke(command, ['queue-enqueue', str(666), test_target.target])
+    result = runner.invoke(command, ['queue-enqueue', 'notexist', test_target.target])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-enqueue', str(test_queue.id), test_target.target])
+    result = runner.invoke(command, ['queue-enqueue', test_queue.ident, test_target.target])
     assert result.exit_code == 0
     assert Queue.query.get(test_queue.id).targets[0].target == test_target.target
 
-    result = runner.invoke(command, ['queue-enqueue', str(test_queue.id), '--file', test_path])
+    result = runner.invoke(command, ['queue-enqueue', test_queue.ident, '--file', test_path])
     assert result.exit_code == 0
     assert len(Queue.query.get(test_queue.id).targets) == 2
-
-    result = runner.invoke(command, ['queue-enqueue', str(test_queue.ident), test_target.target])
-    assert result.exit_code == 0
-    assert len(Queue.query.get(test_queue.id).targets) == 3
 
 
 def test_queue_flush_command(runner, test_target):
     """queue flush command test"""
 
-    test_queue_id = test_target.queue_id
+    test_queue = Queue.query.get(test_target.queue_id)
 
-    result = runner.invoke(command, ['queue-flush', str(666)])
+    result = runner.invoke(command, ['queue-flush', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-flush', str(test_queue_id)])
+    result = runner.invoke(command, ['queue-flush', test_queue.ident])
     assert result.exit_code == 0
 
-    assert not Queue.query.get(test_queue_id).targets
+    assert not Queue.query.get(test_queue.id).targets
 
 
 def test_queue_prune_command(runner, test_job_completed):
     """queue prune command test"""
 
     test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
+    test_queue = Queue.query.get(test_job_completed.queue_id)
 
-    result = runner.invoke(command, ['queue-prune', str(666)])
+    result = runner.invoke(command, ['queue-prune', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-prune', str(test_job_completed.queue_id)])
+    result = runner.invoke(command, ['queue-prune', test_queue.ident])
     assert result.exit_code == 0
 
     assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()

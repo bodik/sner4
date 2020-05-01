@@ -20,14 +20,6 @@ from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqu
 from sner.server.scheduler.models import Job, Queue, Target
 
 
-def queuebyx(queue_ident):
-    """get queue by id or name"""
-
-    if queue_ident.isnumeric():
-        return Queue.query.get(int(queue_ident))
-    return Queue.query.filter(Queue.ident == queue_ident).one_or_none()
-
-
 @click.group(name='scheduler', help='sner.server scheduler management')
 def command():
     """scheduler commands container"""
@@ -64,7 +56,7 @@ def rangetocidr_command(start, end):
 def queue_enqueue_command(queue_ident, argtargets, **kwargs):
     """enqueue targets to queue"""
 
-    queue = queuebyx(queue_ident)
+    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)
@@ -77,12 +69,12 @@ def queue_enqueue_command(queue_ident, argtargets, **kwargs):
 
 
 @command.command(name='queue-flush', help='flush all targets from queue')
-@click.argument('queue_id')
+@click.argument('queue_ident')
 @with_appcontext
-def queue_flush_command(queue_id):
+def queue_flush_command(queue_ident):
     """flush targets from queue"""
 
-    queue = queuebyx(queue_id)
+    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)
@@ -93,12 +85,12 @@ def queue_flush_command(queue_id):
 
 
 @command.command(name='queue-prune', help='delete all associated jobs')
-@click.argument('queue_id')
+@click.argument('queue_ident')
 @with_appcontext
-def queue_prune_command(queue_id):
+def queue_prune_command(queue_ident):
     """delete all jobs associated with queue"""
 
-    queue = queuebyx(queue_id)
+    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)

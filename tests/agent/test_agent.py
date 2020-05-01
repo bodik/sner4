@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from sner.agent import main as agent_main
 from sner.lib import file_from_zip
-from sner.server.scheduler.models import Job
+from sner.server.scheduler.models import Job, Queue
 
 
 def test_version(tmpworkdir):  # pylint: disable=unused-argument
@@ -40,7 +40,13 @@ def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
 def test_run_with_liveserver(tmpworkdir, live_server, apikey, test_dummy_target):  # pylint: disable=unused-argument
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
-    result = agent_main(['--server', live_server.url(), '--apikey', apikey, '--debug', '--queue', str(test_dummy_target.queue_id), '--oneshot'])
+    result = agent_main([
+        '--server', live_server.url(),
+        '--apikey', apikey,
+        '--queue', Queue.query.get(test_dummy_target.queue_id).ident,
+        '--oneshot',
+        '--debug',
+    ])
     assert result == 0
 
     job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one()

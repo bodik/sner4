@@ -58,10 +58,7 @@ def assign_targets(queue_ident=None):
     # Select active queue; by id or highest priority queue with targets.
     query = Queue.query.filter(Queue.active)
     if queue_ident:
-        if queue_ident.isnumeric():
-            queue = query.filter(Queue.id == int(queue_ident)).one_or_none()
-        else:
-            queue = query.filter(Queue.ident == queue_ident).one_or_none()
+        queue = query.filter(Queue.ident == queue_ident).one_or_none()
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 
