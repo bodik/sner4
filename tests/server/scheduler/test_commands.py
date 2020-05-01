@@ -97,31 +97,39 @@ def test_queue_prune_command(runner, test_job_completed):
 def test_planner_command(runner):
     """test planner command"""
 
-    dummy_assignment = '{"module": "dummy", "params": "", "targets":[]}'
+    # commons
+    dummy_a = '{"module": "dummy", "params": "", "targets":[]}'
     now = datetime.utcnow()
 
-    test_disco_task_name, test_disco_queue_name = 'sner_900_disco.main'.split('.')
-    test_disco_task = Task(name=test_disco_task_name, module='dummy', group_size=1)
-    persist_and_detach(test_disco_task)
-    test_disco_queue = Queue(task=test_disco_task, name=test_disco_queue_name, priority=10)
-    persist_and_detach(test_disco_queue)
-    test_disco_job = Job(id=str(uuid4()), queue=test_disco_queue, assignment=dummy_assignment, retval=0, time_start=now, time_end=now)
+    # test disco job
+    test_disco_task_name, test_disco_queue_name = 'sner_900_disco', 'main'
+    test_disco_task = persist_and_detach(
+        Task(name=test_disco_task_name, module='dummy', group_size=1)
+    )
+    test_disco_queue = persist_and_detach(
+        Queue(task=test_disco_task, name=test_disco_queue_name, priority=10)
+    )
+    test_disco_job = Job(id=str(uuid4()), queue=test_disco_queue, assignment=dummy_a, retval=0, time_start=now, time_end=now)
     tmp_job_output_path = Path(test_disco_job.output_abspath)
     tmp_job_output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_job_output_path.write_bytes(Path('tests/server/data/parser-nmap-job.zip').read_bytes())
     persist_and_detach(test_disco_job)
 
+    # test data job
     default_data_task_name, default_data_queue_name = PLANNER_DEFAULT_DATA_QUEUE.split('.')
-    default_data_task = Task(name=default_data_task_name, module='dummy', group_size=1)
-    persist_and_detach(default_data_task)
-    default_data_queue = Queue(task=default_data_task, name=default_data_queue_name, priority=10)
-    persist_and_detach(default_data_queue)
-    test_data_job = Job(id=str(uuid4()), queue=default_data_queue, assignment=dummy_assignment, retval=0, time_start=now, time_end=now)
+    default_data_task = persist_and_detach(
+        Task(name=default_data_task_name, module='dummy', group_size=1)
+    )
+    default_data_queue = persist_and_detach(
+        Queue(task=default_data_task, name=default_data_queue_name, priority=10)
+    )
+    test_data_job = Job(id=str(uuid4()), queue=default_data_queue, assignment=dummy_a, retval=0, time_start=now, time_end=now)
     tmp_job_output_path = Path(test_data_job.output_abspath)
     tmp_job_output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_job_output_path.write_bytes(Path('tests/server/data/parser-manymap-job.zip').read_bytes())
     persist_and_detach(test_data_job)
 
+    # test itself
     with patch.object(sner.server.scheduler.commands, 'PLANNER_LOOP_SLEEP', 0):
         result = runner.invoke(command, ['planner', '--oneshot'])
     assert result.exit_code == 0
