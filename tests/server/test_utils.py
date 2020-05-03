@@ -41,18 +41,18 @@ def test_model_excl_validation():
         test_excl.value = 'invalid('
 
 
-def test_excl_matcher(app, test_excl_network, test_excl_regex):  # pylint: disable=unused-argument
+def test_excl_matcher(app, excl_network, excl_regex):  # pylint: disable=unused-argument
     """test matcher"""
 
     matcher = ExclMatcher()
-    test_network = ip_network(test_excl_network.value)
+    tnetwork = ip_network(excl_network.value)
 
-    assert matcher.match(str(test_network.network_address))
-    assert matcher.match(str(test_network.broadcast_address))
-    assert not matcher.match(str(test_network.network_address-1))
-    assert not matcher.match(str(test_network.broadcast_address+1))
+    assert matcher.match(str(tnetwork.network_address))
+    assert matcher.match(str(tnetwork.broadcast_address))
+    assert not matcher.match(str(tnetwork.network_address-1))
+    assert not matcher.match(str(tnetwork.broadcast_address+1))
 
-    assert matcher.match('tcp://%s:12345' % str(test_network.network_address))
+    assert matcher.match(f'tcp://{tnetwork.network_address}:12345')
     assert not matcher.match('tcp://notanaddress:12345')
 
     assert matcher.match('notarget1')

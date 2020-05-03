@@ -3,28 +3,22 @@
 scheduler.commands tests
 """
 
-from datetime import datetime
 from pathlib import Path
-from uuid import uuid4
 from unittest.mock import patch
 
 import sner.server.scheduler.commands
 from sner.server.scheduler.commands import command, PLANNER_DEFAULT_DATA_QUEUE
-from sner.server.scheduler.models import Job, Queue, Target, Task
+from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.storage.models import Service
-from tests import persist_and_detach
-from tests.server.scheduler.models import create_test_target
 
 
 def test_enumips_command(runner, tmpworkdir):  # pylint: disable=unused-argument
     """basic enumerator test"""
 
-    test_path = 'enumips.txt'
-    with open(test_path, 'w') as ftmp:
-        ftmp.write('127.0.0.132/30\n')
-        ftmp.write('127.0.1.123/32\n')
+    apath = Path('enumips.txt')
+    apath.write_text('127.0.0.132/30\n127.0.1.123/32\n')
 
-    result = runner.invoke(command, ['enumips', '127.0.0.128/30', '--file', test_path])
+    result = runner.invoke(command, ['enumips', '127.0.0.128/30', '--file', apath])
     assert result.exit_code == 0
 
     assert '127.0.0.129' in result.output
@@ -43,91 +37,71 @@ def test_rangetocidr_command(runner):
     assert '128.0.0.0/30' in result.output
 
 
-def test_queue_enqueue_command(runner, tmpworkdir, test_queue):  # pylint: disable=unused-argument
+def test_queue_enqueue_command(runner, tmpworkdir, queue, target_factory):  # pylint: disable=unused-argument
     """queue enqueue command test"""
 
-    test_target = create_test_target(test_queue)
-    test_path = 'ips.txt'
-    with open(test_path, 'w') as ftmp:
-        ftmp.write(test_target.target)
-        ftmp.write('\n \n ')
+    atarget = target_factory.build(queue=queue)
+    apath = Path('ips.txt')
+    apath.write_text(f'{atarget.target}\n \n ')
 
-    result = runner.invoke(command, ['queue-enqueue', 'notexist', test_target.target])
+    result = runner.invoke(command, ['queue-enqueue', 'notexist', atarget.target])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-enqueue', test_queue.ident, test_target.target])
+    result = runner.invoke(command, ['queue-enqueue', queue.ident, atarget.target])
     assert result.exit_code == 0
-    assert Queue.query.get(test_queue.id).targets[0].target == test_target.target
+    assert Queue.query.get(queue.id).targets[0].target == atarget.target
 
-    result = runner.invoke(command, ['queue-enqueue', test_queue.ident, '--file', test_path])
+    result = runner.invoke(command, ['queue-enqueue', queue.ident, '--file', apath])
     assert result.exit_code == 0
-    assert len(Queue.query.get(test_queue.id).targets) == 2
+    assert len(Queue.query.get(queue.id).targets) == 2
 
 
-def test_queue_flush_command(runner, test_target):
+def test_queue_flush_command(runner, target):
     """queue flush command test"""
 
-    test_queue = Queue.query.get(test_target.queue_id)
+    tqueue = Queue.query.get(target.queue_id)
 
     result = runner.invoke(command, ['queue-flush', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-flush', test_queue.ident])
+    result = runner.invoke(command, ['queue-flush', tqueue.ident])
     assert result.exit_code == 0
 
-    assert not Queue.query.get(test_queue.id).targets
+    assert not Queue.query.get(tqueue.id).targets
 
 
-def test_queue_prune_command(runner, test_job_completed):
+def test_queue_prune_command(runner, job_completed):
     """queue prune command test"""
-
-    test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
-    test_queue = Queue.query.get(test_job_completed.queue_id)
 
     result = runner.invoke(command, ['queue-prune', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-prune', test_queue.ident])
+    result = runner.invoke(command, ['queue-prune', job_completed.queue.ident])
     assert result.exit_code == 0
 
-    assert not Job.query.filter(Job.queue_id == test_job_completed.queue_id).all()
-    assert not Path(test_job_completed_output_abspath).exists()
+    assert not Job.query.filter(Job.queue_id == job_completed.queue_id).all()
+    assert not Path(job_completed.output_abspath).exists()
 
 
-def test_planner_command(runner):
+def test_planner_command(runner, task_factory, queue_factory, job_completed_factory):
     """test planner command"""
 
-    # commons
-    dummy_a = '{"module": "dummy", "params": "", "targets":[]}'
-    now = datetime.utcnow()
+    # disco job
+    disco_task = task_factory.create(name='sner_900_disco')
+    disco_queue = queue_factory.create(name='main', task=disco_task)
+    job_completed_factory.create(
+        queue=disco_queue,
+        make_output=Path('tests/server/data/parser-nmap-job.zip').read_bytes()
+    )
 
-    # test disco job
-    test_disco_task_name, test_disco_queue_name = 'sner_900_disco', 'main'
-    test_disco_task = persist_and_detach(
-        Task(name=test_disco_task_name, module='dummy', group_size=1)
+    # data job
+    data_task_name, data_queue_name = PLANNER_DEFAULT_DATA_QUEUE.split('.')
+    data_task = task_factory.create(name=data_task_name)
+    data_queue = queue_factory.create(name=data_queue_name, task=data_task)
+    job_completed_factory.create(
+        queue=data_queue,
+        make_output=Path('tests/server/data/parser-manymap-job.zip').read_bytes()
     )
-    test_disco_queue = persist_and_detach(
-        Queue(task=test_disco_task, name=test_disco_queue_name, priority=10)
-    )
-    test_disco_job = Job(id=str(uuid4()), queue=test_disco_queue, assignment=dummy_a, retval=0, time_start=now, time_end=now)
-    tmp_job_output_path = Path(test_disco_job.output_abspath)
-    tmp_job_output_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_job_output_path.write_bytes(Path('tests/server/data/parser-nmap-job.zip').read_bytes())
-    persist_and_detach(test_disco_job)
-
-    # test data job
-    default_data_task_name, default_data_queue_name = PLANNER_DEFAULT_DATA_QUEUE.split('.')
-    default_data_task = persist_and_detach(
-        Task(name=default_data_task_name, module='dummy', group_size=1)
-    )
-    default_data_queue = persist_and_detach(
-        Queue(task=default_data_task, name=default_data_queue_name, priority=10)
-    )
-    test_data_job = Job(id=str(uuid4()), queue=default_data_queue, assignment=dummy_a, retval=0, time_start=now, time_end=now)
-    tmp_job_output_path = Path(test_data_job.output_abspath)
-    tmp_job_output_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_job_output_path.write_bytes(Path('tests/server/data/parser-manymap-job.zip').read_bytes())
-    persist_and_detach(test_data_job)
 
     # test itself
     with patch.object(sner.server.scheduler.commands, 'PLANNER_LOOP_SLEEP', 0):

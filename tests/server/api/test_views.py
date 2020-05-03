@@ -7,32 +7,33 @@ import base64
 import json
 from http import HTTPStatus
 from ipaddress import ip_network
+from pathlib import Path
 
 from flask import current_app, url_for
 from sqlalchemy import create_engine
 
 from sner.agent import apikey_header
 from sner.server.extensions import db
-from sner.server.scheduler.models import Job, Queue, Target
-from tests import persist_and_detach
-from tests.server.scheduler.models import create_test_target
+from sner.server.scheduler.models import Queue, Target
 
 
-def test_v1_scheduler_job_assign_route(client, apikey, test_target):
+def test_v1_scheduler_job_assign_route(client, apikey, target):
     """job assign route test"""
 
-    test_queue = Target.query.get(test_target.id).queue
-
     # assign from queue by name
-    response = client.get(url_for('api.v1_scheduler_job_assign_route', queue_ident=test_queue.ident), headers=apikey_header(apikey))
+    response = client.get(
+        url_for('api.v1_scheduler_job_assign_route', queue_ident=target.queue.ident),
+        headers=apikey_header(apikey)
+    )
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.filter(Queue.ident == test_queue.ident).one().jobs) == 1
+    assert len(Queue.query.filter(Queue.ident == target.queue.ident).one().jobs) == 1
 
     # assign from non-existent queue
     response = client.get(
         url_for('api.v1_scheduler_job_assign_route', queue_id='notexist'),
-        headers=apikey_header(apikey))  # should return response-nowork
+        headers=apikey_header(apikey)
+    )  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
 
@@ -41,15 +42,13 @@ def test_v1_scheduler_job_assign_route(client, apikey, test_target):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_v1_scheduler_job_assign_route_priority(client, apikey, test_task):
+def test_v1_scheduler_job_assign_route_priority(client, apikey, task, queue_factory, target_factory):
     """job assign route test"""
 
-    queue1 = Queue(name='queue1', task=test_task, priority=10, active=True)
-    persist_and_detach(queue1)
-    queue2 = Queue(name='queue2', task=test_task, priority=20, active=True)
-    persist_and_detach(queue2)
-    persist_and_detach(create_test_target(queue1))
-    persist_and_detach(create_test_target(queue2))
+    queue1 = queue_factory.create(name='queue1', task=task, priority=10, active=True)
+    queue2 = queue_factory.create(name='queue2', task=task, priority=20, active=True)
+    target_factory.create(queue=queue1)
+    target_factory.create(queue=queue2)
 
     response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))
     assert response.status_code == HTTPStatus.OK
@@ -59,16 +58,17 @@ def test_v1_scheduler_job_assign_route_priority(client, apikey, test_task):
     assert len(Queue.query.get(queue2.id).jobs) == 1
 
 
-def test_v1_scheduler_job_assign_route_exclusion(client, apikey, test_queue, test_excl_network):
+def test_v1_scheduler_job_assign_route_exclusion(client, apikey, queue, excl_network, target_factory):
     """job assign route test cleaning up excluded hosts"""
 
-    persist_and_detach(Target(target=str(ip_network(test_excl_network.value).network_address), queue=test_queue))
+    target_factory.create(queue=queue, target=str(ip_network(excl_network.value).network_address))
+
     response = client.get(url_for('api.v1_scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
     assert not json.loads(response.body.decode('utf-8'))
 
 
-def test_v1_scheduler_job_assign_locked(client, apikey, test_target):  # pylint: disable=unused-argument
+def test_v1_scheduler_job_assign_locked(client, apikey, target):  # pylint: disable=unused-argument
     """job assign route test lock handling"""
 
     # flush current session and create new independent connection to simulate lock from other agent
@@ -81,19 +81,23 @@ def test_v1_scheduler_job_assign_locked(client, apikey, test_target):  # pylint:
         assert not json.loads(response.body.decode('utf-8'))
 
 
-def test_v1_scheduler_job_output_route(client, apikey, test_job):
+def test_v1_scheduler_job_output_route(client, apikey, job):
     """job output route test"""
 
     response = client.post_json(
         url_for('api.v1_scheduler_job_output_route'),
-        {'id': test_job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
-        headers=apikey_header(apikey))
+        {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+        headers=apikey_header(apikey)
+    )
     assert response.status_code == HTTPStatus.OK
 
-    job = Job.query.get(test_job.id)
     assert job.retval == 12345
-    with open(job.output_abspath, 'r') as ftmp:
-        assert ftmp.read() == 'a-test-file-contents'
+    assert Path(job.output_abspath).read_text() == 'a-test-file-contents'
 
-    response = client.post_json(url_for('api.v1_scheduler_job_output_route'), {'invalid': 'output'}, headers=apikey_header(apikey), status='*')
+    response = client.post_json(
+        url_for('api.v1_scheduler_job_output_route'),
+        {'invalid': 'output'},
+        headers=apikey_header(apikey),
+        status='*'
+    )
     assert response.status_code == HTTPStatus.BAD_REQUEST

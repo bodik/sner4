@@ -4,13 +4,12 @@ scheduler.views.task tests
 """
 
 import json
-import os
 from http import HTTPStatus
+from pathlib import Path
 
 from flask import url_for
 
-from sner.server.scheduler.models import Queue, Task
-from tests.server.scheduler.models import create_test_task
+from sner.server.scheduler.models import Task
 
 
 def test_task_list_route(cl_operator):
@@ -20,67 +19,68 @@ def test_task_list_route(cl_operator):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_task_list_json_route(cl_operator, test_task):
+def test_task_list_json_route(cl_operator, task):
     """task list_json route test"""
 
-    response = cl_operator.post(url_for('scheduler.task_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_task.name})
+    response = cl_operator.post(
+        url_for('scheduler.task_list_json_route'),
+        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': task.name}
+    )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['name'] == test_task.name
+    assert response_data['data'][0]['name'] == task.name
 
     response = cl_operator.post(
-        url_for('scheduler.task_list_json_route', filter='Task.name=="%s"' % test_task.name),
-        {'draw': 1, 'start': 0, 'length': 1})
+        url_for('scheduler.task_list_json_route', filter=f'Task.name=="{task.name}"'),
+        {'draw': 1, 'start': 0, 'length': 1}
+    )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['name'] == test_task.name
+    assert response_data['data'][0]['name'] == task.name
 
 
-def test_task_add_route(cl_operator):
+def test_task_add_route(cl_operator, task_factory):
     """task add route test"""
 
-    test_task = create_test_task()
+    atask = task_factory.build()
 
     form = cl_operator.get(url_for('scheduler.task_add_route')).form
-    form['name'] = test_task.name
-    form['module'] = test_task.module
-    form['params'] = test_task.params
-    form['group_size'] = test_task.group_size
+    form['name'] = atask.name
+    form['module'] = atask.module
+    form['params'] = atask.params
+    form['group_size'] = atask.group_size
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    task = Task.query.filter(Task.name == test_task.name).one()
-    assert task.name == test_task.name
-    assert task.module == test_task.module
-    assert task.params == test_task.params
-    assert task.group_size == test_task.group_size
+    ttask = Task.query.filter(Task.name == atask.name).one()
+    assert ttask.name == atask.name
+    assert ttask.module == atask.module
+    assert ttask.params == atask.params
+    assert ttask.group_size == atask.group_size
 
 
-def test_task_edit_route(cl_operator, test_task):
+def test_task_edit_route(cl_operator, task):
     """task edit route test"""
 
-    form = cl_operator.get(url_for('scheduler.task_edit_route', task_id=test_task.id)).form
-    form['name'] = form['name'].value+' edited'
-    form['params'] = form['params'].value+' added_parameter'
+    form = cl_operator.get(url_for('scheduler.task_edit_route', task_id=task.id)).form
+    form['name'] = f'{form["name"].value} edited'
+    form['params'] = f'{form["params"].value} added_parameter'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    task = Task.query.get(test_task.id)
-    assert task.name == form['name'].value
-    assert 'added_parameter' in task.params
+    ttask = Task.query.get(task.id)
+    assert ttask.name == form['name'].value
+    assert 'added_parameter' in ttask.params
 
 
-def test_task_delete_route(cl_operator, test_job_completed):
+def test_task_delete_route(cl_operator, job_completed):
     """task delete route test"""
 
-    test_queue = Queue.query.get(test_job_completed.queue_id)
-    test_queue_data_abspath = test_queue.data_abspath
-    test_task = Task.query.get(test_queue.task_id)
-    assert os.path.exists(test_queue_data_abspath)
+    assert Path(job_completed.queue.data_abspath)
 
-    form = cl_operator.get(url_for('scheduler.task_delete_route', task_id=test_task.id)).form
+    form = cl_operator.get(url_for('scheduler.task_delete_route', task_id=job_completed.queue.task.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    assert not Task.query.get(test_task.id)
-    assert not os.path.exists(test_queue_data_abspath)
+    assert not Task.query.get(job_completed.queue.task.id)
+    assert not Path(job_completed.queue.data_abspath).exists()

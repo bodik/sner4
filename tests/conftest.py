@@ -8,12 +8,23 @@ import shutil
 from tempfile import mkdtemp
 
 import pytest
+from pytest_factoryboy import register as factoryboy_register
 
 from sner.server.app import create_app
 from sner.server.auth.models import User
 from sner.server.extensions import db
 from sner.server.db_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
+from tests.server.scheduler.models import (
+    ExclNetworkFactory,
+    ExclRegexFactory,
+    JobFactory,
+    JobCompletedFactory,
+    QueueFactory,
+    TaskFactory,
+    TargetFactory
+)
+from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory
 
 
 @pytest.fixture
@@ -51,3 +62,19 @@ def apikey():
     db.session.add(User(username='pytest_agent', apikey=tmp_apikey, active=True, roles=['agent']))
     db.session.commit()
     yield tmp_apikey
+
+
+# scheduler
+factoryboy_register(ExclNetworkFactory, 'excl_network')
+factoryboy_register(ExclRegexFactory, 'excl_regex')
+factoryboy_register(JobFactory)
+factoryboy_register(JobCompletedFactory, 'job_completed')
+factoryboy_register(QueueFactory)
+factoryboy_register(TargetFactory)
+factoryboy_register(TaskFactory)
+
+# storage
+factoryboy_register(HostFactory)
+factoryboy_register(NoteFactory)
+factoryboy_register(ServiceFactory)
+factoryboy_register(VulnFactory)

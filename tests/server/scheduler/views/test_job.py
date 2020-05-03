@@ -4,8 +4,8 @@ scheduler.views.job tests
 """
 
 import json
-import os
 from http import HTTPStatus
+from pathlib import Path
 
 from flask import url_for
 
@@ -19,30 +19,35 @@ def test_job_list_route(cl_operator):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_job_list_json_route(cl_operator, test_job):
+def test_job_list_json_route(cl_operator, job):
     """job list_json route test"""
 
-    response = cl_operator.post(url_for('scheduler.job_list_json_route'), {'draw': 1, 'start': 0, 'length': 1, 'search[value]': test_job.id})
+    response = cl_operator.post(
+        url_for('scheduler.job_list_json_route'),
+        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': job.id}
+    )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['id'] == test_job.id
+    assert response_data['data'][0]['id'] == job.id
 
     response = cl_operator.post(
-        url_for('scheduler.job_list_json_route', filter='Job.id=="%s"' % test_job.id),
-        {'draw': 1, 'start': 0, 'length': 1})
+        url_for('scheduler.job_list_json_route', filter=f'Job.id=="{job.id}"'),
+        {'draw': 1, 'start': 0, 'length': 1}
+    )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['id'] == test_job.id
+    assert response_data['data'][0]['id'] == job.id
 
 
-def test_job_delete_route(cl_operator, test_job_completed):
+def test_job_delete_route(cl_operator, job_completed):
     """delete route test"""
 
-    test_job_completed_output_abspath = Job.query.get(test_job_completed.id).output_abspath
+    job_completed_id = job_completed.id
+    job_completed_output_abspath = job_completed.output_abspath
 
-    form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=test_job_completed.id)).form
+    form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=job_completed.id)).form
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    assert not Job.query.get(test_job_completed.id)
-    assert not os.path.exists(test_job_completed_output_abspath)
+    assert not Job.query.get(job_completed_id)
+    assert not Path(job_completed_output_abspath).exists()

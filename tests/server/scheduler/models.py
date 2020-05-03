@@ -4,128 +4,107 @@ scheduler test models
 """
 
 import json
-import os
 from datetime import datetime
+from pathlib import Path
 from uuid import uuid4
 from zipfile import ZipFile
 
-import pytest
+from factory import LazyAttribute, post_generation, SubFactory
 
 from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target, Task
-from tests import persist_and_detach
+from tests import BaseModelFactory
 
 
-def create_test_task():
-    """test task data"""
+class TaskFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test task model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test host model factory"""
+        model = Task
 
-    return Task(
-        name='testtaskname',
-        module='test',
-        params='--arg1 abc --arg2',
-        group_size=1)
-
-
-def create_test_queue(a_test_task):
-    """test queue data"""
-
-    return Queue(
-        name='testqueue',
-        task_id=a_test_task.id,
-        task=a_test_task,
-        priority=10,
-        active=True)
+    name = 'testtaskname'
+    module = 'test'
+    params = '--arg1 abc --arg2'
+    group_size = 1
 
 
-def create_test_target(a_test_queue):
-    """test target data"""
+class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test queue model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test queue model factory"""
+        model = Queue
 
-    return Target(
-        target='testtarget',
-        queue_id=a_test_queue.id,
-        queue=a_test_queue)
-
-
-def create_test_job(a_test_queue):
-    """test job data; only assigned"""
-
-    return Job(
-        id=str(uuid4()),
-        queue_id=a_test_queue.id,
-        queue=a_test_queue,
-        assignment=json.dumps({'module': 'testjob', 'targets': ['1', '2']}),
-        time_start=datetime.now())
+    name = 'testqueue'
+    task = SubFactory(TaskFactory)
+    priority = 10
+    active = True
 
 
-def create_test_excl_network():
-    """test network exclusion data"""
+class TargetFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test target model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test target model factory"""
+        model = Target
 
-    return Excl(
-        family=ExclFamily.network,
-        value='127.66.66.0/26',
-        comment='blocked test netrange, no traffic should go there')
-
-
-def create_test_excl_regex():
-    """test regex exclusion data"""
-
-    return Excl(
-        family=ExclFamily.regex,
-        value='notarget[012]',
-        comment='targets blocked by regex')
+    queue = SubFactory(QueueFactory)
+    target = 'testtarget'
 
 
-@pytest.fixture
-def test_task():
-    """persistent test task"""
+class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test job model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test job model factory"""
+        model = Job
 
-    yield persist_and_detach(create_test_task())
-
-
-@pytest.fixture
-def test_queue(test_task):  # pylint: disable=redefined-outer-name
-    """persistent test queue"""
-
-    yield persist_and_detach(create_test_queue(test_task))
-
-
-@pytest.fixture
-def test_target(test_queue):  # pylint: disable=redefined-outer-name
-    """persistent test queue"""
-
-    yield persist_and_detach(create_test_target(test_queue))
+    id = LazyAttribute(lambda x: str(uuid4()))
+    queue = SubFactory(QueueFactory)
+    assignment = json.dumps({'module': 'testjob', 'targets': ['1', '2']})
+    retval = None
+    time_start = datetime.now()
+    time_end = None
 
 
-@pytest.fixture
-def test_job(test_queue):  # pylint: disable=redefined-outer-name
-    """persistent test job assigned"""
+class JobCompletedFactory(JobFactory):  # pylint: disable=too-few-public-methods
+    """test completed job model factory"""
 
-    yield persist_and_detach(create_test_job(test_queue))
+    retval = 0
+    time_end = datetime.utcnow()
 
+    @post_generation
+    def make_output(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
+        """create on-disk output if create requested"""
 
-@pytest.fixture
-def test_job_completed(test_queue):  # pylint: disable=redefined-outer-name
-    """persistent test job completed"""
+        if not create:
+            return
 
-    job = create_test_job(test_queue)
-    job.retval = 0
-    job.output = os.path.join('scheduler', 'queue-%s' % job.queue_id, job.id)
-    os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
-    with open(job.output_abspath, 'wb') as job_file:
-        with ZipFile(job_file, 'w') as zip_file:
-            zip_file.writestr(json.dumps(job.assignment), 'assignment.json')
-    job.time_end = datetime.utcnow()
-    yield persist_and_detach(job)
+        output_abspath = self.output_abspath  # pylint: disable=no-member ; sqla computed property
+        Path(output_abspath).parent.mkdir(parents=True, exist_ok=True)
+        if extracted:
+            Path(output_abspath).write_bytes(extracted)
+        else:
+            with open(output_abspath, 'wb') as job_file:
+                with ZipFile(job_file, 'w') as zip_file:
+                    zip_file.writestr('assignment.json', self.assignment)
 
-
-@pytest.fixture
-def test_excl_network():
-    """persistent test network exclusion"""
-
-    yield persist_and_detach(create_test_excl_network())
+        return
 
 
-@pytest.fixture
-def test_excl_regex():
-    """persistent test regex exclusion"""
+class ExclNetworkFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test excl network model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test excl network model factory"""
+        model = Excl
 
-    yield persist_and_detach(create_test_excl_regex())
+    family = ExclFamily.network
+    value = '127.66.66.0/26'
+    comment = 'blocked test netrange, no traffic should go there'
+
+
+class ExclRegexFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test excl regex model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test excl regex model factory"""
+        model = Excl
+
+    family = ExclFamily.regex
+    value = 'notarget[012]'
+    comment = 'targets blocked by regex'

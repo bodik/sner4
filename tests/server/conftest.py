@@ -7,7 +7,6 @@ from uuid import uuid4
 
 import pytest
 from flask import url_for
-from pytest_factoryboy import register
 from webtest import TestApp
 
 from sner.server.auth.models import User
@@ -15,12 +14,6 @@ from sner.server.extensions import db
 
 # import all fixtures here; they will be available in all tests, import on module specific level would trigger redefined-outer-name
 from tests.server.auth.models import test_user, test_wncred  # noqa: F401  pylint: disable=unused-import
-from tests.server.scheduler.models import (  # noqa: F401  pylint: disable=unused-import
-    test_excl_network, test_excl_regex,
-    test_job, test_job_completed,
-    test_queue, test_target, test_task
-)
-from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory
 
 
 @pytest.fixture
@@ -69,9 +62,3 @@ def cl_admin(client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role admin"""
 
     yield client_in_roles(client, ['user', 'operator', 'admin'])
-
-
-register(HostFactory)
-register(NoteFactory)
-register(ServiceFactory)
-register(VulnFactory)
