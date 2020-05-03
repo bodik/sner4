@@ -7,7 +7,7 @@ from sner.server.storage.forms import NoteForm, VulnForm
 from tests.server import DummyPostData
 
 
-def test_forms_models_relations(app, test_service):  # pylint: disable=unused-argument
+def test_forms_models_relations(app, service):  # pylint: disable=unused-argument
     """validate VulnForm invalid inputs"""
 
     for formcls in VulnForm, NoteForm:
@@ -19,6 +19,6 @@ def test_forms_models_relations(app, test_service):  # pylint: disable=unused-ar
         assert not form.validate()
         assert 'No such service' in form.errors['service_id']
 
-        form = formcls(DummyPostData({'service_id': test_service.id}))
+        form = formcls(DummyPostData({'service_id': service.id}))
         assert not form.validate()
         assert 'Service does not belong to the host' in form.errors['service_id']

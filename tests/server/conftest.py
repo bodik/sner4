@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 from flask import url_for
+from pytest_factoryboy import register
 from webtest import TestApp
 
 from sner.server.auth.models import User
@@ -19,7 +20,7 @@ from tests.server.scheduler.models import (  # noqa: F401  pylint: disable=unuse
     test_job, test_job_completed,
     test_queue, test_target, test_task
 )
-from tests.server.storage.models import test_host, test_note, test_service, test_vuln  # noqa: F401  pylint: disable=unused-import
+from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory
 
 
 @pytest.fixture
@@ -68,3 +69,9 @@ def cl_admin(client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role admin"""
 
     yield client_in_roles(client, ['user', 'operator', 'admin'])
+
+
+register(HostFactory)
+register(NoteFactory)
+register(ServiceFactory)
+register(VulnFactory)

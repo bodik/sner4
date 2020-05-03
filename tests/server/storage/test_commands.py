@@ -5,10 +5,8 @@ storage.commands tests
 
 import json
 
-from sner.server.extensions import db
 from sner.server.storage.commands import command
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
-from tests import persist_and_detach
 
 
 def test_import_invalidparser(runner):
@@ -76,7 +74,7 @@ def test_import_manymap_command_plaintext(runner):
     Host.query.one()
 
 
-def test_flush_command(runner, test_service, test_vuln, test_note):  # pylint: disable=unused-argument
+def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument
     """flush storage database"""
 
     result = runner.invoke(command, ['flush'])
@@ -88,37 +86,39 @@ def test_flush_command(runner, test_service, test_vuln, test_note):  # pylint: d
     assert not Note.query.all()
 
 
-def test_report_command(runner, test_vuln):
+def test_report_command(runner, host_factory, vuln_factory):
     """test vuln report command"""
 
     # additional test data required for 'misc' test (eg. multiple endpoints having same vuln)
-    host1 = Host(address='127.3.3.1', hostname='testhost2.testdomain.tests')
-    host2 = Host(address='127.3.3.2', hostname='testhost2.testdomain.tests')
-    db.session.add(host1, host2)
-    db.session.add(Vuln(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
-    db.session.add(Vuln(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical))
-    db.session.commit()
+    vuln = vuln_factory.create()
+    vuln_name = vuln.name
+    host1 = host_factory.create(address='127.3.3.1', hostname='testhost2.testdomain.tests')
+    host2 = host_factory.create(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
+    vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
 
     result = runner.invoke(command, ['report'])
     assert result.exit_code == 0
-    assert ',"%s",' % test_vuln.name in result.output
+    assert f',"{vuln_name}",' in result.output
     assert ',"misc",' in result.output
 
 
-def test_host_cleanup_command(runner):
+def test_host_cleanup_command(runner, host_factory, service_factory):
     """test host_cleanup command"""
 
-    test_host1 = persist_and_detach(Host(address='127.127.127.135', os='identified'))
-    test_host2 = persist_and_detach(Host(address='127.127.127.134'))
-    persist_and_detach(Service(host_id=test_host2.id, proto='tcp', port=1, state='anystate:reason'))
-    test_host3 = persist_and_detach(Host(address='127.127.127.133', hostname='xxx', os=''))
+    host1 = host_factory.create(address='127.127.127.135', os='identified')
+    host2 = host_factory.create(address='127.127.127.134')
+    service_factory.create(host=host2, proto='tcp', port=1, state='anystate:reason')
+    host3 = host_factory.create(address='127.127.127.133', hostname='xxx', os='', comment='')
+    repr_host1, repr_host2, repr_host3 = repr(host1), repr(host2), repr(host3)
+    host3_id = host3.id
 
     result = runner.invoke(command, ['host-cleanup', '--dry'])
     assert result.exit_code == 0
 
-    assert repr(test_host1) not in result.output
-    assert repr(test_host2) not in result.output
-    assert repr(test_host3) in result.output
+    assert repr_host1 not in result.output
+    assert repr_host2 not in result.output
+    assert repr_host3 in result.output
     assert Host.query.count() == 3
 
     result = runner.invoke(command, ['host-cleanup'])
@@ -126,24 +126,24 @@ def test_host_cleanup_command(runner):
 
     hosts = Host.query.all()
     assert len(hosts) == 2
-    assert test_host3.id not in [x.id for x in hosts]
+    assert host3_id not in [x.id for x in hosts]
 
 
-def test_service_list_command(runner, test_service):
+def test_service_list_command(runner, service):
     """test services listing"""
 
-    host = Host.query.get(test_service.host_id)
+    host = service.host
 
     result = runner.invoke(command, ['service-list', '--long', '--short'])
     assert result.exit_code == 1
 
     result = runner.invoke(command, ['service-list'])
     assert result.exit_code == 0
-    assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
+    assert f'{service.proto}://{host.address}:{service.port}\n' == result.output
 
     result = runner.invoke(command, ['service-list', '--long'])
     assert result.exit_code == 0
-    assert json.dumps(test_service.info) in result.output
+    assert json.dumps(service.info) in result.output
 
     result = runner.invoke(command, ['service-list', '--short'])
     assert result.exit_code == 0
@@ -153,23 +153,25 @@ def test_service_list_command(runner, test_service):
     assert result.exit_code == 0
     assert result.output.strip() == host.hostname
 
-    result = runner.invoke(command, ['service-list', '--filter', 'Service.port=="%d"' % test_service.port])
+    result = runner.invoke(command, ['service-list', '--filter', f'Service.port=="{service.port}"'])
     assert result.exit_code == 0
-    assert '%s://%s:%d\n' % (test_service.proto, host.address, test_service.port) == result.output
+    assert f'{service.proto}://{host.address}:{service.port}\n' == result.output
 
 
-def test_service_cleanup_command(runner, test_host):
+def test_service_cleanup_command(runner, host, service_factory, note_factory):
     """test service_cleanup command"""
 
-    test_service1 = persist_and_detach(Service(host_id=test_host.id, proto='tcp', port=1, state='open:reason'))
-    test_service2 = persist_and_detach(Service(host_id=test_host.id, proto='tcp', port=1, state='filtered:reason'))
-    persist_and_detach(Note(host_id=test_host.id, service_id=test_service2.id, xtype='cleanuptest', data='atestdata'))
+    service1 = service_factory.create(host=host, proto='tcp', port=1, state='open:reason')
+    service2 = service_factory.create(host=host, proto='tcp', port=1, state='filtered:reason')
+    note_factory.create(host=host, service=service2, xtype='cleanuptest', data='atestdata')
+    repr_service1, repr_service2 = repr(service1), repr(service2)
+    service1_id = service1.id
 
     result = runner.invoke(command, ['service-cleanup', '--dry'])
     assert result.exit_code == 0
 
-    assert repr(test_service1) not in result.output
-    assert repr(test_service2) in result.output
+    assert repr_service1 not in result.output
+    assert repr_service2 in result.output
     assert Service.query.count() == 2
 
     result = runner.invoke(command, ['service-cleanup'])
@@ -178,4 +180,4 @@ def test_service_cleanup_command(runner, test_host):
     assert Note.query.count() == 0
     services = Service.query.all()
     assert len(services) == 1
-    assert services[0].id == test_service1.id
+    assert services[0].id == service1_id

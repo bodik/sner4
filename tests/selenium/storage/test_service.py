@@ -5,29 +5,34 @@ selenium ui tests for storage.service component
 
 from flask import url_for
 
+from sner.server.extensions import db
 from sner.server.storage.models import Service
 from tests.selenium import dt_inrow_delete, dt_rendered
 from tests.selenium.storage import check_annotate
 
 
-def test_service_list_route(live_server, sl_operator, test_service):  # pylint: disable=unused-argument
+def test_service_list_route(live_server, sl_operator, service):  # pylint: disable=unused-argument
     """simple test ajaxed datatable rendering"""
 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
-    dt_rendered(sl_operator, 'service_list_table', test_service.comment)
+    dt_rendered(sl_operator, 'service_list_table', service.comment)
 
 
-def test_service_list_route_inrow_delete(live_server, sl_operator, test_service):  # pylint: disable=unused-argument
+def test_service_list_route_inrow_delete(live_server, sl_operator, service):  # pylint: disable=unused-argument
     """delete service inrow button"""
+
+    service_id = service.id
+    db.session.expunge(service)
 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'service_list_table')
-    assert not Service.query.get(test_service.id)
+
+    assert not Service.query.get(service_id)
 
 
-def test_service_list_route_annotate(live_server, sl_operator, test_service):  # pylint: disable=unused-argument
+def test_service_list_route_annotate(live_server, sl_operator, service):  # pylint: disable=unused-argument
     """test annotation from list route"""
 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
-    dt_rendered(sl_operator, 'service_list_table', test_service.comment)
-    check_annotate(sl_operator, 'abutton_annotate_dt', test_service)
+    dt_rendered(sl_operator, 'service_list_table', service.comment)
+    check_annotate(sl_operator, 'abutton_annotate_dt', service)

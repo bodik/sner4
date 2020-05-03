@@ -4,10 +4,10 @@ storage.models tests
 """
 
 
-def test_models_storage_repr(app, test_host, test_service, test_vuln, test_note):  # pylint: disable=unused-argument
+def test_models_storage_repr(app, host, service, vuln, note):  # pylint: disable=unused-argument
     """test models repr methods"""
 
-    assert repr(test_host)
-    assert repr(test_service)
-    assert repr(test_vuln)
-    assert repr(test_note)
+    assert repr(host)
+    assert repr(service)
+    assert repr(vuln)
+    assert repr(note)

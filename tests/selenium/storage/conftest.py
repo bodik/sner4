@@ -5,25 +5,26 @@ shared fixtures for storage component
 
 import pytest
 
-from sner.server.storage.models import SeverityEnum, Vuln
-from tests import persist_and_detach
+from sner.server.storage.models import SeverityEnum
 
 
 @pytest.fixture
-def test_vulns_multiaction(test_host):
+def vulns_multiaction(host, vuln_factory):
     """prepare vulns for multiple selection and actions tests"""
 
-    yield list(map(persist_and_detach, [
-        Vuln(host=test_host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, comment='comment1'),
-        Vuln(host=test_host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, comment='comment2')]))
+    yield [
+        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, comment='comment1'),
+        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, comment='comment2')
+    ]
 
 
 @pytest.fixture
-def test_vulns_filtering(test_host):
+def vulns_filtering(host, vuln_factory):
     """prepare set of vulns needed for basic filtering tests"""
 
-    yield list(map(persist_and_detach, [
-        Vuln(host=test_host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, tags=None),
-        Vuln(host=test_host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, tags=['tagx']),
-        Vuln(host=test_host, name='vuln 3', xtype='test.123', severity=SeverityEnum.info, tags=['info']),
-        Vuln(host=test_host, name='vuln 4', xtype='test.123', severity=SeverityEnum.info, tags=['report'])]))
+    yield [
+        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, tags=None),
+        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, tags=['tagx']),
+        vuln_factory.create(host=host, name='vuln 3', xtype='test.123', severity=SeverityEnum.info, tags=['info']),
+        vuln_factory.create(host=host, name='vuln 4', xtype='test.123', severity=SeverityEnum.info, tags=['report'])
+    ]

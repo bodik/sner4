@@ -8,22 +8,22 @@ from http import HTTPStatus
 from flask import url_for
 
 
-def test_portmap_route(cl_operator, test_service):
+def test_portmap_route(cl_operator, service):
     """portmap route test"""
 
     response = cl_operator.get(url_for('visuals.portmap_route'))
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
+    assert response.lxml.xpath(f'//a[@class="portmap_item" and @data-port="{service.port}"]')
 
-    response = cl_operator.get(url_for('visuals.portmap_route', filter='Service.state=="%s"' % test_service.state))
+    response = cl_operator.get(url_for('visuals.portmap_route', filter=f'Service.state=="{service.state}"'))
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//a[@class="portmap_item" and @data-port="%d"]' % test_service.port)
+    assert response.lxml.xpath(f'//a[@class="portmap_item" and @data-port="{service.port}"]')
 
 
-def test_portmap_portstat_route(cl_operator, test_service):
+def test_portmap_portstat_route(cl_operator, service):
     """portmap portstat route test"""
 
-    response = cl_operator.get(url_for('visuals.portmap_portstat_route', port=test_service.port))
+    response = cl_operator.get(url_for('visuals.portmap_portstat_route', port=service.port))
     assert response.status_code == HTTPStatus.OK
 
-    assert response.lxml.xpath('//td/a[text()="%s"]' % test_service.info)
+    assert response.lxml.xpath(f'//td/a[text()="{service.info}"]')

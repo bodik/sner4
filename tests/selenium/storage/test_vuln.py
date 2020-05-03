@@ -7,6 +7,7 @@ from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
+from sner.server.extensions import db
 from sner.server.storage.models import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
@@ -52,70 +53,77 @@ def check_vulns_filtering(sclnt, dt_id):
     assert len(dt_elem.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 4
 
 
-def test_vuln_list_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_list_route(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """simple test ajaxed datatable rendering"""
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
-    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
+    dt_rendered(sl_operator, 'vuln_list_table', vuln.comment)
 
 
-def test_vuln_list_route_inrow_delete(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_list_route_inrow_delete(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """delete vuln inrow button"""
+
+    vuln_id = vuln.id
+    db.session.expunge(vuln)
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     dt_inrow_delete(sl_operator, 'vuln_list_table')
-    assert not Vuln.query.get(test_vuln.id)
+
+    assert not Vuln.query.get(vuln_id)
 
 
-def test_vuln_list_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_list_route_annotate(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test annotation from list route"""
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
-    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
-    check_annotate(sl_operator, 'abutton_annotate_dt', test_vuln)
+    dt_rendered(sl_operator, 'vuln_list_table', vuln.comment)
+    check_annotate(sl_operator, 'abutton_annotate_dt', vuln)
 
 
-def test_vuln_list_route_selectrows(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
+def test_vuln_list_route_selectrows(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
     """test dt selection and selection buttons"""
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     check_select_rows(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_list_route_multiactions(live_server, sl_operator, test_vulns_multiaction):  # pylint: disable=unused-argument
+def test_vuln_list_route_multiactions(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
     """test vulns multiactions"""
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     check_vulns_multiactions(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_list_route_filtering(live_server, sl_operator, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_list_route_filtering(live_server, sl_operator, vulns_filtering):  # pylint: disable=unused-argument
     """test list vulns view filtering features"""
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     check_vulns_filtering(sl_operator, 'vuln_list_table')
 
 
-def test_vuln_view_route_tagging(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_view_route_tagging(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test vuln view tagging features"""
 
-    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
+    assert 'info' not in vuln.tags
 
+    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=vuln.id, _external=True))
     sl_operator.find_element_by_xpath('//a[contains(@class, "abutton_tag_view") and text()="Info"]').click()
     webdriver_waituntil(
-        sl_operator, EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]')))
-    vuln = Vuln.query.get(test_vuln.id)
-    assert 'info' in vuln.tags
+        sl_operator, EC.visibility_of_element_located((By.XPATH, '//span[contains(@class, "tag-badge") and contains(text(), "info")]'))
+    )
+
+    db.session.refresh(vuln)
+    assert 'info' in Vuln.query.get(vuln.id).tags
 
 
-def test_vuln_view_route_annotate(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_view_route_annotate(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test vuln annotation from view route"""
 
-    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
-    check_annotate(sl_operator, 'abutton_annotate_view', test_vuln)
+    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=vuln.id, _external=True))
+    check_annotate(sl_operator, 'abutton_annotate_view', vuln)
 
 
-def test_vuln_grouped_route(live_server, sl_operator, test_vuln):  # pylint: disable=unused-argument
+def test_vuln_grouped_route(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test grouped vulns view"""
 
     sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
@@ -123,7 +131,7 @@ def test_vuln_grouped_route(live_server, sl_operator, test_vuln):  # pylint: dis
     assert len(sl_operator.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 1
 
 
-def test_vuln_grouped_route_filtering(live_server, sl_operator, test_vulns_filtering):  # pylint: disable=unused-argument
+def test_vuln_grouped_route_filtering(live_server, sl_operator, vulns_filtering):  # pylint: disable=unused-argument
     """test grouped vulns view filtering features"""
 
     sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))

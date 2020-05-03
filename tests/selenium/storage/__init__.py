@@ -7,6 +7,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
+from sner.server.extensions import db
 from sner.server.storage.models import Vuln
 from tests.selenium import dt_wait_processing, no_ajax_pending, webdriver_waituntil
 
@@ -80,4 +81,5 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
     webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
     webdriver_waituntil(sclnt, no_ajax_pending())
 
+    db.session.refresh(test_model)
     assert 'annotated comment' in test_model.__class__.query.get(test_model.id).comment

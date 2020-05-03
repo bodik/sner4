@@ -16,15 +16,15 @@ def test_portinfos_route(cl_operator):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_portinfos_json_route(cl_operator, test_service):
+def test_portinfos_json_route(cl_operator, service):
     """portinfos json route test"""
 
     response = cl_operator.get(url_for('visuals.portinfos_json_route'))
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data[0]['info'] == test_service.info
+    assert response_data[0]['info'] == service.info
 
     response = cl_operator.get(url_for('visuals.portinfos_json_route', crop=2, limit=1))
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data[0]['info'] == ' '.join(test_service.info.split(' ')[:2])
+    assert response_data[0]['info'] == ' '.join(service.info.split(' ')[:2])
