@@ -3,17 +3,13 @@
 pytest config and fixtures
 """
 
-from uuid import uuid4
-
 import pytest
 from flask import url_for
 from webtest import TestApp
 
 from sner.server.auth.models import User
 from sner.server.extensions import db
-
-# import all fixtures here; they will be available in all tests, import on module specific level would trigger redefined-outer-name
-from tests.server.auth.models import test_user, test_wncred  # noqa: F401  pylint: disable=unused-import
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
 @pytest.fixture
@@ -31,14 +27,14 @@ def runner(app):  # pylint: disable=redefined-outer-name
 def client_in_roles(clnt, roles):
     """create user role and login client to role(s)"""
 
-    tmp_password = str(uuid4())
-    tmp_user = User(username='pytest_user', password=tmp_password, active=True, roles=roles)
-    db.session.add(tmp_user)
+    password = PWS().generate()
+    user = User(username='pytest_user', password=password, active=True, roles=roles)
+    db.session.add(user)
     db.session.commit()
 
     form = clnt.get(url_for('auth.login_route')).form
-    form['username'] = tmp_user.username
-    form['password'] = tmp_password
+    form['username'] = user.username
+    form['password'] = password
     form.submit()
     return clnt
 

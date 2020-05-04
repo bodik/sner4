@@ -3,48 +3,48 @@
 auth test models
 """
 
-import pytest
+from factory import LazyAttribute, post_generation, SubFactory
 from fido2 import cbor
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server.auth.models import User, WebauthnCredential
 from sner.server.extensions import webauthn
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from tests import persist_and_detach
+from tests import BaseModelFactory
 
 
-def create_test_user():
-    """test user data"""
+class UserFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test user model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test user model factory"""
+        model = User
 
-    return User(
-        username='user1',
-        password=PWS().generate(),
-        active=True,
-        roles=['user'])
-
-
-def create_test_wncred(a_test_user):
-    """test webauthn credential"""
-
-    device = SoftWebauthnDevice()
-    device.cred_init(webauthn.rp.id, b'randomhandle')
-    return WebauthnCredential(
-        user_id=a_test_user.id,
-        user=a_test_user,
-        user_handle=device.user_handle,
-        credential_data=cbor.encode(device.cred_as_attested().__dict__),
-        name='testcredential')
+    username = 'user1'
+    password = LazyAttribute(lambda x: PWS().generate())
+    active = True
+    roles = ['user']
 
 
-@pytest.fixture
-def test_user(app):  # pylint: disable=unused-argument
-    """persistent test user"""
+class WebauthnCredentialFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test webauthn_credential model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test webauthn_credential model factory"""
+        model = WebauthnCredential
 
-    yield persist_and_detach(create_test_user())
+    user = SubFactory(UserFactory)
+    user_handle = 'dummy'
+    credential_data = b'dummy'
+    name = 'testcredential'
 
+    @post_generation
+    def initialized_device(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
+        """DI or self initialize device"""
 
-@pytest.fixture
-def test_wncred(test_user):  # pylint: disable=redefined-outer-name
-    """persistent test registered webauthn credential"""
+        if extracted:
+            device = extracted
+        else:
+            device = SoftWebauthnDevice()
+            device.cred_init(webauthn.rp.id, b'randomhandle')
 
-    yield persist_and_detach(create_test_wncred(test_user))
+        self.user_handle = device.user_handle
+        self.credential_data = cbor.encode(device.cred_as_attested().__dict__)

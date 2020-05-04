@@ -4,8 +4,8 @@ auth.models tests
 """
 
 
-def test_auth_models_repr(app, test_user, test_wncred):  # pylint: disable=unused-argument
+def test_auth_models_repr(app, user, webauthn_credential):  # pylint: disable=unused-argument
     """test models repr methods"""
 
-    assert repr(test_user)
-    assert repr(test_wncred)
+    assert repr(user)
+    assert repr(webauthn_credential)

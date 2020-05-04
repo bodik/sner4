@@ -10,20 +10,25 @@ from flask import url_for
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from soft_webauthn import SoftWebauthnDevice
 
-from sner.server.extensions import webauthn
-from tests.server.auth import webauthn_device_init
+from sner.server.extensions import db, webauthn
 from tests.selenium import webdriver_waituntil
 from tests.selenium.auth import js_variable_ready
 
 
-def test_login_webauthn(live_server, selenium, test_user):  # pylint: disable=unused-argument
+def test_login_webauthn(live_server, selenium, webauthn_credential_factory):  # pylint: disable=unused-argument
     """test login by webauthn"""
 
-    device = webauthn_device_init(test_user)
+    device = SoftWebauthnDevice()
+    device.cred_init(webauthn.rp.id, b'randomhandle')
+    wncred = webauthn_credential_factory.create(initialized_device=device)
+    # factory post_generate does not call commit to propagate self.attr changes, that messes the actual db state when
+    # accessing from different process such as real browser
+    db.session.commit()
 
     selenium.get(url_for('auth.login_route', _external=True))
-    selenium.find_element_by_xpath('//form//input[@name="username"]').send_keys(test_user.username)
+    selenium.find_element_by_xpath('//form//input[@name="username"]').send_keys(wncred.user.username)
     selenium.find_element_by_xpath('//form//input[@type="submit"]').click()
 
     # some javascript code must be emulated

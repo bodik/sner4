@@ -8,33 +8,30 @@ from http import HTTPStatus
 
 from fido2 import cbor
 from flask import url_for
+from soft_webauthn import SoftWebauthnDevice
 
 from sner.server.auth.core import TOTPImpl
-from sner.server.auth.models import User
-from sner.server.extensions import db, webauthn
+from sner.server.extensions import webauthn
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server import get_csrf_token
-from tests.server.auth import webauthn_device_init
 
 
-def test_login(client, test_user):
+def test_login(client, user_factory):
     """test login"""
 
-    tmp_password = PWS().generate()
-    tmp = User.query.get(test_user.id)
-    tmp.password = tmp_password
-    db.session.commit()
+    password = PWS().generate()
+    user = user_factory.create(password=password)
 
     form = client.get(url_for('auth.login_route')).form
-    form['username'] = test_user.username
+    form['username'] = user.username
     form['password'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'Invalid credentials.\');")]')
 
     form = client.get(url_for('auth.login_route')).form
-    form['username'] = test_user.username
-    form['password'] = tmp_password
+    form['username'] = user.username
+    form['password'] = password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -51,21 +48,19 @@ def test_logout(cl_user):
     assert response.lxml.xpath('//a[text()="Login"]')
 
 
-def test_unauthorized(client, test_user):
+def test_unauthorized(client, user_factory):
     """test for not logged in, redirect and final login"""
 
-    tmp_password = PWS().generate()
-    tmp = User.query.get(test_user.id)
-    tmp.password = tmp_password
-    db.session.commit()
+    password = PWS().generate()
+    user = user_factory.create(password=password)
 
     response = client.get(url_for('auth.profile_route'))
     assert response.status_code == HTTPStatus.FOUND
     assert '/auth/login?next=' in response.headers['Location']
 
     form = response.follow().form
-    form['username'] = test_user.username
-    form['password'] = tmp_password
+    form['username'] = user.username
+    form['password'] = password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
     assert url_for('auth.profile_route') in response.headers['Location']
@@ -78,23 +73,20 @@ def test_forbidden(cl_user):
     assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-def test_login_totp(client, test_user):
+def test_login_totp(client, user_factory):
     """test login totp"""
 
-    tmp_password = PWS().generate()
-    tmp_secret = TOTPImpl.random_base32()
-    tmp = User.query.get(test_user.id)
-    tmp.password = tmp_password
-    tmp.totp = tmp_secret
-    db.session.commit()
+    password = PWS().generate()
+    secret = TOTPImpl.random_base32()
+    user = user_factory(password=password, totp=secret)
 
     response = client.get(url_for('auth.login_totp_route'))
     assert response.status_code == HTTPStatus.FOUND
     assert url_for('auth.login_route') in response.headers['Location']
 
     form = client.get(url_for('auth.login_route')).form
-    form['username'] = test_user.username
-    form['password'] = tmp_password
+    form['username'] = user.username
+    form['password'] = password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -105,7 +97,7 @@ def test_login_totp(client, test_user):
     assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code"]')
 
     form = response.form
-    form['code'] = TOTPImpl(tmp_secret).current_code()
+    form['code'] = TOTPImpl(secret).current_code()
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -113,20 +105,22 @@ def test_login_totp(client, test_user):
     assert response.lxml.xpath('//a[text()="Logout"]')
 
 
-def test_login_webauthn(client, test_user):
+def test_login_webauthn(client, webauthn_credential_factory):
     """test login by webauthn"""
 
-    device = webauthn_device_init(test_user)
+    device = SoftWebauthnDevice()
+    device.cred_init(webauthn.rp.id, b'randomhandle')
+    wncred = webauthn_credential_factory.create(initialized_device=device)
 
     form = client.get(url_for('auth.login_route')).form
-    form['username'] = test_user.username
+    form['username'] = wncred.user.username
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     response = response.follow()
     # some javascript code muset be emulated
     pkcro = cbor.decode(b64decode(client.post(url_for('auth.login_webauthn_pkcro_route'), {'csrf_token': get_csrf_token(client)}).body))
-    assertion = device.get(pkcro, 'https://%s' % webauthn.rp.id)
+    assertion = device.get(pkcro, f'https://{webauthn.rp.id}')
     assertion_data = {
         'credentialRawId': assertion['rawId'],
         'authenticatorData': assertion['response']['authenticatorData'],
@@ -150,7 +144,7 @@ def test_profile_webauthn_pkcro_route_invalid_request(client):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_login_webauthn_invalid_assertion(client, test_wncred):
+def test_login_webauthn_invalid_assertion(client, webauthn_credential):
     """test login by webauthn; error hanling"""
 
     response = client.get(url_for('auth.login_webauthn_route'))
@@ -158,7 +152,7 @@ def test_login_webauthn_invalid_assertion(client, test_wncred):
     assert url_for('auth.login_route') in response.headers['Location']
 
     form = client.get(url_for('auth.login_route')).form
-    form['username'] = User.query.get(test_wncred.user_id).username
+    form['username'] = webauthn_credential.user.username
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

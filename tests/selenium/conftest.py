@@ -13,7 +13,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.auth.models import User
 from sner.server.extensions import db
 from tests.selenium import webdriver_waituntil
-from tests.server.auth.models import test_user  # noqa: F401  pylint: disable=unused-import
 
 
 @pytest.fixture
