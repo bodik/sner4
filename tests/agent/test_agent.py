@@ -4,7 +4,7 @@ agent basic tests
 """
 
 import json
-import os
+from pathlib import Path
 from uuid import uuid4
 
 from sner.agent import main as agent_main
@@ -19,12 +19,12 @@ def test_version(tmpworkdir):  # pylint: disable=unused-argument
     assert result == 0
 
 
-def test_commandline_assignment(tmpworkdir, test_dummy_a):  # pylint: disable=unused-argument
+def test_commandline_assignment(tmpworkdir, dummy_a):  # pylint: disable=unused-argument
     """test custom assignment passed from command line"""
 
-    result = agent_main(['--assignment', json.dumps(test_dummy_a)])
+    result = agent_main(['--assignment', json.dumps(dummy_a)])
     assert result == 0
-    assert os.path.exists('%s.zip' % test_dummy_a['id'])
+    assert Path(f'{dummy_a["id"]}.zip').exists()
 
 
 def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
@@ -34,20 +34,20 @@ def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
 
     result = agent_main(['--assignment', json.dumps(test_a)])
     assert result == 1
-    assert os.path.exists('%s.zip' % test_a['id'])
+    assert Path(f'{test_a["id"]}.zip').exists()
 
 
-def test_run_with_liveserver(tmpworkdir, live_server, apikey, test_dummy_target):  # pylint: disable=unused-argument
+def test_run_with_liveserver(tmpworkdir, live_server, apikey, dummy_target):  # pylint: disable=unused-argument
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
     result = agent_main([
         '--server', live_server.url(),
         '--apikey', apikey,
-        '--queue', Queue.query.get(test_dummy_target.queue_id).ident,
+        '--queue', Queue.query.get(dummy_target.queue_id).ident,
         '--oneshot',
         '--debug',
     ])
     assert result == 0
 
-    job = Job.query.filter(Job.queue_id == test_dummy_target.queue_id).one()
-    assert test_dummy_target.target in file_from_zip(job.output_abspath, 'assignment.json').decode('utf-8')
+    job = Job.query.filter(Job.queue_id == dummy_target.queue_id).one()
+    assert dummy_target.target in file_from_zip(job.output_abspath, 'assignment.json').decode('utf-8')

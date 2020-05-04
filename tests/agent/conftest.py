@@ -10,9 +10,6 @@ from uuid import uuid4
 
 import pytest
 
-from sner.server.scheduler.models import Queue, Target, Task
-from tests import persist_and_detach
-
 
 @pytest.fixture
 def cleanup_markedprocess():
@@ -27,42 +24,44 @@ def cleanup_markedprocess():
 
 
 @pytest.fixture
-def test_dummy_a():
+def dummy_a():
     """test dummy assignment"""
 
-    yield {'id': str(uuid4()), 'module': 'dummy', 'params': '--static_assignment', 'targets': ['target1']}
+    yield {
+        'id': str(uuid4()),
+        'module': 'dummy',
+        'params': '--static_assignment',
+        'targets': ['target1']
+    }
 
 
 @pytest.fixture
-def test_dummy_target(test_dummy_a):  # pylint: disable=redefined-outer-name
-    """dummy target fixture"""
-
-    task = Task(name='test_task', module=test_dummy_a['module'], params=test_dummy_a['params'], group_size=1)
-    persist_and_detach(task)
-    queue = Queue(task=task, name='testqueue', priority=10, active=True)
-    persist_and_detach(queue)
-    target = Target(target=test_dummy_a['targets'][0], queue=queue)
-    yield persist_and_detach(target)
-
-
-@pytest.fixture
-def test_longrun_a():
+def longrun_a():
     """longrun assignment fixture"""
 
     yield {
         'id': str(uuid4()),
         'module': 'nmap',
         'params': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS',
-        'targets': ['127.0.0.127']}
+        'targets': ['127.0.0.127']
+    }
 
 
 @pytest.fixture
-def test_longrun_target(test_longrun_a):  # pylint: disable=redefined-outer-name
+def dummy_target(dummy_a, task_factory, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
+    """dummy target fixture"""
+
+    task = task_factory.create(name='test_task', module=dummy_a['module'], params=dummy_a['params'])
+    queue = queue_factory.create(task=task, name='testqueue')
+    target = target_factory.create(queue=queue, target=dummy_a['targets'][0])
+    yield target
+
+
+@pytest.fixture
+def longrun_target(longrun_a, task_factory, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
-    task = Task(name='test_task', module=test_longrun_a['module'], params=test_longrun_a['params'], group_size=1)
-    persist_and_detach(task)
-    queue = Queue(task=task, name='testqueue', priority=10, active=True)
-    persist_and_detach(queue)
-    target = Target(target=test_longrun_a['targets'][0], queue=queue)
-    yield persist_and_detach(target)
+    task = task_factory.create(name='test_task', module=longrun_a['module'], params=longrun_a['params'])
+    queue = queue_factory.create(task=task, name='testqueue')
+    target = target_factory.create(queue=queue, target=longrun_a['targets'][0])
+    yield target

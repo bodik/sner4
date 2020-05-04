@@ -16,12 +16,12 @@ from sner.agent import main as agent_main
 from sner.server.scheduler.models import Queue
 
 
-def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longrun_a):  # pylint: disable=unused-argument
+def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, longrun_a):  # pylint: disable=unused-argument
     """
     Agent external process handling test. Even thou the test uses nmap module, the point is to test sner.agent.modules.Base _terminate helper.
     """
 
-    proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(test_longrun_a), '--debug'],))
+    proc_agent = multiprocessing.Process(target=agent_main, args=(['--assignment', json.dumps(longrun_a), '--debug'],))
     proc_agent.start()
     sleep(1)
     assert proc_agent.pid
@@ -33,7 +33,7 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, test_longr
     assert 'MARKEDPROCESS' not in os.popen('ps -f').read()
 
 
-def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_markedprocess, test_longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
+def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_markedprocess, longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
     """
     Agent external process handling test. Even thou the test uses nmap module, the point is to test sner.agent.modules.Base _terminate helper.
     """
@@ -43,7 +43,7 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
         args=([
             '--server', live_server.url(),
             '--apikey', apikey,
-            '--queue', Queue.query.get(test_longrun_target.queue_id).ident,
+            '--queue', Queue.query.get(longrun_target.queue_id).ident,
             '--oneshot',
             '--debug',
         ],)
@@ -90,7 +90,8 @@ def test_shutdown(tmpworkdir, httpserver):  # pylint: disable=unused-argument,re
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
-        args=(['--server', sserver.url, '--apikey', 'dummy', '--debug'],))
+        args=(['--server', sserver.url, '--apikey', 'dummy', '--debug'],)
+    )
     proc_agent.start()
     sleep(1)
     assert proc_agent.is_alive()
