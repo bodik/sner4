@@ -23,5 +23,5 @@ pyyaml
 requests
 soft-webauthn
 sqlalchemy-datatables
-git+https://github.com/bodik/sqlalchemy-filters@latest_cummulative#egg=sqlalchemy_filters
+sqlalchemy-filters
 webtest

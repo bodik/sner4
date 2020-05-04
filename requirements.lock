@@ -63,7 +63,7 @@ soft-webauthn==0.1.0
 soupsieve==2.0
 SQLAlchemy==1.3.13
 sqlalchemy-datatables==2.0.1
-sqlalchemy-filters @ git+https://github.com/bodik/sqlalchemy-filters@e853fbec576580afbd931abb323deb8a76aff5d3
+sqlalchemy-filters==0.11.0
 text-unidecode==1.3
 typed-ast==1.4.1
 urllib3==1.25.8

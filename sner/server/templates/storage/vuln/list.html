@@ -67,7 +67,7 @@
 		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.vuln_list_route') }}">unfilter</a>{% endif %}</h1>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
-		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_all "report" AND Vuln.tags not_all "info"') }}">Exclude reviewed</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
 	</div>
 	<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
