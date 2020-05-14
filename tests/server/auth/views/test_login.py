@@ -19,7 +19,7 @@ from tests.server import get_csrf_token
 def test_login(client, user_factory):
     """test login"""
 
-    password = PWS().generate()
+    password = PWS.generate()
     user = user_factory.create(password=password)
 
     form = client.get(url_for('auth.login_route')).form
@@ -51,7 +51,7 @@ def test_logout(cl_user):
 def test_unauthorized(client, user_factory):
     """test for not logged in, redirect and final login"""
 
-    password = PWS().generate()
+    password = PWS.generate()
     user = user_factory.create(password=password)
 
     response = client.get(url_for('auth.profile_route'))
@@ -76,7 +76,7 @@ def test_forbidden(cl_user):
 def test_login_totp(client, user_factory):
     """test login totp"""
 
-    password = PWS().generate()
+    password = PWS.generate()
     secret = TOTPImpl.random_base32()
     user = user_factory(password=password, totp=secret)
 

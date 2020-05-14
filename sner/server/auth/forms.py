@@ -4,7 +4,6 @@ auth forms
 """
 
 from flask import current_app
-from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, SubmitField, ValidationError
 from wtforms.validators import EqualTo, InputRequired, Length, Optional
@@ -17,8 +16,7 @@ from sner.server.password_supervisor import PasswordSupervisor as PWS
 def strong_password(form, field):
     """validate password field"""
 
-    username = form.username.data if hasattr(form, 'username') else current_user.username
-    pwsr = PWS().check_strength(field.data, username)
+    pwsr = PWS.check_strength(field.data)
     if not pwsr.is_strong:
         raise ValidationError(pwsr.message)
 

@@ -59,7 +59,7 @@ def tmpworkdir():
 def apikey():
     """yield valid apikey for user in role agent"""
 
-    tmp_apikey = PWS().generate_apikey()
+    tmp_apikey = PWS.generate_apikey()
     db.session.add(User(username='pytest_agent', apikey=tmp_apikey, active=True, roles=['agent']))
     db.session.commit()
     yield tmp_apikey

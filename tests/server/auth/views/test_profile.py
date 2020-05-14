@@ -28,8 +28,8 @@ def test_profile_route(cl_user):
 def test_profile_changepassword_route(cl_user):
     """user profile change password"""
 
-    cur_password = PWS().generate()
-    new_password = PWS().generate()
+    cur_password = PWS.generate()
+    new_password = PWS.generate()
     user = User.query.filter(User.username == 'pytest_user').one()
     user.password = cur_password
     db.session.commit()

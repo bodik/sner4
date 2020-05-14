@@ -3,10 +3,9 @@
 password supervisor service
 """
 
-import os
-import random
 import re
-from binascii import hexlify
+import secrets
+import string
 from crypt import crypt, mksalt, METHOD_SHA512  # pylint: disable=no-name-in-module
 from hashlib import sha512
 from hmac import compare_digest
@@ -22,29 +21,27 @@ class PasswordSupervisorResult():
     @property
     def is_strong(self):
         """iface getter"""
-
         return self._result
 
     @property
     def message(self):
         """getter"""
-
         return self._message
 
 
 class PasswordSupervisor():
     """password supervisor implementation"""
 
-    def __init__(self, min_length=10, min_classes=3):
-        self.min_length = min_length
-        self.min_classes = min_classes
+    MIN_LENGTH = 10
+    MIN_CLASSES = 3
 
-    def check_strength(self, password, username=None):
-        """supervisor; checks password strength against configured policy"""
+    @classmethod
+    def check_strength(cls, password):
+        """supervisor; checks password strength against policy"""
 
         # length
-        if len(password) < self.min_length:
-            return PasswordSupervisorResult(False, 'Password too short. At least %d characters required.' % self.min_length)
+        if len(password) < cls.MIN_LENGTH:
+            return PasswordSupervisorResult(False, f'Password too short. At least {cls.MIN_LENGTH} characters required.')
 
         # complexity
         classes = 0
@@ -56,37 +53,29 @@ class PasswordSupervisor():
             classes += 1
         if re.search('[^a-zA-Z0-9]', password):
             classes += 1
-        if classes < self.min_classes:
+        if classes < cls.MIN_CLASSES:
             return PasswordSupervisorResult(
                 False,
-                'Only %d character classes found. At least %s classes required (lowercase, uppercase, digits, other).' % (classes, self.min_classes))
-
-        # username similarity
-        if username:
-            for part in username.split('@'):
-                if part.lower() in password.lower():
-                    return PasswordSupervisorResult(False, 'Password must not be based on username.')
+                f'Only {classes} character classes found. At least {cls.MIN_CLASSES} classes required (lowercase, uppercase, digits, other).'
+            )
 
         return PasswordSupervisorResult(True, 'Password is according to policy.')
 
-    def generate(self, length=40):
-        """supervisor; generates password compliant with the policy"""
+    @classmethod
+    def generate(cls, length=40):
+        """supervisor; generates password"""
 
-        if length < self.min_length:
-            raise RuntimeError('Requested less than configured minimum password length.')
-
-        alphabet = ''.join([chr(x) for x in range(32, 126)])
-        ret = ''
-        while not self.check_strength(ret).is_strong:
-            ret = ''
-            for _ in range(length):
-                ret += random.choice(alphabet)
+        alphabet = string.ascii_letters + string.digits
+        while True:
+            ret = ''.join(secrets.choice(alphabet) for i in range(length))
+            if cls.check_strength(ret).is_strong:
+                break
         return ret
 
     @staticmethod
     def generate_apikey():
         """supervisor; generate new apikey"""
-        return hexlify(os.urandom(32)).decode('ascii')
+        return secrets.token_hex(32)
 
     @staticmethod
     def hash(value, salt=None):
@@ -112,36 +101,25 @@ class PasswordSupervisor():
 def test_all():
     """run all test cases"""
 
-    pws = PasswordSupervisor()
+    PWS = PasswordSupervisor
 
     # supervisor tests
-    pwsr = pws.check_strength('x')
+    pwsr = PWS.check_strength('c')
     assert not pwsr.is_strong
     assert 'too short' in pwsr.message
 
-    pwsr = pws.check_strength('aaaaaaaaaA')
+    pwsr = PWS.check_strength('coverage01')
     assert not pwsr.is_strong
     assert 'classes found' in pwsr.message
 
-    pwsr = pws.check_strength('Username1234', 'username')
-    assert not pwsr.is_strong
-    assert 'based on username' in pwsr.message
+    assert PWS.check_strength('Coverage0?').is_strong
 
-    assert pws.check_strength(pws.generate(), 'username').is_strong
-
-    catched_without_pytest = False
-    try:
-        pws.generate(pws.min_length-1)
-    except RuntimeError as e:
-        assert str(e) == 'Requested less than configured minimum password length.'
-        catched_without_pytest = True
-    assert catched_without_pytest
-
-    assert len(pws.generate_apikey()) == 64
+    assert len(PWS.generate()) == 40
+    assert len(PWS.generate_apikey()) == 64
 
     # encoder tests
-    tmp_password = pws.generate()
-    tmp_hash = pws.hash(tmp_password)
-    assert pws.compare(pws.hash(tmp_password, pws.get_salt(tmp_hash)), tmp_hash)
+    tmp_password = PWS.generate()
+    tmp_hash = PWS.hash(tmp_password)
+    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(tmp_hash)), tmp_hash)
 
-    assert len(pws.hash_simple(pws.generate())) == 128
+    assert len(PWS.hash_simple(PWS.generate())) == 128

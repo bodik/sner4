@@ -30,7 +30,7 @@ def passwordreset(username):
         current_app.logger.error('no such user')
         sys.exit(1)
 
-    tmp_password = PWS().generate()
+    tmp_password = PWS.generate()
     user.password = tmp_password
     db.session.commit()
     current_app.logger.info('new password "%s:%s"' % (user.username, tmp_password))
