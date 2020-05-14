@@ -5,10 +5,13 @@
 
 {% block script %}
 <script type="text/javascript">
+	function encode_filter(data) {
+		return encodeURIComponent(data.replace(/"/g, '\\"'));
+	}
 	var dt_vuln_grouped_table_options = {
 		'ajax': {'url': "{{ url_for('storage.vuln_grouped_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encodeURIComponent(row['name'])}); }}),
+			Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_list_filter_name_link({'name': row['name'], 'name_encoded': encode_filter(row['name'])}); }}),
 			Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
 			Sner.dt.column('tags', {'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
 			Sner.dt.column('cnt_vulns')
