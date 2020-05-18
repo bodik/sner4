@@ -43,7 +43,7 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
         args=([
             '--server', live_server.url(),
             '--apikey', apikey,
-            '--queue', Queue.query.get(longrun_target.queue_id).ident,
+            '--queue', Queue.query.get(longrun_target.queue_id).name,
             '--oneshot',
             '--debug',
         ],)

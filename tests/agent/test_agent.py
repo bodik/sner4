@@ -43,7 +43,7 @@ def test_run_with_liveserver(tmpworkdir, live_server, apikey, dummy_target):  # 
     result = agent_main([
         '--server', live_server.url(),
         '--apikey', apikey,
-        '--queue', Queue.query.get(dummy_target.queue_id).ident,
+        '--queue', Queue.query.get(dummy_target.queue_id).name,
         '--oneshot',
         '--debug',
     ])

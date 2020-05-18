@@ -10,49 +10,28 @@ from datetime import datetime
 from ipaddress import ip_network
 
 from flask import current_app
-from sqlalchemy import func, Index, select
-from sqlalchemy.orm import column_property, relationship, validates
+from sqlalchemy.orm import relationship, validates
 
 from sner.server.extensions import db
 from sner.server.models import SelectableEnum
 
 
-class Task(db.Model):
-    """holds settings/arguments for type of scan/scanner. eg. host discovery, fast portmap, version scan, ..."""
+class Queue(db.Model):
+    """task configuration for queue of targets"""
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False, unique=True)
     module = db.Column(db.String(250), nullable=False)
     params = db.Column(db.Text)
     group_size = db.Column(db.Integer, nullable=False)
-
-    queues = relationship('Queue', back_populates='task', cascade='delete,delete-orphan', passive_deletes=True)
-
-    def __repr__(self):
-        return '<Task %d: %s>' % (self.id, self.name)
-
-
-class Queue(db.Model):
-    """task assignment for specific targets"""
-
-    id = db.Column(db.Integer, primary_key=True)
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id', ondelete='CASCADE'), nullable=False)
-    name = db.Column(db.String(250), nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
 
-    # read-only computed property to access fully-qualified queue name easily in code
-    # https://docs.sqlalchemy.org/en/13/orm/mapped_sql_expr.html
-    ident = column_property(select([func.concat_ws('.', Task.name, name)]).where(task_id == Task.id).correlate_except(Task))
-
-    task = relationship('Task', back_populates='queues')
     targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
     jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
 
-    __table_args__ = (Index('uniq_ident', 'task_id', 'name', unique=True),)
-
     def __repr__(self):
-        return '<Queue %s: %s>' % (self.id, self.ident)
+        return '<Queue %s: %s>' % (self.id, self.name)
 
     @property
     def data_abspath(self):
@@ -61,7 +40,7 @@ class Queue(db.Model):
 
 
 class Target(db.Model):
-    """single target of the task"""
+    """single target in queue"""
 
     id = db.Column(db.Integer, primary_key=True)
     target = db.Column(db.Text, nullable=False)

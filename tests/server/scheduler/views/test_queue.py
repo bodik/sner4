@@ -24,29 +24,31 @@ def test_queue_list_json_route(cl_operator, queue):
 
     response = cl_operator.post(
         url_for('scheduler.queue_list_json_route'),
-        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': queue.ident}
+        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': queue.name}
     )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['ident'] == queue.ident
+    assert response_data['data'][0]['name'] == queue.name
 
     response = cl_operator.post(
-        url_for('scheduler.queue_list_json_route', filter=f'Queue.ident=="{queue.ident}"'),
+        url_for('scheduler.queue_list_json_route', filter=f'Queue.name=="{queue.name}"'),
         {'draw': 1, 'start': 0, 'length': 1}
     )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
-    assert response_data['data'][0]['ident'] == queue.ident
+    assert response_data['data'][0]['name'] == queue.name
 
 
-def test_queue_add_route(cl_operator, task, queue_factory):
+def test_queue_add_route(cl_operator, queue_factory):
     """queue add route test"""
 
-    aqueue = queue_factory.build(task=task)
+    aqueue = queue_factory.build()
 
     form = cl_operator.get(url_for('scheduler.queue_add_route')).form
     form['name'] = aqueue.name
-    form['task'] = aqueue.task.id
+    form['module'] = aqueue.module
+    form['params'] = aqueue.params
+    form['group_size'] = aqueue.group_size
     form['priority'] = aqueue.priority
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -59,7 +61,7 @@ def test_queue_edit_route(cl_operator, queue):
     """queue edit route test"""
 
     form = cl_operator.get(url_for('scheduler.queue_edit_route', queue_id=queue.id)).form
-    form['name'] = form['name'].value + ' edited'
+    form['name'] = f'{form["name"].value} edited'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 

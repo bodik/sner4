@@ -46,19 +46,19 @@ def wait_for_lock(table_name):
     return False
 
 
-def assign_targets(queue_ident=None):
+def assign_targets(queue_name=None):
     """
     select queue and targets for job
 
-    :param str queue_ident: queue identification, targets are selected from the queue if specified
+    :param str queue_name: queue name, targets are selected from the queue if specified
     :return: tuple of queue and targets list or `None, None` if queue not found or to targets available
     :rtype: (scheduler.Queue, list)
     """
 
     # Select active queue; by id or highest priority queue with targets.
     query = Queue.query.filter(Queue.active)
-    if queue_ident:
-        queue = query.filter(Queue.ident == queue_ident).one_or_none()
+    if queue_name:
+        queue = query.filter(Queue.name == queue_name).one_or_none()
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
 
@@ -71,7 +71,7 @@ def assign_targets(queue_ident=None):
     assigned_targets = []
     blacklist = ExclMatcher()
     while True:
-        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.task.group_size).all()
+        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size).all()
         if not targets:
             break
 
@@ -80,23 +80,23 @@ def assign_targets(queue_ident=None):
             if blacklist.match(target.target):
                 continue
             assigned_targets.append(target.target)
-            if len(assigned_targets) == queue.task.group_size:
+            if len(assigned_targets) == queue.group_size:
                 break
 
-        if len(assigned_targets) == queue.task.group_size:
+        if len(assigned_targets) == queue.group_size:
             break
 
     return queue, assigned_targets
 
 
 @blueprint.route('/v1/scheduler/job/assign')
-@blueprint.route('/v1/scheduler/job/assign/<queue_ident>')
+@blueprint.route('/v1/scheduler/job/assign/<queue_name>')
 @role_required('agent', api=True)
-def v1_scheduler_job_assign_route(queue_ident=None):
+def v1_scheduler_job_assign_route(queue_name=None):
     """
     assign job for worker
 
-    :param str queue_ident: queue identification
+    :param str queue_name: queue name
     :return: json encoded assignment or empty object
     :rtype: flask.Response
     """
@@ -105,7 +105,7 @@ def v1_scheduler_job_assign_route(queue_ident=None):
         # return response-nowork
         return jsonify({})
 
-    queue, assigned_targets = assign_targets(queue_ident)
+    queue, assigned_targets = assign_targets(queue_name)
     if not assigned_targets:
         # release lock and return response-nowork
         db.session.commit()
@@ -113,8 +113,8 @@ def v1_scheduler_job_assign_route(queue_ident=None):
 
     assignment = {
         'id': str(uuid4()),
-        'module': queue.task.module,
-        'params': '' if queue.task.params is None else queue.task.params,
+        'module': queue.module,
+        'params': '' if queue.params is None else queue.params,
         'targets': assigned_targets
     }
     job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)

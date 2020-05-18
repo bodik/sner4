@@ -13,7 +13,7 @@ from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.scheduler.core import job_delete, queue_delete, queue_enqueue
 from sner.server.scheduler.forms import QueueEnqueueForm, QueueForm
-from sner.server.scheduler.models import Job, Queue, Target, Task
+from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import filter_parser
 
@@ -35,7 +35,10 @@ def queue_list_json_route():
     query_nr_jobs = db.session.query(Job.queue_id, func.count(Job.id).label('cnt')).group_by(Job.queue_id).subquery()
     columns = [
         ColumnDT(Queue.id, mData='id'),
-        ColumnDT(Queue.ident, mData='ident'),
+        ColumnDT(Queue.name, mData='name'),
+        ColumnDT(Queue.module, mData='module'),
+        ColumnDT(Queue.params, mData='params'),
+        ColumnDT(Queue.group_size, mData='group_size'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
         ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),
@@ -43,7 +46,6 @@ def queue_list_json_route():
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Queue) \
-        .outerjoin(Task, Queue.task_id == Task.id) \
         .outerjoin(query_nr_targets, Queue.id == query_nr_targets.c.queue_id) \
         .outerjoin(query_nr_jobs, Queue.id == query_nr_jobs.c.queue_id)
     if 'filter' in request.values:
@@ -54,12 +56,11 @@ def queue_list_json_route():
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
-@blueprint.route('/queue/add/<task_id>', methods=['GET', 'POST'], endpoint='queue_add_route__task_id')
 @role_required('operator')
-def queue_add_route(task_id=None):
+def queue_add_route():
     """queue add"""
 
-    form = QueueForm(task=Task.query.filter(Task.id == task_id).one_or_none())
+    form = QueueForm()
 
     if form.validate_on_submit():
         queue = Queue()

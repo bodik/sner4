@@ -22,12 +22,12 @@ def test_v1_scheduler_job_assign_route(client, apikey, target):
 
     # assign from queue by name
     response = client.get(
-        url_for('api.v1_scheduler_job_assign_route', queue_ident=target.queue.ident),
+        url_for('api.v1_scheduler_job_assign_route', queue_name=target.queue.name),
         headers=apikey_header(apikey)
     )
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.filter(Queue.ident == target.queue.ident).one().jobs) == 1
+    assert len(Queue.query.filter(Queue.name == target.queue.name).one().jobs) == 1
 
     # assign from non-existent queue
     response = client.get(
@@ -42,11 +42,11 @@ def test_v1_scheduler_job_assign_route(client, apikey, target):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_v1_scheduler_job_assign_route_priority(client, apikey, task, queue_factory, target_factory):
+def test_v1_scheduler_job_assign_route_priority(client, apikey, queue_factory, target_factory):
     """job assign route test"""
 
-    queue1 = queue_factory.create(name='queue1', task=task, priority=10, active=True)
-    queue2 = queue_factory.create(name='queue2', task=task, priority=20, active=True)
+    queue1 = queue_factory.create(name='queue1', priority=10, active=True)
+    queue2 = queue_factory.create(name='queue2', priority=20, active=True)
     target_factory.create(queue=queue1)
     target_factory.create(queue=queue2)
 

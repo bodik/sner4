@@ -47,11 +47,11 @@ def test_queue_enqueue_command(runner, tmpworkdir, queue, target_factory):  # py
     result = runner.invoke(command, ['queue-enqueue', 'notexist', atarget.target])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-enqueue', queue.ident, atarget.target])
+    result = runner.invoke(command, ['queue-enqueue', queue.name, atarget.target])
     assert result.exit_code == 0
     assert Queue.query.get(queue.id).targets[0].target == atarget.target
 
-    result = runner.invoke(command, ['queue-enqueue', queue.ident, '--file', apath])
+    result = runner.invoke(command, ['queue-enqueue', queue.name, '--file', apath])
     assert result.exit_code == 0
     assert len(Queue.query.get(queue.id).targets) == 2
 
@@ -64,7 +64,7 @@ def test_queue_flush_command(runner, target):
     result = runner.invoke(command, ['queue-flush', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-flush', tqueue.ident])
+    result = runner.invoke(command, ['queue-flush', tqueue.name])
     assert result.exit_code == 0
 
     assert not Queue.query.get(tqueue.id).targets
@@ -76,28 +76,25 @@ def test_queue_prune_command(runner, job_completed):
     result = runner.invoke(command, ['queue-prune', 'notexist'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['queue-prune', job_completed.queue.ident])
+    result = runner.invoke(command, ['queue-prune', job_completed.queue.name])
     assert result.exit_code == 0
 
     assert not Job.query.filter(Job.queue_id == job_completed.queue_id).all()
     assert not Path(job_completed.output_abspath).exists()
 
 
-def test_planner_command(runner, task_factory, queue_factory, job_completed_factory):
+def test_planner_command(runner, queue_factory, job_completed_factory):
     """test planner command"""
 
     # disco job
-    disco_task = task_factory.create(name='sner_900_disco')
-    disco_queue = queue_factory.create(name='main', task=disco_task)
+    disco_queue = queue_factory.create(name='sner_900_disco')
     job_completed_factory.create(
         queue=disco_queue,
         make_output=Path('tests/server/data/parser-nmap-job.zip').read_bytes()
     )
 
     # data job
-    data_task_name, data_queue_name = PLANNER_DEFAULT_DATA_QUEUE.split('.')
-    data_task = task_factory.create(name=data_task_name)
-    data_queue = queue_factory.create(name=data_queue_name, task=data_task)
+    data_queue = queue_factory.create(name=PLANNER_DEFAULT_DATA_QUEUE)
     job_completed_factory.create(
         queue=data_queue,
         make_output=Path('tests/server/data/parser-manymap-job.zip').read_bytes()

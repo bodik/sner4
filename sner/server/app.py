@@ -30,7 +30,7 @@ from sner.server.storage.commands import command as storage_command
 
 # shell context helpers
 from sner.server.auth.models import User, WebauthnCredential
-from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target, Task
+from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
 
 
@@ -118,7 +118,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     def make_shell_context():  # pylint: disable=unused-variable
         return {
             'app': app, 'db': db,
-            'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target, 'Task': Task,
+            'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target,
             'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln,
             'User': User, 'WebauthnCredential': WebauthnCredential}
 

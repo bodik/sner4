@@ -22,7 +22,6 @@ from tests.server.scheduler.models import (
     JobFactory,
     JobCompletedFactory,
     QueueFactory,
-    TaskFactory,
     TargetFactory
 )
 from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory
@@ -76,7 +75,6 @@ factoryboy_register(JobFactory)
 factoryboy_register(JobCompletedFactory, 'job_completed')
 factoryboy_register(QueueFactory)
 factoryboy_register(TargetFactory)
-factoryboy_register(TaskFactory)
 
 # storage
 factoryboy_register(HostFactory)

@@ -42,7 +42,7 @@ tools, while *data management* part focuses on data analysis and management.
 | ------------------- | ------------- | ----------- |
 | **reconnaissance**  |||
 |                     | agent         | modular wrapper for scanning tools | 
-|                     | scheduler     | job/task distribution |
+|                     | scheduler     | job distribution |
 |                     | planner       | management and scheduling for continuous recon |
 | **data management** |||
 |                     | parser        | agent module data parsing |
@@ -109,7 +109,7 @@ layer (modules). Generally, the agent instance gets assignment from server,
 performs the task, marshalls output and delivers it to the server. Agent
 provides several modes of execution (default, one-time execution, handling
 specific queue) and main module provides functions for process handling
-(shutdown after task, immediate termination).
+(shutdown after current task, immediate termination).
 
 All requests from agent must be authenticated with apikey for user account in
 role *agent*. Key can be specified in configuration file or by command-line
@@ -124,10 +124,8 @@ service sweep scanning), manymap (specific service scanning).
 Scheduler provides workload configuration and distribution mechanism throug
 definitions of Tasks, Queues, Exclusions and Jobs.
 
-* **Task** -- a module configuration executed by agent.
-
-* **Queue** -- list of targets and scheduling specification (active, group_size,
-  priority) for linked Task. Every module has different target
+* **Queue** -- an agent module configuration, scheduling specs (group_size,
+  priority, active) and list of targets. Each module has a different target
   specification, see corresponding module implementation docstrings for
   details.
 
@@ -256,20 +254,19 @@ bin/server run
 
 ### 4.1 Reconnaissance scenario
 
-1. Select existing or define new task: *scheduler > tasks > add | edit*
-2. Select existing or define new queue: *scheduler > queues > add | edit*
-3. Generate target list
+1. Select existing or define new queue: *scheduler > queues > add | edit*
+2. Generate target list
 	* manualy
 	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
 	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
-4. Setup exclusions (*scheduler > exclusions > add | edit*)
-5. Enqueue targets
+3. Setup exclusions (*scheduler > exclusions > add | edit*)
+4. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
 	* cli: `bin/server scheduler queue-enqueue [queue_id | queue_ident] --file=targets`
-6. Run the agent `bin/agent &` (TODO: screen or systemd service)
-7. Monitor the queue until all jobs has been finished by agent
-8. Stop the agent `bin/agent --shutdown [PID]`
-9. Recon data can be found in queue directories (`[SNER_VAR]/scheduler/[queue.id]`)
+5. Run the agent `bin/agent &` (TODO: screen or systemd service)
+6. Monitor the queue until all jobs has been finished by agent
+7. Stop the agent `bin/agent --shutdown [PID]`
+8. Recon data can be found in queue directories (`[SNER_VAR]/scheduler/[queue.id]`)
 
 
 ### 4.2 Data evaluation scenario

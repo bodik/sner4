@@ -64,14 +64,13 @@
 				{% if current_user.has_role('operator') %}
 					{%- set active_subsystem = request.endpoint.split('.')[0] -%}
 					{%- for subsystem, route, icon in [
-						('scheduler', 'scheduler.task_list_route', 'fa-tasks'),
+						('scheduler', 'scheduler.queue_list_route', 'fa-tasks'),
 						('storage', 'storage.host_list_route', 'fa-database'),
 						('visuals', 'visuals.index_route', 'fa-image')] -%}
 						<li class="nav-item"><a class="nav-link{% if subsystem == active_subsystem %} active{% endif %}" href="{{ url_for(route) }}" title="{{ subsystem|capitalize }}"><i class="fas {{ icon }}"></i></a></li>
 					{%- endfor -%}
 					{%- if active_subsystem == 'scheduler' -%}
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.task_list_route') }}">Tasks</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a></li>
 					{%- elif active_subsystem == 'storage' -%}

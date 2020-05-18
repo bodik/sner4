@@ -11,20 +11,8 @@ from zipfile import ZipFile
 
 from factory import LazyAttribute, post_generation, SubFactory
 
-from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target, Task
+from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
 from tests import BaseModelFactory
-
-
-class TaskFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
-    """test task model factory"""
-    class Meta:  # pylint: disable=too-few-public-methods
-        """test host model factory"""
-        model = Task
-
-    name = 'testtaskname'
-    module = 'test'
-    params = '--arg1 abc --arg2'
-    group_size = 1
 
 
 class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
@@ -34,7 +22,9 @@ class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         model = Queue
 
     name = 'testqueue'
-    task = SubFactory(TaskFactory)
+    module = 'test'
+    params = '--arg1 abc --arg2'
+    group_size = 1
     priority = 10
     active = True
 

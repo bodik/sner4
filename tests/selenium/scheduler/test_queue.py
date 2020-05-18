@@ -15,7 +15,7 @@ def test_queue_list_route(live_server, sl_operator, queue):  # pylint: disable=u
     """simple test ajaxed datatable rendering"""
 
     sl_operator.get(url_for('scheduler.queue_list_route', _external=True))
-    dt_rendered(sl_operator, 'queue_list_table', queue.ident)
+    dt_rendered(sl_operator, 'queue_list_table', queue.name)
 
 
 def test_queue_list_route_inrow_delete(live_server, sl_operator, queue):  # pylint: disable=unused-argument

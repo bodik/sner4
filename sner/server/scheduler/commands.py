@@ -49,14 +49,14 @@ def rangetocidr_command(start, end):
 
 
 @command.command(name='queue-enqueue', help='add targets to queue')
-@click.argument('queue_ident')
+@click.argument('queue_name')
 @click.argument('argtargets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 @with_appcontext
-def queue_enqueue_command(queue_ident, argtargets, **kwargs):
+def queue_enqueue_command(queue_name, argtargets, **kwargs):
     """enqueue targets to queue"""
 
-    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
+    queue = Queue.query.filter(Queue.name == queue_name).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)
@@ -69,12 +69,12 @@ def queue_enqueue_command(queue_ident, argtargets, **kwargs):
 
 
 @command.command(name='queue-flush', help='flush all targets from queue')
-@click.argument('queue_ident')
+@click.argument('queue_name')
 @with_appcontext
-def queue_flush_command(queue_ident):
+def queue_flush_command(queue_name):
     """flush targets from queue"""
 
-    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
+    queue = Queue.query.filter(Queue.name == queue_name).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)
@@ -85,12 +85,12 @@ def queue_flush_command(queue_ident):
 
 
 @command.command(name='queue-prune', help='delete all associated jobs')
-@click.argument('queue_ident')
+@click.argument('queue_name')
 @with_appcontext
-def queue_prune_command(queue_ident):
+def queue_prune_command(queue_name):
     """delete all jobs associated with queue"""
 
-    queue = Queue.query.filter(Queue.ident == queue_ident).one_or_none()
+    queue = Queue.query.filter(Queue.name == queue_name).one_or_none()
     if not queue:
         current_app.logger.error('no such queue')
         sys.exit(1)
@@ -100,7 +100,7 @@ def queue_prune_command(queue_ident):
     sys.exit(0)
 
 
-PLANNER_DEFAULT_DATA_QUEUE = 'sner_210_data inet version scan basic.main'
+PLANNER_DEFAULT_DATA_QUEUE = 'sner_210_data inet version scan basic'
 PLANNER_LOOP_SLEEP = 60
 
 
@@ -110,9 +110,9 @@ PLANNER_LOOP_SLEEP = 60
 def planner(**kwargs):
     """run planner daemon"""
 
-    default_data_queue = Queue.query.filter(Queue.ident == PLANNER_DEFAULT_DATA_QUEUE).one()
-    disco_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_disco%'))
-    data_queues_ids = db.session.query(Queue.id).filter(Queue.ident.like('sner_%_data%'))
+    default_data_queue = Queue.query.filter(Queue.name == PLANNER_DEFAULT_DATA_QUEUE).one()
+    disco_queues_ids = db.session.query(Queue.id).filter(Queue.name.like('sner_%_disco%'))
+    data_queues_ids = db.session.query(Queue.id).filter(Queue.name.like('sner_%_data%'))
     archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
     archive_dir.mkdir(parents=True, exist_ok=True)
 

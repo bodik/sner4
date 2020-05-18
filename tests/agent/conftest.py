@@ -48,20 +48,18 @@ def longrun_a():
 
 
 @pytest.fixture
-def dummy_target(dummy_a, task_factory, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
+def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """dummy target fixture"""
 
-    task = task_factory.create(name='test_task', module=dummy_a['module'], params=dummy_a['params'])
-    queue = queue_factory.create(task=task, name='testqueue')
+    queue = queue_factory.create(name='testqueue', module=dummy_a['module'], params=dummy_a['params'])
     target = target_factory.create(queue=queue, target=dummy_a['targets'][0])
     yield target
 
 
 @pytest.fixture
-def longrun_target(longrun_a, task_factory, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
+def longrun_target(longrun_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
-    task = task_factory.create(name='test_task', module=longrun_a['module'], params=longrun_a['params'])
-    queue = queue_factory.create(task=task, name='testqueue')
+    queue = queue_factory.create(name='testqueue', module=longrun_a['module'], params=longrun_a['params'])
     target = target_factory.create(queue=queue, target=longrun_a['targets'][0])
     yield target
