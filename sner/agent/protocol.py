@@ -16,7 +16,7 @@ assignment              = jsonobject
                             ; {
                             ;   "id": uuid,
                             ;   "module": string,
-                            ;   "params": string,
+                            ;   "config": string,
                             ;   "targets": array of strings
                             ; }
 
@@ -67,7 +67,7 @@ assignment = {
     "definitions": common_definitions,
 
     "type": "object",
-    "required": ["id", "module", "params", "targets"],
+    "required": ["id", "module", "config", "targets"],
     "additionalProperties": False,
     "properties": {
         "id": {
@@ -76,7 +76,7 @@ assignment = {
         "module": {
             "type": "string"
         },
-        "params": {
+        "config": {
             "type": "string"
         },
         "targets": {

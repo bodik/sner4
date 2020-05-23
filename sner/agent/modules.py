@@ -104,7 +104,7 @@ class Nmap(ModuleBase):
         super().run(assignment)
         with open('targets', 'w') as ftmp:
             ftmp.write('\n'.join(assignment['targets']))
-        return self._execute('nmap %s -oA output -iL targets' % assignment['params'])
+        return self._execute('nmap %s -oA output -iL targets' % assignment['config'])
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
         """terminate scanner if running"""
@@ -139,7 +139,7 @@ class Manymap(ModuleBase):
         for idx, target in enumerate(assignment['targets']):
             mtmp = re.match(self.TARGET_RE, target)
             if mtmp:
-                cmd = ['nmap'] + shlex.split(assignment['params']) \
+                cmd = ['nmap'] + shlex.split(assignment['config']) \
                     + ['-oA', 'output-%d' % idx, '-p', '%s:%s' % (mtmp.group('proto')[0].upper(), mtmp.group('port'))]
                 host = mtmp.group('host')
                 if (host[0] == '[') and (host[-1] == ']'):

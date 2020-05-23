@@ -13,7 +13,7 @@ from sner.lib import file_from_zip
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """manymap module execution test"""
 
-    test_a = {'id': str(uuid4()), 'module': 'manymap', 'params': '-sV', 'targets': ['invalid', 'tcp://127.0.0.1:1', 'udp://[::1]:2']}
+    test_a = {'id': str(uuid4()), 'module': 'manymap', 'config': '-sV', 'targets': ['invalid', 'tcp://127.0.0.1:1', 'udp://[::1]:2']}
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0

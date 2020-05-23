@@ -41,7 +41,7 @@ class QueueForm(FlaskForm):
 
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
     module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
-    params = TextAreaNoneField('Parameters', render_kw={'rows': '10'})
+    config = TextAreaNoneField('Config', render_kw={'rows': '10'})
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')

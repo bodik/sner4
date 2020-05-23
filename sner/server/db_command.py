@@ -59,7 +59,7 @@ def initdata():  # pylint: disable=too-many-statements
     queue = Queue(
         name='dev_010 dummy',
         module='dummy',
-        params='--dummyparam 1',
+        config='--dummyparam 1',
         group_size=3,
         priority=10,
         active=True
@@ -71,7 +71,7 @@ def initdata():  # pylint: disable=too-many-statements
     queue = Queue(
         name='pentest_010 dns recon',
         module='nmap',
-        params='-sL    -Pn --reason',
+        config='-sL    -Pn --reason',
         group_size=20,
         priority=10,
     )
@@ -82,7 +82,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='pentest_020 full tcp scan',
         module='nmap',
-        params='-sS -A -p1-65535    -Pn --reason --min-hostgroup 20 --min-rate 900 --max-rate 1500 --max-retries 3',
+        config='-sS -A -p1-65535    -Pn --reason --min-hostgroup 20 --min-rate 900 --max-rate 1500 --max-retries 3',
         group_size=20,
         priority=10,
     ))
@@ -90,7 +90,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='meta_010 userspace tcp',
         module='nmap',
-        params='-sT -A    -Pn --reason --min-hostgroup 20 --min-rate 100 --max-rate 200',
+        config='-sT -A    -Pn --reason --min-hostgroup 20 --min-rate 100 --max-rate 200',
         group_size=20,
         priority=10
     ))
@@ -98,7 +98,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_110_disco top1000 ack scan',
         module='nmap',
-        params='-sA --top-ports 1000    -Pn --reason --min-hostgroup 400 --min-rate 4000 --max-rate 4500',
+        config='-sA --top-ports 1000    -Pn --reason --min-hostgroup 400 --min-rate 4000 --max-rate 4500',
         group_size=400,
         priority=12
     ))
@@ -106,7 +106,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_111_disco top10000 ack scan',
         module='nmap',
-        params='-sA --top-ports 10000    -Pn --reason --min-hostgroup 1000 --min-rate 8000 --max-rate 8500',
+        config='-sA --top-ports 10000    -Pn --reason --min-hostgroup 1000 --min-rate 8000 --max-rate 8500',
         group_size=1000,
         priority=10
     ))
@@ -114,7 +114,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_210_data inet version scan basic',
         module='manymap',
-        params='-sV --version-intensity 4    -Pn --reason --scan-delay 10',
+        config='-sV --version-intensity 4    -Pn --reason --scan-delay 10',
         group_size=50,
         priority=15
     ))
@@ -122,7 +122,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_211_data inet version scan intense',
         module='manymap',
-        params='-sV --version-intensity 8    -Pn --reason --scan-delay 10',
+        config='-sV --version-intensity 8    -Pn --reason --scan-delay 10',
         group_size=50,
         priority=15
     ))
@@ -130,7 +130,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_250_data ftp sweep',
         module='manymap',
-        params='-sC --script ftp-anon.nse    -Pn --reason --scan-delay 10',
+        config='-sC --script ftp-anon.nse    -Pn --reason --scan-delay 10',
         group_size=50,
         priority=15
     ))
@@ -138,7 +138,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_251_data http titles',
         module='manymap',
-        params='-sC --script http-title.nse    -Pn --reason --scan-delay 10',
+        config='-sC --script http-title.nse    -Pn --reason --scan-delay 10',
         group_size=50,
         priority=15
     ))
@@ -146,7 +146,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Queue(
         name='sner_252_data ldap rootdse',
         module='manymap',
-        params='-sC --script ldap-rootdse.nse    -Pn --reason --scan-delay 10',
+        config='-sC --script ldap-rootdse.nse    -Pn --reason --scan-delay 10',
         group_size=50,
         priority=15
     ))

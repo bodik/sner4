@@ -30,7 +30,7 @@ def dummy_a():
     yield {
         'id': str(uuid4()),
         'module': 'dummy',
-        'params': '--static_assignment',
+        'config': '--static_assignment',
         'targets': ['target1']
     }
 
@@ -42,7 +42,7 @@ def longrun_a():
     yield {
         'id': str(uuid4()),
         'module': 'nmap',
-        'params': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS',
+        'config': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS',
         'targets': ['127.0.0.127']
     }
 
@@ -51,7 +51,7 @@ def longrun_a():
 def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """dummy target fixture"""
 
-    queue = queue_factory.create(name='testqueue', module=dummy_a['module'], params=dummy_a['params'])
+    queue = queue_factory.create(name='testqueue', module=dummy_a['module'], config=dummy_a['config'])
     target = target_factory.create(queue=queue, target=dummy_a['targets'][0])
     yield target
 
@@ -60,6 +60,6 @@ def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=red
 def longrun_target(longrun_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
-    queue = queue_factory.create(name='testqueue', module=longrun_a['module'], params=longrun_a['params'])
+    queue = queue_factory.create(name='testqueue', module=longrun_a['module'], config=longrun_a['config'])
     target = target_factory.create(queue=queue, target=longrun_a['targets'][0])
     yield target

@@ -22,7 +22,7 @@ class Queue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False, unique=True)
     module = db.Column(db.String(250), nullable=False)
-    params = db.Column(db.Text)
+    config = db.Column(db.Text)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)

@@ -23,7 +23,7 @@ class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
 
     name = 'testqueue'
     module = 'test'
-    params = '--arg1 abc --arg2'
+    config = '--arg1 abc --arg2'
     group_size = 1
     priority = 10
     active = True

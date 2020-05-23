@@ -114,7 +114,7 @@ def v1_scheduler_job_assign_route(queue_name=None):
     assignment = {
         'id': str(uuid4()),
         'module': queue.module,
-        'params': '' if queue.params is None else queue.params,
+        'config': '' if queue.config is None else queue.config,
         'targets': assigned_targets
     }
     job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)

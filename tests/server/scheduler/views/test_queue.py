@@ -47,7 +47,7 @@ def test_queue_add_route(cl_operator, queue_factory):
     form = cl_operator.get(url_for('scheduler.queue_add_route')).form
     form['name'] = aqueue.name
     form['module'] = aqueue.module
-    form['params'] = aqueue.params
+    form['config'] = aqueue.config
     form['group_size'] = aqueue.group_size
     form['priority'] = aqueue.priority
     response = form.submit()

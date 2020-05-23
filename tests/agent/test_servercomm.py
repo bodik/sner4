@@ -53,7 +53,7 @@ class FailServer():
         if self.cnt_assign < 2:
             self.cnt_assign += 1
             return Response(json.dumps({'response': 'invalid'}))
-        return Response(json.dumps({'id': str(uuid4()), 'module': 'dummy', 'params': '', 'targets': []}))
+        return Response(json.dumps({'id': str(uuid4()), 'module': 'dummy', 'config': '', 'targets': []}))
 
     def handler_output(self, request):
         """handle output request"""

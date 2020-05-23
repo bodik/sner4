@@ -37,7 +37,7 @@ def queue_list_json_route():
         ColumnDT(Queue.id, mData='id'),
         ColumnDT(Queue.name, mData='name'),
         ColumnDT(Queue.module, mData='module'),
-        ColumnDT(Queue.params, mData='params'),
+        ColumnDT(Queue.config, mData='config'),
         ColumnDT(Queue.group_size, mData='group_size'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
