@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from time import sleep
 
-from schema import Schema
+from schema import Schema, Optional
 
 
 registered_modules = {}  # pylint: disable=invalid-name
@@ -115,7 +115,8 @@ class Nmap(ModuleBase):
 
     CONFIG_SCHEMA = Schema({
         'module': 'nmap',
-        'args': str
+        'args': str,
+        Optional('timing_perhost'): int
     })
 
     def run(self, assignment):
@@ -123,7 +124,22 @@ class Nmap(ModuleBase):
 
         super().run(assignment)
         Path('targets').write_text('\n'.join(assignment['targets']))
-        return self._execute(f'nmap {assignment["config"]["args"]} -oA output -iL targets')
+
+        timing_args = []
+        if 'timing_perhost' in assignment['config']:
+            output_rate = assignment['config']['timing_perhost'] * len(assignment['targets'])
+            timing_args = [
+                '--max-retries', '3',
+                '--script-timeout', '10m',
+                '--min-hostgroup', str(len(assignment['targets'])),
+                '--min-rate', str(output_rate),
+                '--max-rate', str(int(output_rate * 1.05))
+            ]
+        output_args = ['-oA', 'output', '--reason']
+        target_args = ['-iL', 'targets']
+
+        cmd = ['nmap'] + shlex.split(assignment["config"]["args"]) + timing_args + output_args + target_args
+        return self._execute(cmd)
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
         """terminate scanner if running"""
@@ -164,19 +180,20 @@ class Manymap(ModuleBase):
         for idx, target in enumerate(assignment['targets']):
             mtmp = re.match(self.TARGET_REGEXP, target)
             if mtmp:
+                output_args = ['-oA', f'output-{idx}', '--reason']
+                target_args = ['-p', f'{mtmp.group("proto")[0].upper()}:{mtmp.group("port")}']
                 host = mtmp.group('host')
                 if (host[0] == '[') and (host[-1] == ']'):
-                    hostspec = ['-6', host[1:-1]]
+                    target_args += ['-6', host[1:-1]]
                 else:
-                    hostspec = [host]
-                portspec = ['-p', f'{mtmp.group("proto")[0].upper()}:{mtmp.group("port")}']
-                outspec = ['-oA', f'output-{idx}']
+                    target_args += [host]
 
-                cmd = ['nmap'] + shlex.split(assignment['config']['args']) + outspec + portspec + hostspec
+                cmd = ['nmap'] + shlex.split(assignment['config']['args']) + output_args + target_args
                 ret |= self._execute(cmd, f'output-{idx}')
                 sleep(assignment['config']['delay'])
             else:
                 self.log.warning('invalid target: %s', target)
+
             if not self.loop:  # pragma: no cover  ; not tested
                 break
 

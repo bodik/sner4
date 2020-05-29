@@ -70,7 +70,7 @@ def initdata():  # pylint: disable=too-many-statements
 
     queue = Queue(
         name='pentest_010 dns recon',
-        config=yaml_dump({'module': 'nmap', 'args': '-sL  -Pn --reason'}),
+        config=yaml_dump({'module': 'nmap', 'args': '-sL -Pn'}),
         group_size=20,
         priority=10,
     )
@@ -82,7 +82,7 @@ def initdata():  # pylint: disable=too-many-statements
         name='pentest_020 full tcp scan',
         config=yaml_dump({
             'module': 'nmap',
-            'args': '-sS -A -p1-65535  -Pn --reason --max-retries 3  --min-hostgroup 20 --min-rate 900 --max-rate 1500'
+            'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
         }),
         group_size=20,
         priority=10,
@@ -92,7 +92,8 @@ def initdata():  # pylint: disable=too-many-statements
         name='sner_110_disco top1000 ack scan',
         config=yaml_dump({
             'module': 'nmap',
-            'args': '-sA --top-ports 1000  -Pn --reason --max-retries 3  --min-hostgroup 400 --min-rate 4000 --max-rate 4500'
+            'args': '-sA --top-ports 1000 -Pn',
+            'timing_perhost': 10
         }),
         group_size=400,
         priority=12
@@ -102,7 +103,8 @@ def initdata():  # pylint: disable=too-many-statements
         name='sner_111_disco top10000 ack scan',
         config=yaml_dump({
             'module': 'nmap',
-            'args': '-sA --top-ports 10000  -Pn --reason --max-retries 3  --min-hostgroup 1000 --min-rate 8000 --max-rate 8500'
+            'args': '-sA --top-ports 10000 -Pn',
+            'timing_perhost': 8
         }),
         group_size=1000,
         priority=10
@@ -110,35 +112,35 @@ def initdata():  # pylint: disable=too-many-statements
 
     db.session.add(Queue(
         name='sner_210_data inet version scan basic',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4  -Pn --reason', 'delay': 10}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
         priority=15
     ))
 
     db.session.add(Queue(
         name='sner_211_data inet version scan intense',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 8  -Pn --reason', 'delay': 10}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 8 -Pn', 'delay': 10}),
         group_size=50,
         priority=15
     ))
 
     db.session.add(Queue(
         name='sner_250_data ftp sweep',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ftp-anon.nse  -Pn --reason', 'delay': 10}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ftp-anon.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15
     ))
 
     db.session.add(Queue(
         name='sner_251_data http titles',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script http-title.nse  -Pn --reason', 'delay': 10}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sC --script http-title.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15
     ))
 
     db.session.add(Queue(
         name='sner_252_data ldap rootdse',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse  -Pn --reason', 'delay': 10}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15
     ))

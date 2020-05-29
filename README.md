@@ -124,10 +124,10 @@ service sweep scanning), manymap (specific service scanning).
 Scheduler provides workload configuration and distribution mechanism throug
 definitions of Tasks, Queues, Exclusions and Jobs.
 
-* **Queue** -- an agent module configuration, scheduling specs (group_size,
-  priority, active) and list of targets. Each module has a different target
-  specification, see corresponding module implementation docstrings for
-  details.
+* **Queue** -- an agent module configuration (yaml encoded), scheduling specs
+  (group_size, priority, active) and list of targets. Each module has a
+  different config and target specification, see corresponding module
+  implementation for details.
 
 * **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
   continuous recons, some parts of monitored networks must be avoided for
@@ -262,16 +262,16 @@ bin/server run
 3. Setup exclusions (*scheduler > exclusions > add | edit*)
 4. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
-	* cli: `bin/server scheduler queue-enqueue [queue_id | queue_ident] --file=targets`
+	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
 5. Run the agent `bin/agent &` (TODO: screen or systemd service)
 6. Monitor the queue until all jobs has been finished by agent
 7. Stop the agent `bin/agent --shutdown [PID]`
-8. Recon data can be found in queue directories (`[SNER_VAR]/scheduler/[queue.id]`)
+8. Recon data can be found in queue directories (`<SNER_VAR>/scheduler/<queue.id>`)
 
 
 ### 4.2 Data evaluation scenario
 
-1. Import existing data with one of the available parsers: `bin/server storage import [parser name] [filename]`
+1. Import existing data with one of the available parsers: `bin/server storage import <parser name> <filename>`
 2. Use web interface to consult the data: *storage > hosts | services | vulns | notes | ...*
 3. Manage data in storage
 	* use CRUD, comments or tags to sort the data out
@@ -284,7 +284,7 @@ bin/server run
 #### Use-case: Basic dns recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns_recon.main' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns recon' --file=-
 bin/agent --debug --queue 'dns recon'
 ```
 
@@ -296,7 +296,7 @@ Import gathered data after each step.
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_111_disco top10000 ack scan.main' --file=-
+        | bin/server scheduler queue-enqueue 'sner_111_disco top10000 ack scan' --file=-
     ```
 
 2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
@@ -351,15 +351,15 @@ Generally pure nmap can be used to do specific sweeps/scanning.
 
 ```
 # template
-nmap SCANTYPE TIMING(-Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10) TARGETING OUTPUT(-oA output)
+nmap SCANTYPE TIMING OUTPUT TARGETS
 
 # example
 bin/server storage service-list --filter 'Service.port == 22' --iponly > targets
 nmap \
-    -sV --version-intensity 4 \
-    -Pn --reason --max-hostgroup 1 --max-rate 1 --scan-delay 10 \
-    -p T:22 -iL targets \
-    -oA output
+    -sV --version-intensity 4 -Pn \
+    --max-retries 3 --script-timeout 30m --max-hostgroup 1 --max-rate 1 --scan-delay 10 \
+    -oA output --reason \
+    -p T:22 -iL targets
 bin/server storage import nmap output.xml
 ```
 

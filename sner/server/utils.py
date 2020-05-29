@@ -139,4 +139,4 @@ def valid_next_url(nexturl):
 
 def yaml_dump(data):
     """dump data with style"""
-    return yaml.dump(data, sort_keys=False, width=float('inf'))
+    return yaml.dump(data, sort_keys=False, indent=4, width=80)
