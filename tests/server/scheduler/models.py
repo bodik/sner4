@@ -12,6 +12,7 @@ from zipfile import ZipFile
 from factory import LazyAttribute, post_generation, SubFactory
 
 from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
+from sner.server.utils import yaml_dump
 from tests import BaseModelFactory
 
 
@@ -22,8 +23,7 @@ class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         model = Queue
 
     name = 'testqueue'
-    module = 'test'
-    config = '--arg1 abc --arg2'
+    config = yaml_dump({'module': 'dummy', 'args': '--arg1 abc --arg2'})
     group_size = 1
     priority = 10
     active = True

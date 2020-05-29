@@ -6,10 +6,13 @@ flask forms
 import re
 from ipaddress import ip_network
 
+import yaml
 from flask_wtf import FlaskForm
+from schema import SchemaError
 from wtforms import BooleanField, IntegerField, SelectField, SubmitField, ValidationError
 from wtforms.validators import InputRequired, Length, NumberRange
 
+from sner.agent.modules import registered_modules
 from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.scheduler.models import ExclFamily
 
@@ -36,12 +39,28 @@ def valid_excl_value(form, field):
             raise ValidationError('Invalid regex')
 
 
+def valid_agent_config(form, field):
+    """validate module config"""
+
+    try:
+        config = yaml.safe_load(field.data)
+    except (yaml.YAMLError, AttributeError) as e:
+        raise ValidationError(f'Invalid YAML: {str(e)}')
+
+    if ('module' not in config) or (config['module'] not in registered_modules):
+        raise ValidationError('Invalid module specified')
+
+    try:
+        registered_modules[config['module']].CONFIG_SCHEMA.validate(config)
+    except SchemaError as e:
+        raise ValidationError(f'Invalid config: {str(e)}')
+
+
 class QueueForm(FlaskForm):
     """queue edit form"""
 
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=250)])
-    module = StringNoneField('Module', [InputRequired(), Length(min=1, max=250)])
-    config = TextAreaNoneField('Config', render_kw={'rows': '10'})
+    config = TextAreaNoneField('Config', [valid_agent_config], render_kw={'rows': '10'})
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')

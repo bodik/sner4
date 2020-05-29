@@ -21,6 +21,7 @@ pytest-selenium
 python-libnmap
 pyyaml
 requests
+schema
 soft-webauthn
 sqlalchemy-datatables
 sqlalchemy-filters

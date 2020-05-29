@@ -10,8 +10,7 @@
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('name'),
-			Sner.dt.column('module'),
-			Sner.dt.column('config'),
+			Sner.dt.column('config', {'render': function(data, type, row, meta) { return Sner.scheduler.hbs.queue_config(row); }}),
 			Sner.dt.column('group_size'),
 			Sner.dt.column('priority'),
 			Sner.dt.column('active'),
@@ -23,6 +22,7 @@
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_submit_dataurl_queueflush').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_dataurl);
 			this.find('td a.abutton_submit_dataurl_queueprune').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, Sner.action_submit_dataurl);
+			hljs.initHighlighting();
 		}
 	};
 	$(document).ready(function() {

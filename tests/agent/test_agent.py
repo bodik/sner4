@@ -30,7 +30,7 @@ def test_commandline_assignment(tmpworkdir, dummy_a):  # pylint: disable=unused-
 def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
     """test exception handling during agent module execution"""
 
-    test_a = {'id': str(uuid4()), 'module': 'notexist', 'config': '', 'targets': []}
+    test_a = {'id': str(uuid4()), 'config': {'module': 'notexist'}, 'targets': []}
 
     result = agent_main(['--assignment', json.dumps(test_a)])
     assert result == 1

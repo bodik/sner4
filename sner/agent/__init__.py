@@ -117,7 +117,7 @@ class AgentBase(ABC):
         os.chdir(jobdir)
 
         try:
-            self.module_instance = registered_modules[assignment['module']]()
+            self.module_instance = registered_modules[assignment['config']['module']]()
             retval = self.module_instance.run(assignment)
         except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
             self.log.exception(e)

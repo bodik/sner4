@@ -7,7 +7,7 @@ agent to server protocol definition
 
 ### Definitions
 
-queue-id                = 1*DIGIT / 1*ALPHA
+queue-id                = 1*CHAR
 
 nowork                  = jsonobject
                             ; {}
@@ -15,8 +15,7 @@ nowork                  = jsonobject
 assignment              = jsonobject
                             ; {
                             ;   "id": uuid,
-                            ;   "module": string,
-                            ;   "config": string,
+                            ;   "config": jsonobject, module config
                             ;   "targets": array of strings
                             ; }
 
@@ -27,7 +26,7 @@ output                  = jsonobject
                             ;   "output": string, base64 encoded data
                             ; }
 
-apikey                  = 1*DIGIT / 1*HEXDIG
+apikey                  = 1*HEXDIG
 auth-header:            = "Authorization:" SP "Apikey" SP apikey
 
 http-ok                 = "HTTP/1.1 200 OK" CRLF CRLF
@@ -67,17 +66,19 @@ assignment = {
     "definitions": common_definitions,
 
     "type": "object",
-    "required": ["id", "module", "config", "targets"],
+    "required": ["id", "config", "targets"],
     "additionalProperties": False,
     "properties": {
         "id": {
             "$ref": "#/definitions/UUID"
         },
-        "module": {
-            "type": "string"
-        },
         "config": {
-            "type": "string"
+            "type": "object",
+            "required": ["module"],
+            "additionalProperties": True,
+            "properties": {
+                "module": {"type": "string"}
+            }
         },
         "targets": {
             "type": "array",

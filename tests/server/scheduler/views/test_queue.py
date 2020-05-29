@@ -46,7 +46,6 @@ def test_queue_add_route(cl_operator, queue_factory):
 
     form = cl_operator.get(url_for('scheduler.queue_add_route')).form
     form['name'] = aqueue.name
-    form['module'] = aqueue.module
     form['config'] = aqueue.config
     form['group_size'] = aqueue.group_size
     form['priority'] = aqueue.priority
@@ -55,6 +54,33 @@ def test_queue_add_route(cl_operator, queue_factory):
 
     tqueue = Queue.query.filter(Queue.name == aqueue.name).one()
     assert tqueue.name == aqueue.name
+
+
+def test_queue_add_route_config_validation(cl_operator, queue_factory):
+    """queue add route test"""
+
+    aqueue = queue_factory.build()
+
+    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
+    form['name'] = aqueue.name
+    form['config'] = ''
+    form['group_size'] = aqueue.group_size
+    form['priority'] = aqueue.priority
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid YAML")]')
+
+    form = response.form
+    form['config'] = "module: 'notexist'"
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid module specified"]')
+
+    form = response.form
+    form['config'] = "module: 'dummy'\nadditionalKey: 'value'\n"
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid config")]')
 
 
 def test_queue_edit_route(cl_operator, queue):

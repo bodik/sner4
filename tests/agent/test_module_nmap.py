@@ -13,7 +13,7 @@ from sner.lib import file_from_zip
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """nmap module execution test"""
 
-    test_a = {'id': str(uuid4()), 'module': 'nmap', 'config': '-sL', 'targets': ['127.0.0.1']}
+    test_a = {'id': str(uuid4()), 'config': {'module': 'nmap', 'args': '-sL'}, 'targets': ['127.0.0.1']}
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0

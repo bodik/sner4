@@ -11,6 +11,10 @@ import shlex
 import signal
 import subprocess
 from abc import ABC, abstractmethod
+from pathlib import Path
+from time import sleep
+
+from schema import Schema
 
 
 registered_modules = {}  # pylint: disable=invalid-name
@@ -28,10 +32,15 @@ def register_module(name):
 
 class ModuleBase(ABC):
     """
-    Base class for agent modules. For ABNF target specifications literals not
-    explicitly specified here see 'RFC 3986 Appendix A: Collected ABNF for URI'
-    (https://tools.ietf.org/html/rfc3986#appendix-A)
+    Base class for agent modules.
+
+    For ABNF target specifications literals not explicitly specified here see
+    'RFC 3986 Appendix A: Collected ABNF for URI' (https://tools.ietf.org/html/rfc3986#appendix-A)
     """
+
+    CONFIG_SCHEMA = Schema({
+        'module': str
+    })
 
     def __init__(self):
         self.log = logging.getLogger('sner.agent.module.%s' % self.__class__.__name__)
@@ -41,8 +50,8 @@ class ModuleBase(ABC):
     def run(self, assignment):  # pylint: disable=no-self-use
         """run module for assignment"""
 
-        with open('assignment.json', 'w+') as ftmp:
-            ftmp.write(json.dumps(assignment))
+        Path('assignment.json').write_text(json.dumps(assignment))
+        self.CONFIG_SCHEMA.validate(assignment['config'])
 
     @abstractmethod
     def terminate(self):
@@ -78,8 +87,14 @@ class Dummy(ModuleBase):
     target = 1*CHAR
     """
 
+    CONFIG_SCHEMA = Schema({
+        'module': 'dummy',
+        'args': str
+    })
+
     def run(self, assignment):
         """simply write assignment and return"""
+
         super().run(assignment)
         return 0
 
@@ -98,13 +113,17 @@ class Nmap(ModuleBase):
     target = IPv4address / IPv6address / reg-name
     """
 
+    CONFIG_SCHEMA = Schema({
+        'module': 'nmap',
+        'args': str
+    })
+
     def run(self, assignment):
         """run the agent"""
 
         super().run(assignment)
-        with open('targets', 'w') as ftmp:
-            ftmp.write('\n'.join(assignment['targets']))
-        return self._execute('nmap %s -oA output -iL targets' % assignment['config'])
+        Path('targets').write_text('\n'.join(assignment['targets']))
+        return self._execute(f'nmap {assignment["config"]["args"]} -oA output -iL targets')
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
         """terminate scanner if running"""
@@ -124,7 +143,13 @@ class Manymap(ModuleBase):
     target   = proto "://" hostspec ":" port
     """
 
-    TARGET_RE = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$'
+    CONFIG_SCHEMA = Schema({
+        'module': 'manymap',
+        'args': str,
+        'delay': int,
+    })
+
+    TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$'
 
     def __init__(self):
         super().__init__()
@@ -137,16 +162,19 @@ class Manymap(ModuleBase):
         super().run(assignment)
 
         for idx, target in enumerate(assignment['targets']):
-            mtmp = re.match(self.TARGET_RE, target)
+            mtmp = re.match(self.TARGET_REGEXP, target)
             if mtmp:
-                cmd = ['nmap'] + shlex.split(assignment['config']) \
-                    + ['-oA', 'output-%d' % idx, '-p', '%s:%s' % (mtmp.group('proto')[0].upper(), mtmp.group('port'))]
                 host = mtmp.group('host')
                 if (host[0] == '[') and (host[-1] == ']'):
-                    cmd += ['-6', host[1:-1]]
+                    hostspec = ['-6', host[1:-1]]
                 else:
-                    cmd.append(host)
-                ret |= self._execute(cmd, 'output-%d' % idx)
+                    hostspec = [host]
+                portspec = ['-p', f'{mtmp.group("proto")[0].upper()}:{mtmp.group("port")}']
+                outspec = ['-oA', f'output-{idx}']
+
+                cmd = ['nmap'] + shlex.split(assignment['config']['args']) + outspec + portspec + hostspec
+                ret |= self._execute(cmd, f'output-{idx}')
+                sleep(assignment['config']['delay'])
             else:
                 self.log.warning('invalid target: %s', target)
             if not self.loop:  # pragma: no cover  ; not tested

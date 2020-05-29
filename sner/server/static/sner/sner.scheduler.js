@@ -12,6 +12,7 @@ class SnerSchedulerComponent extends SnerComponentBase {
 					<a class="btn btn-outline-danger abutton_submit_dataurl_delete" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 
+			'queue_config': `<pre><code class="language-yaml">{{config}}</code></pre>`,
 			'queue_controls': `
 				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> scheduler.queue_edit_route queue_id=id}}"><i class="fas fa-edit"></i></a>

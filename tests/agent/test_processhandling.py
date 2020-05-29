@@ -73,7 +73,7 @@ class SimpleServer():
         """handle assign request"""
         if request.headers.get('Authorization') != 'Apikey dummy':
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
-        return Response(json.dumps({'id': str(uuid4()), 'module': 'dummy', 'config': '', 'targets': []}))
+        return Response(json.dumps({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []}))
 
     @staticmethod
     def handler_output(request):

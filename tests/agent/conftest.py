@@ -10,6 +10,8 @@ from uuid import uuid4
 
 import pytest
 
+from sner.server.utils import yaml_dump
+
 
 @pytest.fixture
 def cleanup_markedprocess():
@@ -29,8 +31,10 @@ def dummy_a():
 
     yield {
         'id': str(uuid4()),
-        'module': 'dummy',
-        'config': '--static_assignment',
+        'config': {
+            'module': 'dummy',
+            'args': '--static_assignment'
+        },
         'targets': ['target1']
     }
 
@@ -41,8 +45,10 @@ def longrun_a():
 
     yield {
         'id': str(uuid4()),
-        'module': 'nmap',
-        'config': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS',
+        'config': {
+            'module': 'nmap',
+            'args': '-Pn --reason -sT --max-rate 1 --data-string MARKEDPROCESS'
+        },
         'targets': ['127.0.0.127']
     }
 
@@ -51,7 +57,7 @@ def longrun_a():
 def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """dummy target fixture"""
 
-    queue = queue_factory.create(name='testqueue', module=dummy_a['module'], config=dummy_a['config'])
+    queue = queue_factory.create(name='testqueue', config=yaml_dump(dummy_a['config']))
     target = target_factory.create(queue=queue, target=dummy_a['targets'][0])
     yield target
 
@@ -60,6 +66,6 @@ def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=red
 def longrun_target(longrun_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
     """queue target fixture"""
 
-    queue = queue_factory.create(name='testqueue', module=longrun_a['module'], config=longrun_a['config'])
+    queue = queue_factory.create(name='testqueue', config=yaml_dump(longrun_a['config']))
     target = target_factory.create(queue=queue, target=longrun_a['targets'][0])
     yield target

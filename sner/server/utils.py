@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from ipaddress import ip_address, ip_network
 from urllib.parse import urlunparse, urlparse
 
+import yaml
 from flask import current_app, request
 from werkzeug.exceptions import HTTPException
 
@@ -73,7 +74,7 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):
             pass
 
         try:
-            mtmp = re.match(Manymap.TARGET_RE, value)
+            mtmp = re.match(Manymap.TARGET_REGEXP, value)
             if mtmp:
                 return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
         except ValueError:
@@ -134,3 +135,8 @@ def valid_next_url(nexturl):
         return False
 
     return True
+
+
+def yaml_dump(data):
+    """dump data with style"""
+    return yaml.dump(data, sort_keys=False, width=float('inf'))

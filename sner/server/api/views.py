@@ -14,6 +14,7 @@ from time import sleep
 from uuid import uuid4
 
 import jsonschema
+import yaml
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
@@ -113,8 +114,7 @@ def v1_scheduler_job_assign_route(queue_name=None):
 
     assignment = {
         'id': str(uuid4()),
-        'module': queue.module,
-        'config': '' if queue.config is None else queue.config,
+        'config': {} if queue.config is None else yaml.safe_load(queue.config),
         'targets': assigned_targets
     }
     job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
