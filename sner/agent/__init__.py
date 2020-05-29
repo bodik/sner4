@@ -60,7 +60,7 @@ def config_from_args(args):
 
 def apikey_header(apikey):
     """generate apikey header"""
-    return {'Authorization': 'Apikey %s' % apikey}
+    return {'Authorization': f'Apikey {apikey}'}
 
 
 def zipdir(path, zipto):
@@ -126,7 +126,7 @@ class AgentBase(ABC):
             self.module_instance = None
 
         os.chdir(oldcwd)
-        zipdir(jobdir, '%s.zip' % jobdir)
+        zipdir(jobdir, f'{jobdir}.zip')
         shutil.rmtree(jobdir)
 
         return retval
@@ -145,8 +145,8 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         self.backoff_time = backoff_time
 
         self.loop = True
-        self.get_assignment_url = '%s/api/v1/scheduler/job/assign%s' % (self.server, '/%s' % self.queue if self.queue else '')
-        self.upload_output_url = '%s/api/v1/scheduler/job/output' % self.server
+        self.get_assignment_url = f'{self.server}/api/v1/scheduler/job/assign' + (f'/{self.queue}' if self.queue else '')
+        self.upload_output_url = f'{self.server}/api/v1/scheduler/job/output'
 
     def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """wait for current assignment to finish"""
@@ -216,7 +216,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                     retval = self.process_assignment(assignment)
                     self.log.debug('processed, retval=%d', retval)
 
-                    assignment_output_file = '%s.zip' % assignment['id']
+                    assignment_output_file = f'{assignment["id"]}.zip'
                     with open(assignment_output_file, 'rb') as ftmp:
                         output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
                     self.upload_output(output)
@@ -271,7 +271,7 @@ def main(argv=None):
 
     # agent process management helpers
     if args.version:
-        print('Sner %s' % __version__)
+        print(f'Sner {__version__}')
         return 0
     if args.shutdown:
         return os.kill(args.shutdown, signal.SIGUSR1)
