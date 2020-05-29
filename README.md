@@ -145,6 +145,14 @@ CLI helpers are available for IP ranges enumerations and queues/targets
 management.
 
 
+#### Server: Planner
+
+Planner is a daemon handling simple automation for discovery and version
+scanning as well as importing data into Storage subsystem. Currently two
+*trails* are supported by the planner. `sner_` trail is supposed for long term
+and (TBD: periodic scanning) and `sweep_` is for fast/priority portsweeps.
+
+
 
 ### 2.3 Data management subsystem
 
@@ -170,14 +178,6 @@ Visualization modules can be used to get insight about current storage data:
 * DNS tree
 * Portmap explorer
 * (Service) Port infos
-
-
-#### Server: Planner
-
-**Not implemented**
-
-Planner component will take care of periodic queueing of existing or new
-targets to refresh information in storage.
 
 
 
@@ -249,7 +249,6 @@ bin/server run
 
 
 
-
 ## 4 Usage
 
 ### 4.1 Reconnaissance scenario
@@ -288,43 +287,33 @@ bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue '
 bin/agent --debug --queue 'dns recon'
 ```
 
-#### Use-case: Long-term scanning strategy
+#### Use-case: Long-term scanning strategy aka the Planner
 
-Import gathered data after each step.
+1. Run planner
 
-1. Service discovery, TCP ACK scan to search for alive hosts and probable services (avoids some flow based IDS/IPS systems).
+    ```
+    bin/server scheduler planner &
+    ```
+
+2. Queue targets for (service) discovery
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_111_disco top10000 ack scan' --file=-
+        | bin/server scheduler queue-enqueue 'sner_115_disco top10000 ack scan' --file=-
     ```
 
-2. Service fingerprinting, use lower intensity for first wave, scan most common services first, avoid tcp/22 with regex exclusion on `^tcp://.*:22$`.
+3. Possible targets will be selected from discovery results and enqueued for
+   version scanning (automated by planner). Version scan results will be pushed
+   into Storage subsystem.
 
-    ```
-    # fast track
-    bin/server storage service-list --filter 'Service.port in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_210_data inet version scan basic.prio' --file=-
-    # rest of the ports
-    bin/server storage service-list --filter 'Service.port not_in [21,80,179,443,1723,3128,8000,8080,8443]' \
-        | bin/server scheduler queue-enqueue 'sner_210_data inet version scan basic.main' --file=-
-    ```
-
-3. Re-queue services without identification for high intensity version scan.
+4. Optionaly: services without identification can be requeued for high intensity version scan.
 
     ```
     bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue-enqueue 'sner_211_data inet version scan intense.main' --file=-
+        | bin/server scheduler queue-enqueue 'sner_211_data inet version scan intense' --file=-
     ```
 
-4. Cleanup storage, remove services in filtered state (ack scan artifacts) and prune hosts without any data
-
-    ```
-    bin/server storage service-cleanup
-    bin/server storage host-cleanup
-    ```
-
-5. ?Fully rescan alive hosts
+6. TBD: ???Fully rescan alive hosts
 
 
 #### Use-case: Service specific scanning
@@ -334,15 +323,7 @@ Import gathered data after each step.
 ```
 # ftp sweep
 bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
-    | bin/server scheduler queue-enqueue 'sner_250_data ftp sweep.main' --file=-
-
-# http titles
-bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name ilike "http%"' \
-    | bin/server scheduler queue-enqueue 'sner_251_data http titles.main' --file=-
-
-# ldap info
-bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ldap"' \
-    | bin/server scheduler queue-enqueue 'sner_252_data ldap rootdse.main' --file=-
+    | bin/server scheduler queue-enqueue 'sner_250_data ftp sweep' --file=-
 ```
 
 ##### Manual

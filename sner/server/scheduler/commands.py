@@ -100,7 +100,7 @@ def queue_prune_command(queue_name):
     sys.exit(0)
 
 
-PLANNER_DEFAULT_DATA_QUEUE = 'sner_210_data inet version scan basic'
+PLANNER_POSTDISCO_QUEUE = 'inet version scan basic'
 PLANNER_LOOP_SLEEP = 60
 
 
@@ -110,25 +110,28 @@ PLANNER_LOOP_SLEEP = 60
 def planner(**kwargs):
     """run planner daemon"""
 
-    default_data_queue = Queue.query.filter(Queue.name == PLANNER_DEFAULT_DATA_QUEUE).one()
-    disco_queues_ids = db.session.query(Queue.id).filter(Queue.name.like('sner_%_disco%'))
-    data_queues_ids = db.session.query(Queue.id).filter(Queue.name.like('sner_%_data%'))
     archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
     archive_dir.mkdir(parents=True, exist_ok=True)
 
     loop = True
     while loop:
-        for finished_job in Job.query.filter(Job.queue_id.in_(disco_queues_ids), Job.retval == 0).all():
-            current_app.logger.debug('parsing services from %s', finished_job)
-            queue_enqueue(default_data_queue, NmapParser.service_list(finished_job.output_abspath, exclude_states=['filtered', 'closed']))
-            copy2(finished_job.output_abspath, archive_dir)
-            job_delete(finished_job)
+        for trail in ['sner', 'sweep']:
+            # trails: sner is main, sweep is prio
 
-        for finished_job in Job.query.filter(Job.queue_id.in_(data_queues_ids), Job.retval == 0).all():
-            current_app.logger.debug('importing service scan from %s', finished_job)
-            ManymapParser.import_file(finished_job.output_abspath)
-            copy2(finished_job.output_abspath, archive_dir)
-            job_delete(finished_job)
+            disco_queues_ids = db.session.query(Queue.id).filter(Queue.name.like(f'{trail}_%_disco %'))
+            postdisco_queue = Queue.query.filter(Queue.name.like(f'{trail}_%_data {PLANNER_POSTDISCO_QUEUE}')).one_or_none()
+            for finished_job in Job.query.filter(Job.queue_id.in_(disco_queues_ids), Job.retval == 0).all():
+                current_app.logger.debug('parsing services from %s', finished_job)
+                queue_enqueue(postdisco_queue, NmapParser.service_list(finished_job.output_abspath, exclude_states=['filtered', 'closed']))
+                copy2(finished_job.output_abspath, archive_dir)
+                job_delete(finished_job)
+
+            data_queues_ids = db.session.query(Queue.id).filter(Queue.name.like(f'{trail}_%_data %'))
+            for finished_job in Job.query.filter(Job.queue_id.in_(data_queues_ids), Job.retval == 0).all():
+                current_app.logger.debug('importing service scan from %s', finished_job)
+                ManymapParser.import_file(finished_job.output_abspath)
+                copy2(finished_job.output_abspath, archive_dir)
+                job_delete(finished_job)
 
         sleep(PLANNER_LOOP_SLEEP)
         if kwargs['oneshot']:

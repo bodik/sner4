@@ -57,6 +57,7 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Excl(family=ExclFamily.network, value='127.66.66.0/26', comment='blacklist 1'))
     db.session.add(Excl(family=ExclFamily.regex, value=r'.*donotscan.*', comment='blacklist 2'))
 
+    # devel trail
     queue = Queue(
         name='dev_010 dummy',
         config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
@@ -68,6 +69,7 @@ def initdata():  # pylint: disable=too-many-statements
     for target in range(100):
         db.session.add(Target(target=target, queue=queue))
 
+    # pentest trail
     queue = Queue(
         name='pentest_010 dns recon',
         config=yaml_dump({'module': 'nmap', 'args': '-sL -Pn'}),
@@ -88,6 +90,7 @@ def initdata():  # pylint: disable=too-many-statements
         priority=10,
     ))
 
+    # sner (main) trail
     db.session.add(Queue(
         name='sner_110_disco top1000 ack scan',
         config=yaml_dump({
@@ -100,7 +103,7 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner_111_disco top10000 ack scan',
+        name='sner_115_disco top10000 ack scan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sA --top-ports 10000 -Pn',
@@ -143,6 +146,25 @@ def initdata():  # pylint: disable=too-many-statements
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15
+    ))
+
+    # sweep (prio) trail
+    db.session.add(Queue(
+        name='sweep_300_disco portA ack scan',
+        config=yaml_dump({
+            'module': 'nmap',
+            'args': '-sA -p1099 -Pn',
+            'timing_perhost': 1
+        }),
+        group_size=4000,
+        priority=50
+    ))
+
+    db.session.add(Queue(
+        name='sweep_350_data inet version scan basic',
+        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
+        group_size=50,
+        priority=55
     ))
 
     # storage test data

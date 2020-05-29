@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import sner.server.scheduler.commands
-from sner.server.scheduler.commands import command, PLANNER_DEFAULT_DATA_QUEUE
+from sner.server.scheduler.commands import command, PLANNER_POSTDISCO_QUEUE
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.storage.models import Service
 
@@ -87,14 +87,14 @@ def test_planner_command(runner, queue_factory, job_completed_factory):
     """test planner command"""
 
     # disco job
-    disco_queue = queue_factory.create(name='sner_900_disco')
+    disco_queue = queue_factory.create(name='sner_900_disco test')
     job_completed_factory.create(
         queue=disco_queue,
         make_output=Path('tests/server/data/parser-nmap-job.zip').read_bytes()
     )
 
     # data job
-    data_queue = queue_factory.create(name=PLANNER_DEFAULT_DATA_QUEUE)
+    data_queue = queue_factory.create(name=f'sner_920_data {PLANNER_POSTDISCO_QUEUE}')
     job_completed_factory.create(
         queue=data_queue,
         make_output=Path('tests/server/data/parser-manymap-job.zip').read_bytes()
