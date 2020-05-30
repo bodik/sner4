@@ -51,11 +51,15 @@ class SnerStorageComponent extends SnerComponentBase {
 			'color_for_tag': function(item) {
 				var colors = {'todo': 'badge-warning', 'report': 'badge-danger'};
 				return (item in colors) ? colors[item] : 'badge-secondary';
+			},
+			/* simple each helper with sort for flat array-like contexts */
+			'each_sorted': function(context, options) {
+				return context.sort().map(function(x) { return options.fn(x); }).join('');
 			}
 		};
 
 		this.hbs_source = {
-			'tag_labels': `{{#each tags}}<span class="badge {{color_for_tag this}} tag-badge">{{this}}</span> {{/each}}`,
+			'tag_labels': `{{#each_sorted tags}}<span class="badge {{color_for_tag this}} tag-badge">{{this}}</span> {{/each_sorted}}`,
 
 			'host_link': `<a href="{{> storage.host_view_route host_id=host_id}}">{{host_address}}</a>`,
 			'host_controls': `
