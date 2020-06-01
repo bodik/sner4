@@ -16,8 +16,7 @@ from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.sqlafilter import filter_parser
-from sner.server.storage.core import annotate_model, get_related_models, tag_model_multiid
-from sner.server.storage.commands import vuln_report
+from sner.server.storage.core import annotate_model, get_related_models, tag_model_multiid, vuln_report
 from sner.server.storage.forms import MultiidForm, VulnForm
 from sner.server.storage.models import Host, Service, Vuln
 from sner.server.storage.views import blueprint
@@ -181,4 +180,5 @@ def vuln_report_route():
     return Response(
         vuln_report(),
         mimetype='text/csv',
-        headers={'Content-Disposition': 'attachment; filename=report-%s.csv' % datetime.now().isoformat()})
+        headers={'Content-Disposition': 'attachment; filename=report-%s.csv' % datetime.now().isoformat()}
+    )
