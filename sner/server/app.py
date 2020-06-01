@@ -47,7 +47,8 @@ DEFAULT_CONFIG = {
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600,
-    'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell']
+    'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell'],
+    'SNER_TRIM_REPORT_CELLS': 65000
 }
 
 
@@ -61,7 +62,9 @@ def config_from_yaml(filename):
         'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
         'SNER_VAR': get_dotted(config_dict, 'server.var'),
         'SNER_SESSION_IDLETIME': get_dotted(config_dict, 'server.session_idletime'),
-        'SNER_TAGS': get_dotted(config_dict, 'server.tags')}
+        'SNER_TAGS': get_dotted(config_dict, 'server.tags'),
+        'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells')
+    }
     return {k: v for k, v in config.items() if v is not None}
 
 

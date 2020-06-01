@@ -67,6 +67,7 @@ def vuln_report():
         .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.tags)
 
+    content_trimmed = False
     fieldnames = [
         'id', 'asset', 'vulnerability', 'severity', 'advisory', 'state',
         'endpoint_address', 'description', 'tags', 'endpoint_hostname', 'references']
@@ -81,12 +82,21 @@ def vuln_report():
             rdata['asset'] = rdata['endpoint_hostname'][0]
         else:
             rdata['asset'] = 'misc'
+
         for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
-            rdata[col] = '\n'.join(rdata[col] or [])
-        rdata['references'] = '\n'.join([url_for_ref(ref) for ref in rdata['references'] or []])
+            rdata[col] = '\n'.join(rdata[col]) if rdata[col] else ''
+        rdata['references'] = '\n'.join([url_for_ref(ref) for ref in rdata['references']]) if rdata['references'] else ''
+
+        # do cell trimming, spreadsheet processors has issues if cell data is larger than X
+        for key, val in rdata.items():
+            if current_app.config['SNER_TRIM_REPORT_CELLS'] and val and (len(val) > current_app.config['SNER_TRIM_REPORT_CELLS']):
+                rdata[key] = 'TRIMMED'
+                content_trimmed = True
 
         output.writerow(rdata)
 
+    if content_trimmed:
+        output.writerow({'asset': 'WARNING: some cells were trimmed'})
     return output_buffer.getvalue()
 
 

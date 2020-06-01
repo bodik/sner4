@@ -96,11 +96,13 @@ def test_report_command(runner, host_factory, vuln_factory):
     host2 = host_factory.create(address='127.3.3.2', hostname='testhost2.testdomain.tests')
     vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
+    vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.unknown, descr='A'*1001)
 
     result = runner.invoke(command, ['report'])
     assert result.exit_code == 0
     assert f',"{vuln_name}",' in result.output
     assert ',"misc",' in result.output
+    assert ',"TRIMMED",' in result.output
 
 
 def test_host_cleanup_command(runner, host_factory, service_factory):

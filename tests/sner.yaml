@@ -3,3 +3,4 @@ server:
     db: 'postgresql:///sner_test'
     var: '/tmp/sner_test_var'
     application_root: '/'
+    trim_report_cells: 1000

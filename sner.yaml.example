@@ -5,6 +5,7 @@
 #    var: '/var/lib/sner'
 #    session_idletime: 3600
 #    tags: ['info', 'report', 'todo', 'reviewed', 'sslhell']
+#    trim_report_cells: 65000
 #
 #agent:
 #    server: 'http://localhost:18000'
