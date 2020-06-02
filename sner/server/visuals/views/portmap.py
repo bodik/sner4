@@ -3,6 +3,8 @@
 controller portmap
 """
 
+from socket import getservbyport
+
 from flask import render_template, request
 from sqlalchemy import desc, func
 from sqlalchemy_filters import apply_filters
@@ -64,9 +66,15 @@ def portmap_portstat_route(port):
         comments = apply_filters(comments, parsed_filter, do_auto_join=False)
         hosts = apply_filters(hosts, parsed_filter, do_auto_join=False)
 
+    try:
+        portname = getservbyport(int(port))
+    except OSError:
+        portname = ''
+
     return render_template(
         'visuals/portmap_portstat.html',
         port=port,
+        portname=portname,
         stats=stats.all(),
         infos=infos.all(),
         hosts=hosts.all(),

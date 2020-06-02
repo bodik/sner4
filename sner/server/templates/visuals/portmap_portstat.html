@@ -1,5 +1,5 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
-<h2>Port {{port}}</h2>
+<h2>Port {{port}}{% if portname %} ({{portname}}){% endif %}</h2>
 
 <div class="py-1">
 {% for proto, count in stats %}
