@@ -180,9 +180,23 @@ def initdata():  # pylint: disable=too-many-statements
         proto='tcp',
         port=12345,
         state='open:testreason',
-        name='testservice',
+        name='svcx',
         info='testservice banner',
         comment='manual testservice comment'))
+
+    host = Host(
+        address='127.3.3.3',
+        hostname='testhost1.testdomain.test',
+        os='Test Linux 2',
+        comment='another server')
+    db.session.add(host)
+
+    db.session.add(Service(
+        host=host,
+        proto='tcp',
+        port=12345,
+        state='closed:testreason',
+        name='svcx'))
 
     db.session.add(Vuln(
         host=host,

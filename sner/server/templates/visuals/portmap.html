@@ -22,8 +22,13 @@ table.borderless tbody tr td { border: none; }
 
 	$(document).ready(function() {
 		$('.portmap_item').on('mouseenter', function() {
+			var route_args = {'port': $(this).attr('data-port')};
+			var filter = new URLSearchParams(window.location.search).get('filter');
+			if (filter) {
+				route_args['filter'] = filter;
+			}
 			$.ajax({
-				url: Flask.url_for('visuals.portmap_portstat_route', {'port': $(this).attr('data-port')}),
+				url: Flask.url_for('visuals.portmap_portstat_route', route_args),
 				success: function (data, status, jqXHR) { $('#port_detail').html(data);	}
 			});
 		});

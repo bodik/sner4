@@ -46,15 +46,29 @@ def portmap_portstat_route(port):
     """generate port statistics fragment"""
 
     stats = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port) \
-        .group_by(Service.proto).order_by(Service.proto).all()
+        .group_by(Service.proto).order_by(Service.proto)
 
     infos = db.session.query(Service.info, func.count(Service.id).label('info_count')) \
-        .filter(Service.port == port, Service.info != '', Service.info != None).group_by(Service.info).order_by(desc('info_count')).all()  # noqa: E501,E711  pylint: disable=singleton-comparison
+        .filter(Service.port == port, Service.info != '', Service.info != None).group_by(Service.info).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
-    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment).all()
+    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment)
 
     hosts = db.session.query(Host.address, Host.hostname, Host.id) \
         .select_from(Service).outerjoin(Host) \
-        .filter(Service.port == port).order_by(Host.address).all()
+        .filter(Service.port == port).order_by(Host.address)
 
-    return render_template('visuals/portmap_portstat.html', port=port, stats=stats, infos=infos, hosts=hosts, comments=comments)
+    if 'filter' in request.values:
+        parsed_filter = filter_parser.parse(request.values.get('filter'))
+        stats = apply_filters(stats, parsed_filter, do_auto_join=False)
+        infos = apply_filters(infos, parsed_filter, do_auto_join=False)
+        comments = apply_filters(comments, parsed_filter, do_auto_join=False)
+        hosts = apply_filters(hosts, parsed_filter, do_auto_join=False)
+
+    return render_template(
+        'visuals/portmap_portstat.html',
+        port=port,
+        stats=stats.all(),
+        infos=infos.all(),
+        hosts=hosts.all(),
+        comments=comments.all()
+    )
