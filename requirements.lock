@@ -75,5 +75,5 @@ WebOb==1.8.6
 WebTest==2.0.34
 Werkzeug==1.0.0
 wrapt==1.11.2
-WTForms==2.2.1
+WTForms==2.3.1
 zipp==3.0.0

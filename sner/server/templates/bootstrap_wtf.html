@@ -47,23 +47,23 @@
 		{%- set field_classes = field_classes + ' is-invalid' -%}
 
 		{%- if field.errors|count == 1 -%}
-			{%- set error_output = '<div class="invalid-feedback">%s</div>' % field.errors[0] -%}
+			{%- set error_output = '<div class="invalid-feedback">%s</div>'|safe % field.errors[0] -%}
 		{%- else -%}
 			{%- set error_acc = [] -%}
 			{%- for error in field.errors -%}
-				{{- error_acc.append('<li>%s</li>' % error) -}}
+				{{- error_acc.append('<li>%s</li>'|safe % error) -}}
 			{%- endfor -%}
-			{%- set error_output = '<ul class="invalid-feedback">%s</ul>' % error_acc|join('') -%}
+			{%- set error_output = '<ul class="invalid-feedback">%s</ul>'|safe % error_acc|join('') -%}
                 {%- endif -%}
         {%- endif -%}
 
 	{%- set output = field(class_=field_classes, placeholder=field_placeholder, id=False) -%}
 	{%- if field.description -%}
-		{%- set output = output + '<small class="form-text text-muted">%s</small>' % field.description -%}
+		{%- set output = output + '<small class="form-text text-muted">%s</small>'|safe % field.description -%}
 	{%- endif -%}
 
 	{%- if horizontal -%}
-		{%- set output = label_output + '<div class="col-sm-10">%s</div>' % (output + error_output) -%}
+		{%- set output = label_output + '<div class="col-sm-10">%s</div>'|safe % (output + error_output) -%}
 	{%- else -%}
 		{%- set output = label_output + output + error_output -%}
 	{%- endif -%}
@@ -74,9 +74,9 @@
 	{%- if field.flags.required -%}
 		{% set form_group_classes = form_group_classes + ' required' %}
 	{%- endif -%}
-        {% set output = '<div class="%s">%s</div>' % (form_group_classes, output) %}
+        {% set output = '<div class="%s">%s</div>'|safe % (form_group_classes, output) %}
 
-	{{ output|safe }}
+	{{ output }}
 {%- endmacro %}
 
 
@@ -90,11 +90,11 @@
 
 	{%- set output = field(class_=field_classes, id=False) -%}
 	{%- if horizontal -%}
-		{%- set output = '<div class="col-sm-10 offset-sm-2">%s</div>' % output -%}
+		{%- set output = '<div class="col-sm-10 offset-sm-2">%s</div>'|safe % output -%}
 	{%- endif -%}
-        {% set output = '<div class="%s">%s</div>' % (form_group_classes, output) %}
+        {% set output = '<div class="%s">%s</div>'|safe % (form_group_classes, output) %}
 
-	{{ output|safe }}
+	{{ output }}
 {%- endmacro -%}
 
 
@@ -105,16 +105,16 @@
 
 	{%- if errors and field.errors -%}
 		{%- set field_classes = field_classes + ' is-invalid' -%}
-		{%- set error_output = '<div class="invalid-feedback">%s</div>' % field.errors[0] -%}
+		{%- set error_output = '<div class="invalid-feedback">%s</div>'|safe % field.errors[0] -%}
         {%- endif -%}
 
 	{%- set output = field(class_=field_classes, id=False) + field.label(class_='form-check-label') + error_output -%}
 	{%- if field.description -%}
-		{%- set output = output + '<small class="form-text text-muted">%s</small>' % field.description -%}
+		{%- set output = output + '<small class="form-text text-muted">%s</small>'|safe % field.description -%}
 	{%- endif -%}
-        {% set output = '<div class="form-check">%s</div>' % output %}
+        {% set output = '<div class="form-check">%s</div>'|safe % output %}
         {%- if horizontal -%}
-                {%- set output = '<div class="col-sm-10 offset-sm-2">%s</div>' % output -%}
+                {%- set output = '<div class="col-sm-10 offset-sm-2">%s</div>'|safe % output -%}
         {%- endif -%}
 
 	{%- if horizontal -%}
@@ -123,7 +123,7 @@
 	{%- if field.flags.required -%}
 		{% set form_group_classes = form_group_classes + ' required' %}
 	{%- endif -%}
-        {% set output = '<div class="%s">%s</div>' % (form_group_classes, output) %}
+        {% set output = '<div class="%s">%s</div>'|safe % (form_group_classes, output) %}
 
-	{{ output|safe }}
+	{{ output }}
 {%- endmacro -%}
