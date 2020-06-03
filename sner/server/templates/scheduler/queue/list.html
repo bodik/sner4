@@ -22,6 +22,7 @@
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_submit_dataurl_queueflush').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_dataurl);
 			this.find('td a.abutton_submit_dataurl_queueprune').on('click', {'dt': this.api(), 'confirmation': 'Really prune?'}, Sner.action_submit_dataurl);
+			hljs.initHighlighting.called = false;
 			hljs.initHighlighting();
 		}
 	};
