@@ -21,6 +21,7 @@ class SnerStorageComponent extends SnerComponentBase {
 					'BID': (d) => 'http://www.securityfocus.com/bid/' + d,
 					'CERT': (d) => 'https://www.kb.cert.org/vuls/id/' + d,
 					'EDB': (d) => 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
+					'MSF': (d) => 'https://www.rapid7.com/db/?q=' + d,
 					'SN': (d) => Flask.url_for('storage.note_view_route', {'note_id': d})
 				};
 				try {
@@ -33,7 +34,9 @@ class SnerStorageComponent extends SnerComponentBase {
 			},
 			/* generate text for ref */
 			'text_for_ref': function(ref) {
-				return (ref.startsWith('URL-')) ? 'URL' : ref;
+				if (ref.startsWith('URL-')) { return 'URL'; }
+				if (ref.startsWith('MSF-')) { return 'MSF'; }
+				return ref;
 			},
 			/* get class for severity label */
 			'color_for_severity': function(item) {

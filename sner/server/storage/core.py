@@ -72,6 +72,7 @@ def vuln_report():
             'BID': lambda d: 'http://www.securityfocus.com/bid/' + d,
             'CERT': lambda d: 'https://www.kb.cert.org/vuls/id/' + d,
             'EDB': lambda d: 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
+            'MSF': lambda d: 'https://www.rapid7.com/db/?q=' + d,
             'SN': lambda d: 'SN-' + d
         }
         try:
