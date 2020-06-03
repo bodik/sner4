@@ -20,7 +20,7 @@
 	};
 
 	$(document).ready(function() {
-		var dt_profile_webauthn_table = $('#profile_webauthn_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_profile_webauthn_table_options));
+		var dt_profile_webauthn_table = Sner.dt.init_datatable('#profile_webauthn_table', dt_profile_webauthn_table_options);
 	});
 </script>
 {% endblock %}

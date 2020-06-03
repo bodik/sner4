@@ -18,7 +18,7 @@
 		]
 	};
 	$(document).ready(function() {
-		var dt_vuln_grouped_table = $('#vuln_grouped_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_vuln_grouped_table_options));
+		var dt_vuln_grouped_table = Sner.dt.init_datatable('#vuln_grouped_table', dt_vuln_grouped_table_options);
 	});
 </script>
 {% endblock %}

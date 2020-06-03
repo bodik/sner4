@@ -14,7 +14,7 @@
 		'order': [[1, 'desc']]
 	};
 	$(document).ready(function() {
-		var dt_service_grouped_table = $('#service_grouped_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_service_grouped_table_options));
+		var dt_service_grouped_table = Sner.dt.init_datatable('#service_grouped_table', dt_service_grouped_table_options);
 	});
 </script>
 {% endblock %}

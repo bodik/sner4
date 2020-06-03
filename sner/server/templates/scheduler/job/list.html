@@ -20,7 +20,7 @@
 		'order': [[6, 'desc'], [7, 'desc']]
 	};
 	$(document).ready(function() {
-		var dt_job_list_table = $('#job_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_job_list_table_options));
+		var dt_job_list_table = Sner.dt.init_datatable('#job_list_table', dt_job_list_table_options);
 	});
 </script>
 {% endblock %}

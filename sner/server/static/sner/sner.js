@@ -117,6 +117,23 @@ class SnerDatatablesModule {
 	}
 
 	/**
+	 * Initializes datatable with additional sorting on 'id' column
+	 *
+	 * @param {string} selector jQuery selector for table element
+	 * @param {Object} options datatable custom options object
+	 */
+	init_datatable(selector, options) {
+		return $(selector)
+			.on('preXhr.dt', function (event, settings, data) {
+				var id_column = settings.aoColumns.find(function(item) { return item.name === 'id'; });
+				if (id_column) {
+					data['order'].push({'column': id_column.idx, 'dir': 'asc'});
+				}
+			})
+			.DataTable($.extend({}, Sner.dt.ajax_options, options));
+	}
+
+	/**
 	 * Select all from table
 	 *
 	 * @param {Object} event jquery event, event.data.dt datatable instance reference required

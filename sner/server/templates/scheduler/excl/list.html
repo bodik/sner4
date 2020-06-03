@@ -16,7 +16,7 @@
 		]
 	};
 	$(document).ready(function() {
-		var dt_excl_list_table = $('#excl_list_table').DataTable($.extend({}, Sner.dt.ajax_options, dt_excl_list_table_options));
+		var dt_excl_list_table = Sner.dt.init_datatable('#excl_list_table', dt_excl_list_table_options);
 	});
 </script>
 {% endblock %}
