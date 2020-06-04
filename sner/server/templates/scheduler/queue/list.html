@@ -18,6 +18,7 @@
 			Sner.dt.column('nr_jobs'),
 			Sner.dt.column_buttons(Sner.scheduler.hbs.queue_controls)
 		],
+		'order': [[1, 'asc']],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_submit_dataurl_queueflush').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_dataurl);
