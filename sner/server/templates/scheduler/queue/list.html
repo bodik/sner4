@@ -10,10 +10,11 @@
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('name'),
-			Sner.dt.column('config', {'render': function(data, type, row, meta) { return Sner.scheduler.hbs.queue_config(row); }}),
+			Sner.dt.column('config', {'render': function(data, type, row, meta) { return Sner.scheduler.hbs.render_yaml({'data': row['config']}); }}),
 			Sner.dt.column('group_size'),
 			Sner.dt.column('priority'),
 			Sner.dt.column('active'),
+			Sner.dt.column('workflow', {'render': function(data, type, row, meta) { return Sner.scheduler.hbs.render_yaml({'data': row['workflow']}); }}),
 			Sner.dt.column('nr_targets'),
 			Sner.dt.column('nr_jobs'),
 			Sner.dt.column_buttons(Sner.scheduler.hbs.queue_controls)

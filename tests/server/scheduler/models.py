@@ -27,6 +27,7 @@ class QueueFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     group_size = 1
     priority = 10
     active = True
+    workflow = yaml_dump({'step': 'import'})
 
 
 class TargetFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods

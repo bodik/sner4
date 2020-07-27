@@ -4,12 +4,9 @@ scheduler.commands tests
 """
 
 from pathlib import Path
-from unittest.mock import patch
 
-import sner.server.scheduler.commands
-from sner.server.scheduler.commands import command, PLANNER_POSTDISCO_QUEUE
-from sner.server.scheduler.models import Job, Queue, Target
-from sner.server.storage.models import Service
+from sner.server.scheduler.commands import command
+from sner.server.scheduler.models import Job, Queue
 
 
 def test_enumips_command(runner, tmpworkdir):  # pylint: disable=unused-argument
@@ -81,30 +78,3 @@ def test_queue_prune_command(runner, job_completed):
 
     assert not Job.query.filter(Job.queue_id == job_completed.queue_id).all()
     assert not Path(job_completed.output_abspath).exists()
-
-
-def test_planner_command(runner, queue_factory, job_completed_factory):
-    """test planner command"""
-
-    # disco job
-    disco_queue = queue_factory.create(name='sner_900_disco test')
-    job_completed_factory.create(
-        queue=disco_queue,
-        make_output=Path('tests/server/data/parser-nmap-job.zip').read_bytes()
-    )
-
-    # data job
-    data_queue = queue_factory.create(name=f'sner_920_data {PLANNER_POSTDISCO_QUEUE}')
-    job_completed_factory.create(
-        queue=data_queue,
-        make_output=Path('tests/server/data/parser-manymap-job.zip').read_bytes()
-    )
-
-    # test itself
-    with patch.object(sner.server.scheduler.commands, 'PLANNER_LOOP_SLEEP', 0):
-        result = runner.invoke(command, ['planner', '--oneshot'])
-    assert result.exit_code == 0
-
-    # simplified assertion
-    assert Target.query.count() == 5
-    assert Service.query.count() == 1

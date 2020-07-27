@@ -15,6 +15,7 @@ from wtforms.validators import InputRequired, Length, NumberRange
 from sner.agent.modules import registered_modules
 from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.scheduler.models import ExclFamily
+from sner.server.planner_command import WORKFLOW_SCHEMA
 
 
 def valid_excl_family(form, field):  # pylint: disable=unused-argument
@@ -56,6 +57,22 @@ def valid_agent_config(form, field):
         raise ValidationError(f'Invalid config: {str(e)}')
 
 
+def valid_workflow_config(form, field):  # pylint: disable=unused-argument
+    """validate workflow config"""
+
+    if field.data is None:
+        return
+
+    try:
+        workflow_config = yaml.safe_load(field.data)
+        WORKFLOW_SCHEMA.validate(workflow_config)
+    except (yaml.YAMLError, AttributeError) as e:
+        raise ValidationError(f'Invalid YAML: {str(e)}')
+    except SchemaError as e:
+        raise ValidationError(f'Invalid workflow: {str(e)}')
+    return
+
+
 class QueueForm(FlaskForm):
     """queue edit form"""
 
@@ -64,6 +81,7 @@ class QueueForm(FlaskForm):
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')
+    workflow = TextAreaNoneField('Workflow', [valid_workflow_config], render_kw={'rows': '10'})
     submit = SubmitField('Save')
 
 

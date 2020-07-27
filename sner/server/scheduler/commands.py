@@ -5,17 +5,12 @@ scheduler commands
 
 import sys
 from ipaddress import ip_address, summarize_address_range
-from pathlib import Path
-from shutil import copy2
-from time import sleep
 
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server.extensions import db
-from sner.server.parser.manymap import ManymapParser
-from sner.server.parser.nmap import NmapParser
 from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue, Target
 
@@ -98,41 +93,3 @@ def queue_prune_command(queue_name):
     for job in Job.query.filter(Job.queue_id == queue.id).all():
         job_delete(job)
     sys.exit(0)
-
-
-PLANNER_POSTDISCO_QUEUE = 'inet version scan basic'
-PLANNER_LOOP_SLEEP = 60
-
-
-@command.command(name='planner', help='run planner daemon')
-@with_appcontext
-@click.option('--oneshot', is_flag=True)
-def planner(**kwargs):
-    """run planner daemon"""
-
-    archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
-    archive_dir.mkdir(parents=True, exist_ok=True)
-
-    loop = True
-    while loop:
-        # trails: sner is main, sweep is prio
-        for trail in ['sner', 'sweep']:
-            disco_queues_ids = db.session.query(Queue.id).filter(Queue.name.like(f'{trail}_%_disco %'))
-            postdisco_queue = Queue.query.filter(Queue.name.like(f'{trail}_%_data {PLANNER_POSTDISCO_QUEUE}')).one_or_none()
-            for finished_job in Job.query.filter(Job.queue_id.in_(disco_queues_ids), Job.retval == 0).all():
-                services = NmapParser.service_list(finished_job.output_abspath, exclude_states=['filtered', 'closed'])
-                current_app.logger.debug('parsed %d services from %s', len(services), finished_job)
-                queue_enqueue(postdisco_queue, services)
-                copy2(finished_job.output_abspath, archive_dir)
-                job_delete(finished_job)
-
-            data_queues_ids = db.session.query(Queue.id).filter(Queue.name.like(f'{trail}_%_data %'))
-            for finished_job in Job.query.filter(Job.queue_id.in_(data_queues_ids), Job.retval == 0).all():
-                current_app.logger.debug('importing %s to storage', finished_job)
-                ManymapParser.import_file(finished_job.output_abspath)
-                copy2(finished_job.output_abspath, archive_dir)
-                job_delete(finished_job)
-
-        sleep(PLANNER_LOOP_SLEEP)
-        if kwargs['oneshot']:
-            loop = False
