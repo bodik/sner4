@@ -71,7 +71,7 @@ def initdata():  # pylint: disable=too-many-statements
 
     # pentest trail
     queue = Queue(
-        name='pentest_010 dns recon',
+        name='pentest_020 dns recon',
         config=yaml_dump({'module': 'nmap', 'args': '-sL -Pn'}),
         group_size=20,
         priority=10,
@@ -81,7 +81,7 @@ def initdata():  # pylint: disable=too-many-statements
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
     db.session.add(Queue(
-        name='pentest_020 full tcp scan',
+        name='pentest_022 full tcp scan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
@@ -92,60 +92,67 @@ def initdata():  # pylint: disable=too-many-statements
 
     # sner (main) trail
     db.session.add(Queue(
-        name='sner_110_disco top1000 ack scan',
+        name='sner_100_disco top1000 ack scan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sA --top-ports 1000 -Pn',
             'timing_perhost': 10
         }),
         group_size=400,
-        priority=12
+        priority=12,
+        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sner_200_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sner_115_disco top10000 ack scan',
+        name='sner_105_disco top10000 ack scan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sA --top-ports 10000 -Pn',
             'timing_perhost': 8
         }),
         group_size=1000,
-        priority=10
+        priority=10,
+        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sner_200_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sner_210_data inet version scan basic',
+        name='sner_200_data inet version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
-        priority=15
+        priority=15,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
-        name='sner_211_data inet version scan intense',
+        name='sner_205_data inet version scan intense',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 8 -Pn', 'delay': 10}),
         group_size=50,
-        priority=15
+        priority=15,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
         name='sner_250_data ftp sweep',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script ftp-anon.nse -Pn', 'delay': 10}),
         group_size=50,
-        priority=15
+        priority=15,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
         name='sner_251_data http titles',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script http-title.nse -Pn', 'delay': 10}),
         group_size=50,
-        priority=15
+        priority=15,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
         name='sner_252_data ldap rootdse',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse -Pn', 'delay': 10}),
         group_size=50,
-        priority=15
+        priority=15,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     # sweep (prio) trail
@@ -157,14 +164,16 @@ def initdata():  # pylint: disable=too-many-statements
             'timing_perhost': 1
         }),
         group_size=4000,
-        priority=50
+        priority=50,
+        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sweep_301_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sweep_350_data inet version scan basic',
+        name='sweep_301_data inet version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
-        priority=55
+        priority=55,
+        workflow=yaml_dump({'step': 'import'})
     ))
 
     # storage test data

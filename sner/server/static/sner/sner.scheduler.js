@@ -29,7 +29,7 @@ class SnerSchedulerComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> scheduler.job_delete_route job_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 
-			'render_yaml': `<pre><code class="language-yaml">{{data}}</code></pre>`,
+			'render_yaml': `{{#if data}}<pre><code class="language-yaml">{{data}}</code></pre>{{/if}}`,
 		};
 
 		super.setup();
