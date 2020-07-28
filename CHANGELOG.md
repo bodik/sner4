@@ -1,5 +1,23 @@
 # sner4 changelog
 
+## 0.2.0 - towards planner
+
+* fixes
+  * general: use upstream sqlalchemy-filters
+  * scheduler: fix runnaway assignments when server busy
+  * storage: fix report generation when cells would contain >=64k chars
+  * storage: handling line-endings during import and editing
+  * storage: fix row ordering upon annotation
+
+* features
+  * general: all test models and data created through factoryboy
+  * scheduler: simplified task/queue concept only to queues
+  * scheduler: server modules refactored heavily to reflect somewhat standard flask app architecture
+  * scheduler: droped support to reference queue by numeric id
+  * scheduler: added rich module configuration
+  * storage: added timestams to all storage models
+  * storage: add refs for metasploit modules
+
 ## 0.1.2 - prod feedbacks
 
 * fixes and refactorings
