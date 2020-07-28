@@ -84,6 +84,7 @@
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.note_list_route') }}">Notes</a></li>
 					{%- elif active_subsystem == 'visuals' -%}
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.workflowtree_route') }}">Workflow tree</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.dnstree_route', crop=1) }}">DNS tree</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portmap_route') }}">Portmap</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portinfos_route') }}">Port infos</a></li>

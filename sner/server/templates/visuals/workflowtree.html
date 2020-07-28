@@ -1,0 +1,161 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Visuals / Scheduler workflows{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
+{% endblock %}
+
+{% block style %}
+<style type="text/css">
+svg {
+	border:1px solid lightgrey;
+}
+.links {
+	stroke: lightgray; stroke-width: 2px;
+}
+.nodes {}
+.text {
+	font-size: small;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Visuals', 'Scheduler workflow tree']) %}{% endcall %}
+<!--
+	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
+	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
+	https://github.com/ninjaconcept/d3-force-directed-graph
+	https://bl.ocks.org/rofrischmann/74e3b61530c350d1ec1771416249a535
+	https://bl.ocks.org/mbostock/1129492
+-->
+<div class="text-right py-1">
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled">distance:</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="distance:100">100</a>
+		<a class="btn btn-outline-secondary abutton_modify_link" data-args="distance:200">200</a>
+	</div>
+</div>
+
+<div id="visual">
+	<svg></svg>
+</div>
+
+<script>
+function remToPixels(rem) {
+	return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+
+// globals
+var url_params = new URLSearchParams(window.location.search);
+if (!url_params.has('distance')) { url_params.set('distance', '200'); }
+
+//graph
+var colors = d3.scaleOrdinal(d3.schemeCategory20);
+var radius = 5;
+
+var width = $("#visual")[0].clientWidth;
+var height = window.innerHeight - remToPixels(9.0);
+var svg = d3.select('svg')
+	.attr('width', width)
+	.attr('height', height);
+
+var linkElements;
+var nodeElements;
+var textElements;
+
+var linkForce = d3.forceLink()
+	.id(function (link) { return link.id })
+	.distance(parseInt(url_params.get('distance'))).strength(1);
+
+var simulation = d3.forceSimulation()
+	.force('link', linkForce)
+	.force('charge', d3.forceManyBody().strength(-100))
+	.force('center', d3.forceCenter(width / 2, height / 2));
+
+var dragDrop = d3.drag()
+	.on('start', function (node) {
+		node.fx = node.x;
+		node.fy = node.y;
+	})
+	.on('drag', function (node) {
+		simulation.alphaTarget(0.7).restart();
+		node.fx = d3.event.x;
+		node.fy = d3.event.y;
+	})
+	.on('end', function (node) {
+		if (!d3.event.active) {
+			simulation.alphaTarget(0);
+		}
+		node.fx = null;
+		node.fy = null;
+	});
+
+d3.json(Flask.url_for('visuals.workflowtree_json_route') + window.location.search, function(data) {
+	update(data.nodes, data.links);
+});
+
+function update(nodes, links) {
+	linkElements = svg.append("g")
+		.attr("class", "links")
+		.selectAll("line")
+		.data(links)
+		.enter().append("line")
+			.attr("class", "link");
+
+
+	nodeElements = svg.append("g")
+		.attr("class", "nodes")
+		.selectAll("circle")
+		.data(nodes)
+		.enter().append("circle")
+			.attr("class", "node")
+			.attr("r", function (d, i) { return (d.hasOwnProperty('size') ? d.size : 10); })
+			.style("fill", function (d, i) {return colors(i);})
+			.call(dragDrop)
+	nodeElements
+		.append("title")
+		.text(function (d) { return d.id; });
+
+
+	textElements = svg.append("g")
+		.attr("class", "texts")
+		.selectAll("text")
+		.data(nodes)
+		.enter().append("text")
+			.attr("class", "text")
+			.text(function (d) { return d.name; })
+			.attr("dx", 15)
+			.attr("dy", 4);
+
+
+	simulation
+		.nodes(nodes)
+		.on("tick", ticked);
+	simulation
+		.force("link")
+		.links(links);
+}
+
+function ticked() {
+	nodeElements
+		.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
+		.attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
+
+	textElements
+		.attr('x', function (d) { return d.x })
+		.attr('y', function (d) { return d.y });
+
+	linkElements
+		.attr('x1', function (d) { return d.source.x })
+		.attr('y1', function (d) { return d.source.y })
+		.attr('x2', function (d) { return d.target.x })
+		.attr('y2', function (d) { return d.target.y });
+}
+
+// graph controls
+$('.abutton_modify_link').each(Sner.visuals.action_modify_link);
+</script>
+{% endblock %}

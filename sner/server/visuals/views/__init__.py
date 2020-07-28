@@ -17,4 +17,5 @@ def index_route():
 
 import sner.server.visuals.views.dnstree  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.visuals.views.portmap  # noqa: E402  pylint: disable=wrong-import-position
-import sner.server.visuals.views.portinfos  # noqa: E402,F401  pylint: disable=wrong-import-position
+import sner.server.visuals.views.portinfos  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.visuals.views.workflowtree  # noqa: E402,F401  pylint: disable=wrong-import-position
