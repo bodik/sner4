@@ -125,9 +125,9 @@ Scheduler provides workload configuration and distribution mechanism throug
 definitions of Tasks, Queues, Exclusions and Jobs.
 
 * **Queue** -- an agent module configuration (yaml encoded), scheduling specs
-  (group_size, priority, active) and list of targets. Each module has a
-  different config and target specification, see corresponding module
-  implementation for details.
+  (group_size, priority, active) and list of targets and optional workflow
+  config. Each module has a different config and target specification, see
+  corresponding module implementation for details.
 
 * **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
   continuous recons, some parts of monitored networks must be avoided for
@@ -148,10 +148,8 @@ management.
 #### Server: Planner
 
 Planner is a daemon handling simple automation for discovery and version
-scanning as well as importing data into Storage subsystem. Currently two
-*trails* are supported by the planner. `sner_` trail is supposed for long term
-and (TBD: periodic scanning) and `sweep_` is for fast/priority portsweeps.
-
+scanning as well as importing data into Storage subsystem. Planner handles
+finished jobs acording it's queue workflow configuration.
 
 
 ### 2.3 Data management subsystem
@@ -173,8 +171,9 @@ nessus).
 
 #### Server: Visuals
 
-Visualization modules can be used to get insight about current storage data:
+Visualization modules can be used to visualize various informations stored in database:
 
+* Workflow tree
 * DNS tree
 * Portmap explorer
 * (Service) Port infos

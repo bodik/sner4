@@ -1,6 +1,11 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
 sner.server planner command module
+
+Planner handles finished jobs acording to queue workflow configuration. The
+main task is to requeue discovered targets into subsequent queues or import
+scan results into storage. Workflow configuration must be acording to
+WORKFLOW_SCHEMA schema.
 """
 
 import signal
