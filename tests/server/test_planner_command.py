@@ -3,10 +3,10 @@
 planner command tests
 """
 
+import multiprocessing
 from pathlib import Path
-from unittest.mock import patch
+from time import sleep
 
-import sner.server.planner_command
 from sner.server.planner_command import command
 from sner.server.scheduler.models import Target
 from sner.server.storage.models import Service
@@ -39,8 +39,7 @@ def test_planner_command(runner, queue_factory, job_completed_factory):
     )
 
     # test itself
-    with patch.object(sner.server.planner_command, 'PLANNER_LOOP_SLEEP', 0):
-        result = runner.invoke(command, ['--oneshot'])
+    result = runner.invoke(command, ['--oneshot'])
     assert result.exit_code == 0
 
     # simplified assertion
@@ -80,6 +79,18 @@ def test_planner_command_invalid_workflows(runner, queue_factory, job_completed_
     job_completed_factory.create(queue=invalid_next_queue, make_output=b'empty')
 
     # test itself
-    with patch.object(sner.server.planner_command, 'PLANNER_LOOP_SLEEP', 0):
-        result = runner.invoke(command, ['--oneshot'])
+    result = runner.invoke(command, ['--oneshot'])
     assert result.exit_code == 0
+
+
+def test_shutdown(runner):
+    """test planner signaled shutdown"""
+
+    proc = multiprocessing.Process(target=runner.invoke, args=(command, ['--loopsleep', '1']))
+    proc.start()
+    sleep(1)
+    assert proc.is_alive()
+
+    proc.terminate()
+    sleep(1)
+    assert not proc.is_alive()
