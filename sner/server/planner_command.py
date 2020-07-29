@@ -77,10 +77,15 @@ class Planner:
             while self.loop:
                 self._process_workflows()
                 self._cleanup_storage()
+
                 if oneshot:
                     self.loop = False
                 else:  # pragma: no cover ; running over multiprocessing
-                    sleep(loopsleep)
+                    # support for long loops, but allow fast shutdown
+                    # py35: Changed in version 3.5: The function now sleeps at least secs even if the sleep is interrupted by a signal,
+                    for _ in range(loopsleep):
+                        if self.loop:
+                            sleep(1)
 
     def _process_workflows(self):
         """process workflows over finished jobs"""
@@ -158,4 +163,4 @@ class Planner:
 def command(**kwargs):
     """run planner daemon"""
 
-    Planner().run(float(kwargs.get('loopsleep')), kwargs.get('oneshot'))
+    Planner().run(kwargs.get('loopsleep'), kwargs.get('oneshot'))

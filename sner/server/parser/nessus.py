@@ -26,7 +26,7 @@ class NessusParser(ParserBase):
         """import nessus data from file"""
 
         for item in NessusReportv2(path):
-            tmp = NessusParser._import_report_item(item)
+            NessusParser._import_report_item(item)
         db.session.commit()
 
     @staticmethod
