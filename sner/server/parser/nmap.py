@@ -54,11 +54,9 @@ class NmapParser(ParserBase):
         report = libnmap.parser.NmapParser.parse_fromstring(data)
         for ihost in report.hosts:
             host = NmapParser._import_host(ihost)
-
             for iservice in ihost.services:
                 NmapParser._import_service(host, iservice)
 
-            print('parsed host: %s' % host)
         db.session.commit()
 
     @staticmethod

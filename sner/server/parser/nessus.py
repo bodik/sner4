@@ -27,7 +27,6 @@ class NessusParser(ParserBase):
 
         for item in NessusReportv2(path):
             tmp = NessusParser._import_report_item(item)
-            print('parsed item: %s %s' % (tmp.host, tmp))
         db.session.commit()
 
     @staticmethod
