@@ -105,32 +105,6 @@ def test_report_command(runner, host_factory, vuln_factory):
     assert ',"TRIMMED",' in result.output
 
 
-def test_host_cleanup_command(runner, host_factory, service_factory):
-    """test host_cleanup command"""
-
-    host1 = host_factory.create(address='127.127.127.135', os='identified')
-    host2 = host_factory.create(address='127.127.127.134')
-    service_factory.create(host=host2, proto='tcp', port=1, state='anystate:reason')
-    host3 = host_factory.create(address='127.127.127.133', hostname='xxx', os='', comment='')
-    repr_host1, repr_host2, repr_host3 = repr(host1), repr(host2), repr(host3)
-    host3_id = host3.id
-
-    result = runner.invoke(command, ['host-cleanup', '--dry'])
-    assert result.exit_code == 0
-
-    assert repr_host1 not in result.output
-    assert repr_host2 not in result.output
-    assert repr_host3 in result.output
-    assert Host.query.count() == 3
-
-    result = runner.invoke(command, ['host-cleanup'])
-    assert result.exit_code == 0
-
-    hosts = Host.query.all()
-    assert len(hosts) == 2
-    assert host3_id not in [x.id for x in hosts]
-
-
 def test_service_list_command(runner, service):
     """test services listing"""
 
@@ -158,28 +132,3 @@ def test_service_list_command(runner, service):
     result = runner.invoke(command, ['service-list', '--filter', f'Service.port=="{service.port}"'])
     assert result.exit_code == 0
     assert f'{service.proto}://{host.address}:{service.port}\n' == result.output
-
-
-def test_service_cleanup_command(runner, host, service_factory, note_factory):
-    """test service_cleanup command"""
-
-    service1 = service_factory.create(host=host, proto='tcp', port=1, state='open:reason')
-    service2 = service_factory.create(host=host, proto='tcp', port=1, state='filtered:reason')
-    note_factory.create(host=host, service=service2, xtype='cleanuptest', data='atestdata')
-    repr_service1, repr_service2 = repr(service1), repr(service2)
-    service1_id = service1.id
-
-    result = runner.invoke(command, ['service-cleanup', '--dry'])
-    assert result.exit_code == 0
-
-    assert repr_service1 not in result.output
-    assert repr_service2 in result.output
-    assert Service.query.count() == 2
-
-    result = runner.invoke(command, ['service-cleanup'])
-    assert result.exit_code == 0
-
-    assert Note.query.count() == 0
-    services = Service.query.all()
-    assert len(services) == 1
-    assert services[0].id == service1_id

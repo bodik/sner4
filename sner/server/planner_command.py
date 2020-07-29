@@ -19,10 +19,13 @@ import yaml
 from flask import current_app
 from flask.cli import with_appcontext
 from schema import Or, Schema
+from sqlalchemy import func, not_, or_
 
+from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.scheduler.core import job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue
+from sner.server.storage.models import Host, Note, Service, Vuln
 
 
 WORKFLOW_SCHEMA = Schema(Or(
@@ -66,58 +69,92 @@ class Planner:
         self.log.info('terminate')
         self.loop = False
 
-    def process_queues(self):
-        """process queues"""
-
-        for queue in Queue.query.filter(Queue.workflow is not None).all():
-            for job in Job.query.filter(Job.queue == queue, Job.retval == 0).all():
-                try:
-                    queue_config = yaml.safe_load(queue.config)
-                    workflow_config = yaml.safe_load(queue.workflow)
-                except yaml.YAMLError as e:
-                    self.log.error(f'invalid queue config, {str(e)}')
-                    continue
-
-                try:
-                    parser = registered_parsers[queue_config['module']]
-                except KeyError:
-                    self.log.error(f'parser for queue module missing, queue %s', queue)
-                    continue
-
-                if workflow_config['step'] == 'enqueue_servicelist':
-                    next_queue = Queue.query.filter(Queue.name == workflow_config['queue']).one_or_none()
-                    if not next_queue:
-                        self.log.error(f'invalid next queue "%s"', workflow_config['queue'])
-                        continue
-                    queue_enqueue(next_queue, parser.service_list(job.output_abspath, exclude_states=['filtered', 'closed']))
-                    copy2(job.output_abspath, self.archive_dir)
-                    job_delete(job)
-
-                elif workflow_config['step'] == 'import':
-                    parser.import_file(job.output_abspath)
-                    copy2(job.output_abspath, self.archive_dir)
-                    job_delete(job)
-
-                else:
-                    self.log.error('invalid workflow config, queue %s', queue)
-
     def run(self, loopsleep, oneshot):
         """run planner loop"""
 
         self.loop = True
         with self.terminate_context():
             while self.loop:
-                self.process_queues()
+                self._process_workflows()
+                self._cleanup_storage()
                 if oneshot:
                     self.loop = False
                 else:  # pragma: no cover ; running over multiprocessing
                     sleep(loopsleep)
 
+    def _process_workflows(self):
+        """process workflows over finished jobs"""
+
+        for queue in Queue.query.filter(Queue.workflow is not None).all():
+            for job in Job.query.filter(Job.queue == queue, Job.retval == 0).all():
+                try:
+                    workflow = yaml.safe_load(queue.workflow)
+                    if workflow['step'] == 'enqueue_servicelist':
+                        self._step_enqueue_servicelist(job)
+                    elif workflow['step'] == 'import':
+                        self._step_import(job)
+                    else:
+                        raise ValueError('invalid workflow step, queue %s' % queue)
+                except Exception as e:  # pylint: disable=broad-except  ; a lot of things can go wrong during workflow, skip job and recover
+                    self.log.exception('workflow processing error', e)
+
+    def _step_enqueue_servicelist(self, job):
+        """perform step enqueue_service_list"""
+
+        workflow = yaml.safe_load(job.queue.workflow)
+        next_queue = Queue.query.filter(Queue.name == workflow['queue']).one()
+        config = yaml.safe_load(job.queue.config)
+        parser = registered_parsers[config['module']]
+        service_list = list(map(
+            lambda x: x.service,
+            filter(
+                lambda x: not (x.state.startswith('filtered') or x.state.startswith('closed')),
+                parser.service_list(job.output_abspath)
+            )
+        ))
+        queue_enqueue(next_queue, service_list)
+        copy2(job.output_abspath, self.archive_dir)
+        job_delete(job)
+
+    def _step_import(self, job):
+        """perform step enqueue_service_list"""
+
+        config = yaml.safe_load(job.queue.config)
+        parser = registered_parsers[config['module']]
+        parser.import_file(job.output_abspath)
+        copy2(job.output_abspath, self.archive_dir)
+        job_delete(job)
+
+    def _cleanup_storage(self):  # pylint: disable=no-self-use
+        """clean up storage from various import artifacts"""
+
+        # remove any but open:* state services
+        query_services = Service.query.filter(not_(Service.state.ilike('open:%')))
+        for service in query_services.all():
+            db.session.delete(service)
+        db.session.commit()
+
+        # remove hosts without any data attribute, service, vuln or note
+        services_count = func.count(Service.id)
+        vulns_count = func.count(Vuln.id)
+        notes_count = func.count(Note.id)
+        query_hosts = Host.query \
+            .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
+            .filter(
+                or_(Host.os == '', Host.os == None),  # noqa: E711  pylint: disable=singleton-comparison
+                or_(Host.comment == '', Host.comment == None)  # noqa: E711  pylint: disable=singleton-comparison
+            ) \
+            .having(services_count == 0).having(vulns_count == 0).having(notes_count == 0).group_by(Host.id)
+
+        for host in query_hosts.all():
+            db.session.delete(host)
+        db.session.commit()
+
 
 @click.command(name='planner', help='run planner daemon')
 @with_appcontext
 @click.option('--oneshot', is_flag=True)
-@click.option('--loopsleep', default=30)
+@click.option('--loopsleep', default=60)
 def command(**kwargs):
     """run planner daemon"""
 

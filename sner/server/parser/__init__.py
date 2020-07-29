@@ -4,9 +4,12 @@ sner parsers
 """
 
 from abc import ABC, abstractmethod
+from collections import namedtuple
 
 
 registered_parsers = {}  # pylint: disable=invalid-name
+
+ServiceListItem = namedtuple('ServiceListItem', ['service', 'state'])
 
 
 def register_parser(name):
@@ -26,6 +29,11 @@ class ParserBase(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def import_file(path):
         """import file from disk to storage"""
+
+    @staticmethod
+    @abstractmethod
+    def service_list(path):
+        """parse service list from path"""
 
 
 import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position

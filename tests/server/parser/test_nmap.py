@@ -6,6 +6,7 @@ nmap output parser tests
 import pytest
 from libnmap.parser import NmapParserException
 
+from sner.server.parser import ServiceListItem
 from sner.server.parser.nmap import NmapParser
 
 
@@ -22,10 +23,10 @@ def test_service_list():
     """check service list extraction"""
 
     expected = [
-        'tcp://127.0.0.1:22',
-        'tcp://127.0.0.1:25',
-        'tcp://127.0.0.1:139',
-        'tcp://127.0.0.1:445',
-        'tcp://127.0.0.1:5432'
+        ServiceListItem(service='tcp://127.0.0.1:22', state='open:syn-ack'),
+        ServiceListItem(service='tcp://127.0.0.1:25', state='open:syn-ack'),
+        ServiceListItem(service='tcp://127.0.0.1:139', state='open:syn-ack'),
+        ServiceListItem(service='tcp://127.0.0.1:445', state='open:syn-ack'),
+        ServiceListItem(service='tcp://127.0.0.1:5432', state='open:syn-ack')
     ]
     assert NmapParser.service_list('tests/server/data/parser-nmap-output.xml') == expected

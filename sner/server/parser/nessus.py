@@ -31,6 +31,11 @@ class NessusParser(ParserBase):
         db.session.commit()
 
     @staticmethod
+    def service_list(path):  # pragma: nocover  ; won't test
+        """return servicelist"""
+        raise NotImplementedError
+
+    @staticmethod
     def _import_report_item(report_item):
         """import nessus_v2 ReportItem 'element'"""
 

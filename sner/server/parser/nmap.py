@@ -11,7 +11,7 @@ import libnmap.parser
 
 from sner.lib import format_host_address, file_from_zip, is_zip
 from sner.server.extensions import db
-from sner.server.parser import ParserBase, register_parser
+from sner.server.parser import ParserBase, register_parser, ServiceListItem
 from sner.server.storage.models import Host, Note, Service
 
 
@@ -26,19 +26,17 @@ class NmapParser(ParserBase):
         NmapParser._data_to_storage(NmapParser._rawdata_from_path(path))
 
     @staticmethod
-    def service_list(path, exclude_states=None):
+    def service_list(path):
         """parse path and returns list of services in manymap target format"""
-
-        if exclude_states is None:
-            exclude_states = []
 
         services = []
         report = libnmap.parser.NmapParser.parse_fromstring(NmapParser._rawdata_from_path(path))
         for ihost in report.hosts:
             for iservice in ihost.services:
-                if iservice.state not in exclude_states:
-                    services.append('%s://%s:%d' % (iservice.protocol, format_host_address(ihost.address), iservice.port))
-
+                services.append(ServiceListItem(
+                    f'{iservice.protocol}://{format_host_address(ihost.address)}:{iservice.port}',
+                    f'{iservice.state}:{iservice.reason}'
+                ))
         return services
 
     @staticmethod
@@ -148,9 +146,6 @@ def debug_parser():  # pragma: no cover
 
     print('## service list parser')
     print(NmapParser.service_list(sys.argv[1]))
-
-    print('## service list parser filtered')
-    print(NmapParser.service_list(sys.argv[1], exclude_states=['filtered', 'closed']))
 
 
 if __name__ == '__main__':  # pragma: no cover
