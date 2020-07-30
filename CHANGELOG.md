@@ -11,6 +11,7 @@
 
 * features
   * general: all test models and data created through factoryboy
+  * general: mod_wsgi integration changed to gunicorn and proxy setup
   * scheduler: simplified task/queue concept only to queues
   * scheduler: server modules refactored heavily to reflect somewhat standard flask app architecture
   * scheduler: droped support to reference queue by numeric id
