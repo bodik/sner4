@@ -10,7 +10,7 @@ make venv
 
 make install-deps
 
-sudo -u postgres scripts/database_create.sh sner sner
+sudo -u postgres bin/database_create.sh sner sner
 sudo -u postgres psql -c "ALTER USER sner WITH ENCRYPTED PASSWORD 'password';"
 mkdir -p /var/lib/sner
 chown www-data /var/lib/sner
