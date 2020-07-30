@@ -223,7 +223,7 @@ systemctl enable --now sner.service
 apt-get install apache2
 cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 a2enmod proxy
-a2enmod proxy_html
+a2enmod proxy_http
 systemctl restart apache2
 ```
 
