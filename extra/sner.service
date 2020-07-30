@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve sner flask application
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/sner
+Environment="SCRIPT_NAME=/sner"
+ExecStart=/opt/sner/venv/bin/gunicorn --bind "127.0.0.1:18001" "sner.server.app:create_app()"
+
+[Install]
+WantedBy=multi-user.target

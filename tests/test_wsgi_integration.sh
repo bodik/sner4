@@ -3,7 +3,7 @@
 set -e
 
 apt-get -y install git sudo make postgresql-all
-apt-get -y install apache2 libapache2-mod-wsgi-py3
+apt-get -y install apache2
 
 make venv
 . venv/bin/activate
@@ -23,7 +23,13 @@ server:
 _EOF_
 make db
 
-cp wsgi.conf.example /etc/apache2/conf-enabled/sner-wsgi.conf
-/etc/init.d/apache2 restart
+cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
+a2enmod proxy
+a2enmod proxy_http
+systemctl restart apache2
+
+cp extra/sner.service /etc/systemd/system/sner.service
+systemctl daemon-reload
+systemctl enable --now sner
 
 curl http://localhost/sner/

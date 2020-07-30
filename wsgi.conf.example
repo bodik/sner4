@@ -1,8 +1,0 @@
-WSGIDaemonProcess sner user=www-data group=www-data threads=5 python-home=/opt/sner/venv python-path=/opt/sner/
-WSGIScriptAlias /sner /opt/sner/bin/server.wsgi
-WSGIPassAuthorization On
-<Directory /opt/sner>
-	WSGIProcessGroup sner
-	WSGIApplicationGroup %{GLOBAL}
-	Require all granted
-</Directory>
