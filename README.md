@@ -182,19 +182,12 @@ Visualization modules can be used to visualize various informations stored in da
 
 ## 3 Installation
 
-### 3.1 Pre-requisities
+### 3.1 Installation
 
 ```
-# general
+# pre-requisities
 apt-get install git sudo make postgresql-all
 
-# OPTIONAL: apache + wsgi
-apt-get install apache2 libapache2-mod-wsgi-py3
-```
-
-### 3.2 Installation
-
-```
 # clone from repository
 git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
@@ -207,7 +200,7 @@ make venv
 make install-deps
 ```
 
-### 3.3 Production post-installation
+### 3.2 Production post-installation
 
 ```
 # prepare database and datadir
@@ -221,10 +214,17 @@ cp sner.yaml.example /etc/sner.yaml
 editor /etc/sner.yaml
 make db
 
-# configure apache WSGI proxy
-cp wsgi.conf.example /etc/apache2/conf-enabled/sner-wsgi.conf
-editor /etc/apache2/conf-enabled/sner-wsgi.conf
-/etc/init.d/apache2 restart
+# configure gunicorn service
+cp extra/sner.service /etc/systemd/system/sner.service
+systemctl daemon-reload
+systemctl enable --now sner.service
+
+# configure apache proxy
+apt-get install apache2
+cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
+a2enmod proxy
+a2enmod proxy_html
+systemctl restart apache2
 ```
 
 ### 3.4 Development cycle
