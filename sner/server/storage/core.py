@@ -41,6 +41,18 @@ def annotate_model(model, model_id):
     return render_template('storage/annotate.html', form=form)
 
 
+def tag_add(model, tag):
+    """add tag to model in sqla trackable way"""
+
+    model.tags = list(set((model.tags or []) + [tag]))
+
+
+def tag_remove(model, tag):
+    """remove tag from model in sqla trackable way"""
+
+    model.tags = [x for x in (model.tags or []) if x != tag]
+
+
 def tag_model_multiid(model_class):
     """tag model by id"""
 
@@ -50,9 +62,9 @@ def tag_model_multiid(model_class):
         for item in model_class.query.filter(model_class.id.in_([tmp.data for tmp in form.ids.entries])).all():
             # full assignment must be used for sqla to realize the change
             if form.action.data == 'set':
-                item.tags = list(set((item.tags or []) + [tag]))
+                tag_add(item, tag)
             if form.action.data == 'unset':
-                item.tags = [x for x in item.tags if x != tag]
+                tag_remove(item, tag)
         db.session.commit()
         return '', HTTPStatus.OK
 

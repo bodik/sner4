@@ -63,14 +63,14 @@ tools, while *data management* part focuses on data analysis and management.
                         |            ^              |              |
       module1           |            |              +              |
       module2           |            |                            \|/
-      moduleX           |            |                    +-----------------+
-                        |            |                    |                 |
-                        |            |                    |  db/storage     |
-                        |      +--------------+           |                 |
-                        |      |              |           +-----------------+
-                        |      |  planner     |                    ^
-                        |      |              |                    |
+      moduleX           |      +--------------+           +-----------------+
+                        |      |              |           |                 |
+                        |      |   planner    |---------->|  db/storage     |
+                        |      |              |           |                 |
                         |      +--------------+           +-----------------+
+                        |                                          ^
+                        |                                          |
+                        |                                 +-----------------+
                         |                                 |                 |
                         |                                 |  visuals        |
                         |                                 |                 |
@@ -122,7 +122,7 @@ service sweep scanning), manymap (specific service scanning).
 #### Server: Scheduler
 
 Scheduler provides workload configuration and distribution mechanism throug
-definitions of Tasks, Queues, Exclusions and Jobs.
+definitions of Queues, Exclusions and Jobs.
 
 * **Queue** -- an agent module configuration (yaml encoded), scheduling specs
   (group_size, priority, active) and list of targets and optional workflow
@@ -147,9 +147,9 @@ management.
 
 #### Server: Planner
 
-Planner is a daemon handling simple automation for discovery and version
-scanning as well as importing data into Storage subsystem. Planner handles
-finished jobs acording it's queue workflow configuration.
+Planner is a Celery worker based daemon, performing automation over scheduler
+queues (discovery to version scanning requeue, storage import, rescanning,
+...).
 
 
 ### 2.3 Data management subsystem
@@ -186,7 +186,7 @@ Visualization modules can be used to visualize various informations stored in da
 
 ```
 # pre-requisities
-apt-get install git sudo make postgresql-all
+apt-get install git sudo make postgresql-all redis-server
 
 # clone from repository
 git clone https://github.com/bodik/sner4 /opt/sner
@@ -209,15 +209,15 @@ sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
 mkdir -p /var/lib/sner
 chown www-data /var/lib/sner
 
-# configure project and create db schema
+# configure and create db schema
 cp sner.yaml.example /etc/sner.yaml
 editor /etc/sner.yaml
 make db
 
 # configure gunicorn service
-cp extra/sner.service /etc/systemd/system/sner.service
+cp extra/sner-web.service /etc/systemd/system/sner-web.service
 systemctl daemon-reload
-systemctl enable --now sner.service
+systemctl enable --now sner-web.service
 
 # configure apache proxy
 apt-get install apache2
@@ -225,6 +225,11 @@ cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 a2enmod proxy
 a2enmod proxy_http
 systemctl restart apache2
+
+# configure planner service
+cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
+systemctl daemon-reload
+systemctl enable --now sner-planner.service
 ```
 
 ### 3.4 Development cycle
@@ -252,12 +257,12 @@ bin/server run
 
 ### 4.1 Reconnaissance scenario
 
-1. Select existing or define new queue: *scheduler > queues > add | edit*
-2. Generate target list
+1. Generate target list
 	* manualy
 	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
 	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
-3. Setup exclusions (*scheduler > exclusions > add | edit*)
+2. Setup exclusions (*scheduler > exclusions > add | edit*)
+3. Select or define queue: *scheduler > queues > add | edit*
 4. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
 	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
@@ -269,9 +274,8 @@ bin/server run
 
 ### 4.2 Data evaluation scenario
 
-1. Import existing data with one of the available parsers: `bin/server storage import <parser name> <filename>`
-2. Use web interface to consult the data: *storage > hosts | services | vulns | notes | ...*
-3. Manage data in storage
+1. Import existing data with suitable parser: `bin/server storage import <parser name> <filename>`
+2. Use web interface to consult or manage the data: *storage > hosts | services | vulns | notes | ...*
 	* use CRUD, comments or tags to sort the data out
 	* use server shell for advanced analysis
 4. Generate preliminary vulnerability report: *storage > vulns > Generate report*
@@ -282,52 +286,40 @@ bin/server run
 #### Use-case: Basic dns recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'dns recon' --file=-
-bin/agent --debug --queue 'dns recon'
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'pentest dns recon' --file=-
+bin/agent --debug --queue 'pentest dns recon'
 ```
 
 #### Use-case: Long-term scanning strategy aka the Planner
 
-1. Run planner
+1. Configure and run planner
 
     ```
-    bin/server scheduler planner &
+    editor /etc/sner.yaml
+    bin/server planner run &
     ```
 
-2. Queue targets for (service) discovery
+2. Queue targets for service discovery
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_115_disco top10000 ack scan' --file=-
+        | bin/server scheduler queue-enqueue 'sner_disco ack scan top10000' --file=-
     ```
 
-3. Possible targets will be selected from discovery results and enqueued for
-   version scanning (automated by planner). Version scan results will be pushed
-   into Storage subsystem.
+3. Detected services will be requeued for detailed version scanning (by
+   planner). Results will be imported into Storage subsystem.
 
 4. Optionaly: services without identification can be requeued for high intensity version scan.
 
     ```
     bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue-enqueue 'sner_211_data inet version scan intense' --file=-
+        | bin/server scheduler queue-enqueue 'sner_data version scan intense' --file=-
     ```
 
 6. TBD: ???Fully rescan alive hosts
 
 
-#### Use-case: Service specific scanning
-
-##### Automated (module manymap)
-
-```
-# ftp sweep
-bin/server storage service-list --filter 'Service.state ilike "open%" AND Service.name == "ftp"' \
-    | bin/server scheduler queue-enqueue 'sner_250_data ftp sweep' --file=-
-```
-
-##### Manual
-
-Generally pure nmap can be used to do specific sweeps/scanning.
+#### Use-case: External scan data processing
 
 ```
 # template

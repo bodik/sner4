@@ -1,5 +1,5 @@
 [Unit]
-Description=Gunicorn instance to serve sner flask application
+Description=Sner web ui (gunicorn hosted flask app)
 After=network.target
 
 [Service]

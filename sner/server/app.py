@@ -12,7 +12,7 @@ from flask import Flask, render_template
 from flask_wtf.csrf import generate_csrf
 
 from sner.lib import get_dotted, load_yaml
-from sner.server.extensions import db, jsglue, login_manager, webauthn
+from sner.server.extensions import celery, db, jsglue, login_manager, webauthn
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
 
@@ -25,7 +25,7 @@ from sner.server.visuals.views import blueprint as visuals_blueprint
 
 from sner.server.auth.commands import command as auth_command
 from sner.server.db_command import command as db_command
-from sner.server.planner_command import command as planner_command
+from sner.server.planner.commands import command as planner_command
 from sner.server.scheduler.commands import command as scheduler_command
 from sner.server.storage.commands import command as storage_command
 
@@ -36,6 +36,9 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 
 
 DEFAULT_CONFIG = {
+    # celery
+    'CELERY_BROKER_URL': 'redis://localhost/0',
+
     # flask
     'SECRET_KEY': os.urandom(32),
 
@@ -49,7 +52,8 @@ DEFAULT_CONFIG = {
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600,
     'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell'],
-    'SNER_TRIM_REPORT_CELLS': 65000
+    'SNER_TRIM_REPORT_CELLS': 65000,
+    'SNER_PLANNER': {}
 }
 
 
@@ -58,13 +62,19 @@ def config_from_yaml(filename):
 
     config_dict = load_yaml(filename)
     config = {
-        'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
+        # celery
+        'CELERY_BROKER_URL': get_dotted(config_dict, 'planner.broker_url'),
+        # flask
         'APPLICATION_ROOT': get_dotted(config_dict, 'server.application_root'),
+        'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
+        # sqlalchemy
         'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
+        # sner
         'SNER_VAR': get_dotted(config_dict, 'server.var'),
         'SNER_SESSION_IDLETIME': get_dotted(config_dict, 'server.session_idletime'),
         'SNER_TAGS': get_dotted(config_dict, 'server.tags'),
-        'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells')
+        'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells'),
+        'SNER_PLANNER': get_dotted(config_dict, 'planner')
     }
     return {k: v for k, v in config.items() if v is not None}
 
@@ -80,6 +90,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 
+    celery.init_app(app)
     db.init_app(app)
     jsglue.init_app(app)
     login_manager.init_app(app)

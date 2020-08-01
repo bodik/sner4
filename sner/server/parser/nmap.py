@@ -40,6 +40,11 @@ class NmapParser(ParserBase):
         return services
 
     @staticmethod
+    def host_list(path):    # pragma: nocover  ; won't test
+        """return host list"""
+        raise NotImplementedError
+
+    @staticmethod
     def _rawdata_from_path(path):
         """get path contents or output.xml from archive"""
 

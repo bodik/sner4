@@ -140,3 +140,28 @@ def valid_next_url(nexturl):
 def yaml_dump(data):
     """dump data with style"""
     return yaml.dump(data, sort_keys=False, indent=4, width=80)
+
+
+def windowed_query(query, column, windowsize):
+    """"
+    Break a Query into chunks on a given column.
+    https://github.com/sqlalchemy/sqlalchemy/wiki/RangeQuery-and-WindowedRangeQuery
+    """
+
+    single_entity = query.is_single_entity
+    query = query.add_columns(column).order_by(column)
+    last_id = None
+
+    while True:
+        subq = query
+        if last_id is not None:
+            subq = subq.filter(column > last_id)
+        chunk = subq.limit(windowsize).all()
+        if not chunk:
+            break
+        last_id = chunk[-1][-1]
+        for row in chunk:
+            if single_entity:
+                yield row[0]
+            else:
+                yield row[0:-1]

@@ -24,6 +24,7 @@ class Host(db.Model):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    rescan_time = db.Column(db.DateTime)
 
     services = relationship('Service', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
     vulns = relationship('Vuln', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
@@ -47,6 +48,7 @@ class Service(db.Model):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    rescan_time = db.Column(db.DateTime)
 
     host = relationship('Host', back_populates='services')
     vulns = relationship('Vuln', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
@@ -83,6 +85,7 @@ class Vuln(db.Model):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    rescan_time = db.Column(db.DateTime)
 
     host = relationship('Host', back_populates='vulns')
     service = relationship('Service', back_populates='vulns')

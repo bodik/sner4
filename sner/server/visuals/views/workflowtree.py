@@ -3,8 +3,7 @@
 controller workflowtree
 """
 
-import yaml
-from flask import jsonify, render_template
+from flask import current_app, jsonify, render_template
 
 from sner.server.auth.core import role_required
 from sner.server.scheduler.models import Queue
@@ -27,20 +26,19 @@ def workflowtree_json_route():
     def node_by_name(name):
         return next(filter(lambda obj: obj.get('name') == name, nodes), None)
 
-    nodes = [{'id': 0, 'name': 'import', 'size': 20}]
+    config = current_app.config['SNER_PLANNER']
+
+    nodes = [{'id': 0, 'name': 'import_jobs', 'size': 20}]
     for idx, queue in enumerate(Queue.query.all(), 1):
         nodes.append({'id': idx, 'name': queue.name})
 
     links = []
-    for queue in Queue.query.filter(Queue.workflow != None).all():   # noqa: E711  pylint: disable=singleton-comparison
-        workflow = yaml.safe_load(queue.workflow)
+    for qname in config.get('import_jobs', []):
+        links.append({'source': node_by_name(qname)['id'], 'target': node_by_name('import_jobs')['id']})
 
-        if workflow['step'] == 'import':
-            links.append({'source': node_by_name(queue.name)['id'], 'target': node_by_name('import')['id']})
-
-        elif workflow['step'].startswith('enqueue_'):
-            target = node_by_name(workflow['queue'])
-            if target:
-                links.append({'source': node_by_name(queue.name)['id'], 'target': target['id']})
+    for qname, next_qname in config.get('enqueue_servicelist', []) + config.get('enqueue_hostlist', []):
+        target = node_by_name(next_qname)
+        if target:
+            links.append({'source': node_by_name(qname)['id'], 'target': target['id']})
 
     return jsonify({'nodes': nodes, 'links': links})

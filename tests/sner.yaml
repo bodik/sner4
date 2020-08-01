@@ -4,3 +4,6 @@ server:
     var: '/tmp/sner_test_var'
     application_root: '/'
     trim_report_cells: 1000
+
+planner:
+    broker_url: 'redis://localhost/1'

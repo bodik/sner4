@@ -49,7 +49,6 @@ def test_queue_add_route(cl_operator, queue_factory):
     form['config'] = aqueue.config
     form['group_size'] = aqueue.group_size
     form['priority'] = aqueue.priority
-    form['workflow'] = aqueue.workflow
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -82,28 +81,6 @@ def test_queue_add_route_config_validation(cl_operator, queue_factory):
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid config")]')
-
-
-def test_queue_add_route_workflow_validation(cl_operator, queue_factory):
-    """queue add route test"""
-
-    aqueue = queue_factory.build()
-
-    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
-    form['name'] = aqueue.name
-    form['config'] = aqueue.config
-    form['group_size'] = aqueue.group_size
-    form['priority'] = aqueue.priority
-    form['workflow'] = 'invalid:\nyaml'
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid YAML")]')
-
-    form = response.form
-    form['workflow'] = "step: 'notexist'"
-    response = form.submit()
-    assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid workflow")]')
 
 
 def test_queue_edit_route(cl_operator, queue):

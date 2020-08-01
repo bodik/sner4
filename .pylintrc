@@ -1,3 +1,6 @@
+[MASTER]
+load-plugins=pylint_celery
+
 [FORMAT]
 max-line-length=150
 

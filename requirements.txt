@@ -1,9 +1,11 @@
+celery[redis]
 coverage
 defusedxml
 fido2
 file-magic
 flake8
 flask
+flask-celeryext
 flask-login
 flask-sqlalchemy
 flask-wtf
@@ -20,6 +22,7 @@ pytest-flask
 pytest-httpserver
 pytest-selenium
 python-libnmap
+pytimeparse
 pyyaml
 requests
 schema

@@ -6,10 +6,7 @@ visuals.views.workflowtree tests
 import json
 from http import HTTPStatus
 
-from flask import url_for
-
-from sner.server.utils import yaml_dump
-
+from flask import current_app, url_for
 
 def test_workflowtree_route(cl_operator):
     """workflowtree route test"""
@@ -21,8 +18,13 @@ def test_workflowtree_route(cl_operator):
 def test_workflowtree_json_route(cl_operator, queue_factory):
     """workflowtree.json route test"""
 
-    queue_factory.create(name='test queue 1', workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'test queue 2'}))
-    queue_factory.create(name='test queue 2', workflow=yaml_dump({'step': 'import'}))
+    queue_factory.create(name='test queue 1')
+    queue_factory.create(name='test queue 2')
+
+    current_app.config['SNER_PLANNER'] = {
+        'enqueue_servicelist': [('test queue 1', 'test queue 2')],
+        'import_jobs': ['test queue 2'],
+    }
 
     response = cl_operator.get(url_for('visuals.workflowtree_json_route', crop=0))
     assert response.status_code == HTTPStatus.OK

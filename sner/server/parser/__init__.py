@@ -35,7 +35,13 @@ class ParserBase(ABC):  # pylint: disable=too-few-public-methods
     def service_list(path):
         """parse service list from path"""
 
+    @staticmethod
+    @abstractmethod
+    def host_list(path):
+        """parse host list from path"""
+
 
 import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.nessus  # noqa: E402  pylint: disable=wrong-import-position
-import sner.server.parser.nmap  # noqa: E402,F401  pylint: disable=wrong-import-position
+import sner.server.parser.nmap  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.parser.six_dns_discover  # noqa: E402,F401  pylint: disable=wrong-import-position

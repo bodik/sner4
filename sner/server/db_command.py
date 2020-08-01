@@ -57,9 +57,8 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(Excl(family=ExclFamily.network, value='127.66.66.0/26', comment='blacklist 1'))
     db.session.add(Excl(family=ExclFamily.regex, value=r'.*donotscan.*', comment='blacklist 2'))
 
-    # devel trail
     queue = Queue(
-        name='dev_010 dummy',
+        name='dev dummy',
         config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
         group_size=3,
         priority=10,
@@ -69,9 +68,8 @@ def initdata():  # pylint: disable=too-many-statements
     for target in range(100):
         db.session.add(Target(target=target, queue=queue))
 
-    # pentest trail
     queue = Queue(
-        name='pentest_020 dns recon',
+        name='pentest dns recon',
         config=yaml_dump({'module': 'nmap', 'args': '-sL -Pn'}),
         group_size=20,
         priority=10,
@@ -81,7 +79,7 @@ def initdata():  # pylint: disable=too-many-statements
         db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
     db.session.add(Queue(
-        name='pentest_022 full tcp scan',
+        name='pentest full syn scan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
@@ -90,90 +88,88 @@ def initdata():  # pylint: disable=too-many-statements
         priority=10,
     ))
 
-    # sner (main) trail
     db.session.add(Queue(
-        name='sner_100_disco top1000 ack scan',
-        config=yaml_dump({
-            'module': 'nmap',
-            'args': '-sA --top-ports 1000 -Pn',
-            'timing_perhost': 10
-        }),
+        name='sner_disco ack scan top1000',
+        config=yaml_dump({'module': 'nmap', 'args': '-sA --top-ports 1000 -Pn', 'timing_perhost': 10}),
         group_size=400,
         priority=12,
-        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sner_200_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sner_105_disco top10000 ack scan',
-        config=yaml_dump({
-            'module': 'nmap',
-            'args': '-sA --top-ports 10000 -Pn',
-            'timing_perhost': 8
-        }),
+        name='sner_disco ack scan top10000',
+        config=yaml_dump({'module': 'nmap', 'args': '-sA --top-ports 10000 -Pn', 'timing_perhost': 8}),
         group_size=1000,
         priority=10,
-        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sner_200_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sner_200_data inet version scan basic',
+        name='sner_data version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
         priority=15,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
-        name='sner_205_data inet version scan intense',
+        name='sner_data version scan intense',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 8 -Pn', 'delay': 10}),
         group_size=50,
         priority=15,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
-        name='sner_250_data ftp sweep',
+        name='sner_disco ipv6 dns discover',
+        config=yaml_dump({'module': 'six_dns_discover', 'delay': 1}),
+        group_size=1000,
+        priority=10,
+    ))
+
+    db.session.add(Queue(
+        name='sner_disco ipv6 ack scan top10000',
+        config=yaml_dump({'module': 'nmap', 'args': '-6 -sA --top-ports 10000 -Pn', 'timing_perhost': 8}),
+        group_size=1000,
+        priority=10,
+    ))
+
+    db.session.add(Queue(
+        name='sner_data ipv6 version scan basic',
+        config=yaml_dump({'module': 'manymap', 'args': '-6 -sV --version-intensity 4 -Pn', 'delay': 10}),
+        group_size=50,
+        priority=15,
+    ))
+
+    db.session.add(Queue(
+        name='sner_data script scan ftp-anon',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script ftp-anon.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
-        name='sner_251_data http titles',
+        name='sner_data script scan http-title',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script http-title.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
     db.session.add(Queue(
-        name='sner_252_data ldap rootdse',
+        name='sner_data script scan ldap-rootdse',
         config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse -Pn', 'delay': 10}),
         group_size=50,
         priority=15,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
-    # sweep (prio) trail
     db.session.add(Queue(
-        name='sweep_300_disco portA ack scan',
-        config=yaml_dump({
-            'module': 'nmap',
-            'args': '-sA -p1099 -Pn',
-            'timing_perhost': 1
-        }),
+        name='sner_sweep ack scan portA',
+        config=yaml_dump({'module': 'nmap', 'args': '-sA -p1099 -Pn', 'timing_perhost': 1}),
         group_size=4000,
         priority=50,
-        workflow=yaml_dump({'step': 'enqueue_servicelist', 'queue': 'sweep_301_data inet version scan basic'})
     ))
 
     db.session.add(Queue(
-        name='sweep_301_data inet version scan basic',
+        name='sweep_sweep version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
         priority=55,
-        workflow=yaml_dump({'step': 'import'})
     ))
 
     # storage test data

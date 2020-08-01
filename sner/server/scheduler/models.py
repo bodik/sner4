@@ -25,7 +25,6 @@ class Queue(db.Model):
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
-    workflow = db.Column(db.Text)
 
     targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
     jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)

@@ -26,3 +26,14 @@ class ManymapParser(NmapParser):
                     NmapParser._data_to_storage(file_from_zip(path, ftmp).decode('utf-8'))
         else:
             ManymapParser._data_to_storage(Path(path).read_text())
+
+    @staticmethod
+    def service_list(path):  # pragma: nocover  ; won't test
+        """return service list"""
+        # break pylint dupllicate detection, 1
+        raise NotImplementedError
+
+    @staticmethod
+    def host_list(path):   # pragma: nocover  ; won't test
+        """return host list"""
+        raise NotImplementedError

@@ -31,7 +31,12 @@ class NessusParser(ParserBase):
 
     @staticmethod
     def service_list(path):  # pragma: nocover  ; won't test
-        """return servicelist"""
+        """return service list"""
+        raise NotImplementedError
+
+    @staticmethod
+    def host_list(path):  # pragma: nocover  ; won't test
+        """return host list"""
         raise NotImplementedError
 
     @staticmethod

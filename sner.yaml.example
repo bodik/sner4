@@ -11,3 +11,49 @@
 #    server: 'http://localhost:18000'
 #    apikey: 'generateit'
 #    queue: null
+#
+#planner:
+#    # all successfully finished jobs gets imported into storage
+#    import_jobs:
+#        - 'sner_data version scan basic'
+#        - 'sner_data version scan intense'
+#        - 'sner_data ipv6 version scan basic'
+#        - 'sner_data script scan ftp-anon'
+#        - 'sner_data script scan http-title'
+#        - 'sner_data script scan ldap-rootdse'
+#        - 'sweep_sweep version scan basic'
+#
+#    # all successfull jobs are requeued into next queue
+#    enqueue_servicelist:
+#       - ['sner_disco ack scan top1000', 'sner_data version scan basic']
+#       - ['sner_disco ack scan top10000', 'sner_data version scan basic']
+#       - ['sner_disco ipv6 ack scan top10000', 'sner_data ipv6 version scan basic']
+#       - ['sner_sweep ack scan portA', 'sweep_sweep version scan basic']
+#
+#    # all storage services are rescanned in interval (eg. 1week, 30days, ...)
+#    rescan_services:
+#        interval: '10days'
+#        queue4: 'sner_data version scan basic'
+#        queue6: 'sner_data ipv6 version scan basic'
+#
+#    # all storage hosts are rescanned in interval (eg. 1week, 30days, ...)
+#    rescan_hosts:
+#        interval: '30days'
+#        queue4: 'sner_disco ack scan top10000'
+#        queue6: 'sner_disco ipv6 ack scan top10000'
+#
+#    # set of netranges are fully rescanned in interval
+#    discover_ipv4:
+#        interval: '90days'
+#        netranges: []
+#        queue: 'sner_disco ack scan top10000'
+#
+#    # ipv6 addresses can be discovered by DNS from v4 ptr to aaaa mappings
+#    discover_ipv6_dns:
+#        interval: '90days'
+#        netranges: []
+#        queue: 'sner_disco ipv6 dns discover'
+#
+#    # all hosts/addrs discovered requeue for service discovery
+#    enqueue_hostlist:
+#        - ['sner_disco ipv6 dns discover', 'sner_disco ipv6 ack scan top10000']

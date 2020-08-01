@@ -8,8 +8,9 @@ from ipaddress import ip_network
 import pytest
 from flask import url_for
 
+from sner.server.extensions import db
 from sner.server.scheduler.models import Excl, ExclFamily
-from sner.server.utils import ExclMatcher, valid_next_url
+from sner.server.utils import ExclMatcher, valid_next_url, windowed_query
 
 
 def test_model_excl_validation():
@@ -65,3 +66,10 @@ def test_valid_next_url(app):  # pylint: disable=unused-argument
     assert valid_next_url(url_for('index_route'))
     assert not valid_next_url('http://invalid_route')
     assert not valid_next_url('invalid_route')
+
+
+def test_windowed_query(app, excl_network):  # pylint: disable=unused-argument
+    """test windowed query"""
+
+    assert list(windowed_query(Excl.query, Excl.id, 1))
+    assert list(windowed_query(db.session.query(Excl.id, Excl.id).select_from(Excl), Excl.id, 1))
