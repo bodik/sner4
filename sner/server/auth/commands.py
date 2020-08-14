@@ -4,6 +4,7 @@ auth commands
 """
 
 import sys
+from uuid import uuid4
 
 import click
 from flask import current_app
@@ -22,7 +23,7 @@ def command():
 @command.command(name='reset-password', help='reset password')
 @click.argument('username')
 @with_appcontext
-def passwordreset(username):
+def reset_password(username):
     """reset password for username"""
 
     user = User.query.filter(User.username == username).one_or_none()
@@ -34,3 +35,20 @@ def passwordreset(username):
     user.password = tmp_password
     db.session.commit()
     current_app.logger.info('new password "%s:%s"' % (user.username, tmp_password))
+
+
+@command.command(name='add-agent', help='add agent')
+@with_appcontext
+def add_agent():
+    """add new agent"""
+
+    apikey = PWS.generate_apikey()
+    agent = User(
+        username=f'agent_{uuid4()}',
+        apikey=apikey,
+        active=True,
+        roles=['agent']
+    )
+    db.session.add(agent)
+    db.session.commit()
+    current_app.logger.info(f'new agent {agent.username} apikey {apikey}')

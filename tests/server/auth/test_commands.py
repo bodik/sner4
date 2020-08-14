@@ -7,7 +7,7 @@ from sner.server.auth.commands import command
 from sner.server.auth.models import User
 
 
-def test_passwordreset_command(runner, user):
+def test_resetpassword_command(runner, user):
     """auth password reset command test"""
 
     old_password = user.password
@@ -20,3 +20,10 @@ def test_passwordreset_command(runner, user):
 
     tuser = User.query.get(user.id)
     assert tuser.password != old_password
+
+
+def test_addagent_command(runner):
+    """add agent command test"""
+
+    result = runner.invoke(command, ['add-agent'])
+    assert result.exit_code == 0
