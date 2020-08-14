@@ -56,6 +56,7 @@ def initdata():  # pylint: disable=too-many-statements
     # scheduler test data
     db.session.add(Excl(family=ExclFamily.network, value='127.66.66.0/26', comment='blacklist 1'))
     db.session.add(Excl(family=ExclFamily.regex, value=r'.*donotscan.*', comment='blacklist 2'))
+    db.session.add(Excl(family=ExclFamily.regex, value=r'^tcp://.*:22$', comment='avoid ssh'))
 
     queue = Queue(
         name='dev dummy',
