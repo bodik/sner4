@@ -8,6 +8,7 @@ from http import HTTPStatus
 
 from flask import current_app, url_for
 
+
 def test_workflowtree_route(cl_operator):
     """workflowtree route test"""
 
