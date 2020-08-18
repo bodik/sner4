@@ -12,7 +12,7 @@ from pathlib import Path
 from flask import current_app, url_for
 from sqlalchemy import create_engine
 
-from sner.agent import apikey_header
+from sner.agent.core import apikey_header
 from sner.server.extensions import db
 from sner.server.scheduler.models import Queue, Target
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=Sner agent
+After=network.target
+
+[Service]
+ExecStart=/opt/sner/venv/bin/python /opt/sner/bin/agent --debug
+WorkingDirectory=/tmp
+Type=simple
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -109,7 +109,7 @@ layer (modules). Generally, the agent instance gets assignment from server,
 performs the task, marshalls output and delivers it to the server. Agent
 provides several modes of execution (default, one-time execution, handling
 specific queue) and main module provides functions for process handling
-(shutdown after current task, immediate termination).
+(shutdown after current task SIGUSR1, immediate termination SIGTERM).
 
 All requests from agent must be authenticated with apikey for user account in
 role *agent*. Key can be specified in configuration file or by command-line
@@ -230,6 +230,13 @@ systemctl restart apache2
 cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
 systemctl daemon-reload
 systemctl enable --now sner-planner.service
+
+# configure agent service
+bin/server auth add-agent
+editor /etc/sner.yaml << agent apikey
+cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
+systemctl daemon-reload
+systemctl start sner-agent@1.service
 ```
 
 ### 3.4 Development cycle
@@ -266,8 +273,8 @@ bin/server run
 4. Enqueue targets
 	* web: *scheduler > queues > [queue] > enqueue*
 	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
-5. Run the agent `bin/agent &` (TODO: screen or systemd service)
-6. Monitor the queue until all jobs has been finished by agent
+5. Run the agent
+6. Monitor the queue until all jobs has been finished
 7. Stop the agent `bin/agent --shutdown [PID]`
 8. Recon data can be found in queue directories (`<SNER_VAR>/scheduler/<queue.id>`)
 

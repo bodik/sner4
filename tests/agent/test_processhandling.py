@@ -12,7 +12,7 @@ from uuid import uuid4
 
 from werkzeug.wrappers import Response
 
-from sner.agent import main as agent_main
+from sner.agent.core import main as agent_main
 from sner.server.scheduler.models import Queue
 
 
