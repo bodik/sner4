@@ -51,5 +51,6 @@ def dnstree_json_route():
                 hostnames_tree = to_tree(hostnames_tree, ['DOTROOT']+tmp)
 
     (nodes, links) = to_graph_data(None, hostnames_tree, [], [])
+    nodes[0].update({'size': 10})
 
     return jsonify({'nodes': nodes, 'links': links})

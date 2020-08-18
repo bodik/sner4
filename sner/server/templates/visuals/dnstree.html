@@ -120,7 +120,7 @@ function update(nodes, links) {
 		.data(nodes)
 		.enter().append("circle")
 			.attr("class", "node")
-			.attr("r", 5)
+			.attr("r", function (d, i) { return (d.hasOwnProperty('size') ? d.size : 5); })
 			.style("fill", function (d, i) {return colors(i);})
 			.call(dragDrop)
 	nodeElements
