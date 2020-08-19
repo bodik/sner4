@@ -3,10 +3,11 @@ Description=Sner planner (celery worker+beats)
 After=network.target
 
 [Service]
+ExecStart=/opt/sner/venv/bin/python /opt/sner/bin/server planner run
+WorkingDirectory=/opt/sner
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/sner
-ExecStart=/opt/sner/venv/bin/python /opt/sner/bin/server planner run
+SyslogIdentifier=sner-planner
 
 [Install]
 WantedBy=multi-user.target
