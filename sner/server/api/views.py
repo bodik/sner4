@@ -61,7 +61,7 @@ def assign_targets(queue_name=None):
     if queue_name:
         queue = query.filter(Queue.name == queue_name).one_or_none()
     else:
-        queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc()).first()
+        queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc(), func.random()).first()
 
     if not queue:
         return None, None
