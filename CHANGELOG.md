@@ -1,5 +1,14 @@
 # sner4 changelog
 
+## 0.3.0 - the staged planner
+
+* features
+  * planner:
+    * refactored queues workflows to stages (BC)
+    * implemented as celery worker and beats
+  * agent: restructured code from __init__ to core (BC)
+  * agent: six_dns_discover module to discover ipv6 addresses from ipv4 addrs and dns records
+
 ## 0.2.0 - towards planner
 
 * fixes
