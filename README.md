@@ -25,9 +25,9 @@ The main goal of this project is to create software suite for:
 
 2. Data analysis and management
 	* Flexible user-interface allows to analyze monitored infrastructure
-	  and manage information on on-demand and continuous basis
-	* Programmatical access to the data through standard ORM interface to
-	  provide further analysis capabilities
+	  and manage information on on-demand and continuous basis.
+	* Programmatical access to the data through ORM interface to
+	  provide further analysis capabilities.
 
 
 ### 1.1 Design overview
@@ -45,7 +45,7 @@ tools, while *data management* part focuses on data analysis and management.
 |                     | scheduler     | job distribution |
 |                     | planner       | management and scheduling for continuous recon |
 | **data management** |||
-|                     | parser        | agent module data parsing |
+|                     | parser        | agent module output data parsing |
 |                     | storage       | long term ip-centric storage |
 |                     | visuals       | read-only analytics and visualization user-interface |
 
@@ -76,9 +76,9 @@ tools, while *data management* part focuses on data analysis and management.
                         |                                 |                 |
                         |                                 +-----------------+
                         |
-                        |                                  module1
-                        +                                  module2
-                                                           moduleX
+                        |                                  visual1
+                        +                                  visual2
+                                                           visual3
 ```
 
 
@@ -105,18 +105,19 @@ analysis or out-of-interface data management.
 #### Agent
 
 Agent wraps an existing tools with the communication (agent) and execution
-layer (modules). Generally, the agent instance gets assignment from server,
-performs the task, marshalls output and delivers it to the server. Agent
+layer (modules). Generally, the agent instance fetches assignment from server,
+performs the task and sends results back to the server (scheduler). Agent
 provides several modes of execution (default, one-time execution, handling
-specific queue) and main module provides functions for process handling
-(shutdown after current task SIGUSR1, immediate termination SIGTERM).
+specific queue) and includes functions for process management (shutdown after
+current task - on SIGUSR1, immediate termination on SIGTERM).
 
 All requests from agent must be authenticated with apikey for user account in
 role *agent*. Key can be specified in configuration file or by command-line
 switch.
 
 Currently available modules are: dummy (testing), nmap (IP address scanning or
-service sweep scanning), manymap (specific service scanning). 
+service sweep scanning), manymap (specific service scanning), six_dns_discover
+(IPv6 address discovery from IPv4 and DNS records).
 
 
 #### Server: Scheduler
@@ -125,9 +126,9 @@ Scheduler provides workload configuration and distribution mechanism throug
 definitions of Queues, Exclusions and Jobs.
 
 * **Queue** -- an agent module configuration (yaml encoded), scheduling specs
-  (group_size, priority, active) and list of targets and optional workflow
-  config. Each module has a different config and target specification, see
-  corresponding module implementation for details.
+  (group_size, priority, active) and list of targets. Each module has a
+  different config and target specification, see corresponding module
+  implementation for details.
 
 * **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
   continuous recons, some parts of monitored networks must be avoided for
@@ -137,9 +138,9 @@ definitions of Queues, Exclusions and Jobs.
   all targets matching any configured exclusion during assignment creation
   process.
 
-* **Job** -- one assignment/job for the agent. JSON data and ZIP archive containing
-  input for agent/module and it's corresponding output parseable by *Data
-  management* (Storage) subsystem.
+* **Job** -- one assignment/job for the agent. JSON encoded assignment and the
+  job output in the form of a ZIP archive, parseable by *Data management* (Storage)
+  subsystem.
 
 CLI helpers are available for IP ranges enumerations and queues/targets
 management.
@@ -147,9 +148,14 @@ management.
 
 #### Server: Planner
 
-Planner is a Celery worker based daemon, performing automation over scheduler
-queues (discovery to version scanning requeue, storage import, rescanning,
-...).
+Planner is a Celery worker based daemon, works as automation layer over
+scheduler subsystem. According to it's configuration, planner can execute
+stages to handle:
+
+* automatic import of jobs output from queues (import_jobs)
+* requeueing targets from discovery queues into data queues (enqueue_servicelist, enqueue_hostlist)
+* scheduling rescans of services and hosts from current storage (rescan_services, rescan_hosts)
+* periodic rescan or ipv6 rediscovery in specified netranges (discover_ipv4, discover_ipv6_dns)
 
 
 ### 2.3 Data management subsystem
@@ -171,7 +177,8 @@ nessus).
 
 #### Server: Visuals
 
-Visualization modules can be used to visualize various informations stored in database:
+Visualization modules can be used to visualize various informations stored in
+database or current configuration:
 
 * Workflow tree
 * DNS tree
@@ -226,17 +233,17 @@ a2enmod proxy
 a2enmod proxy_http
 systemctl restart apache2
 
-# configure planner service
-cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
-systemctl daemon-reload
-systemctl enable --now sner-planner.service
-
 # configure agent service
 bin/server auth add-agent
 editor /etc/sner.yaml << agent apikey
 cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
 systemctl daemon-reload
 systemctl start sner-agent@1.service
+
+# configure planner service
+cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
+systemctl daemon-reload
+systemctl enable --now sner-planner.service
 ```
 
 ### 3.4 Development cycle
@@ -262,21 +269,20 @@ bin/server run
 
 ## 4 Usage
 
-### 4.1 Reconnaissance scenario
+### 4.1 Simple reconnaissance scenario
 
 1. Generate target list
-	* manualy
-	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
-	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
+  * manualy
+  * from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
+  * from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
 2. Setup exclusions (*scheduler > exclusions > add | edit*)
-3. Select or define queue: *scheduler > queues > add | edit*
-4. Enqueue targets
-	* web: *scheduler > queues > [queue] > enqueue*
-	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
+3. Enqueue targets in queue
+  * web: *scheduler > queues > [queue] > enqueue*
+  * cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
 5. Run the agent
 6. Monitor the queue until all jobs has been finished
 7. Stop the agent `bin/agent --shutdown [PID]`
-8. Recon data can be found in queue directories (`<SNER_VAR>/scheduler/<queue.id>`)
+8. Recon data can be found in queue directories (`<SNER_VAR>/scheduler/queue-<queue.id>`)
 
 
 ### 4.2 Data evaluation scenario
@@ -295,35 +301,31 @@ bin/server run
 ```
 bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'pentest dns recon' --file=-
 bin/agent --debug --queue 'pentest dns recon'
+bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
 ```
 
 #### Use-case: Long-term scanning strategy aka the Planner
 
-1. Configure and run planner
+1. Configure and run planner, configure stages as needed.
 
     ```
     editor /etc/sner.yaml
-    bin/server planner run &
+    systemctl restart sner-planer.service
     ```
 
-2. Queue targets for service discovery
+2. Queue targets for service discovery (if not using discovery stages)
 
     ```
     bin/server scheduler enumips 192.168.0.0/16 \
         | bin/server scheduler queue-enqueue 'sner_disco ack scan top10000' --file=-
     ```
 
-3. Detected services will be requeued for detailed version scanning (by
-   planner). Results will be imported into Storage subsystem.
-
-4. Optionaly: services without identification can be requeued for high intensity version scan.
+3. Optionaly: Services without identification can be requeued for high intensity version scan.
 
     ```
     bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
         | bin/server scheduler queue-enqueue 'sner_data version scan intense' --file=-
     ```
-
-6. TBD: ???Fully rescan alive hosts
 
 
 #### Use-case: External scan data processing
