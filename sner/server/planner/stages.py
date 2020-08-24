@@ -32,6 +32,24 @@ def archive_job(job):
     job_delete(job)
 
 
+def should_run(name, interval):
+    """checks .lastrun and returns true if calle should run acording to interval"""
+
+    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
+    if lastrun_path.exists():
+        lastrun = datetime.fromisoformat(lastrun_path.read_text())
+        if (datetime.utcnow().timestamp() - lastrun.timestamp()) < interval:
+            return False
+    return True
+
+
+def update_lastrun(name):
+    """update .lastrun file"""
+
+    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
+    lastrun_path.write_text(datetime.utcnow().isoformat())
+
+
 @celery.task(bind=True)
 def shutdown_test_helper(self):  # pragma: nocover  ; running over celery prefork worker
     """utility task used in tests"""
@@ -219,11 +237,8 @@ def discover_ipv4():
     config = current_app.config['SNER_PLANNER']['discover_ipv4']
     queue = Queue.query.filter(Queue.name == config['queue']).one()
 
-    last_run_path = Path(current_app.config['SNER_VAR']) / 'discover_ipv4.last_run'
-    if last_run_path.exists():
-        last_run = datetime.fromisoformat(last_run_path.read_text())
-        if (datetime.utcnow().timestamp() - last_run.timestamp()) < timeparse(config['interval']):
-            return
+    if not should_run('discover_ipv4', timeparse(config['interval'])):
+        return
 
     count = 0
     for netrange in config['netranges']:
@@ -231,7 +246,7 @@ def discover_ipv4():
         count += len(targets)
         queue_enqueue(queue, targets)
 
-    last_run_path.write_text(datetime.utcnow().isoformat())
+    update_lastrun('discover_ipv4')
 
     if count:
         current_app.logger.debug(f'discover_ipv4, queued {count}')
@@ -245,11 +260,8 @@ def discover_ipv6_dns():
     config = current_app.config['SNER_PLANNER']['discover_ipv6_dns']
     queue = Queue.query.filter(Queue.name == config['queue']).one()
 
-    last_run_path = Path(current_app.config['SNER_VAR']) / 'discover_ipv6_dns.last_run'
-    if last_run_path.exists():
-        last_run = datetime.fromisoformat(last_run_path.read_text())
-        if (datetime.utcnow().timestamp() - last_run.timestamp()) < timeparse(config['interval']):
-            return
+    if not should_run('discover_ipv6_dns', timeparse(config['interval'])):
+        return
 
     count = 0
     for netrange in config['netranges']:
@@ -257,8 +269,36 @@ def discover_ipv6_dns():
         count += len(targets)
         queue_enqueue(queue, targets)
 
-    last_run_path.write_text(datetime.utcnow().isoformat())
+    update_lastrun('discover_ipv6_dns')
 
     if count:
         current_app.logger.debug(f'discover_ipv6_dns, queued {count}')
+    db.session.close()
+
+
+@celery.task()
+def discover_ipv6_enum():
+    """enqueues ranged derived from storage registered ipv6 addresses"""
+
+    config = current_app.config['SNER_PLANNER']['discover_ipv6_enum']
+    queue = Queue.query.filter(Queue.name == config['queue']).one()
+
+    if not should_run('discover_ipv6_enum', timeparse(config['interval'])):
+        return
+
+    targets = set()
+    query = Host.query.filter(func.family(Host.address) == 6).order_by(Host.address)
+    for host in query.all():
+        exploded = IPv6Address(host.address).exploded.split(':')
+        exploded[-1] = '0-ffff'
+        target = ':'.join(exploded)
+        targets.add(target)
+
+    targets = filter_already_queued(queue, targets)
+    queue_enqueue(queue, targets)
+
+    update_lastrun('discover_ipv6_enum')
+
+    if targets:
+        current_app.logger.debug(f'discover_ipv6_enum, queued {len(targets)}')
     db.session.close()

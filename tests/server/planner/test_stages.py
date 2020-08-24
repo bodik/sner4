@@ -214,3 +214,20 @@ def test_discover_ipv6_dns_stage(runner, queue):  # pylint: disable=unused-argum
     sner.server.planner.stages.discover_ipv6_dns()
 
     assert Target.query.count() == 256
+
+
+def test_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disable=unused-argument
+    """test discover ipv6 enum"""
+
+    host_factory.create(address='::1')
+    current_app.config['SNER_PLANNER'] = {
+        'discover_ipv6_enum': {
+            'interval': '1h',
+            'queue': queue.name
+        }
+    }
+
+    sner.server.planner.stages.discover_ipv6_enum()
+    sner.server.planner.stages.discover_ipv6_enum()
+
+    assert Target.query.count() == 1

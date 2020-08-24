@@ -48,12 +48,18 @@
 #        netranges: []
 #        queue: 'sner_disco ack scan top10000'
 #
-#    # advanced: ipv6 addresses can be discovered by DNS from v4 ptr to aaaa mappings
+#    # advanced: ipv6 addresses can be discovered by DNS from v4 PTR to AAAA mappings
 #    discover_ipv6_dns:
 #        interval: '90days'
 #        netranges: []
 #        queue: 'sner_disco ipv6 dns discover'
 #
+#    # advanced: ipv6 addresses can be enumerated from existing found in storage
+#    discover_ipv6_enum:
+#        interval: '90days'
+#        queue: 'sner_disco ipv6 enum discover'
+#
 #    # advanced: all hosts/addrs discovered requeue for service discovery
 #    enqueue_hostlist:
 #        - ['sner_disco ipv6 dns discover', 'sner_disco ipv6 ack scan top10000']
+#        - ['sner_disco ipv6 enum discover', 'sner_disco ipv6 ack scan top10000']

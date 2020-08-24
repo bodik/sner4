@@ -19,6 +19,7 @@ def test_run_coverage(runner):
         'rescan_hosts': {'interval': '1h', 'queue4': 'dummy', 'queue6': 'dummy'},
         'discover_ipv4': {'interval': '1h', 'netranges': [], 'queue': 'dummy'},
         'discover_ipv6_dns': {'interval': '1h', 'netranges': [], 'queue': 'dummy'},
+        'discover_ipv6_enum': {'interval': '1h', 'queue': 'dummy'},
         'enqueue_hostlist': [],
     }
 

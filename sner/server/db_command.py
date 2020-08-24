@@ -125,6 +125,13 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
+        name='sner_disco ipv6 enum discover',
+        config=yaml_dump({'module': 'six_enum_discover', 'rate': 100}),
+        group_size=5,
+        priority=10,
+    ))
+
+    db.session.add(Queue(
         name='sner_disco ipv6 ack scan top10000',
         config=yaml_dump({'module': 'nmap', 'args': '-6 -sA --top-ports 10000 -Pn', 'timing_perhost': 8}),
         group_size=1000,

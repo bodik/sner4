@@ -62,6 +62,10 @@ def run(**kwargs):
         schedule = min(600, timeparse(config['discover_ipv6_dns']['interval']))
         add_stage(schedule, sner.server.planner.stages.discover_ipv6_dns.subtask())
 
+    if 'discover_ipv6_enum' in config:
+        schedule = min(600, timeparse(config['discover_ipv6_enum']['interval']))
+        add_stage(schedule, sner.server.planner.stages.discover_ipv6_enum.subtask())
+
     if kwargs['test']:
         add_stage(0.1, sner.server.planner.stages.shutdown_test_helper.subtask())
 
