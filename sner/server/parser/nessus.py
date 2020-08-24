@@ -23,21 +23,11 @@ class NessusParser(ParserBase):
 
     @staticmethod
     def import_file(path):
-        """import nessus data from file"""
+        """import file from disk to storage"""
 
         for item in NessusReportv2(path):
             NessusParser._import_report_item(item)
         db.session.commit()
-
-    @staticmethod
-    def service_list(path):  # pragma: nocover  ; won't test
-        """return service list"""
-        raise NotImplementedError
-
-    @staticmethod
-    def host_list(path):  # pragma: nocover  ; won't test
-        """return host list"""
-        raise NotImplementedError
 
     @staticmethod
     def _import_report_item(report_item):

@@ -15,18 +15,8 @@ class SixDnsDiscoverParser(ParserBase):
     """six dns parser, pulls list of hosts for discovery module"""
 
     @staticmethod
-    def import_file(path):  # pragma: no cover  ; won't test
-        """import nmap data from file or archive"""
-        raise NotImplementedError
-
-    @staticmethod
-    def service_list(path):  # pragma: no cover  ; won't test
-        """parse path and returns list of services in manymap target format"""
-        raise NotImplementedError
-
-    @staticmethod
     def host_list(path):
-        """parse path and returns list of hosts/addresses"""
+        """parse host list from path"""
 
         data = json.loads(file_from_zip(path, 'output.json'))
         return list(data.keys())

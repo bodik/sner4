@@ -9,7 +9,7 @@ venv:
 
 
 install-deps:
-	sudo apt-get -y install unzip nmap
+	sudo apt-get -y install unzip nmap ipv6toolkit
 	sudo apt-get -y install gcc python3-dev libpq-dev # required by psycopg2
 	pip install -r requirements.lock
 

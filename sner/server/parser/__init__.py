@@ -3,7 +3,6 @@
 sner parsers
 """
 
-from abc import ABC, abstractmethod
 from collections import namedtuple
 
 
@@ -22,23 +21,27 @@ def register_parser(name):
     return register_parser_real
 
 
-class ParserBase(ABC):  # pylint: disable=too-few-public-methods
-    """parser interface definition"""
+class ParserBase:  # pylint: disable=too-few-public-methods
+    """
+    parser interface definition
+
+    ABC is not used because it would require too much bload-ware functions and anti pylint duplicate-code hacks
+    """
 
     @staticmethod
-    @abstractmethod
-    def import_file(path):
+    def import_file(path):  # pragma: nocover  ; won't test
         """import file from disk to storage"""
+        raise RuntimeError('not implemented')
 
     @staticmethod
-    @abstractmethod
-    def service_list(path):
+    def service_list(path):  # pragma: nocover  ; won't test
         """parse service list from path"""
+        raise RuntimeError('not implemented')
 
     @staticmethod
-    @abstractmethod
-    def host_list(path):
+    def host_list(path):  # pragma: nocover  ; won't test
         """parse host list from path"""
+        raise RuntimeError('not implemented')
 
 
 import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position

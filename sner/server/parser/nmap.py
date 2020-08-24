@@ -21,13 +21,13 @@ class NmapParser(ParserBase):
 
     @staticmethod
     def import_file(path):
-        """import nmap data from file or archive"""
+        """import file from disk to storage"""
 
         NmapParser._data_to_storage(NmapParser._rawdata_from_path(path))
 
     @staticmethod
     def service_list(path):
-        """parse path and returns list of services in manymap target format"""
+        """parse service list from path"""
 
         services = []
         report = libnmap.parser.NmapParser.parse_fromstring(NmapParser._rawdata_from_path(path))
@@ -38,11 +38,6 @@ class NmapParser(ParserBase):
                     f'{iservice.state}:{iservice.reason}'
                 ))
         return services
-
-    @staticmethod
-    def host_list(path):    # pragma: nocover  ; won't test
-        """return host list"""
-        raise NotImplementedError
 
     @staticmethod
     def _rawdata_from_path(path):
