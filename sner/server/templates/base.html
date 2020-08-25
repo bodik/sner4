@@ -87,7 +87,7 @@
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.workflowtree_route') }}">Workflow tree</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.dnstree_route', crop=1) }}">DNS tree</a></li>
 						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portmap_route') }}">Portmap</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portinfos_route') }}">Port infos</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portinfos_route', crop=3, limit=50) }}">Port infos</a></li>
 					{%- endif -%}
 				{% endif %}
 			{% endif %}
