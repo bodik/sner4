@@ -119,7 +119,7 @@ def initdata():  # pylint: disable=too-many-statements
 
     db.session.add(Queue(
         name='sner_disco ipv6 dns discover',
-        config=yaml_dump({'module': 'six_dns_discover', 'delay': 1}),
+        config=yaml_dump({'module': 'six_dns_discover', 'delay': 1, 'limit_result': []}),
         group_size=1000,
         priority=10,
     ))

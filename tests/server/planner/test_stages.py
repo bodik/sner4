@@ -5,7 +5,7 @@ planner stages tests
 
 import logging
 import os
-from ipaddress import IPv4Address
+from ipaddress import ip_address
 from pathlib import Path
 
 import pytest
@@ -138,7 +138,7 @@ def test_rescan_services_stage_largedataset(runner, queue_factory, host_factory)
 
     logger.info('lot_of_services prepare start')
     for addr in range(10):
-        host = host_factory.create(address=str(IPv4Address(addr)))
+        host = host_factory.create(address=str(ip_address(addr)))
         # bypass all db layers for performance
         query = 'INSERT INTO service (host_id, proto, port, tags) VALUES ' + ','.join([str((host.id, 'tcp', str(idx), '{}')) for idx in range(64000)])
         db.session.execute(query)

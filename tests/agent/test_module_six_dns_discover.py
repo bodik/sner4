@@ -13,7 +13,15 @@ from sner.lib import file_from_zip
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """dix_dns_discover test"""
 
-    test_a = {'id': str(uuid4()), 'config': {'module': 'six_dns_discover', 'delay': 1}, 'targets': ['127.0.0.1', '127.0.0.2']}
+    test_a = {
+        'id': str(uuid4()),
+        'config': {
+            'module': 'six_dns_discover',
+            'delay': 1,
+            'limit_result': ['::1/128']
+        },
+        'targets': ['127.0.0.1', '127.0.0.2']
+    }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0

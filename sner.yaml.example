@@ -49,6 +49,7 @@
 #        queue: 'sner_disco ack scan top10000'
 #
 #    # advanced: ipv6 addresses can be discovered by DNS from v4 PTR to AAAA mappings
+#    # also see complementary config at agent six_dns_discover module/queue limit_results config value
 #    discover_ipv6_dns:
 #        interval: '90days'
 #        netranges: []
