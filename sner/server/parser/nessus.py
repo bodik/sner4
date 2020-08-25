@@ -48,6 +48,7 @@ class NessusParser(ParserBase):
         if 'plugin_output' in report_item:
             vuln.data = report_item['plugin_output']
         vuln.refs = ['SN-%s' % note.id] + NessusParser._get_refs(report_item)
+        vuln.import_time = report_item['HOST_START']
 
         return vuln
 
@@ -96,6 +97,7 @@ class NessusParser(ParserBase):
             db.session.add(service)
         service.state = 'open:nessus'
         service.name = report_item['svc_name']
+        service.import_time = report_item['HOST_START']
 
         return service
 
@@ -108,6 +110,7 @@ class NessusParser(ParserBase):
             note = Note(host=host, service=service, xtype=xtype)
             db.session.add(note)
         note.data = json.dumps(report_item, cls=SnerJSONEncoder)
+        note.import_time = report_item['HOST_START']
         db.session.flush()  # required to get .id
 
         return note

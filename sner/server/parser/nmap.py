@@ -5,6 +5,7 @@ parsers to import from agent outputs to storage
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import libnmap.parser
@@ -55,7 +56,7 @@ class NmapParser(ParserBase):
         for ihost in report.hosts:
             host = NmapParser._import_host(ihost)
             for iservice in ihost.services:
-                NmapParser._import_service(host, iservice)
+                NmapParser._import_service(host, iservice, import_time=datetime.fromtimestamp(int(ihost.starttime)))
 
         db.session.commit()
 
@@ -96,7 +97,7 @@ class NmapParser(ParserBase):
         return host
 
     @staticmethod
-    def _import_service(host, nmapservice):
+    def _import_service(host, nmapservice, import_time=None):
         """pull service to storage"""
 
         service = Service.query.filter(Service.host == host, Service.proto == nmapservice.protocol, Service.port == nmapservice.port).one_or_none()
@@ -107,6 +108,7 @@ class NmapParser(ParserBase):
         service.state = "%s:%s" % (nmapservice.state, nmapservice.reason)
         service.name = nmapservice.service if nmapservice.service else None
         service.info = nmapservice.banner if nmapservice.banner else None
+        service.import_time = import_time
 
         for iscript in nmapservice.scripts_results:
             xtype = 'nmap.%s' % iscript["id"]
@@ -115,6 +117,7 @@ class NmapParser(ParserBase):
                 note = Note(host=host, service=service, xtype=xtype)
                 db.session.add(note)
             note.data = json.dumps(iscript)
+            note.import_time = service.import_time
 
         return service
 
