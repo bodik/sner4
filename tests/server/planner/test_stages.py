@@ -220,6 +220,7 @@ def test_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disab
     """test discover ipv6 enum"""
 
     host_factory.create(address='::1')
+    host_factory.create(address='::00ff:fe00:1')
     current_app.config['SNER_PLANNER'] = {
         'discover_ipv6_enum': {
             'interval': '1h',

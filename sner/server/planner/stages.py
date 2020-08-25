@@ -289,9 +289,15 @@ def discover_ipv6_enum():
     targets = set()
     query = Host.query.filter(func.family(Host.address) == 6).order_by(Host.address)
     for host in query.all():
-        exploded = IPv6Address(host.address).exploded.split(':')
+        exploded = IPv6Address(host.address).exploded
+        # do not enumerate EUI-64 hosts/nets
+        if exploded[27:32] == 'ff:fe':
+            continue
+
+        exploded = exploded.split(':')
         exploded[-1] = '0-ffff'
         target = ':'.join(exploded)
+
         targets.add(target)
 
     targets = filter_already_queued(queue, targets)
