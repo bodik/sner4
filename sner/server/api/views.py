@@ -76,13 +76,16 @@ def assign_targets(queue_name=None):
         if not targets:
             break
 
+        delete_targets = []
         for target in targets:
-            db.session.delete(target)
+            delete_targets.append(target.id)
             if blacklist.match(target.target):
                 continue
             assigned_targets.append(target.target)
             if len(assigned_targets) == queue.group_size:
                 break
+        db.session.expire_all()
+        Target.query.filter(Target.id.in_(delete_targets)).delete(synchronize_session=False)
 
         if len(assigned_targets) == queue.group_size:
             break

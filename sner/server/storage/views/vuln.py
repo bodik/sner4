@@ -131,8 +131,8 @@ def vuln_delete_multiid_route():
 
     form = MultiidForm()
     if form.validate_on_submit():
+        db.session.expire_all()
         Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
-        db.session.commit()
         return '', HTTPStatus.OK
 
     return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST

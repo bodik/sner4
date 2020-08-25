@@ -20,14 +20,16 @@ from sner.server.scheduler.models import Queue, Target
 def test_v1_scheduler_job_assign_route(client, apikey, target):
     """job assign route test"""
 
+    qname = target.queue.name
+
     # assign from queue by name
     response = client.get(
-        url_for('api.v1_scheduler_job_assign_route', queue_name=target.queue.name),
+        url_for('api.v1_scheduler_job_assign_route', queue_name=qname),
         headers=apikey_header(apikey)
     )
     assert response.status_code == HTTPStatus.OK
     assert isinstance(json.loads(response.body.decode('utf-8')), dict)
-    assert len(Queue.query.filter(Queue.name == target.queue.name).one().jobs) == 1
+    assert len(Queue.query.filter(Queue.name == qname).one().jobs) == 1
 
     # assign from non-existent queue
     response = client.get(
