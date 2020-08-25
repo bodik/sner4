@@ -84,8 +84,9 @@ def assign_targets(queue_name=None):
             assigned_targets.append(target.target)
             if len(assigned_targets) == queue.group_size:
                 break
-        db.session.expire_all()
         Target.query.filter(Target.id.in_(delete_targets)).delete(synchronize_session=False)
+        db.session.commit()
+        db.session.expire_all()
 
         if len(assigned_targets) == queue.group_size:
             break

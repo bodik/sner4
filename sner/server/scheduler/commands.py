@@ -74,7 +74,7 @@ def queue_flush_command(queue_name):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    db.session.query(Target).filter(Target.queue_id == queue.id).delete()
+    Target.query.filter(Target.queue_id == queue.id).delete()
     db.session.commit()
     sys.exit(0)
 

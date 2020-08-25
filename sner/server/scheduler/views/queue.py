@@ -110,7 +110,7 @@ def queue_flush_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        db.session.query(Target).filter(Target.queue_id == queue_id).delete()
+        Target.query.filter(Target.queue_id == queue_id).delete()
         db.session.commit()
         return redirect(url_for('scheduler.queue_list_route'))
 
