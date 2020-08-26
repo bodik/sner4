@@ -1,12 +1,24 @@
 # sner4 changelog
 
+## 0.3.1 - prod planner (unreleased)
+
+* features:
+  * general: add syslogidentifiers to systemd services
+  * server: randomize queue selection among same priority
+  * server: [BC BREAK] add import_time for selected models
+  * agent, server, planner: add six_enum_discover module and discover_ipv6_enum stage
+  * agent: add six_dns_discover result filter
+
+* fix:
+  * bypass ipv6 tests for travis env
+
 ## 0.3.0 - the staged planner
 
 * features
   * planner:
-    * refactored queues workflows to stages (BC)
+    * [BC BREAK] refactored queues workflows to stages
     * implemented as celery worker and beats
-  * agent: restructured code from __init__ to core (BC)
+  * agent: [BC BREAK] restructured code from __init__ to core
   * agent: six_dns_discover module to discover ipv6 addresses from ipv4 addrs and dns records
 
 ## 0.2.0 - towards planner
