@@ -155,7 +155,7 @@ stages to handle:
 * automatic import of jobs output from queues (import_jobs)
 * requeueing targets from discovery queues into data queues (enqueue_servicelist, enqueue_hostlist)
 * scheduling rescans of services and hosts from current storage (rescan_services, rescan_hosts)
-* periodic rescan or ipv6 rediscovery in specified netranges (discover_ipv4, discover_ipv6_dns)
+* periodic rescan or ipv6 rediscovery in specified netranges (discover_ipv4, discover_ipv6_dns, discover_ipv6_enum)
 
 
 ### 2.3 Data management subsystem
