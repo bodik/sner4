@@ -272,13 +272,13 @@ bin/server run
 ### 4.1 Simple reconnaissance scenario
 
 1. Generate target list
-  * manualy
-  * from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
-  * from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
+	* manualy
+	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
+	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
 2. Setup exclusions (*scheduler > exclusions > add | edit*)
 3. Enqueue targets in queue
-  * web: *scheduler > queues > [queue] > enqueue*
-  * cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
+	* web: *scheduler > queues > [queue] > enqueue*
+	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
 5. Run the agent
 6. Monitor the queue until all jobs has been finished
 7. Stop the agent `bin/agent --shutdown [PID]`
