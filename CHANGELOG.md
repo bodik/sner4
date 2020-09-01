@@ -1,6 +1,6 @@
 # sner4 changelog
 
-## 0.3.1 - prod planner (unreleased)
+## 0.3.1 - prod planner
 
 * features:
   * general: add syslogidentifiers to systemd services
