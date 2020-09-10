@@ -21,14 +21,14 @@
 #        - 'sner_data script scan ftp-anon'
 #        - 'sner_data script scan http-title'
 #        - 'sner_data script scan ldap-rootdse'
-#        - 'sweep_sweep version scan basic'
+#        - 'sner_sweep version scan basic'
 #
 #    # basic: all successfull jobs are requeued into next queue
 #    enqueue_servicelist:
 #       - ['sner_disco ack scan top1000', 'sner_data version scan basic']
 #       - ['sner_disco ack scan top10000', 'sner_data version scan basic']
 #       - ['sner_disco ipv6 ack scan top10000', 'sner_data ipv6 version scan basic']
-#       - ['sner_sweep ack scan portA', 'sweep_sweep version scan basic']
+#       - ['sner_sweep ack scan portA', 'sner_sweep version scan basic']
 #
 #    # advanced: all storage services are rescanned in interval (eg. 1week, 30days, ...)
 #    rescan_services:

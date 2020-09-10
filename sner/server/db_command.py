@@ -61,23 +61,13 @@ def initdata():  # pylint: disable=too-many-statements
     queue = Queue(
         name='dev dummy',
         config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
-        group_size=3,
+        group_size=2,
         priority=10,
         active=True
     )
     db.session.add(queue)
-    for target in range(100):
+    for target in range(3):
         db.session.add(Target(target=target, queue=queue))
-
-    queue = Queue(
-        name='pentest dns recon',
-        config=yaml_dump({'module': 'nmap', 'args': '-sL -Pn'}),
-        group_size=20,
-        priority=10,
-    )
-    db.session.add(queue)
-    for target in range(100):
-        db.session.add(Target(target='10.0.0.%d' % target, queue=queue))
 
     db.session.add(Queue(
         name='pentest full syn scan',
@@ -146,22 +136,12 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner_data script scan ftp-anon',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ftp-anon.nse -Pn', 'delay': 10}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner_data script scan http-title',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script http-title.nse -Pn', 'delay': 10}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner_data script scan ldap-rootdse',
-        config=yaml_dump({'module': 'manymap', 'args': '-sC --script ldap-rootdse.nse -Pn', 'delay': 10}),
+        name='sner_data script scan basic',
+        config=yaml_dump({
+            'module': 'manymap',
+            'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods -Pn',
+            'delay': 10
+        }),
         group_size=50,
         priority=15,
     ))
@@ -174,7 +154,7 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sweep_sweep version scan basic',
+        name='sner_sweep version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,
         priority=55,
