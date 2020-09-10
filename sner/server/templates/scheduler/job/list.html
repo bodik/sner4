@@ -17,7 +17,11 @@
 			Sner.dt.column('time_taken'),
 			Sner.dt.column_buttons(Sner.scheduler.hbs.job_controls)
 		],
-		'order': [[6, 'desc'], [7, 'desc']]
+		'order': [[6, 'desc'], [7, 'desc']],
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td a.abutton_submit_dataurl_jobrepeat').on('click', {'dt': this.api()}, Sner.action_submit_dataurl);
+		}
 	};
 	$(document).ready(function() {
 		var dt_job_list_table = Sner.dt.init_datatable('#job_list_table', dt_job_list_table_options);

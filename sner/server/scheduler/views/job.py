@@ -13,7 +13,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.scheduler.core import job_delete
+from sner.server.scheduler.core import job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import filter_parser
@@ -63,3 +63,18 @@ def job_delete_route(job_id):
         return redirect(url_for('scheduler.job_list_route'))
 
     return render_template('button-delete.html', form=form)
+
+
+@blueprint.route('/job/repeat/<job_id>', methods=['GET', 'POST'])
+@role_required('operator')
+def job_repeat_route(job_id):
+    """repeat job; requeues targets into same queue, used for rescheduling of failed jobs"""
+
+    form = ButtonForm()
+
+    if form.validate_on_submit():
+        job = Job.query.get(job_id)
+        queue_enqueue(job.queue, json.loads(job.assignment)['targets'])
+        return redirect(url_for('scheduler.job_list_route'))
+
+    return render_template('button-generic.html', form=form)

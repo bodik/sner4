@@ -26,6 +26,7 @@ class SnerSchedulerComponent extends SnerComponentBase {
 
 			'job_controls': `
 				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_jobrepeat" href="#" data-url="{{> scheduler.job_repeat_route job_id=id}}" title="Repeat job">Repeat</a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> scheduler.job_delete_route job_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 

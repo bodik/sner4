@@ -9,7 +9,7 @@ from pathlib import Path
 
 from flask import url_for
 
-from sner.server.scheduler.models import Job
+from sner.server.scheduler.models import Job, Target
 
 
 def test_job_list_route(cl_operator):
@@ -51,3 +51,13 @@ def test_job_delete_route(cl_operator, job_completed):
 
     assert not Job.query.get(job_completed_id)
     assert not Path(job_completed_output_abspath).exists()
+
+
+def test_job_repeat_route(cl_operator, job):
+    """repeat route test"""
+
+    form = cl_operator.get(url_for('scheduler.job_repeat_route', job_id=job.id)).form
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
+
+    assert len(json.loads(job.assignment)['targets']) == Target.query.count()
