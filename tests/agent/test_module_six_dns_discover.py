@@ -17,8 +17,7 @@ def test_basic(tmpworkdir):  # pylint: disable=unused-argument
         'id': str(uuid4()),
         'config': {
             'module': 'six_dns_discover',
-            'delay': 1,
-            'limit_result': ['::1/128']
+            'delay': 1
         },
         'targets': ['127.0.0.1', '127.0.0.2']
     }

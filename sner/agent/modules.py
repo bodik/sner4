@@ -11,12 +11,11 @@ import shlex
 import signal
 import subprocess
 from abc import ABC, abstractmethod
-from ipaddress import IPv6Address, IPv6Network
 from pathlib import Path
 from socket import AF_INET6, getaddrinfo, gethostbyaddr
 from time import sleep
 
-from schema import Schema, Optional, Use
+from schema import Schema, Optional
 
 
 registered_modules = {}  # pylint: disable=invalid-name
@@ -212,17 +211,11 @@ class Manymap(ModuleBase):
 class SixDnsDiscover(ModuleBase):
     """
     dns based ipv6 from ipv4 address discover
-
-    ## config schema
-
-    * delay - delay between subsequent targets
-    * limit_result - list of networks to filter for AAAA pointing to out-of-scope networks
     """
 
     CONFIG_SCHEMA = Schema({
         'module': 'six_dns_discover',
-        'delay': int,
-        'limit_result': [Use(IPv6Network)]
+        'delay': int
     })
 
     def __init__(self):
@@ -248,10 +241,6 @@ class SixDnsDiscover(ModuleBase):
 
             if not self.loop:  # pragma: no cover  ; not tested
                 break
-
-        if assignment['config']['limit_result']:
-            limits = [IPv6Network(net) for net in assignment['config']['limit_result']]
-            result = {k: v for k, v in result.items() if any([IPv6Address(k) in net for net in limits])}
 
         Path('output.json').write_text(json.dumps(result))
         return 0
