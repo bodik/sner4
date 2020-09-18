@@ -5,10 +5,12 @@ parsers to import from agent outputs to storage
 
 import re
 import sys
+from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, register_parser
+from sner.server.parser import register_parser
+from sner.server.parser.core import ParsedHost, ParserBase
 
 
 @register_parser('six_enum_discover')  # pylint: disable=too-few-public-methods
@@ -16,22 +18,18 @@ class SixEnumDiscoverParser(ParserBase):
     """six enum parser, pulls list of hosts for discovery module"""
 
     @staticmethod
-    def host_list(path):
+    def parse_path(path):
         """parse path and returns list of hosts/addresses"""
 
-        result = []
+        hosts = []
+
         with ZipFile(path) as fzip:
             for ftmp in [fname for fname in fzip.namelist() if re.match(r'output\-[0-9]+\.txt', fname)]:
-                result += file_from_zip(path, ftmp).decode('utf-8').splitlines()
-        return result
+                for addr in file_from_zip(path, ftmp).decode('utf-8').splitlines():
+                    hosts.append(ParsedHost(handle=f'host_id={addr}', address=addr))
 
-
-def debug_parser():  # pragma: no cover
-    """cli helper, pull data from report and display"""
-
-    print('## host list parser')
-    print(SixEnumDiscoverParser.host_list(sys.argv[1]))
+        return hosts, [], [], []
 
 
 if __name__ == '__main__':  # pragma: no cover
-    debug_parser()
+    pprint(SixEnumDiscoverParser.parse_path(sys.argv[1]))

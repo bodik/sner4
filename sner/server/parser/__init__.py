@@ -3,12 +3,8 @@
 sner parsers
 """
 
-from collections import namedtuple
-
 
 registered_parsers = {}  # pylint: disable=invalid-name
-
-ServiceListItem = namedtuple('ServiceListItem', ['service', 'state'])
 
 
 def register_parser(name):
@@ -19,29 +15,6 @@ def register_parser(name):
             registered_parsers[name] = cls
         return cls
     return register_parser_real
-
-
-class ParserBase:  # pylint: disable=too-few-public-methods
-    """
-    parser interface definition
-
-    ABC is not used because it would require too much bload-ware functions and anti pylint duplicate-code hacks
-    """
-
-    @staticmethod
-    def import_file(path):  # pragma: nocover  ; won't test
-        """import file from disk to storage"""
-        raise RuntimeError('not implemented')
-
-    @staticmethod
-    def service_list(path):  # pragma: nocover  ; won't test
-        """parse service list from path"""
-        raise RuntimeError('not implemented')
-
-    @staticmethod
-    def host_list(path):  # pragma: nocover  ; won't test
-        """parse host list from path"""
-        raise RuntimeError('not implemented')
 
 
 import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position

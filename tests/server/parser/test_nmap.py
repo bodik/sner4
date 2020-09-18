@@ -6,7 +6,6 @@ nmap output parser tests
 import pytest
 from libnmap.parser import NmapParserException
 
-from sner.server.parser import ServiceListItem
 from sner.server.parser.nmap import NmapParser
 
 
@@ -16,17 +15,22 @@ def test_xxe():
     # https://docs.python.org/3/library/xml.html#xml-vulnerabilities
     # etree exception is masked by library to it's own exception type
     with pytest.raises(NmapParserException):
-        NmapParser.import_file('tests/server/data/parser-nmap-xxe.xml')
+        NmapParser.parse_path('tests/server/data/parser-nmap-xxe.xml')
 
 
-def test_service_list():
-    """check service list extraction"""
+def test_parse_path():
+    """check basic parse_path impl"""
 
-    expected = [
-        ServiceListItem(service='tcp://127.0.0.1:22', state='open:syn-ack'),
-        ServiceListItem(service='tcp://127.0.0.1:25', state='open:syn-ack'),
-        ServiceListItem(service='tcp://127.0.0.1:139', state='open:syn-ack'),
-        ServiceListItem(service='tcp://127.0.0.1:445', state='open:syn-ack'),
-        ServiceListItem(service='tcp://127.0.0.1:5432', state='open:syn-ack')
+    expected_host_handles = ['host_id=127.0.0.1']
+    expected_service_handles = [
+        'host_id=127.0.0.1;service_id=tcp/22',
+        'host_id=127.0.0.1;service_id=tcp/25',
+        'host_id=127.0.0.1;service_id=tcp/139',
+        'host_id=127.0.0.1;service_id=tcp/445',
+        'host_id=127.0.0.1;service_id=tcp/5432'
     ]
-    assert NmapParser.service_list('tests/server/data/parser-nmap-output.xml') == expected
+
+    hosts, services, _, _ = NmapParser.parse_path('tests/server/data/parser-nmap-output.xml')
+
+    assert [x.handle for x in hosts] == expected_host_handles
+    assert [x.handle for x in services] == expected_service_handles

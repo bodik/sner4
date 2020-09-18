@@ -9,9 +9,9 @@ from pprint import pprint
 
 from tenable.reports import NessusReportv2
 
-from sner.server.extensions import db
-from sner.server.parser import ParserBase, register_parser
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
+from sner.server.parser import register_parser
+from sner.server.parser.core import ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, ParsedVuln, ParserBase
+from sner.server.storage.models import SeverityEnum
 from sner.server.utils import SnerJSONEncoder
 
 
@@ -22,101 +22,105 @@ class NessusParser(ParserBase):
     SEVERITY_MAP = ['info', 'low', 'medium', 'high', 'critical']
 
     @staticmethod
-    def import_file(path):
-        """import file from disk to storage"""
+    def parse_path(path):
+        """parse path"""
 
-        for item in NessusReportv2(path):
-            NessusParser._import_report_item(item)
-        db.session.commit()
+        return NessusParser._parse_report(NessusReportv2(path))
 
     @staticmethod
-    def _import_report_item(report_item):
-        """import nessus_v2 ReportItem 'element'"""
+    def _parse_report(report):
+        """parses host data from report item"""
 
-        xtype = 'nessus.%s' % report_item['pluginID']
-        host = NessusParser._import_host(report_item)
-        service = NessusParser._import_service(report_item, host)
-        note = NessusParser._import_vuln_note(report_item, host, service, xtype)
+        hosts, services, vulns, notes = Pdict(), Pdict(), Pdict(), Pdict()
 
-        vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == xtype).one_or_none()
-        if not vuln:
-            vuln = Vuln(host=host, service=service, xtype=xtype)
-            db.session.add(vuln)
-        vuln.name = report_item['plugin_name']
-        vuln.severity = SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']])
-        vuln.descr = '## Synopsis\n\n%s\n\n## Description\n\n%s' % (report_item['synopsis'], report_item['description'])
-        if 'plugin_output' in report_item:
-            vuln.data = report_item['plugin_output']
-        vuln.refs = ['SN-%s' % note.id] + NessusParser._get_refs(report_item)
-        vuln.import_time = report_item['HOST_START']
+        for report_item in report:
+            host = NessusParser._parse_host(report_item)
+            service = NessusParser._parse_service(report_item)
+            vuln = NessusParser._parse_vuln(report_item, service)
+            note = NessusParser._parse_note(report_item, service)
 
-        return vuln
+            for storage, item in [(hosts, host), (services, service), (vulns, vuln), (notes, note)]:
+                if item:
+                    storage.upsert(item)
+
+        return list(hosts.values()), list(services.values()), list(vulns.values()), list(notes.values())
 
     @staticmethod
-    def _import_host(report_item):
-        """pull host to storage"""
+    def _parse_host(report_item):
+        """parse host data from report item"""
 
-        def upsert_hostname(host, hostname):
-            """upsert hostname to host model"""
+        host = ParsedHost(
+            handle=f'host_id={report_item["host-ip"]}',
+            address=report_item['host-ip']
+        )
 
-            if hostname != host.hostname:
-                note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
-                if not note:
-                    note = Note(host=host, xtype='hostnames', data=json.dumps([host.hostname]))
-                    db.session.add(note)
-                note.data = json.dumps(list(set(json.loads(note.data) + [hostname])))
-
-        host = Host.query.filter(Host.address == report_item['host-ip']).one_or_none()
-        if not host:
-            host = Host(address=report_item['host-ip'])
-            db.session.add(host)
-        if 'host-fqdn' in report_item:
+        hostnames = list(set(filter(lambda x: x, [report_item.get('host-fqdn'), report_item.get('host-rdns')])))
+        if hostnames:
+            host.hostnames = hostnames
             if not host.hostname:
-                host.hostname = report_item['host-fqdn']
-            upsert_hostname(host, report_item['host-fqdn'])
-        if 'host-rdns' in report_item:
-            upsert_hostname(host, report_item['host-rdns'])
+                host.hostname = host.hostnames[0]
+
         if 'operating-system' in report_item:
             host.os = report_item['operating-system']
 
         return host
 
     @staticmethod
-    def _import_service(report_item, host):
-        """pull service to storage"""
+    def _parse_service(report_item):
+        """parse service data from report_item"""
 
         if report_item['port'] == 0:
             return None
 
-        service = Service.query.filter(
-            Service.host == host,
-            Service.proto == report_item['protocol'],
-            Service.port == report_item['port']).one_or_none()
-        if not service:
-            service = Service(host=host, proto=report_item['protocol'], port=report_item['port'])
-            db.session.add(service)
-        service.state = 'open:nessus'
-        service.name = report_item['svc_name']
-        service.import_time = report_item['HOST_START']
-
-        return service
+        return ParsedService(
+            handle=f'host_id={report_item["host-ip"]};service_id={report_item["protocol"]}/{report_item["port"]}',
+            proto=report_item['protocol'],
+            port=report_item['port'],
+            state='open:nessus',
+            name=report_item['svc_name'],
+            import_time=report_item['HOST_START']
+        )
 
     @staticmethod
-    def _import_vuln_note(report_item, host, service, xtype):
-        """put vulnerability note to storage"""
+    def _parse_vuln(report_item, service=None):
+        """parse vuln data"""
 
-        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == xtype).one_or_none()
-        if not note:
-            note = Note(host=host, service=service, xtype=xtype)
-            db.session.add(note)
-        note.data = json.dumps(report_item, cls=SnerJSONEncoder)
-        note.import_time = report_item['HOST_START']
-        db.session.flush()  # required to get .id
+        handle = [f'host_id={report_item["host-ip"]}', f'vuln_id={report_item["pluginID"]}']
+        if service:
+            handle.append(f'service_id={report_item["protocol"]}/{report_item["port"]}')
 
-        return note
+        vuln = ParsedVuln(
+            handle=';'.join(handle),
+            name=report_item['plugin_name'],
+            xtype=f'nessus.{report_item["pluginID"]}',
+            severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
+            descr=f'## Synopsis\n\n{report_item["synopsis"]}\n\n## Description\n\n{report_item["description"]}',
+            refs=NessusParser._parse_refs(report_item),
+            import_time=report_item['HOST_START'],
+        )
+
+        if 'plugin_output' in report_item:
+            vuln.data = report_item['plugin_output']
+
+        return vuln
 
     @staticmethod
-    def _get_refs(report_item):
+    def _parse_note(report_item, service=None):
+        """parse notes data"""
+
+        handle = [f'host_id={report_item["host-ip"]}', f'vuln_id={report_item["pluginID"]}']
+        if service:
+            handle.append(f'service_id={report_item["protocol"]}/{report_item["port"]}')
+
+        return ParsedNote(
+            handle=';'.join(handle),
+            xtype=f'nessus.{report_item["pluginID"]}',
+            data=json.dumps(report_item, cls=SnerJSONEncoder),
+            import_time=report_item['HOST_START']
+        )
+
+    @staticmethod
+    def _parse_refs(report_item):
         """compile refs array for report_item"""
 
         def ensure_list(data):
@@ -126,26 +130,18 @@ class NessusParser(ParserBase):
         if 'cve' in report_item:
             refs += ensure_list(report_item['cve'])
         if 'bid' in report_item:
-            refs += ['BID-%s' % ref for ref in ensure_list(report_item['bid'])]
+            refs += [f'BID-{ref}' for ref in ensure_list(report_item['bid'])]
         if 'xref' in report_item:
             refs += ['%s-%s' % tuple(ref.split(':', maxsplit=1)) for ref in ensure_list(report_item['xref'])]
         if 'see_also' in report_item:
-            refs += ['URL-%s' % ref for ref in report_item['see_also'].splitlines()]
+            refs += [f'URL-{ref}' for ref in report_item['see_also'].splitlines()]
         if 'metasploit_name' in report_item:
-            refs.append('MSF-%s' % report_item['metasploit_name'])
+            refs.append(f'MSF-{report_item["metasploit_name"]}')
         if 'pluginID' in report_item:
-            refs.append('NSS-%s' % report_item['pluginID'])
+            refs.append(f'NSS-{report_item["pluginID"]}')
 
         return refs
 
 
-def debug_parser():  # pragma: no cover
-    """cli helper, pull data from report and display"""
-
-    report = NessusReportv2(sys.argv[1])
-    for item in report:
-        pprint(item)
-
-
 if __name__ == '__main__':  # pragma: no cover
-    debug_parser()
+    pprint(NessusParser.parse_path(sys.argv[1]))
