@@ -19,8 +19,11 @@ def test_xxe(app):  # pylint: disable=unused-argument
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_host_handles = ['host_id=127.128.129.130']
-    expected_vuln_handles = ['host_id=127.128.129.130;vuln_id=104631;service_id=tcp/443', 'host_id=127.128.129.130;vuln_id=19506']
+    expected_host_handles = [{'host': '127.128.129.130'}]
+    expected_vuln_handles = [
+        {'host': '127.128.129.130', 'vuln': 'nessus.104631', 'service': 'tcp/443'},
+        {'host': '127.128.129.130', 'vuln': 'nessus.19506'}
+    ]
 
     hosts, _, vulns, _ = NessusParser.parse_path('tests/server/data/parser-nessus-simple.xml')
 

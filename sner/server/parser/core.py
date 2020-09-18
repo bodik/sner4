@@ -3,6 +3,7 @@
 sner parsers core objects
 """
 
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,21 +15,42 @@ class ParsedItemsDict(dict):
     def upsert(self, item):
         """insert or update existing object by .handle key"""
 
-        if item.handle not in self:
-            self[item.handle] = item
+        if item.hash() not in self:
+            self[item.hash()] = item
         else:
-            self[item.handle].update(item)
+            self[item.hash()].update(item)
 
 
 @dataclass
 class ParsedItemBase(ABC):
-    """parsed items base"""
+    """
+    Parsed items base class. All parsed items attributes should corespond with storage.model.
+    'handle' is a dict of related model identifiers used for merge same objects from several
+    distinct agent outputs.
+    """
 
-    handle: str
+    handle: dict
 
     def update(self, obj):
         """update from other object"""
-        self.__dict__.update(obj.__dict__)
+
+        for key, value in obj.__dict__.items():
+            # do not overwrite with None
+            if value is None:
+                continue
+
+            # merge lists
+            if isinstance(value, list):
+                new_value = (getattr(self, key) or []) + value
+                setattr(self, key, new_value)
+                continue
+
+            # set new value
+            setattr(self, key, value)
+
+    def hash(self):
+        """produce hashed handle for use as a dict key"""
+        return hash(json.dumps(self.handle, sort_keys=True))
 
 
 @dataclass

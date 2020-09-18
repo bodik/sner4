@@ -3,6 +3,7 @@
 scheduler module functions
 """
 
+import json
 from csv import DictWriter, QUOTE_ALL
 from http import HTTPStatus
 from io import StringIO
@@ -12,7 +13,7 @@ from sqlalchemy import case, func
 
 from sner.server.extensions import db
 from sner.server.storage.forms import AnnotateForm, TagMultiidForm
-from sner.server.storage.models import Host, Service, Vuln
+from sner.server.storage.models import Host, Note, Service, Vuln
 
 
 def get_related_models(model_name, model_id):
@@ -148,3 +149,96 @@ def vuln_report():
     if content_trimmed:
         output.writerow({'asset': 'WARNING: some cells were trimmed'})
     return output_buffer.getvalue()
+
+
+def import_parsed(hosts, services, vulns, notes):
+    """import parsed objects"""
+
+    import_hosts(hosts)
+    import_services(services)
+    import_vulns(vulns)
+    import_notes(notes)
+
+
+def update_model(model, data):
+    """update model from data object"""
+
+    for key, value in data.__dict__.items():
+        if hasattr(model, key):
+            setattr(model, key, value)
+    return model
+
+
+def import_hosts(parsed_hosts):
+    """import hosts from parsed data"""
+
+    for ihost in parsed_hosts:
+        host = Host.query.filter(Host.address == ihost.address).one_or_none()
+        if not host:
+            host = Host(address=ihost.address)
+            db.session.add(host)
+
+        host = update_model(host, ihost)
+        if ihost.hostnames:
+            note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
+            if not note:
+                note = Note(host=host, xtype='hostnames', data='[]')
+                db.session.add(note)
+            note.data = json.dumps(list(set(json.loads(note.data) + ihost.hostnames)))
+
+    db.session.commit()
+
+
+def import_services(parsed_services):
+    """import services from parsed data"""
+
+    for iservice in parsed_services:
+        host = Host.query.filter(Host.address == iservice.handle['host']).one()
+
+        service = Service.query.filter(Service.host == host, Service.proto == iservice.proto, Service.port == iservice.port).one_or_none()
+        if not service:
+            service = Service(host=host, proto=iservice.proto, port=iservice.port)
+            db.session.add(service)
+
+        service = update_model(service, iservice)
+
+    db.session.commit()
+
+
+def import_vulns(parsed_vulns):
+    """import vulns from parsed data"""
+
+    for ivuln in parsed_vulns:
+        host = Host.query.filter(Host.address == ivuln.handle['host']).one()
+        service_id = func.concat(Service.proto, '/', Service.port)
+        service = Service.query.filter(Service.host == host, service_id == ivuln.handle.get('service')).one_or_none()
+
+        vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == ivuln.handle['vuln']).one_or_none()
+        if not vuln:
+            vuln = Vuln(host=host, service=service, xtype=ivuln.xtype)
+            db.session.add(vuln)
+
+        vuln = update_model(vuln, ivuln)
+
+    db.session.commit()
+
+
+def import_notes(parsed_notes):
+    """import vulns from parsed data"""
+
+    for inote in parsed_notes:
+        host = Host.query.filter(Host.address == inote.handle['host']).one()
+        service_id = func.concat(Service.proto, '/', Service.port)
+        service = Service.query.filter(Service.host == host, service_id == inote.handle.get('service')).one_or_none()
+
+        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == inote.handle['note']).one_or_none()
+        if not note:
+            note = Note(host=host, service=service, xtype=inote.xtype)
+            db.session.add(note)
+        note = update_model(note, inote)
+
+        if 'vuln' in inote.handle:
+            vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == inote.handle['vuln']).one()
+            vuln.refs = [f'SN-{note.id}'] + vuln.refs
+
+    db.session.commit()

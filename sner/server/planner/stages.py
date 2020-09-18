@@ -19,6 +19,7 @@ from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue, Target
+from sner.server.storage.core import import_parsed
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import windowed_query
 
@@ -69,13 +70,9 @@ def enqueue_servicelist():
         next_queue = Queue.query.filter(Queue.name == next_qname).one()
 
         for job in Job.query.filter(Job.queue == queue, Job.retval == 0).all():
-            service_list = list(map(
-                lambda x: x.service,
-                filter(
-                    lambda x: not (x.state.startswith('filtered') or x.state.startswith('closed')),
-                    parser.service_list(job.output_abspath)
-                )
-            ))
+            _, services, _, _ = parser.parse_path(job.output_abspath)
+            services = list(filter(lambda x: not (x.state.startswith('filtered') or x.state.startswith('closed')), services))
+            service_list = [f'{x.proto}://{x.handle["host"]}:{x.port}' for x in services]
             queue_enqueue(next_queue, service_list)
             archive_job(job)
             current_app.logger.debug(f'enqueue_servicelist requeued {job.id} ({queue.name})')
@@ -93,8 +90,8 @@ def enqueue_hostlist():
         next_queue = Queue.query.filter(Queue.name == next_qname).one()
 
         for job in Job.query.filter(Job.queue == queue, Job.retval == 0).all():
-            host_list = parser.host_list(job.output_abspath)
-            queue_enqueue(next_queue, host_list)
+            hosts, _, _, _ = parser.parse_path(job.output_abspath)
+            queue_enqueue(next_queue, [x.address for x in hosts])
             archive_job(job)
             current_app.logger.debug(f'enqueue_hostlist requeued {job.id} ({queue.name})')
     db.session.close()
@@ -113,7 +110,7 @@ def import_jobs():
 
         for job in Job.query.filter(Job.queue == queue, Job.retval == 0).all():
             do_cleanup = True
-            parser.import_file(job.output_abspath)
+            import_parsed(*parser.parse_path(job.output_abspath))
             archive_job(job)
             current_app.logger.debug(f'import_jobs imported {job.id} ({queue.name})')
 

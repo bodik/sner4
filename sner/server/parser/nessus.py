@@ -50,7 +50,7 @@ class NessusParser(ParserBase):
         """parse host data from report item"""
 
         host = ParsedHost(
-            handle=f'host_id={report_item["host-ip"]}',
+            handle={'host': report_item['host-ip']},
             address=report_item['host-ip']
         )
 
@@ -73,7 +73,7 @@ class NessusParser(ParserBase):
             return None
 
         return ParsedService(
-            handle=f'host_id={report_item["host-ip"]};service_id={report_item["protocol"]}/{report_item["port"]}',
+            handle={'host': report_item['host-ip'], 'service': f'{report_item["protocol"]}/{report_item["port"]}'},
             proto=report_item['protocol'],
             port=report_item['port'],
             state='open:nessus',
@@ -85,12 +85,12 @@ class NessusParser(ParserBase):
     def _parse_vuln(report_item, service=None):
         """parse vuln data"""
 
-        handle = [f'host_id={report_item["host-ip"]}', f'vuln_id={report_item["pluginID"]}']
+        handle = {'host': report_item['host-ip'], 'vuln': f'nessus.{report_item["pluginID"]}'}
         if service:
-            handle.append(f'service_id={report_item["protocol"]}/{report_item["port"]}')
+            handle['service'] = f'{report_item["protocol"]}/{report_item["port"]}'
 
         vuln = ParsedVuln(
-            handle=';'.join(handle),
+            handle=handle,
             name=report_item['plugin_name'],
             xtype=f'nessus.{report_item["pluginID"]}',
             severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
@@ -108,12 +108,12 @@ class NessusParser(ParserBase):
     def _parse_note(report_item, service=None):
         """parse notes data"""
 
-        handle = [f'host_id={report_item["host-ip"]}', f'vuln_id={report_item["pluginID"]}']
+        handle = {'host': report_item['host-ip'], 'vuln': f'nessus.{report_item["pluginID"]}', 'note': f'nessus.{report_item["pluginID"]}'}
         if service:
-            handle.append(f'service_id={report_item["protocol"]}/{report_item["port"]}')
+            handle['service'] = f'{report_item["protocol"]}/{report_item["port"]}'
 
         return ParsedNote(
-            handle=';'.join(handle),
+            handle=handle,
             xtype=f'nessus.{report_item["pluginID"]}',
             data=json.dumps(report_item, cls=SnerJSONEncoder),
             import_time=report_item['HOST_START']

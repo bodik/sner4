@@ -9,15 +9,15 @@ from sner.server.storage.commands import command
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 
 
-def test_import_invalidparser(runner):
+def test_import_command_invalidparser(runner):
     """test invalid parser"""
 
     result = runner.invoke(command, ['import', 'invalid', '/nonexistent'])
     assert result.exit_code == 1
 
 
-def test_import_job_output(runner):
-    """test import from job output parser"""
+def test_import_command_nmap_job(runner):
+    """test import nmap job"""
 
     result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
     assert result.exit_code == 0
@@ -25,7 +25,7 @@ def test_import_job_output(runner):
     Host.query.one()
 
 
-def test_import_nmap_command(runner):
+def test_import_command_nmap_rawdata(runner):
     """test nmap parser"""
 
     result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
@@ -38,7 +38,7 @@ def test_import_nmap_command(runner):
     assert 'PIPELINING' in json.loads(tmpnote.data)['output']
 
 
-def test_import_nessus_command(runner):
+def test_import_command_nessus(runner):
     """test nessus parser"""
 
     result = runner.invoke(command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
@@ -54,7 +54,7 @@ def test_import_nessus_command(runner):
     assert len(json.loads(note.data)) == 3
 
 
-def test_import_manymap_command_zipfile(runner):
+def test_import_command_manymap_job(runner):
     """test manymap parser; zipfile import"""
 
     result = runner.invoke(command, ['import', 'manymap', 'tests/server/data/parser-manymap-job.zip'])
@@ -63,15 +63,6 @@ def test_import_manymap_command_zipfile(runner):
     host = Host.query.one()
     assert host.services[0].port == 18000
     assert host.services[0].info == 'product: Werkzeug httpd version: 0.15.5 extrainfo: Python 3.7.3'
-
-
-def test_import_manymap_command_plaintext(runner):
-    """test manymap parser; plaintext import"""
-
-    result = runner.invoke(command, ['import', 'manymap', 'tests/server/data/parser-manymap-output-1.xml'])
-    assert result.exit_code == 0
-
-    Host.query.one()
 
 
 def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument

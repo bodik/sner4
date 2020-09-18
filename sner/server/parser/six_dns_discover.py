@@ -24,8 +24,8 @@ class SixDnsDiscoverParser(ParserBase):
         data = json.loads(file_from_zip(path, 'output.json'))
 
         for addr, via in data.items():
-            hosts.append(ParsedHost(handle=f'host_id={addr}', address=addr))
-            notes.append(ParsedNote(handle=f'host_id={addr}', xtype='six_dns_discover.via', data=json.dumps(via)))
+            hosts.append(ParsedHost(handle={'host': addr}, address=addr))
+            notes.append(ParsedNote(handle={'host': addr}, xtype='six_dns_discover.via', data=json.dumps(via)))
 
         return hosts, [], [], notes
 

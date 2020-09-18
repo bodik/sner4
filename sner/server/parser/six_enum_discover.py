@@ -26,7 +26,7 @@ class SixEnumDiscoverParser(ParserBase):
         with ZipFile(path) as fzip:
             for ftmp in [fname for fname in fzip.namelist() if re.match(r'output\-[0-9]+\.txt', fname)]:
                 for addr in file_from_zip(path, ftmp).decode('utf-8').splitlines():
-                    hosts.append(ParsedHost(handle=f'host_id={addr}', address=addr))
+                    hosts.append(ParsedHost(handle={'host': addr}, address=addr))
 
         return hosts, [], [], []
 

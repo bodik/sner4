@@ -16,7 +16,7 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.sqlafilter import filter_parser
-from sner.server.storage.core import vuln_report
+from sner.server.storage.core import import_parsed, vuln_report
 from sner.server.storage.models import Host, Service
 
 
@@ -39,7 +39,7 @@ def storage_import(path, parser):
     parser_impl = registered_parsers[parser]
     for item in path:
         if os.path.isfile(item):
-            parser_impl.import_file(item)
+            import_parsed(*parser_impl.parse_path(item))
     sys.exit(0)
 
 

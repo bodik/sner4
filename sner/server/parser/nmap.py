@@ -50,7 +50,7 @@ class NmapParser(ParserBase):
         hosts = []
 
         for ihost in report.hosts:
-            host = ParsedHost(f'host_id={ihost.address}', ihost.address)
+            host = ParsedHost(handle={'host': ihost.address}, address=ihost.address)
 
             if ihost.hostnames:
                 host.hostnames = list(set(ihost.hostnames))
@@ -75,7 +75,7 @@ class NmapParser(ParserBase):
             for iservice in ihost.services:
 
                 service = ParsedService(
-                    handle=f'host_id={ihost.address};service_id={iservice.protocol}/{iservice.port}',
+                    handle={'host': ihost.address, 'service': f'{iservice.protocol}/{iservice.port}'},
                     proto=iservice.protocol,
                     port=iservice.port,
                     state=f'{iservice.state}:{iservice.reason}',
@@ -100,7 +100,7 @@ class NmapParser(ParserBase):
             # host level scripts
             for iscript in ihost.scripts_results:
                 notes.append(ParsedNote(
-                    handle=f'host_id={ihost.address};note_id=nmap.{iscript["id"]}',
+                    handle={'host': ihost.address, 'note': f'nmap.{iscript["id"]}'},
                     xtype=f'nmap.{iscript["id"]}',
                     data=json.dumps(iscript),
                     import_time=datetime.fromtimestamp(int(ihost.starttime))
@@ -110,7 +110,7 @@ class NmapParser(ParserBase):
             for iservice in ihost.services:
                 for iscript in iservice.scripts_results:
                     notes.append(ParsedNote(
-                        handle=f'host_id={ihost.address};service_id={iservice.protocol}/{iservice.port};note_id=nmap.{iscript["id"]}',
+                        handle={'host': ihost.address, 'service': f'{iservice.protocol}/{iservice.port}', 'note': f'nmap.{iscript["id"]}'},
                         xtype=f'nmap.{iscript["id"]}',
                         data=json.dumps(iscript),
                         import_time=datetime.fromtimestamp(int(ihost.starttime))

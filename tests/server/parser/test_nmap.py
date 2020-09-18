@@ -21,13 +21,13 @@ def test_xxe():
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_host_handles = ['host_id=127.0.0.1']
+    expected_host_handles = [{'host': '127.0.0.1'}]
     expected_service_handles = [
-        'host_id=127.0.0.1;service_id=tcp/22',
-        'host_id=127.0.0.1;service_id=tcp/25',
-        'host_id=127.0.0.1;service_id=tcp/139',
-        'host_id=127.0.0.1;service_id=tcp/445',
-        'host_id=127.0.0.1;service_id=tcp/5432'
+        {'host': '127.0.0.1', 'service': 'tcp/22'},
+        {'host': '127.0.0.1', 'service': 'tcp/25'},
+        {'host': '127.0.0.1', 'service': 'tcp/139'},
+        {'host': '127.0.0.1', 'service': 'tcp/445'},
+        {'host': '127.0.0.1', 'service': 'tcp/5432'}
     ]
 
     hosts, services, _, _ = NmapParser.parse_path('tests/server/data/parser-nmap-output.xml')
