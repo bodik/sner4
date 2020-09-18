@@ -160,15 +160,6 @@ def import_parsed(hosts, services, vulns, notes):
     import_notes(notes)
 
 
-def update_model(model, data):
-    """update model from data object"""
-
-    for key, value in data.__dict__.items():
-        if hasattr(model, key):
-            setattr(model, key, value)
-    return model
-
-
 def import_hosts(parsed_hosts):
     """import hosts from parsed data"""
 
@@ -178,7 +169,7 @@ def import_hosts(parsed_hosts):
             host = Host(address=ihost.address)
             db.session.add(host)
 
-        host = update_model(host, ihost)
+        host.update(ihost)
         if ihost.hostnames:
             note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
             if not note:
@@ -200,7 +191,7 @@ def import_services(parsed_services):
             service = Service(host=host, proto=iservice.proto, port=iservice.port)
             db.session.add(service)
 
-        service = update_model(service, iservice)
+        service.update(iservice)
 
     db.session.commit()
 
@@ -218,7 +209,7 @@ def import_vulns(parsed_vulns):
             vuln = Vuln(host=host, service=service, xtype=ivuln.xtype)
             db.session.add(vuln)
 
-        vuln = update_model(vuln, ivuln)
+        vuln.update(ivuln)
 
     db.session.commit()
 
@@ -235,8 +226,8 @@ def import_notes(parsed_notes):
         if not note:
             note = Note(host=host, service=service, xtype=inote.xtype)
             db.session.add(note)
-        note = update_model(note, inote)
 
+        note.update(inote)
         if 'vuln' in inote.handle:
             vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == inote.handle['vuln']).one()
             vuln.refs = [f'SN-{note.id}'] + vuln.refs

@@ -13,7 +13,20 @@ from sner.server.extensions import db
 from sner.server.models import SelectableEnum
 
 
-class Host(db.Model):
+class StorageModelBase(db.Model):
+    """storage model base"""
+
+    __abstract__ = True
+
+    def update(self, obj):
+        """update model from data object"""
+
+        for key, value in obj.__dict__.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+
+class Host(StorageModelBase):
     """basic host (ip-centric) model"""
 
     id = db.Column(db.Integer, primary_key=True)
@@ -34,7 +47,7 @@ class Host(db.Model):
         return '<Host %s: %s (%s)>' % (self.id, self.address, self.hostname if self.hostname else '')
 
 
-class Service(db.Model):
+class Service(StorageModelBase):
     """discovered host service"""
 
     id = db.Column(db.Integer, primary_key=True)
@@ -70,7 +83,7 @@ class SeverityEnum(SelectableEnum):
     critical = 'critical'
 
 
-class Vuln(db.Model):
+class Vuln(StorageModelBase):
     """vulnerability model; heavily inspired by metasploit; hdm rulez"""
 
     id = db.Column(db.Integer, primary_key=True)
@@ -96,7 +109,7 @@ class Vuln(db.Model):
         return '<Vuln %s: %s>' % (self.id, self.xtype)
 
 
-class Note(db.Model):
+class Note(StorageModelBase):
     """host assigned note, generic data container"""
 
     id = db.Column(db.Integer, primary_key=True)
