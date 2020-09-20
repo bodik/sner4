@@ -12,16 +12,11 @@ from sner.server.planner.commands import command
 def test_run_coverage(runner):
     """run planner in test mode to trigger coverage"""
 
-    runner.app.config['SNER_PLANNER'] = {
-        'import_jobs': [],
-        'enqueue_servicelist': [],
-        'rescan_services': {'interval': '1h', 'queue4': 'dummy', 'queue6': 'dummy'},
-        'rescan_hosts': {'interval': '1h', 'queue4': 'dummy', 'queue6': 'dummy'},
-        'discover_ipv4': {'interval': '1h', 'netranges': [], 'queue': 'dummy'},
-        'discover_ipv6_dns': {'interval': '1h', 'netranges': [], 'queue': 'dummy'},
-        'discover_ipv6_enum': {'interval': '1h', 'queue': 'dummy'},
-        'enqueue_hostlist': [],
-    }
+    runner.app.config['SNER_PLANNER']['pipelines'] = [
+        {'type': 'queue', 'steps': []},
+        {'type': 'standalone', 'steps': []},
+        {'type': 'invalid'}
+    ]
 
-    result = runner.invoke(command, ['run', '--test', '--debug'])
+    result = runner.invoke(command, ['run', '--oneshot'])
     assert result.exit_code == 0

@@ -80,13 +80,6 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner_disco ack scan top1000',
-        config=yaml_dump({'module': 'nmap', 'args': '-sA --top-ports 1000 -Pn', 'timing_perhost': 10}),
-        group_size=400,
-        priority=12,
-    ))
-
-    db.session.add(Queue(
         name='sner_disco ack scan top10000',
         config=yaml_dump({'module': 'nmap', 'args': '-sA --top-ports 10000 -Pn', 'timing_perhost': 8}),
         group_size=1000,

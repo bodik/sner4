@@ -22,7 +22,7 @@ def test_import_command_nmap_job(runner):
     result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
     assert result.exit_code == 0
 
-    Host.query.one()
+    assert Host.query.one()
 
 
 def test_import_command_nmap_rawdata(runner):
