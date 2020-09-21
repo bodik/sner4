@@ -22,8 +22,7 @@
 #
 #    pipelines:
 #        # BASIC: two-phase ipv4/ipv6 scanning
-#        - name: "process 'sner_disco ack scan top10000'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_disco ack scan top10000'
@@ -32,16 +31,14 @@
 #                queue: 'sner_data version scan basic'
 #              - step: archive_job
 #
-#        - name: "process 'sner_data version scan basic'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_data version scan basic'
 #              - step: import_job
 #              - step: archive_job
 #
-#        - name: "process 'sner_disco ipv6 ack scan top10000'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_disco ipv6 ack scan top10000'
@@ -50,8 +47,7 @@
 #                queue: 'sner_data ipv6 version scan basic'
 #              - step: archive_job
 #
-#        - name: "process 'sner_data ipv6 version scan basic'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_data ipv6 version scan basic'
@@ -60,8 +56,7 @@
 #
 #
 #        # ADVANCED: priority port sweep scan
-#        - name: "process 'sner_sweep ack scan portA'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_sweep ack scan portA'
@@ -70,8 +65,7 @@
 #                queue: 'sner_sweep version scan basic'
 #              - step: archive_job
 #
-#        - name: "process 'sner_sweep version scan basic'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_sweep version scan basic'
@@ -80,16 +74,14 @@
 #
 #
 #        # ADVANCED: advanced scanning techniques
-#        - name: "process 'sner_data version scan intense'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_data version scan intense'
 #              - step: import_job
 #              - step: archive_job
 #
-#        - name: "process 'sner_data script scan basic'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_data script scan basic'
@@ -98,8 +90,7 @@
 #
 #
 #        # ADVANCED: storage rescanning
-#        - name: "rescan storage"
-#          type: generic
+#        - type: generic
 #          steps:
 #              - step: rescan_services
 #                interval: '10days'
@@ -113,8 +104,7 @@
 #
 #
 #        # ADVANCED: full netranges rediscovery
-#        - name: "rediscover netranges"
-#          type: generic
+#        - type: generic
 #          steps:
 #              - step: discover_ipv4
 #                interval: '90days'
@@ -130,8 +120,7 @@
 #                interval: '90days'
 #                queue: 'sner_disco ipv6 enum discover'
 #
-#        - name: "process 'sner_disco ipv6 dns discover'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_disco ipv6 dns discover'
@@ -142,8 +131,7 @@
 #                queue: 'sner_disco ipv6 ack scan top10000'
 #              - step: archive_job
 #
-#        - name: "process 'sner_disco ipv6 enum discover'"
-#          type: queue
+#        - type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_disco ipv6 enum discover'

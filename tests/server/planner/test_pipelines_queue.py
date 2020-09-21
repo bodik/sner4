@@ -26,7 +26,6 @@ def test_pipeline_import_job(runner, queue_factory, job_completed_factory):  # p
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'name': __name__,
             'type': 'queue',
             'steps': [
                 {'step': 'load_job', 'queue': queue.name},
@@ -59,7 +58,6 @@ def test_pipeline_servicelist_enqueue(runner, queue_factory, job_completed_facto
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'name': __name__,
             'type': 'queue',
             'steps': [
                 {'step': 'load_job', 'queue': queue.name},
@@ -92,7 +90,6 @@ def test_pipeline_hostlist_enqueue(runner, queue_factory, job_completed_factory)
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'name': __name__,
             'type': 'queue',
             'steps': [
                 {'step': 'load_job', 'queue': queue.name},

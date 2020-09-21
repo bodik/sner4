@@ -16,7 +16,6 @@ from sner.server.planner.steps import registered_steps, StopPipeline
 
 
 PIPELINE_CONFIG_SCHEMA = Schema({
-    'name': str,
     'type': Or('queue', 'generic'),
     'steps': list
 })
@@ -44,7 +43,7 @@ def run_pipeline(config):
 def run_generic_pipeline(config):
     """run generic/simple pipeline"""
 
-    current_app.logger.debug(f'run pipeline: {config["name"]}')
+    current_app.logger.debug(f'run pipeline: {config}')
     ctx = Context()
     for step_config in config['steps']:
         current_app.logger.debug(f'run step: {step_config}')

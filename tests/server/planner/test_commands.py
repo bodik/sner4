@@ -11,8 +11,8 @@ def test_run_coverage(runner):
     """run planner in test mode to trigger coverage"""
 
     runner.app.config['SNER_PLANNER']['pipelines'] = [
-        {'name': 'test1', 'type': 'queue', 'steps': [{'step': 'stop_pipeline'}]},
-        {'name': 'test2', 'type': 'generic', 'steps': []},
+        {'type': 'queue', 'steps': [{'step': 'stop_pipeline'}]},
+        {'type': 'generic', 'steps': []},
         {'invalid': 0},
     ]
 
