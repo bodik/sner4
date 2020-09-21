@@ -25,7 +25,7 @@ def enumerate_network(arg):
 def filter_already_queued(queue, targets):
     """filters already queued targets"""
 
-    current_targets = {x[0]: 0 for x in windowed_query(db.session.query(Target.target).filter(Target.queue == queue), Target.id, 5000)}
+    current_targets = {x[0]: 0 for x in windowed_query(db.session.query(Target.target).filter(Target.queue == queue), Target.id)}
     targets = [tgt for tgt in targets if tgt not in current_targets]
     return targets
 

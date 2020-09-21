@@ -17,8 +17,8 @@
 #planner:
 #    # common aliases
 #    common:
-#        &home_netranges_ipv4: []
-#        &home_netranges_ipv6: ['::1/128']
+#        home_netranges_ipv4: &home_netranges_ipv4 []
+#        home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 #
 #    pipelines:
 #        # BASIC: two-phase ipv4/ipv6 scanning

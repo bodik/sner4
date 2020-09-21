@@ -8,7 +8,7 @@
 	var dt_queue_list_table_options = {
 		'ajax': {'url': "{{ url_for('scheduler.queue_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
-			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('id'),
 			Sner.dt.column('name'),
 			Sner.dt.column('config', {'render': function(data, type, row, meta) { return Sner.scheduler.hbs.render_yaml({'data': row['config']}); }}),
 			Sner.dt.column('group_size'),
@@ -18,7 +18,6 @@
 			Sner.dt.column('nr_jobs'),
 			Sner.dt.column_buttons(Sner.scheduler.hbs.queue_controls)
 		],
-		'order': [[1, 'asc']],
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_submit_dataurl_queueflush').on('click', {'dt': this.api(), 'confirmation': 'Really flush?'}, Sner.action_submit_dataurl);

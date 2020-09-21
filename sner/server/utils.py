@@ -142,7 +142,7 @@ def yaml_dump(data):
     return yaml.dump(data, sort_keys=False, indent=4, width=80)
 
 
-def windowed_query(query, column, windowsize):
+def windowed_query(query, column, windowsize=5000):
     """"
     Break a Query into chunks on a given column.
     https://github.com/sqlalchemy/sqlalchemy/wiki/RangeQuery-and-WindowedRangeQuery

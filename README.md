@@ -237,7 +237,7 @@ cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
 systemctl daemon-reload
 systemctl start sner-agent@1.service
 
-# configure planner service
+# OPTIONAL: configure planner service
 cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
 systemctl daemon-reload
 systemctl enable --now sner-planner.service

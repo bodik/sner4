@@ -55,7 +55,7 @@ def run_generic_pipeline(config):
 class Planner:
     """planner"""
 
-    LOOPSLEEP = 1
+    LOOPSLEEP = 60
 
     def __init__(self, oneshot=False):
         self.log = current_app.logger.getChild('sner.server.planner')

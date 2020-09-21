@@ -156,7 +156,7 @@ def rescan_services(_, interval, queue4, queue6):
     query = Service.query.filter(or_(Service.rescan_time < rescan_horizont, Service.rescan_time == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
     rescan4, rescan6, ids = [], [], []
-    for service in windowed_query(query, Service.id, 5000):
+    for service in windowed_query(query, Service.id):
         item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
         if isinstance(ip_address(service.host.address), IPv4Address):
             rescan4.append(item)
@@ -191,7 +191,7 @@ def rescan_hosts(_, interval, queue4, queue6):
     query = Host.query.filter(or_(Host.rescan_time < rescan_horizont, Host.rescan_time == None))  # noqa: E711  pylint: disable=singleton-comparison
 
     rescan4, rescan6, ids = [], [], []
-    for host in windowed_query(query, Host.id, 5000):
+    for host in windowed_query(query, Host.id):
         if isinstance(ip_address(host.address), IPv4Address):
             rescan4.append(host.address)
             ids.append(host.id)
