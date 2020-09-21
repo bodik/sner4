@@ -148,14 +148,11 @@ management.
 
 #### Server: Planner
 
-Planner is a Celery worker based daemon, works as automation layer over
-scheduler subsystem. According to it's configuration, planner can execute
-stages to handle:
+Planner is scheduling daemon executing defined pipelines. Pipelines defines a
+queues processing (imports data to storage, requeueing during two-phase
+scanning) as well as periodic generators (rescanning storage, rediscovery of
+netranges for IPv4 and IPv6 address space).
 
-* automatic import of jobs output from queues (import_jobs)
-* requeueing targets from discovery queues into data queues (enqueue_servicelist, enqueue_hostlist)
-* scheduling rescans of services and hosts from current storage (rescan_services, rescan_hosts)
-* periodic rescan or ipv6 rediscovery in specified netranges (discover_ipv4, discover_ipv6_dns, discover_ipv6_enum)
 
 
 ### 2.3 Data management subsystem
@@ -193,7 +190,7 @@ database or current configuration:
 
 ```
 # pre-requisities
-apt-get install git sudo make postgresql-all redis-server
+apt-get install git sudo make postgresql-all
 
 # clone from repository
 git clone https://github.com/bodik/sner4 /opt/sner
@@ -299,8 +296,8 @@ bin/server run
 #### Use-case: Basic dns recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'pentest dns recon' --file=-
-bin/agent --debug --queue 'pentest dns recon'
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner_data version scan basic' --file=-
+bin/agent --debug (--queue 'sner_data version scan basic')?
 bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
 ```
 

@@ -4,7 +4,6 @@ python: 3.7
 
 services:
     - postgresql
-    - redis-server
 
 addons:
     firefox: "latest-esr"

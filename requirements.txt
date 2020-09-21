@@ -1,11 +1,9 @@
-celery[redis]
 coverage
 defusedxml
 fido2
 file-magic
 flake8
 flask
-flask-celeryext
 flask-login
 flask-sqlalchemy
 flask-wtf
