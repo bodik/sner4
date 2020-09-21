@@ -17,113 +17,129 @@
 #planner:
 #    # common aliases
 #    common:
-#        &import_pipeline_steps:
-#            - step: load_job
-#            - step: import_job
-#
 #        &home_netranges_ipv4: []
 #        &home_netranges_ipv6: ['::1/128']
 #
 #    pipelines:
-#        # BASIC: all successfully finished jobs gets imported into storage
-#        - type: queue
-#          queue: 'sner_data version scan basic'
-#          steps: *import_pipeline_steps
-#        - type: queue
-#          queue: 'sner_data version scan intense'
-#          steps: *import_pipeline_steps
-#        - type: queue
-#          queue: 'sner_data ipv6 version scan basic'
-#          steps: *import_pipeline_steps
-#        - type: queue
-#          queue: 'sner_sweep version scan basic'
-#          steps: *import_pipeline_steps
-#
-#
-#        # BASIC: all successfull jobs are requeued into next queue
-#        - type: queue
-#          queue: 'sner_disco ack scan top10000'
+#        # BASIC: two-phase ipv4/ipv6 scanning
+#        - name: "process 'sner_disco ack scan top10000'"
+#          type: queue
 #          steps:
 #              - step: load_job
+#                queue: 'sner_disco ack scan top10000'
 #              - step: project_servicelist
 #              - step: enqueue
 #                queue: 'sner_data version scan basic'
+#              - step: archive_job
 #
-#        - type: queue
-#          queue: 'sner_disco ipv6 ack scan top10000'
+#        - name: "process 'sner_data version scan basic'"
+#          type: queue
 #          steps:
 #              - step: load_job
+#                queue: 'sner_data version scan basic'
+#              - step: import_job
+#              - step: archive_job
+#
+#        - name: "process 'sner_disco ipv6 ack scan top10000'"
+#          type: queue
+#          steps:
+#              - step: load_job
+#                queue: 'sner_disco ipv6 ack scan top10000'
 #              - step: project_servicelist
 #              - step: enqueue
 #                queue: 'sner_data ipv6 version scan basic'
+#              - step: archive_job
 #
-#        - type: queue
-#          queue: 'sner_sweep ack scan portA'
+#        - name: "process 'sner_data ipv6 version scan basic'"
+#          type: queue
 #          steps:
 #              - step: load_job
+#                queue: 'sner_data ipv6 version scan basic'
+#              - step: import_job
+#              - step: archive_job
+#
+#
+#        # ADVANCED: priority port sweep scan
+#        - name: "process 'sner_sweep ack scan portA'"
+#          type: queue
+#          steps:
+#              - step: load_job
+#                queue: 'sner_sweep ack scan portA'
 #              - step: project_servicelist
 #              - step: enqueue
 #                queue: 'sner_sweep version scan basic'
+#              - step: archive_job
+#
+#        - name: "process 'sner_sweep version scan basic'"
+#          type: queue
+#          steps:
+#              - step: load_job
+#                queue: 'sner_sweep version scan basic'
+#              - step: import_job
+#              - step: archive_job
 #
 #
-#        # ADVANCED: all storage services are rescanned in interval (eg. 1week, 30days, ...)
-#        - type: standalone
+#        # ADVANCED: intense version scanning
+#        - name: "process 'sner_data version scan intense'
+#          type: queue
+#          steps:
+#              - step: load_job
+#                queue: 'sner_data version scan intense'
+#              - step: import_job
+#              - step: archive_job
+#
+#
+#        # ADVANCED: storage rescanning
+#        - name: "rescan storage"
+#          type: generic
 #          steps:
 #              - step: rescan_services
 #                interval: '10days'
 #                queue4: 'sner_data version scan basic'
 #                queue6: 'sner_data ipv6 version scan basic'
 #
-#
-#        # ADVANCED: all storage hosts are rescanned in interval (eg. 1week, 30days, ...)
-#        - type: standalone
-#          steps:
 #              - step: rescan_hosts
 #                interval: '30days'
 #                queue4: 'sner_disco ack scan top10000'
 #                queue6: 'sner_disco ipv6 ack scan top10000'
 #
 #
-#        # ADVANCED: set of netranges are fully rescanned in interval
-#        - type: standalone
+#        # ADVANCED: full netranges rediscovery
+#        - name: "rediscover netranges"
+#          type: generic
 #          steps:
 #              - step: discover_ipv4
 #                interval: '90days'
 #                netranges: *home_netranges_ipv4
 #                queue: 'sner_disco ack scan top10000'
 #
-#
-#        # ADVANCED: ipv6 addresses can be discovered by DNS from v4 PTR to AAAA mappings
-#        # also see complementary filtering on six_dns_discover queue to confine resuls into whitelisted netranges
-#        - type: standalone
-#          steps:
 #              - step: discover_ipv6_dns
 #                interval: '90days'
 #                netranges: *home_netranges_ipv4
 #                queue: 'sner_disco ipv6 dns discover'
 #
-#        - type: queue
-#          queue: 'sner_disco ipv6 dns discover'
+#              - step: discover_ipv6_enum
+#                interval: '90days'
+#                queue: 'sner_disco ipv6 enum discover'
+#
+#        - name: "process 'sner_disco ipv6 dns discover'"
+#          type: queue
 #          steps:
 #              - step: load_job
+#                queue: 'sner_disco ipv6 dns discover'
 #              - step: project_hostlist
 #              - step: filter_netranges
 #                netranges: *home_netranges_ipv6
 #              - step: enqueue
 #                queue: 'sner_disco ipv6 ack scan top10000'
+#              - step: archive_job
 #
-#
-#        # advanced: ipv6 addresses can be enumerated from existing found in storage
-#        - type: standalone
-#          steps:
-#              - step: discover_ipv6_enum
-#                interval: '90days'
-#                queue: 'sner_disco ipv6 enum discover'
-#
-#        - type: queue
-#          queue: 'sner_disco ipv6 enum discover'
+#        - name: "process 'sner_disco ipv6 enum discover'"
+#          type: queue
 #          steps:
 #              - step: load_job
+#                queue: 'sner_disco ipv6 enum discover'
 #              - step: project_hostlist
 #              - step: enqueue
 #                queue: 'sner_disco ipv6 ack scan top10000'
+#              - step: archive_job

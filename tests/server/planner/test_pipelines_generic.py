@@ -22,7 +22,8 @@ def test_pipeline_debug_step(runner, host_factory, service_factory, queue_factor
 
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [{'step': 'debug'}]
         }
     ]
@@ -43,7 +44,8 @@ def test_pipeline_rescan_services(runner, host_factory, service_factory, queue_f
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'rescan_services',
@@ -90,7 +92,8 @@ def test_pipeline_rescan_services_largedataset(runner, queue_factory, host_facto
 
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'rescan_services',
@@ -118,7 +121,8 @@ def test_pipeline_rescan_hosts(runner, host_factory, queue_factory):  # pylint: 
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'rescan_hosts',
@@ -140,7 +144,8 @@ def test_pipeline_discover_ipv4(runner, queue):  # pylint: disable=unused-argume
 
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'discover_ipv4',
@@ -164,7 +169,8 @@ def test_discover_ipv6_dns_stage(runner, queue):  # pylint: disable=unused-argum
 
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'discover_ipv6_dns',
@@ -190,7 +196,8 @@ def test_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disab
     host_factory.create(address='::00ff:fe00:1')
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
-            'type': 'standalone',
+            'name': __name__,
+            'type': 'generic',
             'steps': [
                 {
                     'step': 'discover_ipv6_enum',

@@ -5,11 +5,51 @@ planner core
 
 import signal
 from contextlib import contextmanager
+from copy import deepcopy
 from time import sleep
 
 from flask import current_app
+from schema import Schema, Or
 
-from sner.server.planner.pipelines import run_queue_pipeline, run_standalone_pipeline
+from sner.server.planner.steps import registered_steps, StopPipeline
+
+
+PIPELINE_CONFIG_SCHEMA = Schema({
+    'name': str,
+    'type': Or('queue', 'generic'),
+    'steps': list
+})
+
+
+class Context(dict):
+    """context object"""
+
+
+def run_pipeline(config):
+    """
+    run pipeline. type:queue pipelines are running until stop is signaled, all others are run only once
+    """
+
+    try:
+        if config['type'] == 'queue':
+            while True:
+                run_generic_pipeline(config)
+        else:
+            run_generic_pipeline(config)
+    except StopPipeline:
+        return
+
+
+def run_generic_pipeline(config):
+    """run generic/simple pipeline"""
+
+    current_app.logger.debug(f'run pipeline: {config["name"]}')
+    ctx = Context()
+    for step_config in config['steps']:
+        current_app.logger.debug(f'run step: {step_config}')
+        args = deepcopy(step_config)
+        step = args.pop('step')
+        registered_steps[step](ctx, **args)
 
 
 class Planner:
@@ -53,12 +93,8 @@ class Planner:
             while self.loop:
                 for pipeline in config:
                     try:
-                        if pipeline['type'] == 'queue':
-                            run_queue_pipeline(pipeline)
-                        elif pipeline['type'] == 'standalone':
-                            run_standalone_pipeline(pipeline)
-                        else:
-                            raise RuntimeError(f'unsupported pipeline {config}')
+                        PIPELINE_CONFIG_SCHEMA.validate(pipeline)
+                        run_pipeline(pipeline)
                     except Exception as e:  # pylint: disable=broad-except  ; any exception can be raised during pipeline processing
                         current_app.logger.error(f'pipeline failed, {pipeline}, {repr(e)}', exc_info=True)
 

@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-planner pipelines
+test planner queue pipelines
 """
 
 from pathlib import Path
@@ -26,11 +26,12 @@ def test_pipeline_import_job(runner, queue_factory, job_completed_factory):  # p
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
+            'name': __name__,
             'type': 'queue',
-            'queue': queue.name,
             'steps': [
-                {'step': 'load_job'},
+                {'step': 'load_job', 'queue': queue.name},
                 {'step': 'import_job'},
+                {'step': 'archive_job'}
             ]
         }
     ]
@@ -58,12 +59,13 @@ def test_pipeline_servicelist_enqueue(runner, queue_factory, job_completed_facto
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
+            'name': __name__,
             'type': 'queue',
-            'queue': queue.name,
             'steps': [
-                {'step': 'load_job'},
+                {'step': 'load_job', 'queue': queue.name},
                 {'step': 'project_servicelist'},
-                {'step': 'enqueue', 'queue': next_queue.name}
+                {'step': 'enqueue', 'queue': next_queue.name},
+                {'step': 'archive_job'}
             ]
         }
     ]
@@ -90,13 +92,14 @@ def test_pipeline_hostlist_enqueue(runner, queue_factory, job_completed_factory)
     )
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
+            'name': __name__,
             'type': 'queue',
-            'queue': queue.name,
             'steps': [
-                {'step': 'load_job'},
+                {'step': 'load_job', 'queue': queue.name},
                 {'step': 'project_hostlist'},
                 {'step': 'filter_netranges', 'netranges': ['::1/128']},
-                {'step': 'enqueue', 'queue': next_queue.name}
+                {'step': 'enqueue', 'queue': next_queue.name},
+                {'step': 'archive_job'}
             ]
         }
     ]

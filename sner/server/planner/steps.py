@@ -6,6 +6,7 @@ sner planner pipeline steps
 from datetime import datetime, timedelta
 from ipaddress import ip_address, IPv4Address, IPv6Address, IPv6Network
 from pathlib import Path
+from shutil import copy2
 
 import yaml
 from flask import current_app
@@ -16,8 +17,8 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.storage.core import import_parsed
-from sner.server.scheduler.core import enumerate_network, filter_already_queued, queue_enqueue
-from sner.server.scheduler.models import Queue
+from sner.server.scheduler.core import enumerate_network, filter_already_queued, job_delete, queue_enqueue
+from sner.server.scheduler.models import Job, Queue
 from sner.server.storage.models import Host, Service
 from sner.server.utils import windowed_query
 
@@ -51,6 +52,10 @@ def update_lastrun(name):
     lastrun_path.write_text(datetime.utcnow().isoformat())
 
 
+class StopPipeline(Exception):
+    """stop pipeline signal"""
+
+
 @register_step
 def debug(ctx):
     """debug current context"""
@@ -59,10 +64,22 @@ def debug(ctx):
 
 
 @register_step
-def load_job(ctx):
-    """load data from queue or queues"""
+def stop_pipeline(ctx):
+    """stop pipeline"""
 
-    job = ctx['job']
+    raise StopPipeline()
+
+
+@register_step
+def load_job(ctx, queue):
+    """load one finished job from queue or signal stop to pipeline"""
+
+    qref = Queue.query.filter(Queue.name == queue).one()
+    job = Job.query.filter(Job.queue == qref, Job.retval == 0).first()
+    if not job:
+        raise StopPipeline()
+
+    ctx['job'] = job
     queue_module_config = yaml.safe_load(job.queue.config)
     parser = registered_parsers[queue_module_config['module']]
     ctx['data'] = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
@@ -110,6 +127,21 @@ def enqueue(ctx, queue):
 
     queue = Queue.query.filter(Queue.name == queue).one()
     queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
+
+
+@register_step
+def archive_job(ctx):
+    """archive job step"""
+
+    job = ctx['job']
+    job_id, queue_name = job.id, job.queue.name
+
+    archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    copy2(job.output_abspath, archive_dir)
+    job_delete(job)
+
+    current_app.logger.info(f'archived job {job_id} ({queue_name})')
 
 
 @register_step
