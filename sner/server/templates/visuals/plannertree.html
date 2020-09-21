@@ -23,7 +23,7 @@ svg {
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Visuals', 'Scheduler workflow tree']) %}{% endcall %}
+{% call cm.heading(['Visuals', 'Planner workflow tree']) %}{% endcall %}
 <!--
 	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
 	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
@@ -93,7 +93,7 @@ var dragDrop = d3.drag()
 		node.fy = null;
 	});
 
-d3.json(Flask.url_for('visuals.workflowtree_json_route') + window.location.search, function(data) {
+d3.json(Flask.url_for('visuals.plannertree_json_route') + window.location.search, function(data) {
 	update(data.nodes, data.links);
 });
 

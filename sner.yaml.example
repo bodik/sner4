@@ -79,12 +79,20 @@
 #              - step: archive_job
 #
 #
-#        # ADVANCED: intense version scanning
-#        - name: "process 'sner_data version scan intense'
+#        # ADVANCED: advanced scanning techniques
+#        - name: "process 'sner_data version scan intense'"
 #          type: queue
 #          steps:
 #              - step: load_job
 #                queue: 'sner_data version scan intense'
+#              - step: import_job
+#              - step: archive_job
+#
+#        - name: "process 'sner_data script scan basic'"
+#          type: queue
+#          steps:
+#              - step: load_job
+#                queue: 'sner_data script scan basic'
 #              - step: import_job
 #              - step: archive_job
 #
