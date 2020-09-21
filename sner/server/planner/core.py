@@ -11,6 +11,7 @@ from time import sleep
 from flask import current_app
 from schema import Schema, Or
 
+from sner.server.extensions import db
 from sner.server.planner.steps import registered_steps, StopPipeline
 
 
@@ -97,6 +98,7 @@ class Planner:
                         run_pipeline(pipeline)
                     except Exception as e:  # pylint: disable=broad-except  ; any exception can be raised during pipeline processing
                         current_app.logger.error(f'pipeline failed, {pipeline}, {repr(e)}', exc_info=True)
+                db.session.close()
 
                 if self.oneshot:
                     self.loop = False
