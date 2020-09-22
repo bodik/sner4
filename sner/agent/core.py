@@ -26,15 +26,25 @@ from sner.agent.modules import registered_modules
 from sner.version import __version__
 
 
+LOGGER_NAME = 'sner.agent'
 DEFAULT_CONFIG = {
     'SERVER': 'http://localhost:18000',
     'APIKEY': None,
     'QUEUE': None
 }
 
-logger = logging.getLogger('sner.agent')  # pylint: disable=invalid-name
-logging.basicConfig(stream=sys.stdout, format='%(levelname)s %(message)s')
-logger.setLevel(logging.INFO)
+
+def setup_logger():
+    """configure logger"""
+
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter('%(levelname)s %(message)s'))
+    logger.addHandler(handler)
+
+    return logger
 
 
 def config_from_yaml(filename):
@@ -79,7 +89,7 @@ class AgentBase(ABC):
     """base agent impl containing main (sub)process handling code"""
 
     def __init__(self):
-        self.log = logging.getLogger('sner.agent')
+        self.log = logging.getLogger(LOGGER_NAME)
         self.module_instance = None
         self.original_signal_handlers = {}
         self.loop = None
@@ -247,6 +257,8 @@ class AssignableAgent(AgentBase):
 
 def main(argv=None):
     """sner agent main"""
+
+    logger = setup_logger()
 
     parser = ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='show debug output')
