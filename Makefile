@@ -12,6 +12,9 @@ install-deps:
 	sudo apt-get -y install unzip nmap ipv6toolkit
 	sudo apt-get -y install gcc python3-dev libpq-dev # required by psycopg2
 	pip install -r requirements.lock
+	# remove after update to selenium 4.x
+	if [ -d venv/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=venv/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
+	if [ -d /home/travis/virtualenv/python3.7.6/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=/home/travis/virtualenv/python3.7.6/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
 
 freeze:
 	@pip freeze | grep -v '^pkg-resources='

@@ -366,3 +366,8 @@ $ bin/server shell
   ensure functionality and coding standards.
 
 * Any review or contribution is welcome.
+
+### Known issues
+
+* Selenium python driver does not correctly cleanup the urllib3 pool manager, which yields into ResourceWarning, it's fixed 4.0 branch currently in development (09/2020)
+  The isssue is monkeypatched to `venv` during `install-deps`.
