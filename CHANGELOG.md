@@ -1,5 +1,20 @@
 # sner4 changelog
 
+## 0.4.0 - pipelined planner [BC BREAK]
+
+* features
+  * scheduler: add job repeat feature
+  * tune default queues (drop unused, add generic script scan queue)
+  * decouple module output parsing from storage imports
+  * refactor planner to be drived by configured pipelines, remove celery and implement as simple loop daemon
+
+* fixes:
+  * fix annotate modal dialogue form action to work properly with gunicorn
+  * hotfix python selenium to correctly close sockets
+
+* security:
+  * update handlbars library
+
 ## 0.3.1 - prod planner
 
 * features:
