@@ -11,7 +11,7 @@ from shutil import copy2
 import yaml
 from flask import current_app
 from pytimeparse import parse as timeparse
-from sqlalchemy import func, or_
+from sqlalchemy import func, not_, or_
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
@@ -19,7 +19,7 @@ from sner.server.parser import registered_parsers
 from sner.server.storage.core import import_parsed
 from sner.server.scheduler.core import enumerate_network, filter_already_queued, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue
-from sner.server.storage.models import Host, Service
+from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import windowed_query
 
 
@@ -145,6 +145,34 @@ def archive_job(ctx):
 
 
 @register_step
+def cleanup_storage(_):
+    """clean up storage from various import artifacts"""
+
+    # remove any but open:* state services
+    query_services = Service.query.filter(not_(Service.state.ilike('open:%')))
+    for service in query_services.all():
+        db.session.delete(service)
+    db.session.commit()
+
+    # remove hosts without any data attribute, service, vuln or note
+    services_count = func.count(Service.id)
+    vulns_count = func.count(Vuln.id)
+    notes_count = func.count(Note.id)
+    query_hosts = Host.query \
+        .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
+        .filter(
+            or_(Host.os == '', Host.os == None),  # noqa: E711  pylint: disable=singleton-comparison
+            or_(Host.comment == '', Host.comment == None)  # noqa: E711  pylint: disable=singleton-comparison
+        ) \
+        .having(services_count == 0).having(vulns_count == 0).having(notes_count == 0).group_by(Host.id)
+
+    for host in query_hosts.all():
+        db.session.delete(host)
+    db.session.commit()
+    current_app.logger.debug(f'storage cleaned')
+
+
+@register_step
 def rescan_services(_, interval, queue4, queue6):
     """rescan services from storage; update known services info"""
 
@@ -176,7 +204,7 @@ def rescan_services(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.debug(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.info(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -210,7 +238,7 @@ def rescan_hosts(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.debug(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.info(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -231,7 +259,7 @@ def discover_ipv4(_, interval, netranges, queue):
     update_lastrun('discover_ipv4')
 
     if count:
-        current_app.logger.debug(f'discover_ipv4, queued {count}')
+        current_app.logger.info(f'discover_ipv4, queued {count}')
 
 
 @register_step
@@ -249,7 +277,7 @@ def discover_ipv6_dns(_, interval, netranges, queue):
         queue_enqueue(queue, targets)
 
     if count:
-        current_app.logger.debug(f'discover_ipv6_dns, queued {count}')
+        current_app.logger.info(f'discover_ipv6_dns, queued {count}')
     update_lastrun('discover_ipv6_dns')
 
 
@@ -279,5 +307,5 @@ def discover_ipv6_enum(_, interval, queue):
     queue_enqueue(queue, targets)
 
     if targets:
-        current_app.logger.debug(f'discover_ipv6_enum, queued {len(targets)}')
+        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)}')
     update_lastrun('discover_ipv6_enum')

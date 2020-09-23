@@ -13,7 +13,7 @@ from flask import current_app
 from sner.server.extensions import db
 from sner.server.planner.core import Planner
 from sner.server.scheduler.models import Target
-from sner.server.storage.models import Service
+from sner.server.storage.models import Host, Service
 from sner.server.utils import yaml_dump
 
 
@@ -159,7 +159,7 @@ def test_pipeline_discover_ipv4(runner, queue):  # pylint: disable=unused-argume
     assert Target.query.count() == 256
 
 
-def test_discover_ipv6_dns_stage(runner, queue):  # pylint: disable=unused-argument
+def test_pipeline_discover_ipv6_dns_stage(runner, queue):  # pylint: disable=unused-argument
     """test discover ipv6 dns pipeline"""
 
     current_app.config['SNER_PLANNER']['pipelines'] = [
@@ -183,7 +183,7 @@ def test_discover_ipv6_dns_stage(runner, queue):  # pylint: disable=unused-argum
     assert Target.query.count() == 256
 
 
-def test_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disable=unused-argument
+def test_pipeline_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disable=unused-argument
     """test discover ipv6 enum pipeline"""
 
     host_factory.create(address='::1')
@@ -206,3 +206,23 @@ def test_discover_ipv6_enum_stage(runner, queue, host_factory):  # pylint: disab
     Planner(oneshot=True).run()
 
     assert Target.query.count() == 1
+
+
+def test_pipeline_cleanup_storage(runner, host_factory, service_factory):  # pylint: disable=unused-argument
+    """test planners cleanup storage stage"""
+
+    host1 = host_factory.create(address='127.127.127.135', os='identified')
+    service_factory.create(host=host1, proto='tcp', port=1, state='open:reason')
+    service_factory.create(host=host1, proto='tcp', port=1, state='filtered:reason')
+    host_factory.create(address='127.127.127.134', hostname=None, os=None, comment=None)
+    current_app.config['SNER_PLANNER']['pipelines'] = [
+        {
+            'type': 'generic',
+            'steps': [{'step': 'cleanup_storage'}]
+        }
+    ]
+
+    Planner(oneshot=True).run()
+
+    assert Host.query.count() == 1
+    assert Service.query.count() == 1

@@ -3,6 +3,7 @@
 planner core
 """
 
+import logging
 import signal
 from contextlib import contextmanager
 from copy import deepcopy
@@ -43,7 +44,7 @@ def run_pipeline(config):
 def run_generic_pipeline(config):
     """run generic/simple pipeline"""
 
-    current_app.logger.debug(f'run pipeline: {config}')
+    current_app.logger.info(f'run pipeline: {config}')
     ctx = Context()
     for step_config in config['steps']:
         current_app.logger.debug(f'run step: {step_config}')
@@ -57,8 +58,12 @@ class Planner:
 
     LOOPSLEEP = 60
 
-    def __init__(self, oneshot=False):
-        self.log = current_app.logger.getChild('sner.server.planner')
+    def __init__(self, oneshot=False, debug=False):
+        self.log = current_app.logger
+        self.log.setLevel(logging.INFO)
+        if debug:
+            self.log.setLevel(logging.DEBUG)
+
         self.original_signal_handlers = {}
         self.loop = None
         self.oneshot = oneshot

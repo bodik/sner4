@@ -17,7 +17,8 @@ def command():
 @command.command(name='run', help='run planner daemon')
 @with_appcontext
 @click.option('--oneshot', is_flag=True)
+@click.option('--debug', is_flag=True)
 def run1(**kwargs):
     """run planner daemon"""
 
-    Planner(kwargs['oneshot']).run()
+    Planner(**kwargs).run()

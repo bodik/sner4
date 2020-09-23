@@ -139,3 +139,9 @@
 #              - step: enqueue
 #                queue: 'sner_disco ipv6 ack scan top10000'
 #              - step: archive_job
+#
+#
+#        # BASIC: cleanup storage
+#        - type: generic
+#          steps:
+#              - step: cleanup_storage
