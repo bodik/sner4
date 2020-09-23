@@ -60,7 +60,7 @@ class StopPipeline(Exception):
 def debug(ctx):
     """debug current context"""
 
-    current_app.logger.info(ctx)
+    current_app.logger.debug(ctx)
 
 
 @register_step
@@ -141,7 +141,7 @@ def archive_job(ctx):
     copy2(job.output_abspath, archive_dir)
     job_delete(job)
 
-    current_app.logger.info(f'archived job {job_id} ({queue_name})')
+    current_app.logger.debug(f'archived job {job_id} ({queue_name})')
 
 
 @register_step
@@ -204,7 +204,7 @@ def rescan_services(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.info(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.debug(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -238,7 +238,7 @@ def rescan_hosts(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.info(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.debug(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -259,7 +259,7 @@ def discover_ipv4(_, interval, netranges, queue):
     update_lastrun('discover_ipv4')
 
     if count:
-        current_app.logger.info(f'discover_ipv4, queued {count}')
+        current_app.logger.debug(f'discover_ipv4, queued {count}')
 
 
 @register_step
@@ -277,7 +277,7 @@ def discover_ipv6_dns(_, interval, netranges, queue):
         queue_enqueue(queue, targets)
 
     if count:
-        current_app.logger.info(f'discover_ipv6_dns, queued {count}')
+        current_app.logger.debug(f'discover_ipv6_dns, queued {count}')
     update_lastrun('discover_ipv6_dns')
 
 
@@ -307,5 +307,5 @@ def discover_ipv6_enum(_, interval, queue):
     queue_enqueue(queue, targets)
 
     if targets:
-        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)}')
+        current_app.logger.debug(f'discover_ipv6_enum, queued {len(targets)}')
     update_lastrun('discover_ipv6_enum')

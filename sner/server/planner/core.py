@@ -44,7 +44,7 @@ def run_pipeline(config):
 def run_generic_pipeline(config):
     """run generic/simple pipeline"""
 
-    current_app.logger.info(f'run pipeline: {config}')
+    current_app.logger.debug(f'run pipeline: {config}')
     ctx = Context()
     for step_config in config['steps']:
         current_app.logger.debug(f'run step: {step_config}')
