@@ -38,8 +38,11 @@ def storage_import(path, parser):
 
     parser_impl = registered_parsers[parser]
     for item in path:
-        if os.path.isfile(item):
-            import_parsed(*parser_impl.parse_path(item))
+        if not os.path.isfile(item):
+            current_app.logger.error(f'invalid path "{item}"')
+            sys.exit(1)
+        import_parsed(*parser_impl.parse_path(item))
+
     sys.exit(0)
 
 

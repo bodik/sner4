@@ -16,6 +16,13 @@ def test_import_command_invalidparser(runner):
     assert result.exit_code == 1
 
 
+def test_import_command_invalidpath(runner):
+    """test invalid input path"""
+
+    result = runner.invoke(command, ['import', 'nmap', '/nonexistent'])
+    assert result.exit_code == 1
+
+
 def test_import_command_nmap_job(runner):
     """test import nmap job"""
 
