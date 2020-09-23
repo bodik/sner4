@@ -122,8 +122,10 @@ service sweep scanning), manymap (specific service scanning), six_dns_discover
 
 #### Server: Scheduler
 
-Scheduler provides workload configuration and distribution mechanism throug
-definitions of Queues, Exclusions and Jobs.
+Scheduler provides workload configuration container and distribution mechanism
+through definitions of Queues, Exclusions, Targets and Jobs. Despite it's name,
+scheduler is a mostly passive component which is managed by planner or human
+operator.
 
 * **Queue** -- an agent module configuration (yaml encoded), scheduling specs
   (group_size, priority, active) and list of targets. Each module has a
@@ -148,10 +150,11 @@ management.
 
 #### Server: Planner
 
-Planner is scheduling daemon executing defined pipelines. Pipelines defines a
+Planner is daemon periodicaly executing defined pipelines. Pipelines defines a
 queues processing (imports data to storage, requeueing during two-phase
 scanning) as well as periodic generators (rescanning storage, rediscovery of
-netranges for IPv4 and IPv6 address space).
+netranges for IPv4 and IPv6 address space) or other generic pipelines (storage
+cleanup).
 
 
 
