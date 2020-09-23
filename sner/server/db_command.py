@@ -131,7 +131,7 @@ def initdata():  # pylint: disable=too-many-statements
         name='sner_data script scan basic',
         config=yaml_dump({
             'module': 'manymap',
-            'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods -Pn',
+            'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',
             'delay': 10
         }),
         group_size=50,
