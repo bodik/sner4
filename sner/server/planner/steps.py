@@ -148,27 +148,39 @@ def archive_job(ctx):
 def cleanup_storage(_):
     """clean up storage from various import artifacts"""
 
+    # NOTE: Services must be deleted via ORM otherwise relationship defined
+    # cascades (vulns, notes) would break. Hosts could be because of
+    # non-nullable foregin keys, but anyway we'll delete them with ORM too.
+
     # remove any but open:* state services
-    query_services = Service.query.filter(not_(Service.state.ilike('open:%')))
-    for service in query_services.all():
-        db.session.delete(service)
+    query = Service.query.filter(not_(Service.state.ilike('open:%')))
+    for service in query.all():
+        db.session.delete(service)  # must not bypass orm due to relationship defined cascades to vulns and notes
     db.session.commit()
 
     # remove hosts without any data attribute, service, vuln or note
-    services_count = func.count(Service.id)
-    vulns_count = func.count(Vuln.id)
-    notes_count = func.count(Note.id)
-    query_hosts = Host.query \
-        .outerjoin(Service, Host.id == Service.host_id).outerjoin(Vuln, Host.id == Vuln.host_id).outerjoin(Note, Host.id == Note.host_id) \
-        .filter(
-            or_(Host.os == '', Host.os == None),  # noqa: E711  pylint: disable=singleton-comparison
-            or_(Host.comment == '', Host.comment == None)  # noqa: E711  pylint: disable=singleton-comparison
-        ) \
-        .having(services_count == 0).having(vulns_count == 0).having(notes_count == 0).group_by(Host.id)
+    query = db.session.query(Host.id).filter(or_(Host.os == '', Host.os == None), or_(Host.comment == '', Host.comment == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
+    hosts_noinfo = [dbid for dbid, in query.all()]
 
-    for host in query_hosts.all():
+    hosts_noservices = [dbid for dbid, in db.session.query(Host.id).outerjoin(Service).having(func.count(Service.id) == 0).group_by(Host.id).all()]
+    hosts_novulns = [dbid for dbid, in db.session.query(Host.id).outerjoin(Vuln).having(func.count(Vuln.id) == 0).group_by(Host.id).all()]
+    hosts_nonotes = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 0).group_by(Host.id).all()]
+
+    hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_nonotes))
+    for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
         db.session.delete(host)
     db.session.commit()
+
+    # also remove all hosts not having any info but one note xtype hostnames
+    hosts_only_one_note = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 1).group_by(Host.id).all()]
+    query = db.session.query(Host.id).join(Note).filter(Host.id.in_(hosts_only_one_note), Note.xtype == 'hostnames')
+    hosts_only_note_hostnames = [dbid for dbid, in query.all()]
+
+    hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_only_note_hostnames))
+    for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
+        db.session.delete(host)
+    db.session.commit()
+
     current_app.logger.debug(f'storage cleaned')
 
 
