@@ -10,6 +10,7 @@ import sys
 import flask.cli
 from flask import Flask, render_template
 from flask_wtf.csrf import generate_csrf
+from sqlalchemy import func
 
 from sner.lib import get_dotted, load_yaml
 from sner.server.extensions import db, jsglue, login_manager, webauthn
@@ -127,7 +128,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable
         return {
-            'app': app, 'db': db,
+            'app': app, 'db': db, 'func': func,
             'Excl': Excl, 'ExclFamily': ExclFamily, 'Job': Job, 'Queue': Queue, 'Target': Target,
             'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln,
             'User': User, 'WebauthnCredential': WebauthnCredential}
