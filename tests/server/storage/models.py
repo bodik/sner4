@@ -43,7 +43,7 @@ class VulnFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         model = Vuln
 
     host = SubFactory(HostFactory)
-    service = SubFactory(ServiceFactory)
+    service = None
     name = 'some vulnerability'
     xtype = 'scannerx.moduley'
     severity = SeverityEnum.unknown
@@ -61,7 +61,7 @@ class NoteFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         model = Note
 
     host = SubFactory(HostFactory)
-    service = SubFactory(ServiceFactory)
+    service = None
     xtype = 'testnote.xtype'
     data = 'test note data'
     comment = 'some test note comment'

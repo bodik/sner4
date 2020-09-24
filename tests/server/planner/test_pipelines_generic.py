@@ -208,13 +208,15 @@ def test_pipeline_discover_ipv6_enum_stage(runner, queue, host_factory):  # pyli
     assert Target.query.count() == 1
 
 
-def test_pipeline_cleanup_storage(runner, host_factory, service_factory):  # pylint: disable=unused-argument
+def test_pipeline_cleanup_storage(runner, host_factory, service_factory, note_factory):  # pylint: disable=unused-argument
     """test planners cleanup storage stage"""
 
+    host_factory.create(address='127.127.127.134', hostname=None, os=None, comment=None)
     host1 = host_factory.create(address='127.127.127.135', os='identified')
     service_factory.create(host=host1, proto='tcp', port=1, state='open:reason')
     service_factory.create(host=host1, proto='tcp', port=1, state='filtered:reason')
-    host_factory.create(address='127.127.127.134', hostname=None, os=None, comment=None)
+    host2 = host_factory.create(address='127.127.127.136', hostname=None, os=None, comment=None)
+    note_factory.create(host=host2, xtype='hostnames', data='adata')
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
             'type': 'generic',
