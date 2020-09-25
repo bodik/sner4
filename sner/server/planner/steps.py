@@ -100,7 +100,7 @@ def project_servicelist(ctx):
 
     data = []
     for service in ctx['data']['services']:
-        data.append(f'{service.proto}://{service.handle["host"]}:{service.port}')
+        data.append(f'{service.proto}://{format_host_address(service.handle["host"])}:{service.port}')
     ctx['data'] = data
 
 
