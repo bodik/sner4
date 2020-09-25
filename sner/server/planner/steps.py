@@ -83,6 +83,7 @@ def load_job(ctx, queue):
     queue_module_config = yaml.safe_load(job.queue.config)
     parser = registered_parsers[queue_module_config['module']]
     ctx['data'] = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
+    current_app.logger.debug(f'finished load_job {job.id} ({qref.name})')
 
 
 @register_step
@@ -90,6 +91,7 @@ def import_job(ctx):
     """import data to storage"""
 
     import_parsed(**ctx['data'])
+    current_app.logger.info(f'finished import_job {ctx["job"].id} ({ctx["job"].queue.name})')
 
 
 @register_step
@@ -127,6 +129,7 @@ def enqueue(ctx, queue):
 
     queue = Queue.query.filter(Queue.name == queue).one()
     queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
+    current_app.logger.info(f'finished enqueue {len(ctx["data"])} targets to "{queue.name}"')
 
 
 @register_step
@@ -141,7 +144,7 @@ def archive_job(ctx):
     copy2(job.output_abspath, archive_dir)
     job_delete(job)
 
-    current_app.logger.debug(f'archived job {job_id} ({queue_name})')
+    current_app.logger.debug(f'finished archivie_job {job_id} ({queue_name})')
 
 
 @register_step
@@ -181,7 +184,7 @@ def cleanup_storage(_):
         db.session.delete(host)
     db.session.commit()
 
-    current_app.logger.debug(f'storage cleaned')
+    current_app.logger.debug(f'finished cleanup_storage')
 
 
 @register_step
@@ -216,7 +219,7 @@ def rescan_services(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.debug(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.info(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -250,7 +253,7 @@ def rescan_hosts(_, interval, queue4, queue6):
     queue_enqueue(queue6, rescan6)
 
     if rescan4 or rescan6:
-        current_app.logger.debug(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+        current_app.logger.info(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
 
 
 @register_step
@@ -271,7 +274,7 @@ def discover_ipv4(_, interval, netranges, queue):
     update_lastrun('discover_ipv4')
 
     if count:
-        current_app.logger.debug(f'discover_ipv4, queued {count}')
+        current_app.logger.info(f'discover_ipv4, queued {count}')
 
 
 @register_step
@@ -289,7 +292,7 @@ def discover_ipv6_dns(_, interval, netranges, queue):
         queue_enqueue(queue, targets)
 
     if count:
-        current_app.logger.debug(f'discover_ipv6_dns, queued {count}')
+        current_app.logger.info(f'discover_ipv6_dns, queued {count}')
     update_lastrun('discover_ipv6_dns')
 
 
@@ -319,5 +322,5 @@ def discover_ipv6_enum(_, interval, queue):
     queue_enqueue(queue, targets)
 
     if targets:
-        current_app.logger.debug(f'discover_ipv6_enum, queued {len(targets)}')
+        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)}')
     update_lastrun('discover_ipv6_enum')
