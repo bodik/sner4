@@ -37,7 +37,7 @@ class Host(StorageModelBase):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    rescan_time = db.Column(db.DateTime)
+    rescan_time = db.Column(db.DateTime, default=datetime.utcnow)
 
     services = relationship('Service', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
     vulns = relationship('Vuln', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
@@ -61,7 +61,7 @@ class Service(StorageModelBase):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    rescan_time = db.Column(db.DateTime)
+    rescan_time = db.Column(db.DateTime, default=datetime.utcnow)
     import_time = db.Column(db.DateTime)
 
     host = relationship('Host', back_populates='services')
@@ -99,7 +99,7 @@ class Vuln(StorageModelBase):
     comment = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    rescan_time = db.Column(db.DateTime)
+    rescan_time = db.Column(db.DateTime, default=datetime.utcnow)
     import_time = db.Column(db.DateTime)
 
     host = relationship('Host', back_populates='vulns')
