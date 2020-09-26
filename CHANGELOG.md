@@ -7,10 +7,14 @@
   * tune default queues (drop unused, add generic script scan queue)
   * decouple module output parsing from storage imports
   * refactor planner to be drived by configured pipelines, remove celery and implement as simple loop daemon
+  * add default script scanning queue
+  * add ipv6 handling to nmap agent module and server parser, update on default queues and planner steps config
 
 * fixes:
   * fix annotate modal dialogue form action to work properly with gunicorn
   * hotfix python selenium to correctly close sockets
+  * fix storage_cleanup and handle empty hosts with only note.xtype hostnames
+  * fix planner step project_servicelist ipv6 address handling
 
 * security:
   * update handlbars library
