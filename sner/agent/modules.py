@@ -199,7 +199,7 @@ class Manymap(ModuleBase):
     ## target specification
 
     proto    = "tcp" / "udp"
-    hostspec = IPv4address / "[" IPv6address "]" / reg-name
+    hostspec = IPv4address / reg-name / "[" IPv6address "]" / "[" reg-name "]"
     port     = 1*DIGIT
     target   = proto "://" hostspec ":" port
     """
@@ -210,7 +210,7 @@ class Manymap(ModuleBase):
         'delay': int,
     })
 
-    TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|\[[0-9a-fA-F:]{3,45}\]|[0-9a-zA-Z\.\-]{1,256}):(?P<port>[0-9]+)$'
+    TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|[0-9a-zA-Z\.\-]{1,256}|\[[0-9a-fA-F:]{3,45}\]|\[[0-9a-zA-Z\.\-]{1,256}\]):(?P<port>[0-9]+)$'  # noqa: 501  pylint: disable=line-too-long
 
     def __init__(self):
         super().__init__()
