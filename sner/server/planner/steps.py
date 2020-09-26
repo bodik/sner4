@@ -4,7 +4,7 @@ sner planner pipeline steps
 """
 
 from datetime import datetime, timedelta
-from ipaddress import ip_address, IPv4Address, IPv6Address, IPv6Network
+from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
 from shutil import copy2
 
@@ -118,8 +118,8 @@ def project_hostlist(ctx):
 def filter_netranges(ctx, netranges):
     """filter ctx data, whitelist only specified netranges"""
 
-    whitelist = [IPv6Network(net) for net in netranges]
-    data = [item for item in ctx['data'] if any([IPv6Address(item) in net for net in whitelist])]
+    whitelist = [ip_network(net) for net in netranges]
+    data = [item for item in ctx['data'] if any([ip_address(item) in net for net in whitelist])]
     ctx['data'] = data
 
 
