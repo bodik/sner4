@@ -169,7 +169,7 @@ class Nmap(ModuleBase):
         target_args = ['-iL', targets_file]
 
         cmd = ['nmap'] + (extra_args or []) + shlex.split(assignment['config']['args']) + timing_args + output_args + target_args
-        return self._execute(cmd)
+        return self._execute(cmd, output_file)
 
     def run(self, assignment):
         """run the agent"""
