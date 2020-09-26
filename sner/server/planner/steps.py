@@ -79,19 +79,19 @@ def load_job(ctx, queue):
     if not job:
         raise StopPipeline()
 
+    current_app.logger.info(f'load_job {job.id} ({qref.name})')
     ctx['job'] = job
     queue_module_config = yaml.safe_load(job.queue.config)
     parser = registered_parsers[queue_module_config['module']]
     ctx['data'] = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
-    current_app.logger.debug(f'finished load_job {job.id} ({qref.name})')
 
 
 @register_step
 def import_job(ctx):
     """import data to storage"""
 
+    current_app.logger.info(f'import_job {ctx["job"].id} ({ctx["job"].queue.name})')
     import_parsed(**ctx['data'])
-    current_app.logger.info(f'finished import_job {ctx["job"].id} ({ctx["job"].queue.name})')
 
 
 @register_step
@@ -127,9 +127,9 @@ def filter_netranges(ctx, netranges):
 def enqueue(ctx, queue):
     """enqueue to queue from context data"""
 
+    current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue.name}"')
     queue = Queue.query.filter(Queue.name == queue).one()
     queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
-    current_app.logger.info(f'finished enqueue {len(ctx["data"])} targets to "{queue.name}"')
 
 
 @register_step
@@ -139,12 +139,12 @@ def archive_job(ctx):
     job = ctx['job']
     job_id, queue_name = job.id, job.queue.name
 
+    current_app.logger.info(f'archive_job {job_id} ({queue_name})')
     archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
     archive_dir.mkdir(parents=True, exist_ok=True)
     copy2(job.output_abspath, archive_dir)
     job_delete(job)
 
-    current_app.logger.debug(f'finished archivie_job {job_id} ({queue_name})')
 
 
 @register_step
@@ -212,7 +212,7 @@ def rescan_services(_, interval, queue):
     queue_enqueue(qref, rescan)
 
     if rescan:
-        current_app.logger.info(f'rescan_services, rescan {len(rescan)}')
+        current_app.logger.info(f'rescan_services, rescan {len(rescan)} items')
 
 
 @register_step
@@ -239,7 +239,7 @@ def rescan_hosts(_, interval, queue):
     queue_enqueue(qref, rescan)
 
     if rescan:
-        current_app.logger.info(f'rescan_hosts, rescan {len(rescan)}')
+        current_app.logger.info(f'rescan_hosts, rescan {len(rescan)} items')
 
 
 @register_step
@@ -257,10 +257,9 @@ def discover_ipv4(_, interval, netranges, queue):
         count += len(targets)
         queue_enqueue(queue, targets)
 
-    update_lastrun('discover_ipv4')
-
     if count:
-        current_app.logger.info(f'discover_ipv4, queued {count}')
+        current_app.logger.info(f'discover_ipv4, queued {count} items')
+    update_lastrun('discover_ipv4')
 
 
 @register_step
@@ -278,7 +277,7 @@ def discover_ipv6_dns(_, interval, netranges, queue):
         queue_enqueue(queue, targets)
 
     if count:
-        current_app.logger.info(f'discover_ipv6_dns, queued {count}')
+        current_app.logger.info(f'discover_ipv6_dns, queued {count} items')
     update_lastrun('discover_ipv6_dns')
 
 
@@ -308,5 +307,5 @@ def discover_ipv6_enum(_, interval, queue):
     queue_enqueue(queue, targets)
 
     if targets:
-        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)}')
+        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)} items')
     update_lastrun('discover_ipv6_enum')
