@@ -114,20 +114,6 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner_disco ipv6 ack scan top10000',
-        config=yaml_dump({'module': 'nmap', 'args': '-6 -sA --top-ports 10000 -Pn', 'timing_perhost': 8}),
-        group_size=1000,
-        priority=10,
-    ))
-
-    db.session.add(Queue(
-        name='sner_data ipv6 version scan basic',
-        config=yaml_dump({'module': 'manymap', 'args': '-6 -sV --version-intensity 4 -Pn', 'delay': 10}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
         name='sner_data script scan basic',
         config=yaml_dump({
             'module': 'manymap',

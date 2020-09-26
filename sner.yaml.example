@@ -38,22 +38,6 @@
 #              - step: import_job
 #              - step: archive_job
 #
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_disco ipv6 ack scan top10000'
-#              - step: project_servicelist
-#              - step: enqueue
-#                queue: 'sner_data ipv6 version scan basic'
-#              - step: archive_job
-#
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_data ipv6 version scan basic'
-#              - step: import_job
-#              - step: archive_job
-#
 #
 #        # ADVANCED: priority port sweep scan
 #        - type: queue
@@ -94,13 +78,11 @@
 #          steps:
 #              - step: rescan_services
 #                interval: '10days'
-#                queue4: 'sner_data version scan basic'
-#                queue6: 'sner_data ipv6 version scan basic'
+#                queue: 'sner_data version scan basic'
 #
 #              - step: rescan_hosts
 #                interval: '30days'
-#                queue4: 'sner_disco ack scan top10000'
-#                queue6: 'sner_disco ipv6 ack scan top10000'
+#                queue: 'sner_disco ack scan top10000'
 #
 #
 #        # ADVANCED: full netranges rediscovery
@@ -128,7 +110,7 @@
 #              - step: filter_netranges
 #                netranges: *home_netranges_ipv6
 #              - step: enqueue
-#                queue: 'sner_disco ipv6 ack scan top10000'
+#                queue: 'sner_disco ack scan top10000'
 #              - step: archive_job
 #
 #        - type: queue
@@ -137,7 +119,7 @@
 #                queue: 'sner_disco ipv6 enum discover'
 #              - step: project_hostlist
 #              - step: enqueue
-#                queue: 'sner_disco ipv6 ack scan top10000'
+#                queue: 'sner_disco ack scan top10000'
 #              - step: archive_job
 #
 #

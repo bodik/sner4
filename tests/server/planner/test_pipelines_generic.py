@@ -48,8 +48,7 @@ def test_pipeline_rescan_services(runner, host_factory, service_factory, queue_f
                 {
                     'step': 'rescan_services',
                     'interval': '0s',
-                    'queue4': 'test vscan',
-                    'queue6': 'test vscan'
+                    'queue': 'test vscan',
                 }
             ]
         }
@@ -95,8 +94,7 @@ def test_pipeline_rescan_services_largedataset(runner, queue_factory, host_facto
                 {
                     'step': 'rescan_services',
                     'interval': '0s',
-                    'queue4': 'test vscan',
-                    'queue6': 'test vscan',
+                    'queue': 'test vscan',
                 }
             ]
         }
@@ -123,8 +121,7 @@ def test_pipeline_rescan_hosts(runner, host_factory, queue_factory):  # pylint: 
                 {
                     'step': 'rescan_hosts',
                     'interval': '0s',
-                    'queue4': 'test vscan',
-                    'queue6': 'test vscan'
+                    'queue': 'test vscan',
                 }
             ]
         }

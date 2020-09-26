@@ -3,14 +3,10 @@
 parsers to import from agent module manymap output to storage
 """
 
-import re
 import sys
 from pprint import pprint
-from zipfile import ZipFile
 
-from sner.lib import file_from_zip
 from sner.server.parser import register_parser
-from sner.server.parser.core import ParsedItemsDict as Pdict
 from sner.server.parser.nmap import NmapParser
 
 
@@ -18,20 +14,7 @@ from sner.server.parser.nmap import NmapParser
 class ManymapParser(NmapParser):
     """inet endpoints scanner xml output parser; the module uses nmap hence parse uses nmap parser"""
 
-    @staticmethod
-    def parse_path(path):
-        """import file from disk to storage"""
-
-        hosts, services, vulns, notes = Pdict(), Pdict(), Pdict(), Pdict()
-        with ZipFile(path) as fzip:
-            for ftmp in [fname for fname in fzip.namelist() if re.match(r'output\-[0-9]+\.xml', fname)]:
-
-                thosts, tservices, tvulns, tnotes = NmapParser._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
-                for storage, items in [(hosts, thosts), (services, tservices), (vulns, tvulns), (notes, tnotes)]:
-                    for item in items:
-                        storage.upsert(item)
-
-        return list(hosts.values()), list(services.values()), list(vulns.values()), list(notes.values())
+    ARCHIVE_PATHS = r'output\-[0-9]+\.xml'
 
 
 if __name__ == '__main__':  # pragma: no cover

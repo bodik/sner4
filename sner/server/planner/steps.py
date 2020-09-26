@@ -188,72 +188,58 @@ def cleanup_storage(_):
 
 
 @register_step
-def rescan_services(_, interval, queue4, queue6):
+def rescan_services(_, interval, queue):
     """rescan services from storage; update known services info"""
 
-    queue4 = Queue.query.filter(Queue.name == queue4).one()
-    queue6 = Queue.query.filter(Queue.name == queue6).one()
+    qref = Queue.query.filter(Queue.name == queue).one()
 
     now = datetime.utcnow()
     rescan_horizont = now - timedelta(seconds=timeparse(interval))
     query = Service.query.filter(or_(Service.rescan_time < rescan_horizont, Service.rescan_time == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
-    rescan4, rescan6, ids = [], [], []
+    rescan, ids = [], []
     for service in windowed_query(query, Service.id):
         item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
-        if isinstance(ip_address(service.host.address), IPv4Address):
-            rescan4.append(item)
-            ids.append(service.id)
-        elif isinstance(ip_address(service.host.address), IPv6Address):
-            rescan6.append(item)
-            ids.append(service.id)
+        rescan.append(item)
+        ids.append(service.id)
     # orm is bypassed for performance reasons in case of large rescans
     update_statement = Service.__table__.update().where(Service.id.in_(ids)).values(rescan_time=now)
     db.session.execute(update_statement)
     db.session.commit()
     db.session.expire_all()
 
-    rescan4 = filter_already_queued(queue4, rescan4)
-    queue_enqueue(queue4, rescan4)
-    rescan6 = filter_already_queued(queue6, rescan6)
-    queue_enqueue(queue6, rescan6)
+    rescan = filter_already_queued(qref, rescan)
+    queue_enqueue(qref, rescan)
 
-    if rescan4 or rescan6:
-        current_app.logger.info(f'rescan_services, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+    if rescan:
+        current_app.logger.info(f'rescan_services, rescan {len(rescan)}')
 
 
 @register_step
-def rescan_hosts(_, interval, queue4, queue6):
+def rescan_hosts(_, interval, queue):
     """rescan hosts from storage; discovers new services on hosts"""
 
-    queue4 = Queue.query.filter(Queue.name == queue4).one()
-    queue6 = Queue.query.filter(Queue.name == queue6).one()
+    qref = Queue.query.filter(Queue.name == queue).one()
 
     now = datetime.utcnow()
     rescan_horizont = now - timedelta(seconds=timeparse(interval))
     query = Host.query.filter(or_(Host.rescan_time < rescan_horizont, Host.rescan_time == None))  # noqa: E711  pylint: disable=singleton-comparison
 
-    rescan4, rescan6, ids = [], [], []
+    rescan, ids = [], []
     for host in windowed_query(query, Host.id):
-        if isinstance(ip_address(host.address), IPv4Address):
-            rescan4.append(host.address)
-            ids.append(host.id)
-        elif isinstance(ip_address(host.address), IPv6Address):
-            rescan6.append(host.address)
-            ids.append(host.id)
+        rescan.append(host.address)
+        ids.append(host.id)
     # orm is bypassed for performance reasons in case of large rescans
     update_statement = Host.__table__.update().where(Host.id.in_(ids)).values(rescan_time=now)
     db.session.execute(update_statement)
     db.session.commit()
     db.session.expire_all()
 
-    rescan4 = filter_already_queued(queue4, rescan4)
-    queue_enqueue(queue4, rescan4)
-    rescan6 = filter_already_queued(queue6, rescan6)
-    queue_enqueue(queue6, rescan6)
+    rescan = filter_already_queued(qref, rescan)
+    queue_enqueue(qref, rescan)
 
-    if rescan4 or rescan6:
-        current_app.logger.info(f'rescan_hosts, rescan4 {len(rescan4)}, rescan6 {len(rescan6)}')
+    if rescan:
+        current_app.logger.info(f'rescan_hosts, rescan {len(rescan)}')
 
 
 @register_step
