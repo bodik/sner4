@@ -127,7 +127,7 @@ def filter_netranges(ctx, netranges):
 def enqueue(ctx, queue):
     """enqueue to queue from context data"""
 
-    current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue.name}"')
+    current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue}"')
     queue = Queue.query.filter(Queue.name == queue).one()
     queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
 
@@ -144,7 +144,6 @@ def archive_job(ctx):
     archive_dir.mkdir(parents=True, exist_ok=True)
     copy2(job.output_abspath, archive_dir)
     job_delete(job)
-
 
 
 @register_step
