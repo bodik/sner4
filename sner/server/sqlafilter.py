@@ -22,7 +22,7 @@ SEARCH_GRAMMAR = r"""
 
     criteria: COLSPEC OP _value
     COLSPEC: /[a-z]+\.[a-z]+/i
-    OP: "==" | "!=" | ">" | "<" | ">=" | "<=" | "ilike" | "not_ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_any"
+    OP: "==" | "!=" | ">=" | "<=" | ">" | "<" | "ilike" | "not_ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_any"
 
     _value: _item | array
     _item: string | number
@@ -80,6 +80,10 @@ def test_all():
     """perform all tests"""
 
     # parsing
+    test('A.a<"a"', {'model': 'A', 'field': 'a', 'op': '<', 'value': 'a'})
+    test('A.a>"a"', {'model': 'A', 'field': 'a', 'op': '>', 'value': 'a'})
+    test('A.a<="a"', {'model': 'A', 'field': 'a', 'op': '<=', 'value': 'a'})
+    test('A.a>="a"', {'model': 'A', 'field': 'a', 'op': '>=', 'value': 'a'})
     test('A.a=="a\\"]a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a"]a'})
     test('A.a in [1,2]', {'model': 'A', 'field': 'a', 'op': 'in', 'value': [1, 2]})
     test('A.a not_in ["1","]2\\""]', {'model': 'A', 'field': 'a', 'op': 'not_in', 'value': ['1', ']2"']})
