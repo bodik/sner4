@@ -27,7 +27,7 @@
 {% block content %}
 {% call cm.heading(['Vulns', 'Grouped']) %}
 	<div class="pl-2">
-		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
 
@@ -39,7 +39,7 @@
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags any "report"') }}">Only Report</a>
 	</div>
-	{{ cm.filter() }}
+	{{ cm.filter_form() }}
 </div>
 
 <table id="vuln_grouped_table" class="table table-hover table-sm" width="100%"></table>

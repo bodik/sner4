@@ -19,14 +19,11 @@ svg {
 {% block content %}
 {% call cm.heading(['Visuals', 'Port infos']) %}
 	<div class="pl-2">
-		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
 
 <!--
-	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
-	https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js
-	https://github.com/jasondavies/d3-cloud
 -->
 <div class="text-right py-1">
 	<div class="btn-group">
@@ -55,7 +52,7 @@ svg {
 		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:">no limit</a>
 	</div>
 
-	{{ cm.filter() }}
+	{{ cm.filter_form() }}
 </div>
 
 <div id="visual">
@@ -63,6 +60,10 @@ svg {
 </div>
 
 <script>
+// https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
+// https://github.com/ly-cultureiq/d3-cloud/blob/master/build/d3-cloud.js
+// https://github.com/jasondavies/d3-cloud
+
 // globals
 var url_params = new URLSearchParams(window.location.search);
 if (!url_params.has('view')) { url_params.set('view', 'normal'); }

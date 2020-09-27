@@ -25,19 +25,22 @@
 </script>
 {%- endmacro -%}
 
-{%- macro filter() -%}
-{% set showFilter = 'filter' in request.args %}
-<form class="form filter_bar collapse {% if showFilter %}show{% endif %}" id="collapseFilter">
+{%- macro filter_form() -%}
+{% set show_form = 'filter' in request.args %}
+<form class="form filter_bar collapse {% if show_form %}show{% endif %}" id="filter_form">
 	<div class="input-group flex-fill">
 		<div class="input-group-prepend">
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
-			{% if showFilter %}<a class="btn btn-info" href="{{ url_for(request.endpoint) }}">Unfilter</a>{% endif %}
+			{% if show_form %}<a class="btn btn-info" href="{{ url_for(request.endpoint) }}">Unfilter</a>{% endif %}
 		</div>
 		<input class="form-control" type="text" name="filter" value="{{ request.values.filter }}" placeholder="Filter">
 		<div class="input-group-append">
 			<button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
 		</div>
 	</div>
+	{% for k, v in request.args.items() if k != "filter" %}
+		<input type="hidden" name="{{ k }}" value="{{ v }}">
+	{% endfor %}
 </form>
 {%- endmacro -%}
 

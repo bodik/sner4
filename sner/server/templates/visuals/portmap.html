@@ -43,7 +43,7 @@ table.borderless tbody tr td { border: none; }
 {% block content %}
 {% call cm.heading(['Visuals', 'Portmap']) %}
 	<div class="pl-2">
-		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
 
@@ -77,7 +77,7 @@ table.borderless tbody tr td { border: none; }
 </div>
 
 <div class="dt_toolbar">
-	{{ cm.filter() }}
+	{{ cm.filter_form() }}
 </div>
 
 <div class="row py-1">

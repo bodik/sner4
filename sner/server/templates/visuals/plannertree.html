@@ -25,11 +25,6 @@ svg {
 {% block content %}
 {% call cm.heading(['Visuals', 'Planner workflow tree']) %}{% endcall %}
 <!--
-	http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
-	https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
-	https://github.com/ninjaconcept/d3-force-directed-graph
-	https://bl.ocks.org/rofrischmann/74e3b61530c350d1ec1771416249a535
-	https://bl.ocks.org/mbostock/1129492
 -->
 <div class="text-right py-1">
 	<div class="btn-group">
@@ -44,6 +39,12 @@ svg {
 </div>
 
 <script>
+// http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
+// https://medium.com/ninjaconcept/interactive-dynamic-force-directed-graphs-with-d3-da720c6d7811
+// https://github.com/ninjaconcept/d3-force-directed-graph
+// https://bl.ocks.org/rofrischmann/74e3b61530c350d1ec1771416249a535
+// https://bl.ocks.org/mbostock/1129492
+
 function remToPixels(rem) {
 	return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }

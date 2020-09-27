@@ -33,7 +33,7 @@
 {% block content %}
 {% call cm.heading(['Notes']) %}
 	<div class="pl-2">
-		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
 
@@ -42,7 +42,7 @@
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
 	</div>
-	{{ cm.filter() }}
+	{{ cm.filter_form() }}
 </div>
 
 <table id="note_list_table" class="table table-hover table-sm" width="100%"></table>
