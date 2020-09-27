@@ -25,17 +25,21 @@
 
 
 {% block content %}
-{% call cm.heading(['Vulns', 'Grouped']) %}{% endcall %}
+{% call cm.heading(['Vulns', 'Grouped']) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
 
 <div id="vuln_grouped_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
-		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.vuln_grouped_route') }}">unfilter</a>{% endif %}
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags any "report"') }}">Only Report</a>
 	</div>
+	{{ cm.filter() }}
 </div>
 
 <table id="vuln_grouped_table" class="table table-hover table-sm" width="100%"></table>

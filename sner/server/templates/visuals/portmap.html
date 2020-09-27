@@ -41,11 +41,11 @@ table.borderless tbody tr td { border: none; }
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Visuals', 'Portmap']) %}{% endcall %}
-
-<div class="dt_toolbar">
-	{% if 'filter' in request.args %}<a class="btn btn-info btn-sm" href="{{ url_for('visuals.portmap_route') }}">unfilter</a>{% endif %}
-</div>
+{% call cm.heading(['Visuals', 'Portmap']) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
 
 <div class="card">
 	<h5 class="card-header">
@@ -74,6 +74,10 @@ table.borderless tbody tr td { border: none; }
 			</tbody>
 		</table>
 	</div>
+</div>
+
+<div class="dt_toolbar">
+	{{ cm.filter() }}
 </div>
 
 <div class="row py-1">

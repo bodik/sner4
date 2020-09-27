@@ -31,14 +31,18 @@
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Notes']) %}{% endcall %}
+{% call cm.heading(['Notes']) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
 
 <div id="note_list_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
-		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.note_list_route') }}">unfilter</a>{% endif %}
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
 	</div>
+	{{ cm.filter() }}
 </div>
 
 <table id="note_list_table" class="table table-hover table-sm" width="100%"></table>

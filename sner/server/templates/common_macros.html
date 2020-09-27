@@ -10,7 +10,7 @@
 </div>
 {%- endmacro -%}
 
-{%- macro addtag_buttons(aa) -%}
+{%- macro addtag_buttons() -%}
 <div class="form-group row">
 	<div class="col-sm-10 offset-sm-2">
 	{% for tag in config['SNER_TAGS'] %}
@@ -23,4 +23,20 @@
 		$('textarea[name="tags"]').tagEditor('addTag', event.target.text, true);
 	});
 </script>
+{%- endmacro -%}
+
+{%- macro filter() -%}
+{% set showFilter = 'filter' in request.args %}
+<form class="form storage_filter collapse {% if showFilter %}show{% endif %}" id="collapseFilter">
+	<div class="input-group flex-fill">
+		<div class="input-group-prepend">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
+			{% if showFilter %}<a class="btn btn-info" href="{{ url_for(request.endpoint) }}">Unfilter</a>{% endif %}
+		</div>
+		<input class="form-control" type="text" name="filter" value="{{ request.values.filter }}" placeholder="Filter">
+		<div class="input-group-append">
+			<button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
+		</div>
+	</div>
+</form>
 {%- endmacro -%}

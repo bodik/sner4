@@ -17,7 +17,11 @@ svg {
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Visuals', 'Port infos']) %}{% endcall %}
+{% call cm.heading(['Visuals', 'Port infos']) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
 
 <!--
 	https://bl.ocks.org/abrahamdu/e1481e86dd4e9d553cc2d7d359b91e68
@@ -50,6 +54,8 @@ svg {
 		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:200">200</a>
 		<a class="btn btn-outline-secondary abutton_modify_link" data-args="limit:">no limit</a>
 	</div>
+
+	{{ cm.filter() }}
 </div>
 
 <div id="visual">

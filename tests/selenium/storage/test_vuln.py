@@ -48,7 +48,7 @@ def check_vulns_filtering(sclnt, dt_id):
     assert dt_elem.find_element_by_xpath('//td/a[text()="vuln 4"]')
 
     # and user must be able to loose the filter
-    sclnt.find_element_by_xpath('//a[text()="unfilter"]').click()
+    sclnt.find_element_by_xpath('//a[text()="Unfilter"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert len(dt_elem.find_elements_by_xpath('//tbody/tr[@role="row"]')) == 4
 

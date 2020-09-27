@@ -20,16 +20,21 @@
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Services', 'Grouped']) %}{% endcall %}
+{% call cm.heading(['Services', 'Grouped']) %}
+	<div class="pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseFilter"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
 
 <div id="service_list_table_toolbar" class="dt_toolbar">
-	{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('storage.service_grouped_route') }}">unfilter</a>{% endif %}
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled">crop at:</a>
 		{% for crop in [1, 2, 3, 4, 5] %}
 			<a class="btn btn-outline-secondary{% if request.args.get('crop')|int == crop %} active{% endif %}" href="{{ url_for('storage.service_grouped_route', crop=crop) }}">{{ crop }}</a>
 		{% endfor %}
 		<a class="btn btn-outline-secondary{% if not request.args.get('crop')|int %} active{% endif %}" href="{{ url_for('storage.service_grouped_route') }}">no crop</a>
+	</div>
+	{{ cm.filter() }}
 </div>
 
 <table id="service_grouped_table" class="table table-hover table-sm" width="100%"></table>
