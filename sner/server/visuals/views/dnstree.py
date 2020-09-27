@@ -4,8 +4,10 @@ controller dnstree
 """
 
 from flask import jsonify, render_template, request
+from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import role_required
+from sner.server.sqlafilter import filter_parser
 from sner.server.storage.models import Host
 from sner.server.visuals.views import blueprint
 
@@ -42,9 +44,13 @@ def dnstree_json_route():
             (nodes, links) = to_graph_data(nodeid, treedata[node], nodes, links)
         return (nodes, links)
 
+    query = Host.query
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
     crop = request.args.get('crop', 0, type=int)
+
     hostnames_tree = {}
-    for ihost in Host.query.all():
+    for ihost in query.all():
         if ihost.hostname:
             tmp = list(reversed(ihost.hostname.split('.')[crop:]))
             if tmp:
