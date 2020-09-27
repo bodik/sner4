@@ -69,25 +69,26 @@
 					{%- for subsystem, route, icon in [
 						('scheduler', 'scheduler.queue_list_route', 'fa-tasks'),
 						('storage', 'storage.host_list_route', 'fa-database'),
-						('visuals', 'visuals.index_route', 'fa-image')] -%}
+						('visuals', 'visuals.index_route', 'fa-image')
+					] -%}
 						<li class="nav-item"><a class="nav-link{% if subsystem == active_subsystem %} active{% endif %}" href="{{ url_for(route) }}" title="{{ subsystem|capitalize }}"><i class="fas {{ icon }}"></i></a></li>
 					{%- endfor -%}
 					{%- if active_subsystem == 'scheduler' -%}
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.excl_list_route') }}">Exclusions</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.queue_list_route') }}">Queues</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('scheduler.job_list_route') }}">Jobs</a></li>
+						{{ cm.main_menu_link('Exclusions', 'scheduler.excl_list_route') }}
+						{{ cm.main_menu_link('Queues', 'scheduler.queue_list_route') }}
+						{{ cm.main_menu_link('Jobs', 'scheduler.job_list_route') }}
 					{%- elif active_subsystem == 'storage' -%}
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.host_list_route') }}">Hosts</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_list_route') }}">Services</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.service_grouped_route', crop=3) }}">Services grouped</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_list_route') }}">Vulnerabilities</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.vuln_grouped_route') }}">Vulnerabilities grouped</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('storage.note_list_route') }}">Notes</a></li>
+						{{ cm.main_menu_link('Hosts', 'storage.host_list_route') }}
+						{{ cm.main_menu_link('Services', 'storage.service_list_route') }}
+						{{ cm.main_menu_link('Services grouped', 'storage.service_grouped_route', crop=3) }}
+						{{ cm.main_menu_link('Vulnerabilities', 'storage.vuln_list_route') }}
+						{{ cm.main_menu_link('Vulnerabilities grouped', 'storage.vuln_grouped_route') }}
+						{{ cm.main_menu_link('Notes', 'storage.note_list_route') }}
 					{%- elif active_subsystem == 'visuals' -%}
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.plannertree_route') }}">Planner tree</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.dnstree_route', crop=1) }}">DNS tree</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portmap_route') }}">Portmap</a></li>
-						<li class="nav-item"><a class="nav-link" href="{{ url_for('visuals.portinfos_route', crop=3, limit=50) }}">Port infos</a></li>
+						{{ cm.main_menu_link('Planner tree', 'visuals.plannertree_route') }}
+						{{ cm.main_menu_link('DNS Tree', 'visuals.dnstree_route', crop=1) }}
+						{{ cm.main_menu_link('Portmap', 'visuals.portmap_route') }}
+						{{ cm.main_menu_link('Port infos', 'visuals.portinfos_route', crop=3, limit=50) }}
 					{%- endif -%}
 				{% endif %}
 			{% endif %}
