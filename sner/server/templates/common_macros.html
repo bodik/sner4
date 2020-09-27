@@ -27,7 +27,7 @@
 
 {%- macro filter() -%}
 {% set showFilter = 'filter' in request.args %}
-<form class="form storage_filter collapse {% if showFilter %}show{% endif %}" id="collapseFilter">
+<form class="form filter_bar collapse {% if showFilter %}show{% endif %}" id="collapseFilter">
 	<div class="input-group flex-fill">
 		<div class="input-group-prepend">
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>

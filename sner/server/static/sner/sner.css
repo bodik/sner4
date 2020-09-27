@@ -58,6 +58,6 @@ td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover {
 	border-right: 2px dotted #ffc107;
 }
 
-.storage_filter {
+.filter_bar {
 	margin-top: .3rem;
 }
