@@ -6,7 +6,7 @@ import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
 
-logger = logging.getLogger()
+logger = logging.getLogger()  # pylint: disable=invalid-name
 logger.addHandler(logging.StreamHandler())
 
 
@@ -26,16 +26,17 @@ def main():
     for item in Path(args.portfile).read_text().splitlines():
         if item.startswith('#'):
             continue
-        elif item.isnumeric():
+
+        if item.isnumeric():
             portlist.append(int(item))
         elif '-' in item:
             start, end = item.split('-')
-            for i in range(int(start), int(end)):
-                portlist.append(i)
+            for port in range(int(start), int(end)):
+                portlist.append(port)
         else:
-            logging.warn(f'invalid item {item}')
+            logging.error('invalid item %s', item)
 
-    subprocess.run(['bin/server', 'storage', 'service-list', '--filter', f'Service.port in {portlist}'] + unk_args)
+    subprocess.run(['bin/server', 'storage', 'service-list', '--filter', f'Service.port in {portlist}'] + unk_args, check=True)
 
 
 if __name__ == '__main__':
