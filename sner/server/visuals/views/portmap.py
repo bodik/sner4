@@ -25,13 +25,17 @@ VIZPORTS_HIGH = 100.0
 def portmap_route():
     """visualize portmap"""
 
-    portstates = db.session.query(Service.state, func.count(Service.id).label('state_count')) \
-        .group_by(Service.state).order_by(desc('state_count')).all()
+    query = db.session.query(Service.state, func.count(Service.id).label('state_count')).join(Host) \
+        .group_by(Service.state).order_by(desc('state_count'))
+    if 'filter' in request.values:
+        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+    portstates = query.all()
 
-    query = db.session.query(Service.port, func.count(Service.id)).order_by(Service.port).group_by(Service.port)
+    query = db.session.query(Service.port, func.count(Service.id)).join(Host).order_by(Service.port).group_by(Service.port)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
     portmap = [{'port': port, 'count': count} for port, count in query.all()]
+
     # compute sizing for rendered element
     lowest = min(portmap, key=lambda x: x['count'])['count'] if portmap else 0
     highest = max(portmap, key=lambda x: x['count'])['count'] if portmap else 0

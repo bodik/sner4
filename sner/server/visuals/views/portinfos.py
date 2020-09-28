@@ -11,7 +11,7 @@ from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.sqlafilter import filter_parser
 from sner.server.storage.views.service import service_info_column
-from sner.server.storage.models import Service
+from sner.server.storage.models import Host, Service
 from sner.server.visuals.views import blueprint
 
 
@@ -29,7 +29,7 @@ def portinfos_json_route():
     """service info visualization json data endpoint"""
 
     info_column = service_info_column(request.args.get('crop'))
-    query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')) \
+    query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')).join(Host) \
         .filter(Service.info != '', Service.info != None).group_by(info_column).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
     if 'filter' in request.values:
