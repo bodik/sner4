@@ -79,11 +79,18 @@ class SnerStorageComponent extends SnerComponentBase {
 
 			'service_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Vuln</a>
-					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='service' model_id=id}}">Note</a>
-				</div>
-				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" data-toggle="dropdown"><i class="fas fa-ellipsis-h text-secondary"></i></a>
+					<div class="dropdown-menu dropdown-menu-right">
+						<a class="dropdown-item" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Add vuln</a>
+						<a class="dropdown-item" href="{{> storage.note_add_route model_name='service' model_id=id}}">Add note</a>
+						<div class="dropdown-divider"></div>
+						<a class="dropdown-item" href="http://{{ host_address }}:{{ port }}"><i class="fas fa-external-link-alt text-secondary"></i> http://{{ host_address }}:{{ port }}</a>
+						<a class="dropdown-item" href="https://{{ host_address }}:{{ port }}"><i class="fas fa-external-link-alt text-secondary"></i> https://{{ host_address }}:{{ port }}</a>
+						{{#if host_hostname}}
+							<a class="dropdown-item" href="http://{{ host_hostname }}:{{ port }}"><i class="fas fa-external-link-alt text-secondary"></i> http://{{ host_hostname }}:{{ port }}</a>
+							<a class="dropdown-item" href="https://{{ host_hostname }}:{{ port }}"><i class="fas fa-external-link-alt text-secondary"></i> https://{{ host_hostname }}:{{ port }}</a>
+						{{/if}}
+					</div>
 					<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
