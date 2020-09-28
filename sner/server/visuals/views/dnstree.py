@@ -47,7 +47,7 @@ def dnstree_json_route():
     query = Host.query
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
-    crop = request.args.get('crop', 0, type=int)
+    crop = request.values.get('crop', 0, type=int)
 
     hostnames_tree = {}
     for ihost in query.all():

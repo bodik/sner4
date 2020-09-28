@@ -34,7 +34,7 @@ def portinfos_json_route():
 
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
-    if request.args.get('limit'):
-        query = query.limit(request.args.get('limit'))
+    if request.values.get('limit'):
+        query = query.limit(request.values.get('limit'))
 
     return jsonify([{'info': info, 'count': count} for info, count in query.all()])
