@@ -165,6 +165,7 @@ def vuln_grouped_json_route():
         ColumnDT(Vuln.tags, mData='tags'),
         ColumnDT(func.count(Vuln.id), mData='cnt_vulns', global_search=False),
     ]
+    # join allows filter over host attrs
     query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, Vuln.tags)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)

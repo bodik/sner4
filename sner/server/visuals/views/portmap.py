@@ -25,12 +25,14 @@ VIZPORTS_HIGH = 100.0
 def portmap_route():
     """visualize portmap"""
 
+    # join allows filter over host attrs
     query = db.session.query(Service.state, func.count(Service.id).label('state_count')).join(Host) \
         .group_by(Service.state).order_by(desc('state_count'))
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
     portstates = query.all()
 
+    # join allows filter over host attrs
     query = db.session.query(Service.port, func.count(Service.id)).join(Host).order_by(Service.port).group_by(Service.port)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)

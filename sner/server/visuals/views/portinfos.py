@@ -29,6 +29,7 @@ def portinfos_json_route():
     """service info visualization json data endpoint"""
 
     info_column = service_info_column(request.args.get('crop'))
+    # join allows filter over host attrs
     query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')).join(Host) \
         .filter(Service.info != '', Service.info != None).group_by(info_column).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
 

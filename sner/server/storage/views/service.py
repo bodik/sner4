@@ -139,6 +139,7 @@ def service_grouped_json_route():
         ColumnDT(info_column, mData='info'),
         ColumnDT(func.count(Service.id), mData='cnt_services', global_search=False),
     ]
+    # join allows filter over host attrs
     query = db.session.query().select_from(Service).join(Host).group_by(info_column)
     if 'filter' in request.values:
         query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
