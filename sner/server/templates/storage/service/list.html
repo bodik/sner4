@@ -13,7 +13,14 @@
 			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
 			Sner.dt.column('host_hostname'),
 			Sner.dt.column('proto'),
-			Sner.dt.column('port'),
+			Sner.dt.column('port', {
+				'className': 'clickable',
+				'render': function(data, type, row, meta) {
+					return Sner.storage.hbs.service_endpoint_dropdown(
+						$.extend(row, {'service_proto': row['proto'], 'service_port': row['port'], 'service': row['port'] + '/' + row['proto']})
+					);
+				}
+			}),
 			Sner.dt.column('name'),
 			Sner.dt.column('state'),
 			Sner.dt.column('info'),

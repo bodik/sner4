@@ -54,8 +54,9 @@ td.dt-nowrap {
 	text-decoration: line-through !important;
 }
 
-td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover {
-	border-right: 2px dotted #ffc107;
+td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover, td.clickable:hover {
+	outline: 2px dotted #ffc107;
+	outline-offset: -2px;
 }
 
 .filter_bar {

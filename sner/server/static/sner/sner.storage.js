@@ -103,15 +103,11 @@ class SnerStorageComponent extends SnerComponentBase {
 
 			'service_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" data-toggle="dropdown"><i class="fas fa-ellipsis-h text-secondary"></i></a>
-					<div class="dropdown-menu dropdown-menu-right">
-						<a class="dropdown-item" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Add vuln</a>
-						<a class="dropdown-item" href="{{> storage.note_add_route model_name='service' model_id=id}}">Add note</a>
-						<div class="dropdown-divider"></div>
-						{{#links_for_service host_address host_hostname proto port}}
-							<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
-						{{/links_for_service}}
-					</div>
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Vuln</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='service' model_id=id}}">Note</a>
+				</div>
+				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
@@ -121,27 +117,24 @@ class SnerStorageComponent extends SnerComponentBase {
 				{{else}}
 					<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="fas fa-list"></span></a>
 				{{/if}}`,
-			'service_endpoint_links': `
-				<div class="dropdown d-inline">
-					<a class="btn btn-outline-secondary btn-sm" data-toggle="dropdown"><i class="fas fa-ellipsis-h text-secondary"></i></a>
-					<div class="dropdown-menu dropdown-menu-right">
-						{{#links_for_service host_address host_hostname service_proto service_port}}
-							<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
-						{{/links_for_service}}
+			'service_endpoint_dropdown': `
+				{{# if service}}
+					<div class="dropdown d-flex">
+						<a class="flex-fill" data-toggle="dropdown">{{service}}</a>
+						<div class="dropdown-menu dropdown-menu-right">
+							<h6 class="dropdown-header">Service endpoint URIs</h6>
+							{{#links_for_service host_address host_hostname service_proto service_port}}
+								<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
+							{{/links_for_service}}
+						</div>
 					</div>
-				</div>`,
+				{{/if}}`,
 
 			'vuln_link': `<a href="{{> storage.vuln_view_route vuln_id=id}}">{{name}}</a>`,
 			'severity_label': `<span class="badge {{color_for_severity severity}}">{{severity}}</span>`,
 			'vuln_refs': `{{#each refs}}<a rel="noreferrer" href="{{url_for_ref this}}">{{text_for_ref this}}</a> {{/each}}`,
 			'vuln_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" data-toggle="dropdown"><i class="fas fa-ellipsis-h text-secondary"></i></a>
-					<div class="dropdown-menu dropdown-menu-right">
-						{{#links_for_service host_address host_hostname service_proto service_port}}
-							<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
-						{{/links_for_service}}
-					</div>
 					<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
@@ -150,12 +143,6 @@ class SnerStorageComponent extends SnerComponentBase {
 			'note_controls': `
 				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}"><i class="fas fa-eye"></i></a>
-					<a class="btn btn-outline-secondary" data-toggle="dropdown"><i class="fas fa-ellipsis-h text-secondary"></i></a>
-					<div class="dropdown-menu dropdown-menu-right">
-						{{#links_for_service host_address host_hostname service_proto service_port}}
-							<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
-						{{/links_for_service}}
-					</div>
 					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
