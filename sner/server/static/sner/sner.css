@@ -54,7 +54,7 @@ td.dt-nowrap {
 	text-decoration: line-through !important;
 }
 
-td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover, td.clickable:hover {
+td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover, td.service_endpoint_dropdown:hover {
 	outline: 2px dotted #ffc107;
 	outline-offset: -2px;
 }

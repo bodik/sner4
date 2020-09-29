@@ -101,11 +101,9 @@
 					Sner.dt.column('host_hostname', {'visible': false}),
 					Sner.dt.column('proto'),
 					Sner.dt.column('port', {
-						'className': 'clickable',
+						'className': 'service_endpoint_dropdown',
 						'render': function(data, type, row, meta) {
-							return Sner.storage.hbs.service_endpoint_dropdown(
-								$.extend(row, {'service_proto': row['proto'], 'service_port': row['port'], 'service': row['port'] + '/' + row['proto']})
-							);
+							return Sner.storage.hbs.service_endpoint_dropdown({...row, 'service_proto': row['proto'], 'service_port': row['port'], 'value': row['port']});
 						}
 					}),
 					Sner.dt.column('name'),
@@ -160,7 +158,12 @@
 					Sner.dt.column('host_hostname', {'visible': false}),
 					Sner.dt.column('service_proto', {'visible': false}),
 					Sner.dt.column('service_port', {'visible': false}),
-					Sner.dt.column('service', {'className': 'clickable', 'render': function(data, type, row, meta) { return Sner.storage.hbs.service_endpoint_dropdown(row); }}),
+					Sner.dt.column('service', {
+						'className': 'service_endpoint_dropdown',
+						'render': function(data, type, row, meta) {
+							return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+						}
+					}),
 					Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_link(row); }}),
 					Sner.dt.column('xtype', {'visible': false}),
 					Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),
@@ -197,7 +200,12 @@
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
 					Sner.dt.column('host_hostname', {'visible': false}),
-					Sner.dt.column('service', {'className': 'clickable', 'render': function(data, type, row, meta) { return Sner.storage.hbs.service_endpoint_dropdown(row); }}),
+					Sner.dt.column('service', {
+						'className': 'service_endpoint_dropdown',
+						'render': function(data, type, row, meta) {
+							return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+						}
+					}),
 					Sner.dt.column('xtype'),
 					Sner.dt.column('data', {'className': 'forcewrap'}),
 					Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),

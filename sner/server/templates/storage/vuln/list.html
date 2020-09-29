@@ -15,7 +15,12 @@
 			Sner.dt.column('host_hostname'),
 			Sner.dt.column('service_proto', {'visible': false}),
 			Sner.dt.column('service_port', {'visible': false}),
-			Sner.dt.column('service', {'className': 'clickable', 'render': function(data, type, row, meta) { return Sner.storage.hbs.service_endpoint_dropdown(row); }}),
+			Sner.dt.column('service', {
+				'className': 'service_endpoint_dropdown',
+				'render': function(data, type, row, meta) {
+					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+				}
+			}),
 			Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_link(row); }}),
 			Sner.dt.column('xtype', {'visible': false}),
 			Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),

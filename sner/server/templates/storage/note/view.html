@@ -28,8 +28,8 @@ $(document).ready(function() {
 				{{ note.host.hostname }}
 			</td>
 			<th>service</th>
-			<td class="clickable">
-				<span class="render_hbs" data-hbs="storage.hbs.service_endpoint_dropdown" data-hbs_context='{{ {'host_address': note.host.address, 'host_hostname': note.host.hostname, 'service_proto': note.service.proto|default(None), 'service_port': note.service.port|default(None), 'service': note.service|string}|tojson }}'></span>
+			<td class="service_endpoint_dropdown">
+				<span class="render_hbs" data-hbs="storage.hbs.service_endpoint_dropdown" data-hbs_context='{{ {'host_address': note.host.address, 'host_hostname': note.host.hostname, 'service_proto': note.service.proto|default(None), 'service_port': note.service.port|default(None), 'value': note.service|string}|tojson }}'></span>
 			</td>
 		</tr>
 		<tr>

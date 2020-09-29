@@ -14,11 +14,9 @@
 			Sner.dt.column('host_hostname'),
 			Sner.dt.column('proto'),
 			Sner.dt.column('port', {
-				'className': 'clickable',
+				'className': 'service_endpoint_dropdown',
 				'render': function(data, type, row, meta) {
-					return Sner.storage.hbs.service_endpoint_dropdown(
-						$.extend(row, {'service_proto': row['proto'], 'service_port': row['port'], 'service': row['port'] + '/' + row['proto']})
-					);
+					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'service_proto': row['proto'], 'service_port': row['port'], 'value': row['port']});
 				}
 			}),
 			Sner.dt.column('name'),
