@@ -18,7 +18,7 @@
 			Sner.dt.column('xtype'),
 			Sner.dt.column('data', {'className': 'forcewrap'}),
 			Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
-			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap'}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 		],
 		'drawCallback': function (settings) {
