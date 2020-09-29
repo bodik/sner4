@@ -82,10 +82,12 @@ def vuln_report():
             'URL': lambda d: d,
             'CVE': lambda d: 'https://cvedetails.com/cve/CVE-' + d,
             'NSS': lambda d: 'https://www.tenable.com/plugins/nessus/' + d,
-            'BID': lambda d: 'http://www.securityfocus.com/bid/' + d,
+            'BID': lambda d: 'https://www.securityfocus.com/bid/' + d,
             'CERT': lambda d: 'https://www.kb.cert.org/vuls/id/' + d,
             'EDB': lambda d: 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
             'MSF': lambda d: 'https://www.rapid7.com/db/?q=' + d,
+            'MSFT': lambda d: 'https://technet.microsoft.com/en-us/security/bulletin/' + d,
+            'MSKB': lambda d: 'https://support.microsoft.com/en-us/help/' + d,
             'SN': lambda d: 'SN-' + d
         }
         try:

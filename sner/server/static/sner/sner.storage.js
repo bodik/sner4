@@ -18,10 +18,12 @@ class SnerStorageComponent extends SnerComponentBase {
 					'URL': (d) => d,
 					'CVE': (d) => 'https://cvedetails.com/cve/CVE-' + d,
 					'NSS': (d) => 'https://www.tenable.com/plugins/nessus/' + d,
-					'BID': (d) => 'http://www.securityfocus.com/bid/' + d,
+					'BID': (d) => 'https://www.securityfocus.com/bid/' + d,
 					'CERT': (d) => 'https://www.kb.cert.org/vuls/id/' + d,
 					'EDB': (d) => 'https://www.exploit-db.com/exploits/' + d.replace('ID-', ''),
 					'MSF': (d) => 'https://www.rapid7.com/db/?q=' + d,
+					'MSFT': (d) => 'https://technet.microsoft.com/en-us/security/bulletin/' + d,
+					'MSKB': (d) => 'https://support.microsoft.com/en-us/help/' + d,
 					'SN': (d) => Flask.url_for('storage.note_view_route', {'note_id': d})
 				};
 				try {
