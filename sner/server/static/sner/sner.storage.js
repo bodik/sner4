@@ -121,7 +121,7 @@ class SnerStorageComponent extends SnerComponentBase {
 				{{# if service}}
 					<div class="dropdown d-flex">
 						<a class="flex-fill" data-toggle="dropdown">{{service}}</a>
-						<div class="dropdown-menu dropdown-menu-right">
+						<div class="dropdown-menu">
 							<h6 class="dropdown-header">Service endpoint URIs</h6>
 							{{#links_for_service host_address host_hostname service_proto service_port}}
 								<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
