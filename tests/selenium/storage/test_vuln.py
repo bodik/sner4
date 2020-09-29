@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.extensions import db
 from sner.server.storage.models import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
+from tests.selenium.storage import check_annotate, check_select_rows, check_service_endpoint_dropdown, check_vulns_multiactions
 
 
 def check_vulns_filtering(sclnt, dt_id):
@@ -116,11 +116,38 @@ def test_vuln_view_route_tagging(live_server, sl_operator, vuln):  # pylint: dis
     assert 'info' in Vuln.query.get(vuln.id).tags
 
 
+def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vuln_factory, service):  # pylint: disable=unused-argument
+    """service endpoint uris dropdown test"""
+
+    test_vuln = vuln_factory.create(service=service)
+
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
+    check_service_endpoint_dropdown(
+        sl_operator,
+        sl_operator.find_element_by_id('vuln_list_table'),
+        f'{test_vuln.service.port}/{test_vuln.service.proto}'
+    )
+
+
 def test_vuln_view_route_annotate(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test vuln annotation from view route"""
 
     sl_operator.get(url_for('storage.vuln_view_route', vuln_id=vuln.id, _external=True))
     check_annotate(sl_operator, 'abutton_annotate_view', vuln)
+
+
+def test_vuln_view_route_service_endpoint_dropdown(live_server, sl_operator, vuln_factory, service):  # pylint: disable=unused-argument
+    """test note annotation from view route"""
+
+    test_vuln = vuln_factory.create(service=service)
+
+    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=test_vuln.id, _external=True))
+    check_service_endpoint_dropdown(
+        sl_operator,
+        sl_operator.find_element_by_xpath('//td[contains(@class, "service_endpoint_dropdown")]'),
+        f'<Service {test_vuln.service.id}: {test_vuln.service.proto}.{test_vuln.service.port}>'
+    )
 
 
 def test_vuln_grouped_route(live_server, sl_operator, vuln):  # pylint: disable=unused-argument

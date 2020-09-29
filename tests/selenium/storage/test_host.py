@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.extensions import db
 from sner.server.storage.models import Host, Note, Service, Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_select_rows, check_vulns_multiactions
+from tests.selenium.storage import check_annotate, check_select_rows, check_service_endpoint_dropdown, check_vulns_multiactions
 
 
 def switch_tab(sclnt, tab_name, dt_name, control_data):
@@ -68,7 +68,7 @@ def test_host_view_route_annotate(live_server, sl_operator, host):  # pylint: di
     check_annotate(sl_operator, 'abutton_annotate_view', host)
 
 
-def test_host_view_route_services_list(live_server, sl_operator, service):  # pylint: disable=unused-argument
+def test_host_view_route_services_list_inrow_delete(live_server, sl_operator, service):  # pylint: disable=unused-argument
     """host view tabbed services dt tests; render and inrow delete"""
 
     service_id = service.id
@@ -81,7 +81,15 @@ def test_host_view_route_services_list(live_server, sl_operator, service):  # py
     assert not Service.query.get(service_id)
 
 
-def test_host_view_route_vulns_list(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
+def test_host_view_route_services_list_service_endpoint_dropdown(live_server, sl_operator, service):  # pylint: disable=unused-argument
+    """host view tabbed services; SE dropdown"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=service.host_id, _external=True))
+    switch_tab(sl_operator, 'services', 'host_view_service_table', service.comment)
+    check_service_endpoint_dropdown(sl_operator, sl_operator.find_element_by_id('host_view_service_table'), service.port)
+
+
+def test_host_view_route_vulns_list_inrow_delete(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """host view tabbed vulns dt test; render and inrow delete"""
 
     vuln_id = vuln.id
@@ -94,17 +102,18 @@ def test_host_view_route_vulns_list(live_server, sl_operator, vuln):  # pylint: 
     assert not Vuln.query.get(vuln_id)
 
 
-def test_host_view_route_notes_list(live_server, sl_operator, note):  # pylint: disable=unused-argument
-    """host view tabbed notes dt test; render and inrow delete"""
+def test_host_view_route_vulns_list_service_endpoint_dropdown(live_server, sl_operator, vuln_factory, service):  # pylint: disable=unused-argument
+    """host view tabbed vulns; SE dropdown"""
 
-    note_id = note.id
-    db.session.expunge(note)
+    test_vuln = vuln_factory.create(service=service)
 
-    sl_operator.get(url_for('storage.host_view_route', host_id=note.host_id, _external=True))
-    switch_tab(sl_operator, 'notes', 'host_view_note_table', note.comment)
-    dt_inrow_delete(sl_operator, 'host_view_note_table')
-
-    assert not Note.query.get(note_id)
+    sl_operator.get(url_for('storage.host_view_route', host_id=test_vuln.host_id, _external=True))
+    switch_tab(sl_operator, 'vulns', 'host_view_vuln_table', test_vuln.comment)
+    check_service_endpoint_dropdown(
+        sl_operator,
+        sl_operator.find_element_by_id('host_view_vuln_table'),
+        f'{test_vuln.service.port}/{test_vuln.service.proto}'
+    )
 
 
 def test_host_view_route_vulns_list_selectrows(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
@@ -121,3 +130,30 @@ def test_host_view_route_vulns_list_multiactions(live_server, sl_operator, vulns
     sl_operator.get(url_for('storage.host_view_route', host_id=vulns_multiaction[0].host_id, _external=True))
     switch_tab(sl_operator, 'vulns', 'host_view_vuln_table', vulns_multiaction[-1].comment)
     check_vulns_multiactions(sl_operator, 'host_view_vuln_table')
+
+
+def test_host_view_route_notes_list_inrow_delete(live_server, sl_operator, note):  # pylint: disable=unused-argument
+    """host view tabbed notes dt test; render and inrow delete"""
+
+    note_id = note.id
+    db.session.expunge(note)
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=note.host_id, _external=True))
+    switch_tab(sl_operator, 'notes', 'host_view_note_table', note.comment)
+    dt_inrow_delete(sl_operator, 'host_view_note_table')
+
+    assert not Note.query.get(note_id)
+
+
+def test_host_view_route_notes_list_service_endpoint_dropdown(live_server, sl_operator, note_factory, service):  # pylint: disable=unused-argument
+    """host view tabbed notes; SE dropdown"""
+
+    test_note = note_factory.create(service=service)
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=test_note.host_id, _external=True))
+    switch_tab(sl_operator, 'notes', 'host_view_note_table', test_note.comment)
+    check_service_endpoint_dropdown(
+        sl_operator,
+        sl_operator.find_element_by_id('host_view_note_table'),
+        f'{test_note.service.port}/{test_note.service.proto}'
+    )

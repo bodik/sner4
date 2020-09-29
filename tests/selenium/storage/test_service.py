@@ -8,7 +8,7 @@ from flask import url_for
 from sner.server.extensions import db
 from sner.server.storage.models import Service
 from tests.selenium import dt_inrow_delete, dt_rendered
-from tests.selenium.storage import check_annotate
+from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
 
 
 def test_service_list_route(live_server, sl_operator, service):  # pylint: disable=unused-argument
@@ -36,3 +36,11 @@ def test_service_list_route_annotate(live_server, sl_operator, service):  # pyli
     sl_operator.get(url_for('storage.service_list_route', _external=True))
     dt_rendered(sl_operator, 'service_list_table', service.comment)
     check_annotate(sl_operator, 'abutton_annotate_dt', service)
+
+
+def test_service_list_route_service_endpoint_dropdown(live_server, sl_operator, service):  # pylint: disable=unused-argument
+    """service endpoint uris dropdown test"""
+
+    sl_operator.get(url_for('storage.service_list_route', _external=True))
+    dt_rendered(sl_operator, 'service_list_table', service.comment)
+    check_service_endpoint_dropdown(sl_operator, sl_operator.find_element_by_id('service_list_table'), service.port)

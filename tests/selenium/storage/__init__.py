@@ -83,3 +83,10 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
 
     db.session.refresh(test_model)
     assert 'annotated comment' in test_model.__class__.query.get(test_model.id).comment
+
+
+def check_service_endpoint_dropdown(sclnt, parent_elem, dropdown_value):
+    """check service endpoint_dropdown"""
+
+    parent_elem.find_element_by_xpath(f'//div[contains(@class, "dropdown")]/a[text()="{dropdown_value}"]').click()
+    webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.XPATH, '//h6[text()="Service endpoint URIs"]')))
