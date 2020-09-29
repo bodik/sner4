@@ -28,7 +28,10 @@ $(document).ready(function() {
 				{{ note.host.hostname }}
 			</td>
 			<th>service</th>
-			<td>{{ note.service }}</td>
+			<td>
+				{{ note.service }}
+				<span class="render_hbs" data-hbs="storage.hbs.service_endpoint_links" data-hbs_context='{{ {'host_address': note.host.address, 'host_hostname': note.host.hostname, 'service_proto': note.service.proto|default(None), 'service_port': note.service.port|default(None)}|tojson }}'></span>
+			</td>
 		</tr>
 		<tr>
 			<th>xtype</th>

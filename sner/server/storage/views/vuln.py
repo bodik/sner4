@@ -42,6 +42,8 @@ def vuln_list_json_route():
         ColumnDT(Host.id, mData='host_id'),
         ColumnDT(Host.address, mData='host_address'),
         ColumnDT(Host.hostname, mData='host_hostname'),
+        ColumnDT(Service.proto, mData='service_proto'),
+        ColumnDT(Service.port, mData='service_port'),
         ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
         ColumnDT(Vuln.name, mData='name'),
         ColumnDT(Vuln.xtype, mData='xtype'),

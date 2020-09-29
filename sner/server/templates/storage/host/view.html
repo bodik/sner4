@@ -151,6 +151,8 @@
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
 					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('service_proto', {'visible': false}),
+					Sner.dt.column('service_port', {'visible': false}),
 					Sner.dt.column('service'),
 					Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_link(row); }}),
 					Sner.dt.column('xtype', {'visible': false}),
