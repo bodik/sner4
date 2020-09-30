@@ -9,12 +9,19 @@
   * refactor planner to be drived by configured pipelines, remove celery and implement as simple loop daemon
   * add default script scanning queue
   * add ipv6 handling to nmap agent module and server parser, update on default queues and planner steps config
+  * add filtering form/field for storage and visuals + add join host model to allow filtering by host properties
+  * main menu active item highlighting
+  * new helpers: scripts, added portlist file service lister
+  * add service endpoint URIs dropdown for storage ui (including selenium tests)
+  * add MSFT and MSKB vuln refs links
+  * minor UI cosmetics tweaks
 
 * fixes:
   * fix annotate modal dialogue form action to work properly with gunicorn
   * hotfix python selenium to correctly close sockets
   * fix storage_cleanup and handle empty hosts with only note.xtype hostnames
   * fix planner step project_servicelist ipv6 address handling
+  * sqlafilter fix parsing '>' vs '>='
 
 * security:
   * update handlbars library
