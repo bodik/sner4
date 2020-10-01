@@ -110,6 +110,7 @@ def vuln_report():
         .query(
             Vuln.name.label('vulnerability'),
             Vuln.descr.label('description'),
+            func.text(Vuln.severity).label('severity'),
             Vuln.tags,
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
@@ -118,7 +119,7 @@ def vuln_report():
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id) \
         .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
-        .group_by(Vuln.name, Vuln.descr, Vuln.tags)
+        .group_by(Vuln.name, Vuln.descr, Vuln.severity, Vuln.tags)
 
     content_trimmed = False
     fieldnames = [
