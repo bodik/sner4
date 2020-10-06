@@ -62,3 +62,9 @@ td.abutton_annotate_dt:hover, td.abutton_annotate_view:hover, td.service_endpoin
 .filter_bar {
 	margin-top: .3rem;
 }
+
+table.auth-user-profile th {
+	font-weight: bold;
+	text-align: right;
+	vertical-align: middle;
+}

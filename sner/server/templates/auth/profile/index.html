@@ -28,25 +28,34 @@
 {% block content %}
 {% call cm.heading(['User profile']) %}{% endcall %}
 
-<dl class="row">
-	<dt class="col-1">username</dt>
-	<dd class="col-11">{{ user.username }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_changepassword_route') }}">Change password</a></dd>
+<table class="table table-sm auth-user-profile">
+	<tr>
+		<th>username</th>
+		<td>{{ user.username }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_changepassword_route') }}">Change password</a></td>
+	</tr>
 
-	<dt class="col-1">email</dt>
-	<dd class="col-11">{{ user.email }}</dd>
+	<tr>
+		<th>email</th>
+		<td>{{ user.email }}</td>
+	</tr>
 
-	<dt class="col-2">2fa authentication</dt>
-	<dd class="col-10">
-	{% if user.totp %}{% set tfa_state = ('enabled', 'Disable') %}{% else %}{% set tfa_state = ['disabled', 'Enable'] %}{% endif %}
-	{{ tfa_state[0] }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_totp_route') }}">{{ tfa_state[1] }}</a>
-	</dd>
+	<tr>
+		<th>2fa authentication</th>
+		<td>
+	                {% if user.totp %}{% set tfa_state = ('enabled', 'Disable') %}{% else %}{% set tfa_state = ['disabled', 'Enable'] %}{% endif %}
+			{{ tfa_state[0] }} <a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_totp_route') }}">{{ tfa_state[1] }}</a>
+		</td>
+	</tr>
 
-	<dt class="col-1">webauthn credentials</dt>
-	<dd class="col-11">
-		<div id="profile_webauthn_table_toolbar" class="dt_toolbar">
-			<a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_webauthn_register_route') }}">Register new</a>
-		</div>
-		<table id="profile_webauthn_table" class="table table-hover table-sm"></table>
-	</dd>
-</dl>
+	<tr>
+		<th>webauthn credentials</th>
+		<td>
+			<div id="profile_webauthn_table_toolbar" class="dt_toolbar">
+				<a class="btn btn-outline-secondary" href="{{ url_for('auth.profile_webauthn_register_route') }}">Register new</a>
+			</div>
+			<table id="profile_webauthn_table" class="table table-hover table-sm"></table>
+		</td>
+	</tr>
+</table>
+
 {% endblock %}
