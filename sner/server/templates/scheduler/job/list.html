@@ -33,11 +33,11 @@
 {% call cm.heading(['Jobs']) %}{% endcall %}
 
 <div id="job_list_table_toolbar" class="dt_toolbar">
-	<div class="btn-group" role="group">
-		<a class="btn btn-outline-secondary disabled" href="#"><i class="fas fa-filter"></i></a>
-		{% if 'filter' in request.args %}<a class="btn btn-info" href="{{ url_for('scheduler.job_list_route') }}">unfilter</a>{% endif %}
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('scheduler.job_list_route', filter='Job.retval is_null ""') }}">Running</a>
 	</div>
+	{{ cm.filter_form() }}
 </div>
 
 <table id="job_list_table" class="table table-hover table-sm" width="100%"></table>
