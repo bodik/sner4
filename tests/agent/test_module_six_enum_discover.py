@@ -14,7 +14,7 @@ from sner.lib import file_from_zip
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """six_enum_discover test"""
 
-    test_a = {'id': str(uuid4()), 'config': {'module': 'six_enum_discover', 'rate': 100}, 'targets': ['::0', '::1']}
+    test_a = {'id': str(uuid4()), 'config': {'module': 'six_enum_discover', 'rate': 100}, 'targets': ['::1']}
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
 
@@ -24,4 +24,4 @@ def test_basic(tmpworkdir):  # pylint: disable=unused-argument
         return
 
     assert result == 0
-    assert '::1' in file_from_zip(f'{test_a["id"]}.zip', 'output-1.txt').decode('utf-8')
+    assert '::1' in file_from_zip(f'{test_a["id"]}.zip', 'output-0.txt').decode('utf-8')
