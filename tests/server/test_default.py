@@ -83,7 +83,7 @@ def test_version():
 
     buf_stdout = StringIO()
 
-    patch_argv = patch.object(sys, 'argv', ['--version'])
+    patch_argv = patch.object(sys, 'argv', ['--version', '--debug'])
     patch_environ = patch.object(os, 'environ', {})
     patch_stdout = patch.object(sys, 'stdout', buf_stdout)
     with pytest.raises(SystemExit) as pytest_wrapped_e:

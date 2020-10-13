@@ -145,8 +145,10 @@ def cli():
 
     if '--version' in sys.argv:
         print('Sner %s' % __version__)
+    if '--debug' in sys.argv:
+        os.environ['FLASK_ENV'] = 'development'
+        sys.argv.remove('--debug')
     os.environ['FLASK_APP'] = 'sner.server.app'
-    os.environ['FLASK_ENV'] = 'development'
     os.environ['FLASK_RUN_PORT'] = '18000'
     os.environ['FLASK_RUN_HOST'] = '0.0.0.0'
     return flask.cli.main()

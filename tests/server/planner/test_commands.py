@@ -16,5 +16,5 @@ def test_run_coverage(runner):
         {'invalid': 0},
     ]
 
-    result = runner.invoke(command, ['run', '--oneshot', '--debug'])
+    result = runner.invoke(command, ['run', '--oneshot'])
     assert result.exit_code == 0

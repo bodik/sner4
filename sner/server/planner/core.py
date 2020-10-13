@@ -58,11 +58,9 @@ class Planner:
 
     LOOPSLEEP = 60
 
-    def __init__(self, oneshot=False, debug=False):
+    def __init__(self, oneshot=False):
         self.log = current_app.logger
-        self.log.setLevel(logging.INFO)
-        if debug:
-            self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.DEBUG if current_app.config['DEBUG'] else logging.INFO)
 
         self.original_signal_handlers = {}
         self.loop = None
