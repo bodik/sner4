@@ -34,7 +34,7 @@ def reset_password(username):
     tmp_password = PWS.generate()
     user.password = tmp_password
     db.session.commit()
-    current_app.logger.info('new password "%s:%s"' % (user.username, tmp_password))
+    print(f'new password "{user.username}:{tmp_password}"')
 
 
 @command.command(name='add-agent', help='add agent')
@@ -51,4 +51,4 @@ def add_agent():
     )
     db.session.add(agent)
     db.session.commit()
-    current_app.logger.info(f'new agent {agent.username} apikey {apikey}')
+    print(f'new agent {agent.username} apikey {apikey}')
