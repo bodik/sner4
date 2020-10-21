@@ -15,6 +15,8 @@
   * add service endpoint URIs dropdown for storage ui (including selenium tests)
   * add MSFT and MSKB vuln refs links
   * minor UI cosmetics tweaks
+  * add severity to generated report
+  * add filtering form for scheduler job list page
 
 * fixes:
   * fix annotate modal dialogue form action to work properly with gunicorn
@@ -22,6 +24,11 @@
   * fix storage_cleanup and handle empty hosts with only note.xtype hostnames
   * fix planner step project_servicelist ipv6 address handling
   * sqlafilter fix parsing '>' vs '>='
+  * fix user profile page layout
+  * fit add user button placement
+  * fix six enum discover test
+  * fix bin/server commands --debug handling and setup
+  * fix logging vs print output
 
 * security:
   * update handlbars library
