@@ -49,7 +49,7 @@ DEFAULT_CONFIG = {
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600,
-    'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell'],
+    'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell', 'falsepositive'],
     'SNER_TRIM_REPORT_CELLS': 65000,
     'SNER_PLANNER': {}
 }
