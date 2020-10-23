@@ -50,6 +50,7 @@
 {% block content %}
 {% call cm.heading(['Vulns']) %}
 	<div class="pl-2">
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
 		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
@@ -62,15 +63,11 @@
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
-		<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="info">Info</a>
-		<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="report">Report</a>
-		<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="todo">Todo</a>
+		{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
-		<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="info">Info</a></li>
-		<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="report">Report</a></li>
-		<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="todo">Todo</a></li>
+		{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'striked btn btn-outline-secondary abutton_untag_multiid') }}
 	</div>
 	<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 	<div class="btn-group">
@@ -80,7 +77,6 @@
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
 	</div>
-	<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
 	{{ cm.filter_form() }}
 </div>
 

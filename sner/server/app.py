@@ -49,7 +49,9 @@ DEFAULT_CONFIG = {
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600,
-    'SNER_TAGS': ['info', 'report', 'todo', 'reviewed', 'sslhell', 'falsepositive'],
+    'SNER_TAGS_HOST': ['reviewed'],
+    'SNER_TAGS_VULN': ['info', 'report', 'todo', 'falsepositive'],
+    'SNER_TAGS_ANNOTATE': ['sslhell'],
     'SNER_TRIM_REPORT_CELLS': 65000,
     'SNER_PLANNER': {}
 }
@@ -68,7 +70,9 @@ def config_from_yaml(filename):
         # sner
         'SNER_VAR': get_dotted(config_dict, 'server.var'),
         'SNER_SESSION_IDLETIME': get_dotted(config_dict, 'server.session_idletime'),
-        'SNER_TAGS': get_dotted(config_dict, 'server.tags'),
+        'SNER_TAGS_HOST': get_dotted(config_dict, 'server.tags_host'),
+        'SNER_TAGS_VULN': get_dotted(config_dict, 'server.tags_vuln'),
+        'SNER_TAGS_ANNOTATE': get_dotted(config_dict, 'server.tags_annotate'),
         'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells'),
         'SNER_PLANNER': get_dotted(config_dict, 'planner')
     }

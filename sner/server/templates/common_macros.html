@@ -13,7 +13,7 @@
 {%- macro addtag_buttons() -%}
 <div class="form-group row">
 	<div class="col-sm-10 offset-sm-2">
-	{% for tag in config['SNER_TAGS'] %}
+	{% for tag in (config['SNER_TAGS_HOST'] + config['SNER_TAGS_VULN'] + config['SNER_TAGS_ANNOTATE'])|unique|sort %}
 		<a class="btn btn-outline-secondary btn-sm abutton_addtag">{{ tag|capitalize }}</a>
 	{% endfor %}
 	</div>
@@ -46,4 +46,21 @@
 
 {%- macro main_menu_link(title, route) -%}
 <li class="nav-item{% if request.endpoint == route %} active{% endif %}"><a class="nav-link" href="{{ url_for(route, **kwargs) }}">{{ title }}</a></li>
+{%- endmacro -%}
+
+{%- macro view_tag_abuttons(tags, route, model_id) -%}
+{% for tag in tags %}
+	<a
+		class="btn btn-outline-primary abutton_tag_view"
+		href="#"
+		title="{{ tag }}"
+		data-tag_route="{{ route }}"
+		data-tag_data='{{ {'action': 'set', 'tag': tag, 'ids-0': model_id}|tojson }}'>{{ tag|capitalize|truncate(6, True) }}</a>
+{% endfor %}
+{%- endmacro -%}
+
+{%- macro multiid_tagging_abuttons(tags, elem_class) -%}
+{% for tag in tags %}
+	<a class="{{ elem_class }}" href="#" title="{{ tag }}" data-tag="{{ tag }}">{{ tag|capitalize|truncate(6, True) }}</a>
+{% endfor %}
 {%- endmacro -%}

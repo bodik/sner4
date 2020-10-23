@@ -38,8 +38,7 @@
 		</div>
 		<div class="btn-group">
 			<a class="btn btn-outline-primary disabled"><i class="fas fa-tag text-primary"></i></a>
-			<a class="btn btn-outline-primary abutton_tag_view" href="#"
-				data-tag_route="storage.host_tag_multiid_route" data-tag_data='{{ {'action': 'set', 'tag': 'reviewed', 'ids-0': host.id}|tojson }}'>Reviewed</a>
+			{{ cm.view_tag_abuttons(config['SNER_TAGS_HOST'], 'storage.host_tag_multiid_route', host.id) }}
 		</div>
 		<div class="btn-group">
 			<a class="btn btn-outline-primary disabled"><i class="fas fa-plus text-primary"></i></a>
@@ -134,15 +133,11 @@
 			</div>
 			<div class="btn-group">
 				<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
-				<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="info">Info</a>
-				<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="report">Report</a>
-				<a class="btn btn-outline-secondary abutton_tag_multiid" href="#" data-tag="todo">Todo</a>
+				{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
 			</div>
 			<div class="btn-group">
 				<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
-				<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="info">Info</a>
-				<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="report" >Report</a>
-				<a class="striked btn btn-outline-secondary abutton_untag_multiid" href="#" data-tag="todo">Todo</a>
+				{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'striked btn btn-outline-secondary abutton_untag_multiid') }}
 			</div>
 			<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 		</div>

@@ -4,7 +4,9 @@
 #    db: 'postgresql://user:password@localhost/sner'
 #    var: '/var/lib/sner'
 #    session_idletime: 3600
-#    tags: ['info', 'report', 'todo', 'reviewed', 'sslhell', 'falsepositive']
+#    tags_host: ['reviewed']
+#    tags_vuln: ['info', 'report', 'todo', 'falsepositive']
+#    tags_annotate: ['sslhell']
 #    trim_report_cells: 65000
 #
 #
