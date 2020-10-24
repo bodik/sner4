@@ -199,12 +199,10 @@ def list_to_lines(data):
 def vuln_report():
     """generate report from storage data"""
 
+    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
-    endpoint_hostname = func.concat_ws(
-        ':',
-        case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address)),
-        Service.port
-    )
+    endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
+
     # note1: refs (itself and array) must be unnested in order to be correctly uniq and agg as individual elements by used axis
     # note2: unnesting refs should be implemented as
     # SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln
@@ -219,6 +217,7 @@ def vuln_report():
             Vuln.descr.label('description'),
             func.text(Vuln.severity).label('severity'),
             Vuln.tags,
+            func.array_agg(func.distinct(host_ident)).label('host_ident'),
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
             func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references')
@@ -234,17 +233,14 @@ def vuln_report():
         'endpoint_address', 'description', 'tags', 'endpoint_hostname', 'references'
     ]
     output_buffer = StringIO()
-    output = DictWriter(output_buffer, fieldnames, restval='', quoting=QUOTE_ALL)
+    output = DictWriter(output_buffer, fieldnames, restval='', extrasaction='ignore', quoting=QUOTE_ALL)
 
     output.writeheader()
     for row in query.all():
         rdata = row._asdict()
 
-        if (len(rdata['endpoint_address']) == 1) and (len(rdata['endpoint_hostname']) == 1):
-            rdata['asset'] = rdata['endpoint_hostname'][0]
-        else:
-            rdata['asset'] = 'misc'
-
+        # must count endpoints, multiple addrs can coline in hostnames
+        rdata['asset'] = rdata['host_ident'][0] if len(rdata['endpoint_address']) == 1 else 'misc'
         for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
             rdata[col] = list_to_lines(rdata[col])
         rdata['references'] = list_to_lines(map(url_for_ref, rdata['references']))
@@ -261,15 +257,13 @@ def vuln_report():
 def vuln_export():
     """export all vulns in storage without aggregation"""
 
+    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
     endpoint_address = func.concat_ws(':', Host.address, Service.port)
-    endpoint_hostname = func.concat_ws(
-        ':',
-        case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address)),
-        Service.port
-    )
+    endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
 
     query = db.session \
         .query(
+            host_ident.label('host_ident'),
             Vuln.name.label('vulnerability'),
             Vuln.descr.label('description'),
             Vuln.data,
@@ -283,7 +277,10 @@ def vuln_export():
         .outerjoin(Service, Vuln.service_id == Service.id)
 
     content_trimmed = False
-    fieldnames = ['id', 'asset', 'vulnerability', 'severity', 'description', 'data', 'tags', 'endpoint_address', 'endpoint_hostname', 'references']
+    fieldnames = [
+        'id', 'host_ident', 'vulnerability', 'severity', 'description', 'data',
+        'tags', 'endpoint_address', 'endpoint_hostname', 'references'
+    ]
     output_buffer = StringIO()
     output = DictWriter(output_buffer, fieldnames, restval='', quoting=QUOTE_ALL)
 
@@ -291,7 +288,6 @@ def vuln_export():
     for row in query.all():
         rdata = row._asdict()
 
-        rdata['asset'] = rdata['endpoint_hostname']
         rdata['tags'] = list_to_lines(rdata['tags'])
         rdata['references'] = list_to_lines(map(url_for_ref, rdata['references']))
         rdata, trim_trigger = trim_rdata(rdata)
@@ -299,5 +295,5 @@ def vuln_export():
         output.writerow(rdata)
 
     if content_trimmed:
-        output.writerow({'asset': 'WARNING: some cells were trimmed'})
+        output.writerow({'host_ident': 'WARNING: some cells were trimmed'})
     return output_buffer.getvalue()
