@@ -51,6 +51,7 @@
 {% call cm.heading(['Vulns']) %}
 	<div class="pl-2">
 		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_export_route') }}">Export</a>
 		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}

@@ -150,3 +150,11 @@ def test_vuln_report_route(cl_operator, vuln):
     response = cl_operator.get(url_for('storage.vuln_report_route'))
     assert response.status_code == HTTPStatus.OK
     assert f',"{vuln.name}",' in response.body.decode('utf-8')
+
+
+def test_vuln_export_route(cl_operator, vuln):
+    """vuln export route test"""
+
+    response = cl_operator.get(url_for('storage.vuln_export_route'))
+    assert response.status_code == HTTPStatus.OK
+    assert f',"{vuln.name}",' in response.body.decode('utf-8')

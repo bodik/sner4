@@ -16,7 +16,7 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.sqlafilter import filter_parser
-from sner.server.storage.core import import_parsed, vuln_report
+from sner.server.storage.core import import_parsed, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 
 
@@ -60,6 +60,13 @@ def storage_flush():
 def storage_report():
     """generate vuln report"""
     print(vuln_report())
+
+
+@command.command(name='vuln-export', help='export vulnerabilities')
+@with_appcontext
+def storage_vuln_export():
+    """export vulnerabilities"""
+    print(vuln_export())
 
 
 @command.command(name='service-list', help='service (filtered) listing')

@@ -3,7 +3,9 @@
 storage.commands tests
 """
 
+import csv
 import json
+from io import StringIO
 
 from sner.server.storage.commands import command
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
@@ -101,6 +103,21 @@ def test_report_command(runner, host_factory, vuln_factory):
     assert f',"{vuln_name}",' in result.output
     assert ',"misc",' in result.output
     assert ',"TRIMMED",' in result.output
+
+
+def test_vuln_export_command(runner, host_factory, vuln_factory):
+    """test vuln-export command"""
+
+    host1 = host_factory.create(address='127.3.3.1', hostname='testhost2.testdomain.tests')
+    host2 = host_factory.create(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
+    vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
+    vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.unknown, descr='A'*1001)
+
+    result = runner.invoke(command, ['vuln-export'])
+    assert result.exit_code == 0
+    assert ',"TRIMMED",' in result.output
+    assert len(list(csv.reader(StringIO(result.stdout), delimiter=','))) == 6
 
 
 def test_service_list_command(runner, service):
