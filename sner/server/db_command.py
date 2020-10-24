@@ -138,12 +138,15 @@ def initdata():  # pylint: disable=too-many-statements
         priority=55,
     ))
 
-    # storage test data
+    # storage test data host1
+    aggregable_vuln = {'name': 'aggregable vuln', 'xtype': 'x.agg', 'severity': SeverityEnum.medium}
+
     host = Host(
         address='127.4.4.4',
         hostname='testhost.testdomain.test<script>alert(1);</script>',
         os='Test Linux 1',
-        comment='a some unknown service server')
+        comment='a some unknown service server'
+    )
     db.session.add(host)
 
     db.session.add(Service(
@@ -153,13 +156,18 @@ def initdata():  # pylint: disable=too-many-statements
         state='open:testreason',
         name='svcx',
         info='testservice banner',
-        comment='manual testservice comment'))
+        comment='manual testservice comment'
+    ))
 
+    db.session.add(Vuln(host=host, **aggregable_vuln))
+
+    # storage test data host2
     host = Host(
         address='127.3.3.3',
         hostname='testhost1.testdomain.test',
         os='Test Linux 2',
-        comment='another server')
+        comment='another server'
+    )
     db.session.add(host)
 
     db.session.add(Service(
@@ -167,7 +175,8 @@ def initdata():  # pylint: disable=too-many-statements
         proto='tcp',
         port=12345,
         state='closed:testreason',
-        name='svcx'))
+        name='svcx'
+    ))
 
     db.session.add(Vuln(
         host=host,
@@ -176,7 +185,8 @@ def initdata():  # pylint: disable=too-many-statements
         severity=SeverityEnum.critical,
         comment='a test vulnerability comment',
         refs=['ref1', 'ref2'],
-        tags=['tag1', 'tag2']))
+        tags=['tag1', 'tag2']
+    ))
 
     db.session.add(Vuln(
         host=host,
@@ -184,28 +194,32 @@ def initdata():  # pylint: disable=too-many-statements
         xtype='testxtype.124',
         severity=SeverityEnum.high,
         comment='another vulnerability comment',
-        tags=None))
+        tags=None
+    ))
 
     db.session.add(Vuln(
         host=host,
         name='vulnerability1',
         xtype='testxtype.124',
         severity=SeverityEnum.medium,
-        tags=['info']))
+        tags=['info']
+    ))
 
     db.session.add(Vuln(
         host=host,
         name='vulnerability2',
         xtype='testxtype.124',
         severity=SeverityEnum.low,
-        tags=['report']))
+        tags=['report']
+    ))
 
     db.session.add(Vuln(
         host=host,
         name='vulnerability2',
         xtype='testxtype.124',
         severity=SeverityEnum.info,
-        tags=['info']))
+        tags=['info']
+    ))
 
     db.session.add(Vuln(
         host=host,
@@ -213,13 +227,17 @@ def initdata():  # pylint: disable=too-many-statements
         name='vulnerability3',
         xtype='testxtype.124',
         severity=SeverityEnum.unknown,
-        tags=['report']))
+        tags=['report']
+    ))
+
+    db.session.add(Vuln(host=host, **aggregable_vuln))
 
     db.session.add(Note(
         host=host,
         xtype='sner.testnote',
         data='testnote data',
-        comment='test note comment'))
+        comment='test note comment'
+    ))
 
     db.session.commit()
 
