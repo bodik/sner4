@@ -1,5 +1,11 @@
 # sner4 changelog
 
+## 0.4.1 - prod updates
+
+* featues
+  * vuln export (non grouped data export)
+  * configurable action buttons for vulns and hosts
+
 ## 0.4.0 - pipelined planner [BC BREAK]
 
 * features
