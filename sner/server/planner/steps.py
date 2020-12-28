@@ -3,6 +3,7 @@
 sner planner pipeline steps
 """
 
+import json
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
@@ -184,6 +185,19 @@ def storage_cleanup(_):
     db.session.commit()
 
     current_app.logger.debug(f'finished storage_cleanup')
+
+
+@register_step
+def storage_stats(_):
+    """emits storage stats to application logs"""
+
+    stats = {
+        'hosts': Host.query.count(),
+        'services': Service.query.count(),
+        'vulns': Vuln.query.count(),
+        'notes': Note.query.count()
+    }
+    current_app.logger.info('storage stats: %s', json.dumps(stats))
 
 
 @register_step
