@@ -125,7 +125,7 @@
 #              - step: archive_job
 #
 #
-#        # BASIC: cleanup storage
+#        # BASIC: maintenance pipeline
 #        - type: generic
 #          steps:
-#              - step: cleanup_storage
+#              - step: storage_cleanup

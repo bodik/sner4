@@ -11,6 +11,7 @@ import pytest
 from flask import current_app
 
 from sner.server.extensions import db
+from sner.server.planner.commands import command
 from sner.server.planner.core import Planner
 from sner.server.scheduler.models import Target
 from sner.server.storage.models import Host, Service
@@ -205,7 +206,7 @@ def test_pipeline_discover_ipv6_enum_stage(runner, queue, host_factory):  # pyli
     assert Target.query.count() == 1
 
 
-def test_pipeline_cleanup_storage(runner, host_factory, service_factory, note_factory):  # pylint: disable=unused-argument
+def test_pipeline_storage_cleanup(runner, host_factory, service_factory, note_factory):  # pylint: disable=unused-argument
     """test planners cleanup storage stage"""
 
     host_factory.create(address='127.127.127.134', hostname=None, os=None, comment=None)
@@ -217,11 +218,11 @@ def test_pipeline_cleanup_storage(runner, host_factory, service_factory, note_fa
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
             'type': 'generic',
-            'steps': [{'step': 'cleanup_storage'}]
+            'steps': [{'step': 'storage_cleanup'}]
         }
     ]
 
-    Planner(oneshot=True).run()
+    runner.invoke(command, ['run', '--oneshot'])
 
     assert Host.query.count() == 1
     assert Service.query.count() == 1

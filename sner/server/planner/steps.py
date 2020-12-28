@@ -147,7 +147,7 @@ def archive_job(ctx):
 
 
 @register_step
-def cleanup_storage(_):
+def storage_cleanup(_):
     """clean up storage from various import artifacts"""
 
     # NOTE: Services must be deleted via ORM otherwise relationship defined
@@ -183,7 +183,7 @@ def cleanup_storage(_):
         db.session.delete(host)
     db.session.commit()
 
-    current_app.logger.debug(f'finished cleanup_storage')
+    current_app.logger.debug(f'finished storage_cleanup')
 
 
 @register_step
