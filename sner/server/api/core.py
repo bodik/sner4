@@ -21,7 +21,7 @@ def get_internal_stats():
         'scheduler': {
             'queues': queues,
             'jobs': {
-                'running': Job.query.filter(Job.retval != None).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
+                'running': Job.query.filter(Job.retval == None).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
                 'finished': Job.query.filter(Job.retval == 0).count(),
                 'failed': Job.query.filter(Job.retval != 0).count()
             }
