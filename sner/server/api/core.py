@@ -3,6 +3,8 @@
 api functions
 """
 
+from datetime import datetime, timedelta
+
 from sqlalchemy import func
 
 from sner.server.extensions import db
@@ -17,11 +19,14 @@ def get_internal_stats():
         db.session.query(Queue.name, func.count(Target.id).label('cnt')).select_from(Queue).outerjoin(Target).group_by(Queue.name).all()
     )
 
+    stale_horizont = datetime.utcnow() - timedelta(days=5)
+
     result = {
         'scheduler': {
             'queues': queues,
             'jobs': {
-                'running': Job.query.filter(Job.retval == None).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
+                'running': Job.query.filter(Job.retval == None, Job.time_start > stale_horizont).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
+                'stale': Job.query.filter(Job.retval == None, Job.time_start < stale_horizont).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
                 'finished': Job.query.filter(Job.retval == 0).count(),
                 'failed': Job.query.filter(Job.retval != 0).count()
             }
