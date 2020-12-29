@@ -234,11 +234,11 @@ def test_pipeline_storage_stats(runner, caplog, host, service, note):  # pylint:
     current_app.config['SNER_PLANNER']['pipelines'] = [
         {
             'type': 'generic',
-            'steps': [{'step': 'storage_stats'}]
+            'steps': [{'step': 'stats'}]
         }
     ]
 
     with caplog.at_level(logging.INFO):
         runner.invoke(command, ['run', '--oneshot'])
 
-    assert 'storage stats: {' in caplog.text
+    assert 'stats: {' in caplog.text
