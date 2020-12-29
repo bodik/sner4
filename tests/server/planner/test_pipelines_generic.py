@@ -226,19 +226,3 @@ def test_pipeline_storage_cleanup(runner, host_factory, service_factory, note_fa
 
     assert Host.query.count() == 1
     assert Service.query.count() == 1
-
-
-def test_pipeline_storage_stats(runner, caplog, host, service, note):  # pylint: disable=unused-argument
-    """test planners storage stats stage"""
-
-    current_app.config['SNER_PLANNER']['pipelines'] = [
-        {
-            'type': 'generic',
-            'steps': [{'step': 'stats'}]
-        }
-    ]
-
-    with caplog.at_level(logging.INFO):
-        runner.invoke(command, ['run', '--oneshot'])
-
-    assert 'stats: {' in caplog.text

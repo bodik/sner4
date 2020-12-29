@@ -15,11 +15,12 @@ from uuid import uuid4
 
 import jsonschema
 import yaml
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify, request, Response
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 
 import sner.agent.protocol
+from sner.server.api.core import get_internal_stats
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.scheduler.models import Job, Queue, Target
@@ -152,3 +153,30 @@ def v1_scheduler_job_output_route():
         db.session.commit()
 
     return '', HTTPStatus.OK
+
+
+@blueprint.route('/v1/stats/json')
+def v1_stats_json_route():
+    """returns internal stats; json format"""
+
+    return jsonify({'sner': get_internal_stats()})
+
+
+@blueprint.route('/v1/stats/prometheus')
+def v1_stats_prometheus_route():
+    """returns internal stats; prometheus"""
+
+    stats = get_internal_stats()
+    promstats = {}
+
+    for key, val in stats['storage'].items():
+        promstats[f'sner_storage_{key}_total'] = val
+
+    for key, val in stats['scheduler']['jobs'].items():
+        promstats[f'sner_scheduler_jobs_total{{state="{key}"}}'] = val
+
+    for key, val in stats['scheduler']['queues'].items():
+        promstats[f'sner_scheduler_queue_targets_total{{name="{key}"}}'] = val
+
+    output = '\n'.join(f'{key} {val}' for key, val in promstats.items())
+    return Response(output, mimetype='text/plain')

@@ -3,7 +3,6 @@
 sner planner pipeline steps
 """
 
-import json
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
@@ -19,7 +18,7 @@ from sner.server.extensions import db
 from sner.server.parser import registered_parsers
 from sner.server.storage.core import import_parsed
 from sner.server.scheduler.core import enumerate_network, filter_already_queued, job_delete, queue_enqueue
-from sner.server.scheduler.models import Job, Queue, Target
+from sner.server.scheduler.models import Job, Queue
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import windowed_query
 
@@ -185,34 +184,6 @@ def storage_cleanup(_):
     db.session.commit()
 
     current_app.logger.debug(f'finished storage_cleanup')
-
-
-@register_step
-def stats(_):
-    """emits various stats to application log"""
-
-    queues = dict(
-        db.session.query(Queue.name, func.count(Target.id).label('cnt')).select_from(Queue).outerjoin(Target).group_by(Queue.name).all()
-    )
-
-    result = {
-        'scheduler': {
-            'queues': queues,
-            'jobs': {
-                'running': Job.query.filter(Job.retval != None).count(),  # noqa: E501,E711  pylint: disable=singleton-comparison
-                'finished': Job.query.filter(Job.retval == 0).count(),
-                'failed': Job.query.filter(Job.retval != 0).count()
-            }
-        },
-        'storage': {
-            'hosts': Host.query.count(),
-            'services': Service.query.count(),
-            'vulns': Vuln.query.count(),
-            'notes': Note.query.count()
-        }
-    }
-
-    current_app.logger.info('stats: %s', json.dumps(result))
 
 
 @register_step

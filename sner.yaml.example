@@ -129,4 +129,3 @@
 #        - type: generic
 #          steps:
 #              - step: storage_cleanup
-#              - step: stats

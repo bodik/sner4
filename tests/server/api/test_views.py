@@ -103,3 +103,17 @@ def test_v1_scheduler_job_output_route(client, apikey, job):
         status='*'
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_v1_stats_json_route(client, queue):  # pylint: disable=unused-argument
+    """job json stats route test"""
+
+    response = client.get(url_for('api.v1_stats_json_route'))
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_v1_stats_prometheus_route(client, queue):  # pylint: disable=unused-argument
+    """job prometheus stats route test"""
+
+    response = client.get(url_for('api.v1_stats_prometheus_route'))
+    assert response.status_code == HTTPStatus.OK
