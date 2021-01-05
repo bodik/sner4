@@ -5,7 +5,8 @@ test planner steps unittests
 
 from sner.server.parser.core import ParsedService
 from sner.server.planner.core import Context
-from sner.server.planner.steps import project_servicelist
+from sner.server.planner.steps import filter_tarpits, project_servicelist
+from sner.server.scheduler.models import Job
 
 
 def test_project_servicelist():
@@ -20,3 +21,18 @@ def test_project_servicelist():
 
     expected = ['tcp://127.0.2.1:1', 'tcp://[::1]:1']
     assert ctx['data'] == expected
+
+
+def test_filter_tarpits(app):  # pylint: disable=unused-argument
+    """test filter tarpits"""
+
+    ctx = Context()
+    ctx['job'] = Job(id='atestjobid')
+    ctx['data'] = {'services': [
+        ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')
+    ]}
+    for port in range(1, 500):
+        ctx['data']['services'].append(ParsedService(handle={'host': '127.0.4.1', 'service': f'tcp/{port}'}, proto='tcp', port=f'{port}'))
+    filter_tarpits(ctx)
+
+    assert len(ctx['data']['services']) == 1

@@ -3,6 +3,7 @@
 sner planner pipeline steps
 """
 
+from collections import defaultdict
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
@@ -112,6 +113,22 @@ def project_hostlist(ctx):
     for host in ctx['data']['hosts']:
         data.append(f'{host.address}')
     ctx['data'] = data
+
+
+@register_step
+def filter_tarpits(ctx, threshold=500):
+    """filter filter hosts with too much services detected"""
+
+    hosts = defaultdict(int)
+    for service in ctx['data'].get('services', []):
+        hosts[service.handle['host']] += 1
+    hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, hosts.items()))
+
+    if hosts_over_threshold:
+        current_app.logger.info(f'filter_tarpits {ctx["job"].id} {hosts_over_threshold}')
+        for collection in ['services', 'vulns', 'notes']:
+            if collection in ctx['data']:
+                ctx['data'][collection] = list(filter(lambda x: x.handle['host'] not in hosts_over_threshold, ctx['data'][collection]))
 
 
 @register_step
