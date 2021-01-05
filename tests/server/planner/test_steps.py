@@ -31,7 +31,7 @@ def test_filter_tarpits(app):  # pylint: disable=unused-argument
     ctx['data'] = {'services': [
         ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')
     ]}
-    for port in range(1, 500):
+    for port in range(201):
         ctx['data']['services'].append(ParsedService(handle={'host': '127.0.4.1', 'service': f'tcp/{port}'}, proto='tcp', port=f'{port}'))
     filter_tarpits(ctx)
 
