@@ -1,0 +1,19 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+add table raw
+add chain raw prerouting { type filter hook prerouting priority -300; policy accept; }
+add chain raw output { type filter hook output priority -300; policy accept; }
+add rule raw prerouting notrack
+add rule raw output notrack
+
+add table inet filter
+add chain inet filter input { type filter hook input priority 0; policy accept; }
+add chain inet filter forward { type filter hook forward priority 0; policy accept; }
+add chain inet filter output { type filter hook output priority 0; policy accept; }
+
+add chain inet filter shell
+add rule inet filter input ip protocol tcp tcp dport 22 jump shell
+add rule inet filter shell ip saddr 0.0.0.0/0 accept
+add rule inet filter shell drop
