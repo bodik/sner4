@@ -189,34 +189,23 @@ database or current configuration:
 
 ## 3 Installation
 
-### 3.1 Installation
+### 3.1 Install server
 
 ```
-# pre-requisities
-apt-get install git sudo make postgresql-all
-
-# clone from repository
+# prepare environment
+apt-get install git sudo make
 git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
-
-# OPTIONAL: create and activate virtualenv
 make venv
 . venv/bin/activate
-
-# install dependencies
 make install-deps
-```
 
-### 3.2 Production post-installation
-
-```
-# prepare database and datadir
+# database and datadir
+apt-get install postgresql-all
 sudo -u postgres psql -c "CREATE DATABASE sner;"
 sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
 mkdir -p /var/lib/sner
 chown www-data /var/lib/sner
-
-# configure and create db schema
 cp sner.yaml.example /etc/sner.yaml
 editor /etc/sner.yaml
 make db
@@ -226,31 +215,40 @@ cp extra/sner-web.service /etc/systemd/system/sner-web.service
 systemctl daemon-reload
 systemctl enable --now sner-web.service
 
-# configure apache proxy
+# configure apache2 reverse proxy
 apt-get install apache2
-cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 a2enmod proxy
 a2enmod proxy_http
+cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 systemctl restart apache2
 
 # configure agent service
 bin/server auth add-agent
-editor /etc/sner.yaml << agent apikey
+editor /etc/sner.yaml
 cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
 systemctl daemon-reload
 systemctl start sner-agent@1.service
 
-# OPTIONAL: configure planner service
+# configure planner service
 cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
 systemctl daemon-reload
 systemctl enable --now sner-planner.service
 ```
 
-### 3.4 Development cycle
+### 3.2 Development cycle
 
 ```
-# ensure git settings on cloud nodes
+# prepare environment
+apt-get install git sudo make
+git clone https://github.com/bodik/sner4 /opt/sner
+cd /opt/sner
 ln -s ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
+make venv
+. venv/bin/activate
+make install-deps
+
+# install database
+apt-get install postgresql-all
 
 # run tests
 make db-create-test
