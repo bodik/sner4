@@ -1,132 +1,132 @@
 #server:
-#    secret: 'changeit'
-#    application_root: '/sner'
-#    db: 'postgresql://user:password@localhost/sner'
-#    var: '/var/lib/sner'
-#    session_idletime: 3600
-#    tags_host: ['reviewed']
-#    tags_vuln: ['info', 'report', 'todo', 'falsepositive']
-#    tags_annotate: ['sslhell']
-#    trim_report_cells: 65000
+#  secret: 'changeit'
+#  application_root: '/sner'
+#  db: 'postgresql://user:password@localhost/sner'
+#  var: '/var/lib/sner'
+#  session_idletime: 3600
+#  tags_host: ['reviewed']
+#  tags_vuln: ['info', 'report', 'todo', 'falsepositive']
+#  tags_annotate: ['sslhell']
+#  trim_report_cells: 65000
 #
 #
 #agent:
-#    server: 'http://localhost:18000'
-#    apikey: 'generateit'
-#    queue: null
+#  server: 'http://localhost:18000'
+#  apikey: 'generateit'
+#  queue: null
 #
 #
 #planner:
-#    # common aliases
-#    common:
-#        home_netranges_ipv4: &home_netranges_ipv4 []
-#        home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
+#  # common aliases
+#  common:
+#    home_netranges_ipv4: &home_netranges_ipv4 []
+#    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 #
-#    pipelines:
-#        # BASIC: two-phase ipv4/ipv6 scanning
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_disco ack scan top10000'
-#              - step: filter_tarpits
-#              - step: project_servicelist
-#              - step: enqueue
-#                queue: 'sner_data version scan basic'
-#              - step: archive_job
+#  pipelines:
+#    # BASIC: two-phase ipv4/ipv6 scanning
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_disco ack scan top10000'
+#        - step: filter_tarpits
+#        - step: project_servicelist
+#        - step: enqueue
+#          queue: 'sner_data version scan basic'
+#        - step: archive_job
 #
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_data version scan basic'
-#              - step: import_job
-#              - step: archive_job
-#
-#
-#        # ADVANCED: priority port sweep scan
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_sweep ack scan portA'
-#              - step: project_servicelist
-#              - step: enqueue
-#                queue: 'sner_sweep version scan basic'
-#              - step: archive_job
-#
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_sweep version scan basic'
-#              - step: import_job
-#              - step: archive_job
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_data version scan basic'
+#        - step: import_job
+#        - step: archive_job
 #
 #
-#        # ADVANCED: advanced scanning techniques
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_data version scan intense'
-#              - step: import_job
-#              - step: archive_job
+#    # ADVANCED: priority port sweep scan
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_sweep ack scan portA'
+#        - step: project_servicelist
+#        - step: enqueue
+#          queue: 'sner_sweep version scan basic'
+#        - step: archive_job
 #
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_data script scan basic'
-#              - step: import_job
-#              - step: archive_job
-#
-#
-#        # ADVANCED: storage rescanning
-#        - type: generic
-#          steps:
-#              - step: rescan_services
-#                interval: '10days'
-#                queue: 'sner_data version scan basic'
-#
-#              - step: rescan_hosts
-#                interval: '30days'
-#                queue: 'sner_disco ack scan top10000'
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_sweep version scan basic'
+#        - step: import_job
+#        - step: archive_job
 #
 #
-#        # ADVANCED: full netranges rediscovery
-#        - type: generic
-#          steps:
-#              - step: discover_ipv4
-#                interval: '90days'
-#                netranges: *home_netranges_ipv4
-#                queue: 'sner_disco ack scan top10000'
+#    # ADVANCED: advanced scanning techniques
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_data version scan intense'
+#        - step: import_job
+#        - step: archive_job
 #
-#              - step: discover_ipv6_dns
-#                interval: '90days'
-#                netranges: *home_netranges_ipv4
-#                queue: 'sner_disco ipv6 dns discover'
-#
-#              - step: discover_ipv6_enum
-#                interval: '90days'
-#                queue: 'sner_disco ipv6 enum discover'
-#
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_disco ipv6 dns discover'
-#              - step: project_hostlist
-#              - step: filter_netranges
-#                netranges: *home_netranges_ipv6
-#              - step: enqueue
-#                queue: 'sner_disco ack scan top10000'
-#              - step: archive_job
-#
-#        - type: queue
-#          steps:
-#              - step: load_job
-#                queue: 'sner_disco ipv6 enum discover'
-#              - step: project_hostlist
-#              - step: enqueue
-#                queue: 'sner_disco ack scan top10000'
-#              - step: archive_job
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_data script scan basic'
+#        - step: import_job
+#        - step: archive_job
 #
 #
-#        # BASIC: maintenance pipeline
-#        - type: generic
-#          steps:
-#              - step: storage_cleanup
+#    # ADVANCED: storage rescanning
+#    - type: generic
+#      steps:
+#        - step: rescan_services
+#          interval: '10days'
+#          queue: 'sner_data version scan basic'
+#
+#        - step: rescan_hosts
+#          interval: '30days'
+#          queue: 'sner_disco ack scan top10000'
+#
+#
+#    # ADVANCED: full netranges rediscovery
+#    - type: generic
+#      steps:
+#        - step: discover_ipv4
+#          interval: '90days'
+#          netranges: *home_netranges_ipv4
+#          queue: 'sner_disco ack scan top10000'
+#
+#        - step: discover_ipv6_dns
+#          interval: '90days'
+#          netranges: *home_netranges_ipv4
+#          queue: 'sner_disco ipv6 dns discover'
+#
+#        - step: discover_ipv6_enum
+#          interval: '90days'
+#          queue: 'sner_disco ipv6 enum discover'
+#
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_disco ipv6 dns discover'
+#        - step: project_hostlist
+#        - step: filter_netranges
+#          netranges: *home_netranges_ipv6
+#        - step: enqueue
+#          queue: 'sner_disco ack scan top10000'
+#        - step: archive_job
+#
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_disco ipv6 enum discover'
+#        - step: project_hostlist
+#        - step: enqueue
+#          queue: 'sner_disco ack scan top10000'
+#        - step: archive_job
+#
+#
+#    # BASIC: maintenance pipeline
+#    - type: generic
+#      steps:
+#        - step: storage_cleanup
