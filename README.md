@@ -294,17 +294,17 @@ bin/server run
 
 ### 4.3 Examples
 
-#### Use-case: Basic dns recon
+#### Use-case: Basic recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner_data version scan basic' --file=-
-bin/agent --debug (--queue 'sner_data version scan basic')?
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner_disco syn scan top10000' --file=-
+bin/agent --debug
 bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
 ```
 
-#### Use-case: Long-term scanning strategy aka the Planner
+#### Use-case: Long-term scanning strategy with Planner
 
-1. Configure and run planner, configure stages as needed.
+1. Configure and run planner, configure pipelines as needed.
 
     ```
     editor /etc/sner.yaml
@@ -339,6 +339,8 @@ nmap \
     --max-retries 3 --script-timeout 30m --max-hostgroup 1 --max-rate 1 --scan-delay 10 \
     -oA output --reason \
     -p T:22 -iL targets
+
+# import data
 bin/server storage import nmap output.xml
 ```
 
