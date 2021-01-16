@@ -17,17 +17,17 @@
 The main goal of this project is to create software suite for:
 
 1. Distribution of network reconnaissance workload
-	* Scanning/reconnaissance is performed by set of modular agents. Each
-	  agent module wraps one existing or implements new tool such as nmap,
-          nikto, sslscan.
-	* Agent architecture allows to do pivoted scans and elastic scan
-	  scheduling.
+    * Scanning/reconnaissance is performed by set of modular agents. Each
+      agent module wraps one existing or implements new tool such as nmap,
+      nikto, sslscan.
+    * Agent architecture allows to do pivoted scans and elastic scan
+      scheduling.
 
 2. Data analysis and management
-	* Flexible user-interface allows to analyze monitored infrastructure
-	  and manage information on on-demand and continuous basis.
-	* Programmatical access to the data through ORM interface to
-	  provide further analysis capabilities.
+    * Flexible user-interface allows to analyze monitored infrastructure
+      and manage information on on-demand and continuous basis.
+    * Programmatical access to the data through ORM interface to
+      provide further analysis capabilities.
 
 
 ### 1.1 Design overview
@@ -270,13 +270,13 @@ bin/server run
 ### 4.1 Simple reconnaissance scenario
 
 1. Generate target list
-	* manualy
-	* from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
-	* from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
+    * manualy
+    * from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
+    * from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
 2. Setup exclusions (*scheduler > exclusions > add | edit*)
 3. Enqueue targets in queue
-	* web: *scheduler > queues > [queue] > enqueue*
-	* cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
+    * web: *scheduler > queues > [queue] > enqueue*
+    * cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
 5. Run the agent
 6. Monitor the queue until all jobs has been finished
 7. Stop the agent `bin/agent --shutdown [PID]`
@@ -287,8 +287,8 @@ bin/server run
 
 1. Import existing data with suitable parser: `bin/server storage import <parser name> <filename>`
 2. Use web interface to consult or manage the data: *storage > hosts | services | vulns | notes | ...*
-	* use CRUD, comments or tags to sort the data out
-	* use server shell for advanced analysis
+    * use CRUD, comments or tags to sort the data out
+    * use server shell for advanced analysis
 4. Generate preliminary vulnerability report: *storage > vulns > Generate report*
 
 
