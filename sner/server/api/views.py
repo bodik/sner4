@@ -7,7 +7,7 @@ import base64
 import binascii
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from random import random
 from time import sleep
@@ -20,10 +20,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import func
 
 import sner.agent.protocol
-from sner.server.api.core import get_internal_stats
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.scheduler.models import Job, Queue, Target
+from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import ExclMatcher
 
 
@@ -155,28 +155,26 @@ def v1_scheduler_job_output_route():
     return '', HTTPStatus.OK
 
 
-@blueprint.route('/v1/stats/json')
-def v1_stats_json_route():
-    """returns internal stats; json format"""
-
-    return jsonify({'sner': get_internal_stats()})
-
-
 @blueprint.route('/v1/stats/prometheus')
 def v1_stats_prometheus_route():
     """returns internal stats; prometheus"""
 
-    stats = get_internal_stats()
-    promstats = {}
+    stats = {}
 
-    for key, val in stats['storage'].items():
-        promstats[f'sner_storage_{key}_total'] = val
+    stats['sner_storage_hosts_total'] = Host.query.count()
+    stats['sner_storage_services_total'] = Service.query.count()
+    stats['sner_storage_vulns_total'] = Vuln.query.count()
+    stats['sner_storage_notes_total'] = Note.query.count()
 
-    for key, val in stats['scheduler']['jobs'].items():
-        promstats[f'sner_scheduler_jobs_total{{state="{key}"}}'] = val
+    stale_horizont = datetime.utcnow() - timedelta(days=5)
+    stats[f'sner_scheduler_jobs_total{{state="running"}}'] = Job.query.filter(Job.retval == None, Job.time_start > stale_horizont).count()  # noqa: E501,E711  pylint: disable=singleton-comparison
+    stats[f'sner_scheduler_jobs_total{{state="stale"}}'] = Job.query.filter(Job.retval == None, Job.time_start < stale_horizont).count()  # noqa: E501,E711  pylint: disable=singleton-comparison
+    stats[f'sner_scheduler_jobs_total{{state="finished"}}'] = Job.query.filter(Job.retval == 0).count()
+    stats[f'sner_scheduler_jobs_total{{state="failed"}}'] = Job.query.filter(Job.retval != 0).count()
 
-    for key, val in stats['scheduler']['queues'].items():
-        promstats[f'sner_scheduler_queue_targets_total{{name="{key}"}}'] = val
+    queue_targets = db.session.query(Queue.name, func.count(Target.id).label('cnt')).select_from(Queue).outerjoin(Target).group_by(Queue.name).all()
+    for queue, targets in queue_targets:
+        stats[f'sner_scheduler_queue_targets_total{{name="{queue}"}}'] = targets
 
-    output = '\n'.join(f'{key} {val}' for key, val in promstats.items())
+    output = '\n'.join(f'{key} {val}' for key, val in stats.items())
     return Response(output, mimetype='text/plain')
