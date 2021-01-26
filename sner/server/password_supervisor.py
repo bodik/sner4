@@ -96,30 +96,3 @@ class PasswordSupervisor():
     def hash_simple(value):
         """encoder; create non salted hash"""
         return sha512(value.encode('utf-8')).hexdigest()
-
-
-def test_all():
-    """run all test cases"""
-
-    PWS = PasswordSupervisor
-
-    # supervisor tests
-    pwsr = PWS.check_strength('c')
-    assert not pwsr.is_strong
-    assert 'too short' in pwsr.message
-
-    pwsr = PWS.check_strength('coverage01')
-    assert not pwsr.is_strong
-    assert 'classes found' in pwsr.message
-
-    assert PWS.check_strength('Coverage0?').is_strong
-
-    assert len(PWS.generate()) == 40
-    assert len(PWS.generate_apikey()) == 64
-
-    # encoder tests
-    tmp_password = PWS.generate()
-    tmp_hash = PWS.hash(tmp_password)
-    assert PWS.compare(PWS.hash(tmp_password, PWS.get_salt(tmp_hash)), tmp_hash)
-
-    assert len(PWS.hash_simple(PWS.generate())) == 128
