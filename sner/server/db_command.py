@@ -86,6 +86,13 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
+        name='sner_disco syn scan top10000',
+        config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn', 'timing_perhost': 4}),
+        group_size=1000,
+        priority=10,
+    ))
+
+    db.session.add(Queue(
         name='sner_data version scan basic',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
         group_size=50,

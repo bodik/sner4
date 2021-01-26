@@ -21,6 +21,7 @@
 #  common:
 #    home_netranges_ipv4: &home_netranges_ipv4 []
 #    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
+#    portscan_queue: &portscan_queue 'sner_disco syn scan top10000'
 #
 #  pipelines:
 #    # BASIC: two-phase ipv4/ipv6 scanning
@@ -28,6 +29,16 @@
 #      steps:
 #        - step: load_job
 #          queue: 'sner_disco ack scan top10000'
+#        - step: filter_tarpits
+#        - step: project_servicelist
+#        - step: enqueue
+#          queue: 'sner_data version scan basic'
+#        - step: archive_job
+#
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_disco syn scan top10000'
 #        - step: filter_tarpits
 #        - step: project_servicelist
 #        - step: enqueue
@@ -80,29 +91,29 @@
 #    - type: generic
 #      steps:
 #        - step: rescan_services
-#          interval: '10days'
+#          interval: '20days'
 #          queue: 'sner_data version scan basic'
 #
 #        - step: rescan_hosts
-#          interval: '30days'
-#          queue: 'sner_disco ack scan top10000'
+#          interval: '60days'
+#          queue: *portscan_queue
 #
 #
 #    # ADVANCED: full netranges rediscovery
 #    - type: generic
 #      steps:
 #        - step: discover_ipv4
-#          interval: '90days'
+#          interval: '120days'
 #          netranges: *home_netranges_ipv4
-#          queue: 'sner_disco ack scan top10000'
+#          queue: *portscan_queue
 #
 #        - step: discover_ipv6_dns
-#          interval: '90days'
+#          interval: '120days'
 #          netranges: *home_netranges_ipv4
 #          queue: 'sner_disco ipv6 dns discover'
 #
 #        - step: discover_ipv6_enum
-#          interval: '90days'
+#          interval: '120days'
 #          queue: 'sner_disco ipv6 enum discover'
 #
 #    - type: queue
@@ -113,7 +124,7 @@
 #        - step: filter_netranges
 #          netranges: *home_netranges_ipv6
 #        - step: enqueue
-#          queue: 'sner_disco ack scan top10000'
+#          queue: *portscan_queue
 #        - step: archive_job
 #
 #    - type: queue
@@ -122,7 +133,7 @@
 #          queue: 'sner_disco ipv6 enum discover'
 #        - step: project_hostlist
 #        - step: enqueue
-#          queue: 'sner_disco ack scan top10000'
+#          queue: *portscan_queue
 #        - step: archive_job
 #
 #
