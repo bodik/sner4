@@ -31,7 +31,7 @@ def test_profile_changepassword_route(cl_user):
     cur_password = PWS.generate()
     new_password = PWS.generate()
     user = User.query.filter(User.username == 'pytest_user').one()
-    user.password = cur_password
+    user.password = PWS.hash(cur_password)
     db.session.commit()
 
     form = cl_user.get(url_for('auth.profile_changepassword_route')).form

@@ -20,7 +20,7 @@ class UserFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         model = User
 
     username = 'user1'
-    password = LazyAttribute(lambda x: PWS.generate())
+    password = LazyAttribute(lambda x: PWS.hash(PWS.generate()))
     active = True
     roles = ['user']
 

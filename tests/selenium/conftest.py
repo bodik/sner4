@@ -3,8 +3,6 @@
 shared fixtures for selenium tests
 """
 
-from uuid import uuid4
-
 import pytest
 from flask import url_for
 from selenium.webdriver.common.by import By
@@ -12,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.auth.models import User
 from sner.server.extensions import db
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.selenium import webdriver_waituntil
 
 
@@ -26,8 +25,8 @@ def firefox_options(firefox_options):  # pylint: disable=redefined-outer-name
 def selenium_in_roles(sclnt, roles):
     """create user role and login selenium to role(s)"""
 
-    tmp_password = str(uuid4())
-    tmp_user = User(username='pytest_user', password=tmp_password, active=True, roles=roles)
+    tmp_password = PWS.generate()
+    tmp_user = User(username='pytest_user', password=PWS.hash(tmp_password), active=True, roles=roles)
     db.session.add(tmp_user)
     db.session.commit()
 

@@ -40,14 +40,14 @@ def test_user_list_json_route(cl_admin, user):
 def test_user_add_route(cl_admin, user_factory):
     """user add route test"""
 
-    password = PWS().generate()
-    auser = user_factory.build(password=password)
+    password = PWS.generate()
+    auser = user_factory.build()
 
     form = cl_admin.get(url_for('auth.user_add_route')).form
     form['username'] = auser.username
-    form['password'] = password
     form['roles'] = auser.roles
     form['active'] = auser.active
+    form['new_password'] = password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -61,14 +61,18 @@ def test_user_add_route(cl_admin, user_factory):
 def test_user_edit_route(cl_admin, user):
     """user edit route test"""
 
+    password = PWS.generate()
+
     form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).form
     form['username'] = f'{form["username"].value}_edited'
+    form['new_password'] = password
     form['roles'] = []
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     tuser = User.query.filter(User.username == form['username'].value).one()
     assert tuser.username == form['username'].value
+    assert PWS.compare(PWS.hash(password, PWS.get_salt(tuser.password)), tuser.password)
     assert not user.roles
 
 

@@ -20,7 +20,7 @@ class User(db.Model, flask_login.UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(250), unique=True, nullable=False)
-    _password = db.Column(db.String(250), name='password')
+    password = db.Column(db.String(250))
     email = db.Column(db.String(250))
     active = db.Column(db.Boolean, nullable=False, default=False)
     roles = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
@@ -41,19 +41,6 @@ class User(db.Model, flask_login.UserMixin):
         if self.roles and (role in self.roles):
             return True
         return False
-
-    @hybrid_property
-    def password(self):
-        """password getter"""
-
-        return self._password
-
-    @password.setter
-    def password(self, value):
-        """password setter; condition is handling value edit from empty form.populate_obj submission"""
-
-        if value:
-            self._password = PWS().hash(value)
 
     @hybrid_property
     def apikey(self):

@@ -51,10 +51,10 @@ class UserForm(FlaskForm):
     """user edit form"""
 
     username = StringNoneField('Username', [InputRequired(), Length(min=1, max=250)])
-    password = PasswordField('Password', [Optional(), strong_password])
     email = StringNoneField('Email', [Length(max=250)])
     active = BooleanField('Active')
     roles = MultiCheckboxField('Roles')
+    new_password = PasswordField('Password', [Optional(), strong_password])
     submit = SubmitField('Save')
 
     def __init__(self, *args, **kwargs):

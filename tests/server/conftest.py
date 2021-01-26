@@ -28,7 +28,7 @@ def client_in_roles(clnt, roles):
     """create user role and login client to role(s)"""
 
     password = PWS.generate()
-    user = User(username='pytest_user', password=password, active=True, roles=roles)
+    user = User(username='pytest_user', password=PWS.hash(password), active=True, roles=roles)
     db.session.add(user)
     db.session.commit()
 

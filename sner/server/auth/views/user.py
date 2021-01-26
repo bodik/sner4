@@ -60,6 +60,8 @@ def user_add_route():
     if form.validate_on_submit():
         user = User()
         form.populate_obj(user)
+        if form.new_password.data:
+            user.password = PWS.hash(form.new_password.data)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
@@ -77,6 +79,8 @@ def user_edit_route(user_id):
 
     if form.validate_on_submit():
         form.populate_obj(user)
+        if form.new_password.data:
+            user.password = PWS.hash(form.new_password.data)
         db.session.commit()
         return redirect(url_for('auth.user_list_route'))
 

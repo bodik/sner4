@@ -31,10 +31,10 @@ def reset_password(username):
         current_app.logger.error('no such user')
         sys.exit(1)
 
-    tmp_password = PWS.generate()
-    user.password = tmp_password
+    new_password = PWS.generate()
+    user.password = PWS.hash(new_password)
     db.session.commit()
-    print(f'new password "{user.username}:{tmp_password}"')
+    print(f'new password "{user.username}:{new_password}"')
 
 
 @command.command(name='add-agent', help='add agent')

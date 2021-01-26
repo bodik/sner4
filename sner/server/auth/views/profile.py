@@ -54,7 +54,7 @@ def profile_changepassword_route():
         if not PWS.compare(PWS.hash(form.current_password.data, PWS.get_salt(user.password)), user.password):
             flash('Invalid current password.', 'error')
         else:
-            user.password = form.password1.data
+            user.password = PWS.hash(form.password1.data)
             db.session.commit()
             flash('Password changed.', 'info')
             return redirect(url_for('auth.profile_route'))
