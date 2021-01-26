@@ -8,11 +8,9 @@ from datetime import datetime
 
 import flask_login
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from sner.server.extensions import db
-from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -24,7 +22,7 @@ class User(db.Model, flask_login.UserMixin):
     email = db.Column(db.String(250))
     active = db.Column(db.Boolean, nullable=False, default=False)
     roles = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
-    _apikey = db.Column(db.String(250), name='apikey')
+    apikey = db.Column(db.String(250))
     totp = db.Column(db.String(32))
 
     webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan', passive_deletes=True)
@@ -41,18 +39,6 @@ class User(db.Model, flask_login.UserMixin):
         if self.roles and (role in self.roles):
             return True
         return False
-
-    @hybrid_property
-    def apikey(self):
-        """apikey getter"""
-
-        return self._apikey
-
-    @apikey.setter
-    def apikey(self, value):
-        """apikey setter"""
-
-        self._apikey = PWS.hash_simple(value) if value else None
 
     def __repr__(self):
         return '<User %s: %s>' % (self.id, self.username)

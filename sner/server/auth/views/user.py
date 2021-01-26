@@ -113,7 +113,7 @@ def user_apikey_route(user_id, action):
 
         if action == 'generate':
             apikey = PWS.generate_apikey()
-            user.apikey = apikey
+            user.apikey = PWS.hash_simple(apikey)
             db.session.commit()
             return jsonify({'title': 'Apikey operation', 'detail': 'New apikey generated: %s' % apikey}), HTTPStatus.OK
 
