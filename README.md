@@ -1,6 +1,7 @@
 # sner -- slow network recon
 
-[![Build Status](https://travis-ci.org/bodik/sner4.svg?branch=master)](https://travis-ci.org/bodik/sner4)
+Travis: [![Build Status](https://travis-ci.org/bodik/sner4.svg?branch=master)](https://travis-ci.org/bodik/sner4)
+GitHub Actions: [![Tests CI](https://github.com/bodik/sner4/workflows/Tests%20CI/badge.svg)](https://github.com/bodik/sner4/actions)
 
 ## Table of Contents
 
