@@ -1,5 +1,18 @@
 # sner4 changelog
 
+## 0.4.2 - towards continuous prod
+
+* features
+  * bin/server psql helper, drops psql shell logged in configured database
+  * api adds prometheus statistics
+  * planner switch to syn scan by default, add filter_tarpits to default pipeline
+  * nftables notrack config example
+  * doc and other cleanups to orchestrate with sner-ansible
+  * add support for github actions
+
+* other
+  * password hasing refactored, moved from ORM to app logic
+
 ## 0.4.1 - prod updates
 
 * featues
