@@ -18,8 +18,8 @@ def test_basic(tmpworkdir):  # pylint: disable=unused-argument
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
 
-    # travis does not support ipv6 on bionic
-    if 'TRAVIS' in os.environ:
+    # travis does not support ipv6 on bionic, gh actions has issues as well
+    if ('TRAVIS' in os.environ) or ('GITHUB_ACTIONS' in os.environ):
         assert result == 1
         return
 
