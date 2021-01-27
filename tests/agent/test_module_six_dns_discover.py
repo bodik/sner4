@@ -19,7 +19,7 @@ def test_basic(tmpworkdir):  # pylint: disable=unused-argument
             'module': 'six_dns_discover',
             'delay': 1
         },
-        'targets': ['127.0.0.1', '127.0.0.2']
+        'targets': ['127.0.0.1', '0.0.0.0']
     }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
