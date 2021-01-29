@@ -38,11 +38,14 @@ def plannertree_json_route():
         for step in pipeline['steps']:
             if step['step'] == 'load_job':
                 source_queue = node_by_name(step['queue'])
+                continue
 
             if (step['step'] == 'import_job') and source_queue:
                 links.append({'source': source_queue['id'], 'target': node_by_name('import_jobs')['id']})
+                continue
 
             if (step['step'] == 'enqueue') and source_queue:
                 links.append({'source': source_queue['id'], 'target': node_by_name(step['queue'])['id']})
+                continue
 
     return jsonify({'nodes': nodes, 'links': links})
