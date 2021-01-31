@@ -48,13 +48,9 @@ def wait_for_lock(table_name):
     return False
 
 
-def assign_targets(queue_name=None):
+def select_queue(queue_name):
     """
-    select queue and targets for job
-
-    :param str queue_name: queue name, targets are selected from the queue if specified
-    :return: tuple of queue and targets list or `None, None` if queue not found or to targets available
-    :rtype: (scheduler.Queue, list)
+    select queue
     """
 
     # Select active queue; by id or highest priority queue with targets.
@@ -64,8 +60,13 @@ def assign_targets(queue_name=None):
     else:
         queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc(), func.random()).first()
 
-    if not queue:
-        return None, None
+    return queue
+
+
+def assign_targets(queue):
+    """
+    select targets for job
+    """
 
     # Pop targets until `group_size` of targets are selected or no targets left in queue.
     # Blacklisted/excluded targets are discarded from queue in the process.
@@ -92,30 +93,32 @@ def assign_targets(queue_name=None):
         if len(assigned_targets) == queue.group_size:
             break
 
-    return queue, assigned_targets
+    return assigned_targets
 
 
 @blueprint.route('/v1/scheduler/job/assign')
-@blueprint.route('/v1/scheduler/job/assign/<queue_name>')
 @role_required('agent', api=True)
-def v1_scheduler_job_assign_route(queue_name=None):
+def v1_scheduler_job_assign_route():
     """
     assign job for worker
-
-    :param str queue_name: queue name
-    :return: json encoded assignment or empty object
-    :rtype: flask.Response
     """
 
-    if not wait_for_lock(Target.__tablename__):
-        # return response-nowork
-        return jsonify({})
+    nowork = jsonify({})
 
-    queue, assigned_targets = assign_targets(queue_name)
+    if not wait_for_lock(Target.__tablename__):
+        return nowork
+
+    queue = select_queue(request.args.get('queue'))
+    if not queue:
+        # release lock and return response-nowork
+        db.session.commit()
+        return nowork
+
+    assigned_targets = assign_targets(queue)
     if not assigned_targets:
         # release lock and return response-nowork
         db.session.commit()
-        return jsonify({})
+        return nowork
 
     assignment = {
         'id': str(uuid4()),

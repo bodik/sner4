@@ -155,7 +155,10 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         self.backoff_time = backoff_time
 
         self.loop = True
-        self.get_assignment_url = f'{self.server}/api/v1/scheduler/job/assign' + (f'/{self.queue}' if self.queue else '')
+        self.get_assignment_url = f'{self.server}/api/v1/scheduler/job/assign'
+        self.get_assignment_params = {}
+        if self.queue:
+            self.get_assignment_params['queue'] = self.queue
         self.upload_output_url = f'{self.server}/api/v1/scheduler/job/output'
 
     def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
@@ -180,7 +183,12 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         assignment = None
         while self.loop and not assignment:
             try:
-                response = requests.get(self.get_assignment_url, headers=apikey_header(self.apikey), timeout=10)
+                response = requests.get(
+                    self.get_assignment_url,
+                    headers=apikey_header(self.apikey),
+                    params=self.get_assignment_params,
+                    timeout=10
+                )
                 response.raise_for_status()
                 assignment = response.json()
                 if not assignment:  # response-nowork

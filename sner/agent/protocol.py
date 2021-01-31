@@ -7,8 +7,6 @@ agent to server protocol definition
 
 ### Definitions
 
-queue-id                = 1*CHAR
-
 nowork                  = jsonobject
                             ; {}
 
@@ -18,6 +16,11 @@ assignment              = jsonobject
                             ;   "config": jsonobject, module config
                             ;   "targets": array of strings
                             ; }
+
+get-assignment-params   = param ["&" get-assignment-params]
+param                   = key "=" value
+key                     = "queue"
+value                   = 1*CHAR
 
 output                  = jsonobject
                             ; {
@@ -37,7 +40,7 @@ http-bad-request        = "HTTP/1.1 400 Bad Request" CRLF CRLF
 
 ### Request assignment/job
 
-request-assign-job      = "GET /api/v1/scheduler/job/assign" ["/" queue-id] SP "HTTP/1.1" CRLF auth-header CRLF CRLF
+request-assign-job      = "GET /api/v1/scheduler/job/assign" ["?" get-assignment-params] SP "HTTP/1.1" CRLF auth-header CRLF CRLF
 response-assign-job	= response-nowork / response-assignment
 response-nowork		= http-ok nowork
 response-assignment	= http-ok assignment
