@@ -10,6 +10,7 @@ from datetime import datetime
 from ipaddress import ip_network
 
 from flask import current_app
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship, validates
 
 from sner.server.extensions import db
@@ -25,6 +26,7 @@ class Queue(db.Model):
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
+    reqs = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
 
     targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
     jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)

@@ -64,6 +64,7 @@ class QueueForm(FlaskForm):
     group_size = IntegerField('Group size', [InputRequired(), NumberRange(min=1)], default=1)
     priority = IntegerField('Priority', [InputRequired()], default=0)
     active = BooleanField('Active')
+    reqs = TextAreaListField('Requirements', render_kw={'class': 'form-control tageditor'})
     submit = SubmitField('Save')
 
 
