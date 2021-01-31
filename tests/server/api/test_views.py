@@ -24,7 +24,7 @@ def test_v1_scheduler_job_assign_route(client, apikey, target):
 
     # assign from queue by name
     response = client.get(
-        url_for('api.v1_scheduler_job_assign_route', queue_name=qname),
+        url_for('api.v1_scheduler_job_assign_route', queue=qname),
         headers=apikey_header(apikey)
     )
     assert response.status_code == HTTPStatus.OK
