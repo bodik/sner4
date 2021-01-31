@@ -40,6 +40,7 @@ def queue_list_json_route():
         ColumnDT(Queue.group_size, mData='group_size'),
         ColumnDT(Queue.priority, mData='priority'),
         ColumnDT(Queue.active, mData='active'),
+        ColumnDT(Queue.reqs, mData='reqs'),
         ColumnDT(func.coalesce(query_nr_targets.c.cnt, 0), mData='nr_targets', global_search=False),
         ColumnDT(func.coalesce(query_nr_jobs.c.cnt, 0), mData='nr_jobs', global_search=False),
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
