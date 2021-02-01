@@ -5,6 +5,7 @@ auth.command tests
 
 from sner.server.auth.commands import command
 from sner.server.auth.models import User
+from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
 def test_resetpassword_command(runner, user):
@@ -27,3 +28,5 @@ def test_addagent_command(runner):
 
     result = runner.invoke(command, ['add-agent'])
     assert result.exit_code == 0
+    new_apikey = result.output.strip().split(' ')[-1]
+    assert User.query.first().apikey == PWS.hash_simple(new_apikey)

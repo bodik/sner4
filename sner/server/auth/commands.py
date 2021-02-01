@@ -45,7 +45,7 @@ def add_agent():
     apikey = PWS.generate_apikey()
     agent = User(
         username=f'agent_{uuid4()}',
-        apikey=apikey,
+        apikey=PWS.hash_simple(apikey),
         active=True,
         roles=['agent']
     )
