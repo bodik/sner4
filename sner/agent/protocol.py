@@ -40,7 +40,7 @@ http-bad-request        = "HTTP/1.1 400 Bad Request" CRLF CRLF
 
 ### Request assignment/job
 
-request-assign-job      = "GET /api/v1/scheduler/job/assign" ["?" get-assignment-params] SP "HTTP/1.1" CRLF auth-header CRLF CRLF
+request-assign-job      = "GET /api/scheduler/job/assign" ["?" get-assignment-params] SP "HTTP/1.1" CRLF auth-header CRLF CRLF
 response-assign-job	= response-nowork / response-assignment
 response-nowork		= http-ok nowork
 response-assignment	= http-ok assignment
@@ -48,7 +48,7 @@ response-assignment	= http-ok assignment
 
 ### Upload assignment/job output
 
-request-job-output	= "POST /api/v1/scheduler/job/output HTTP/1.1" CRLF auth-header CRLF CRLF output
+request-job-output	= "POST /api/scheduler/job/output HTTP/1.1" CRLF auth-header CRLF CRLF output
 response-job-output	= response-accepted / response-refused
 response-accepted	= http-ok
                             ; output accepted

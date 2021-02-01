@@ -160,8 +160,8 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         self.backoff_time = backoff_time
 
         self.loop = True
-        self.get_assignment_url = f'{self.server}/api/v1/scheduler/job/assign'
-        self.upload_output_url = f'{self.server}/api/v1/scheduler/job/output'
+        self.get_assignment_url = f'{self.server}/api/scheduler/job/assign'
+        self.upload_output_url = f'{self.server}/api/scheduler/job/output'
 
         self.get_assignment_params = {}
         if self.queue:

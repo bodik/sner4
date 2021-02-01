@@ -65,8 +65,8 @@ class SimpleServer():
     def __init__(self, server):
         self.server = server
         self.url = self.server.url_for('/')[:-1]
-        self.server.expect_request('/api/v1/scheduler/job/assign').respond_with_handler(self.handler_assign)
-        self.server.expect_request('/api/v1/scheduler/job/output').respond_with_handler(self.handler_output)
+        self.server.expect_request('/api/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/api/scheduler/job/output').respond_with_handler(self.handler_output)
 
     @staticmethod
     def handler_assign(request):
