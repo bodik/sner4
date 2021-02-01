@@ -100,9 +100,9 @@ def assign_targets(queue):
     return assigned_targets
 
 
-@blueprint.route('/v1/scheduler/job/assign')
+@blueprint.route('/scheduler/job/assign')
 @role_required('agent', api=True)
-def v1_scheduler_job_assign_route():
+def scheduler_job_assign_route():
     """
     assign job for worker
     """
@@ -135,9 +135,9 @@ def v1_scheduler_job_assign_route():
     return jsonify(assignment)
 
 
-@blueprint.route('/v1/scheduler/job/output', methods=['POST'])
+@blueprint.route('/scheduler/job/output', methods=['POST'])
 @role_required('agent', api=True)
-def v1_scheduler_job_output_route():
+def scheduler_job_output_route():
     """receive output from assigned job"""
 
     try:
@@ -162,8 +162,8 @@ def v1_scheduler_job_output_route():
     return '', HTTPStatus.OK
 
 
-@blueprint.route('/v1/stats/prometheus')
-def v1_stats_prometheus_route():
+@blueprint.route('/stats/prometheus')
+def stats_prometheus_route():
     """returns internal stats; prometheus"""
 
     stats = {}
