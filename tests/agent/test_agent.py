@@ -44,6 +44,7 @@ def test_run_with_liveserver(tmpworkdir, live_server, apikey, dummy_target):  # 
         '--server', live_server.url(),
         '--apikey', apikey,
         '--queue', Queue.query.get(dummy_target.queue_id).name,
+        '--caps', 'cap1', 'cap2',
         '--oneshot',
         '--debug',
     ])

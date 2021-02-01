@@ -19,7 +19,7 @@ assignment              = jsonobject
 
 get-assignment-params   = param ["&" get-assignment-params]
 param                   = key "=" value
-key                     = "queue"
+key                     = "queue" / "caps"
 value                   = 1*CHAR
 
 output                  = jsonobject

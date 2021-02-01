@@ -16,8 +16,9 @@ from uuid import uuid4
 import jsonschema
 import yaml
 from flask import Blueprint, current_app, jsonify, request, Response
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import cast, func
 
 import sner.agent.protocol
 from sner.server.auth.core import role_required
@@ -48,18 +49,21 @@ def wait_for_lock(table_name):
     return False
 
 
-def select_queue(queue_name):
+def select_queue(queue_name, client_caps):
     """
     select queue
+        * queue must be active
+        * queue must have any targets enqueued
+        * client capabilities (caps) must conform queue requirements (reqs)
+        * must suffice client requested parameters (name)
+        * queue is selected with priority in respect, but at random on same prio levels
     """
 
-    # Select active queue; by id or highest priority queue with targets.
-    query = Queue.query.filter(Queue.active)
+    ccaps = cast(client_caps, postgresql.ARRAY(db.String))
+    query = Queue.query.filter(Queue.active).filter(Queue.targets.any()).filter(Queue.reqs.contained_by(ccaps))
     if queue_name:
-        queue = query.filter(Queue.name == queue_name).one_or_none()
-    else:
-        queue = query.filter(Queue.targets.any()).order_by(Queue.priority.desc(), func.random()).first()
-
+        query = query.filter(Queue.name == queue_name)
+    queue = query.order_by(Queue.priority.desc(), func.random()).first()
     return queue
 
 
@@ -108,7 +112,7 @@ def v1_scheduler_job_assign_route():
     if not wait_for_lock(Target.__tablename__):
         return nowork
 
-    queue = select_queue(request.args.get('queue'))
+    queue = select_queue(request.args.get('queue'), request.args.getlist('caps'))
     if not queue:
         # release lock and return response-nowork
         db.session.commit()

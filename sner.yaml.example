@@ -13,7 +13,10 @@
 #agent:
 #  server: 'http://localhost:18000'
 #  apikey: 'generateit'
-#  queue: null
+#  queue: a_queue_name
+#  caps:
+#    - capability1
+#    - capability2
 #
 #
 #planner:
