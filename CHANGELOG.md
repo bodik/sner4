@@ -1,5 +1,10 @@
 # sner4 changelog
 
+## 0.4.3 - fix bugs
+
+* fix:
+  * fix add-agent command
+
 ## 0.4.2 - towards continuous prod
 
 * features
