@@ -1,6 +1,19 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
 sner agent execution modules
+
+## Target specification ABNFs
+
+For ABNF target specifications literals not explicitly specified here see
+'RFC 3986 Appendix A: Collected ABNF for URI' (https://tools.ietf.org/html/rfc3986#appendix-A)
+
+simple-target  = 1*CHAR
+
+host-target    = IPv4address / reg-name / "[" IPv6address "]" / "[" reg-name "]"
+
+proto          = "tcp" / "udp"
+port           = 1*DIGIT
+service-target = proto "://" host-target ":" port
 """
 
 import json
@@ -18,7 +31,7 @@ from time import sleep
 
 from schema import Schema, Optional
 
-
+SERVICE_TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|[0-9a-zA-Z\.\-]{1,256}|\[[0-9a-fA-F:]{3,45}\]|\[[0-9a-zA-Z\.\-]{1,256}\]):(?P<port>[0-9]+)$'  # noqa: 501  pylint: disable=line-too-long
 registered_modules = {}  # pylint: disable=invalid-name
 
 
@@ -35,9 +48,6 @@ def register_module(name):
 class ModuleBase(ABC):
     """
     Base class for agent modules.
-
-    For ABNF target specifications literals not explicitly specified here see
-    'RFC 3986 Appendix A: Collected ABNF for URI' (https://tools.ietf.org/html/rfc3986#appendix-A)
     """
 
     CONFIG_SCHEMA = Schema({
@@ -78,6 +88,21 @@ class ModuleBase(ABC):
             self.process = None
         return retval
 
+    def enumerate_service_targets(self, targets):
+        """
+        parse list of service targets, discards invalid values
+
+        :return: tuple of parsed target data
+        :rtype: (target index, target, proto, host, port)
+        """
+
+        for idx, target in enumerate(targets):
+            mtmp = re.match(SERVICE_TARGET_REGEXP, target)
+            if mtmp:
+                yield idx, target, mtmp.group('proto'), mtmp.group('host'), mtmp.group('port')
+            else:
+                self.log.warning('invalid service target: %s', target)
+
 
 @register_module('dummy')
 class Dummy(ModuleBase):
@@ -85,8 +110,7 @@ class Dummy(ModuleBase):
     testing module implementation
 
     ## target specification
-
-    target = 1*CHAR
+    target = simple-target
     """
 
     CONFIG_SCHEMA = Schema({
@@ -110,8 +134,7 @@ class Nmap(ModuleBase):
     nmap module
 
     ## target specification
-
-    target = IPv4address / reg-name / IPv6address / "[" IPv6address "]" / "[" reg-name "]"
+    target = host-target
     """
 
     CONFIG_SCHEMA = Schema({
@@ -122,7 +145,7 @@ class Nmap(ModuleBase):
 
     def __init__(self):
         super().__init__()
-        self.doscan = True
+        self.loop = True
 
     @staticmethod
     def sort_ipv6_targets(intargets):
@@ -174,20 +197,20 @@ class Nmap(ModuleBase):
     def run(self, assignment):
         """run the agent"""
 
-        ret = 0
         super().run(assignment)
+        ret = 0
 
         targets, targets6 = self.sort_ipv6_targets(assignment['targets'])
-        if targets and self.doscan:
+        if targets and self.loop:
             ret |= self.run_scan(assignment, targets, 'targets', 'output')
-        if targets6 and self.doscan:
+        if targets6 and self.loop:
             ret |= self.run_scan(assignment, targets6, 'targets6', 'output6', extra_args=['-6'])
         return ret
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing
         """terminate scanner if running"""
 
-        self.doscan = False
+        self.loop = False
         self._terminate()
 
 
@@ -197,11 +220,7 @@ class Manymap(ModuleBase):
     internet endpoints nmap-based scanner
 
     ## target specification
-
-    proto    = "tcp" / "udp"
-    hostspec = IPv4address / reg-name / "[" IPv6address "]" / "[" reg-name "]"
-    port     = 1*DIGIT
-    target   = proto "://" hostspec ":" port
+    target = service-target
     """
 
     CONFIG_SCHEMA = Schema({
@@ -210,8 +229,6 @@ class Manymap(ModuleBase):
         'delay': int,
     })
 
-    TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|[0-9a-zA-Z\.\-]{1,256}|\[[0-9a-fA-F:]{3,45}\]|\[[0-9a-zA-Z\.\-]{1,256}\]):(?P<port>[0-9]+)$'  # noqa: 501  pylint: disable=line-too-long
-
     def __init__(self):
         super().__init__()
         self.loop = True
@@ -219,25 +236,20 @@ class Manymap(ModuleBase):
     def run(self, assignment):
         """run the agent"""
 
-        ret = 0
         super().run(assignment)
+        ret = 0
 
-        for idx, target in enumerate(assignment['targets']):
-            mtmp = re.match(self.TARGET_REGEXP, target)
-            if mtmp:
-                output_args = ['-oA', f'output-{idx}', '--reason']
-                target_args = ['-p', f'{mtmp.group("proto")[0].upper()}:{mtmp.group("port")}']
-                host = mtmp.group('host')
-                if (host[0] == '[') and (host[-1] == ']'):
-                    target_args += ['-6', host[1:-1]]
-                else:
-                    target_args += [host]
-
-                cmd = ['nmap'] + shlex.split(assignment['config']['args']) + output_args + target_args
-                ret |= self._execute(cmd, f'output-{idx}')
-                sleep(assignment['config']['delay'])
+        for idx, _, proto, host, port in self.enumerate_service_targets(assignment['targets']):
+            output_args = ['-oA', f'output-{idx}', '--reason']
+            target_args = ['-p', f'{proto[0].upper()}:{port}']
+            if (host[0] == '[') and (host[-1] == ']'):
+                target_args += ['-6', host[1:-1]]
             else:
-                self.log.warning('invalid target: %s', target)
+                target_args += [host]
+
+            cmd = ['nmap'] + shlex.split(assignment['config']['args']) + output_args + target_args
+            ret |= self._execute(cmd, f'output-{idx}')
+            sleep(assignment['config']['delay'])
 
             if not self.loop:  # pragma: no cover  ; not tested
                 break
@@ -255,6 +267,9 @@ class Manymap(ModuleBase):
 class SixDnsDiscover(ModuleBase):
     """
     dns based ipv6 from ipv4 address discover
+
+    ## target specification
+    target = IPv4Address
     """
 
     CONFIG_SCHEMA = Schema({
@@ -307,7 +322,6 @@ class SixEnumDiscover(ModuleBase):
     for remote address scanning attacks.
 
     ## target specification
-
     target   = scan6-dst-address
     """
 
@@ -323,8 +337,8 @@ class SixEnumDiscover(ModuleBase):
     def run(self, assignment):
         """run the agent"""
 
-        ret = 0
         super().run(assignment)
+        ret = 0
 
         for idx, target in enumerate(assignment['targets']):
             ret |= self._execute(['scan6', '--rate-limit', f'{assignment["config"]["rate"]}pps', '--dst-address', target], f'output-{idx}.txt')

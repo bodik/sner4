@@ -14,7 +14,7 @@ import yaml
 from flask import current_app, request
 from werkzeug.exceptions import HTTPException
 
-from sner.agent.modules import Manymap
+from sner.agent.modules import SERVICE_TARGET_REGEXP
 from sner.server.scheduler.models import Excl, ExclFamily
 from sner.server.storage.models import SeverityEnum
 
@@ -74,7 +74,7 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):
             pass
 
         try:
-            mtmp = re.match(Manymap.TARGET_REGEXP, value)
+            mtmp = re.match(SERVICE_TARGET_REGEXP, value)
             if mtmp:
                 return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
         except ValueError:
