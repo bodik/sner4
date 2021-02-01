@@ -54,7 +54,9 @@ def config_from_yaml(filename):
     config = {
         'SERVER': get_dotted(config_dict, 'agent.server'),
         'APIKEY': get_dotted(config_dict, 'agent.apikey'),
-        'QUEUE': get_dotted(config_dict, 'agent.queue')}
+        'QUEUE': get_dotted(config_dict, 'agent.queue'),
+        'CAPS': get_dotted(config_dict, 'agent.caps')
+    }
     return {k: v for k, v in config.items() if v is not None}
 
 
@@ -64,7 +66,9 @@ def config_from_args(args):
     config = {
         'SERVER': args.server,
         'APIKEY': args.apikey,
-        'QUEUE': args.queue}
+        'QUEUE': args.queue,
+        'CAPS': args.caps,
+    }
     return {k: v for k, v in config.items() if v is not None}
 
 
@@ -145,21 +149,25 @@ class AgentBase(ABC):
 class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attributes
     """agent to fetch and execute assignments from central job server"""
 
-    def __init__(self, server, apikey, queue, oneshot=False, backoff_time=5.0):  # pylint: disable=too-many-arguments
+    def __init__(self, server, apikey, queue=None, caps=None, oneshot=False, backoff_time=5.0):  # pylint: disable=too-many-arguments
         super().__init__()
 
         self.server = server
         self.apikey = apikey
         self.queue = queue
+        self.caps = caps
         self.oneshot = oneshot
         self.backoff_time = backoff_time
 
         self.loop = True
         self.get_assignment_url = f'{self.server}/api/v1/scheduler/job/assign'
+        self.upload_output_url = f'{self.server}/api/v1/scheduler/job/output'
+
         self.get_assignment_params = {}
         if self.queue:
             self.get_assignment_params['queue'] = self.queue
-        self.upload_output_url = f'{self.server}/api/v1/scheduler/job/output'
+        if self.caps:
+            self.get_assignment_params['caps'] = self.caps
 
     def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """wait for current assignment to finish"""
@@ -280,8 +288,9 @@ def main(argv=None):
     parser.add_argument('--config', default='/etc/sner.yaml', help='agent config')
     parser.add_argument('--server', help='server uri')
     parser.add_argument('--apikey', help='server apikey')
-    parser.add_argument('--queue', help='select specific queue to work on')
-    parser.add_argument('--oneshot', action='store_true', help='do not loop for assignments')
+    parser.add_argument('--queue', help='specific queue selector')
+    parser.add_argument('--caps', nargs='+', help='agent capabilities tags')
+    parser.add_argument('--oneshot', action='store_true', help='process single assignment and exit')
     parser.add_argument('--backofftime', type=float, default=5.0, help='backoff time for repeating requests; used to speedup tests')
 
     args = parser.parse_args(argv)
@@ -306,4 +315,4 @@ def main(argv=None):
     config = copy.deepcopy(DEFAULT_CONFIG)
     config.update(config_from_yaml(args.config))
     config.update(config_from_args(args))
-    return ServerableAgent(config.get('SERVER'), config.get('APIKEY'), config.get('QUEUE'), args.oneshot, args.backofftime).run()
+    return ServerableAgent(config.get('SERVER'), config.get('APIKEY'), config.get('QUEUE'), config.get('CAPS'), args.oneshot, args.backofftime).run()
