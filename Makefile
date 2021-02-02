@@ -9,8 +9,10 @@ venv:
 
 
 install-deps:
+	# base installation
 	sudo apt-get -y install unzip nmap ipv6toolkit
-	sudo apt-get -y install gcc python3-dev libpq-dev # required by psycopg2
+	# required by psycopg2
+	sudo apt-get -y install gcc python3-dev libpq-dev
 	pip install -r requirements.lock
 	# remove after update to selenium 4.x
 	if [ -d venv/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=venv/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
