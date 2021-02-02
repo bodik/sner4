@@ -31,18 +31,6 @@
 #    - type: queue
 #      steps:
 #        - step: load_job
-#          queue: 'sner_disco ack scan top10000'
-#        - step: filter_tarpits
-#        - step: project_servicelist
-#        - step: enqueue
-#          queue: 'sner_data version scan basic'
-#        - step: enqueue
-#          queue: 'sner_data jarm scan'
-#        - step: archive_job
-#
-#    - type: queue
-#      steps:
-#        - step: load_job
 #          queue: 'sner_disco syn scan top10000'
 #        - step: filter_tarpits
 #        - step: project_servicelist
