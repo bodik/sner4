@@ -63,6 +63,18 @@ var svg = d3.select('svg')
 	.attr('width', width)
 	.attr('height', height);
 
+svg.append('defs').append('marker')
+	.attr('id', 'arrow')
+	.attr('viewBox', '0 -5 10 10')
+	.attr('refX', 20)
+	.attr('refY', 0)
+	.attr('markerWidth', 5)
+	.attr('markerHeight', 5)
+	.attr('orient', 'auto')
+	.append('path')
+		.attr('d', 'M0,-5L10,0L0,5')
+		.attr('class', 'arrowHead');
+
 var linkElements;
 var nodeElements;
 var textElements;
@@ -104,8 +116,8 @@ function update(nodes, links) {
 		.selectAll("line")
 		.data(links)
 		.enter().append("line")
-			.attr("class", "link");
-
+			.attr("class", "link")
+			.attr("marker-end", "url(#arrow)");
 
 	nodeElements = svg.append("g")
 		.attr("class", "nodes")
