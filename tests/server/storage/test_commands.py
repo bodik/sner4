@@ -40,6 +40,10 @@ def test_import_command_nmap_rawdata(runner):
     result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
     assert result.exit_code == 0
 
+    # run twice to check update scheme of the import algorithms
+    result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
+    assert result.exit_code == 0
+
     host = Host.query.one()
     assert host.os == 'Linux 3.8 - 4.6'
     assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]

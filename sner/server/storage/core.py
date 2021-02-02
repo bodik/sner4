@@ -72,19 +72,19 @@ def tag_model_multiid(model_class):
     return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
-def import_parsed(hosts, services, vulns, notes):
+def import_parsed(parsed_items_db):
     """import parsed objects"""
 
-    import_hosts(hosts)
-    import_services(services)
-    import_vulns(vulns)
-    import_notes(notes)
+    import_hosts(parsed_items_db)
+    import_services(parsed_items_db)
+    import_vulns(parsed_items_db)
+    import_notes(parsed_items_db)
 
 
-def import_hosts(parsed_hosts):
+def import_hosts(pidb):
     """import hosts from parsed data"""
 
-    for ihost in parsed_hosts:
+    for ihost in pidb.hosts.values():
         host = Host.query.filter(Host.address == ihost.address).one_or_none()
         if not host:
             host = Host(address=ihost.address)
@@ -101,11 +101,11 @@ def import_hosts(parsed_hosts):
     db.session.commit()
 
 
-def import_services(parsed_services):
+def import_services(pidb):
     """import services from parsed data"""
 
-    for iservice in parsed_services:
-        host = Host.query.filter(Host.address == iservice.handle['host']).one()
+    for iservice in pidb.services.values():
+        host = Host.query.filter(Host.address == pidb.hosts[iservice.host_handle].address).one()
 
         service = Service.query.filter(Service.host == host, Service.proto == iservice.proto, Service.port == iservice.port).one_or_none()
         if not service:
@@ -117,15 +117,20 @@ def import_services(parsed_services):
     db.session.commit()
 
 
-def import_vulns(parsed_vulns):
+def import_vulns(pidb):
     """import vulns from parsed data"""
 
-    for ivuln in parsed_vulns:
-        host = Host.query.filter(Host.address == ivuln.handle['host']).one()
-        service_id = func.concat(Service.proto, '/', Service.port)
-        service = Service.query.filter(Service.host == host, service_id == ivuln.handle.get('service')).one_or_none()
+    for ivuln in pidb.vulns.values():
+        host = Host.query.filter(Host.address == pidb.hosts[ivuln.host_handle].address).one()
+        service = None
+        if ivuln.service_handle:
+            service = Service.query.filter(
+                Service.host == host,
+                Service.proto == pidb.services[ivuln.service_handle].proto,
+                Service.port == pidb.services[ivuln.service_handle].port
+            ).one()
 
-        vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == ivuln.handle['vuln']).one_or_none()
+        vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == ivuln.xtype).one_or_none()
         if not vuln:
             vuln = Vuln(host=host, service=service, xtype=ivuln.xtype)
             db.session.add(vuln)
@@ -135,23 +140,25 @@ def import_vulns(parsed_vulns):
     db.session.commit()
 
 
-def import_notes(parsed_notes):
+def import_notes(pidb):
     """import vulns from parsed data"""
 
-    for inote in parsed_notes:
-        host = Host.query.filter(Host.address == inote.handle['host']).one()
-        service_id = func.concat(Service.proto, '/', Service.port)
-        service = Service.query.filter(Service.host == host, service_id == inote.handle.get('service')).one_or_none()
+    for inote in pidb.notes.values():
+        host = Host.query.filter(Host.address == pidb.hosts[inote.host_handle].address).one()
+        service = None
+        if inote.service_handle:
+            service = Service.query.filter(
+                Service.host == host,
+                Service.proto == pidb.services[inote.service_handle].proto,
+                Service.port == pidb.services[inote.service_handle].port
+            ).one()
 
-        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == inote.handle['note']).one_or_none()
+        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == inote.xtype).one_or_none()
         if not note:
             note = Note(host=host, service=service, xtype=inote.xtype)
             db.session.add(note)
 
         note.update(inote)
-        if 'vuln' in inote.handle:
-            vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == inote.handle['vuln']).one()
-            vuln.refs = [f'SN-{note.id}'] + vuln.refs
 
     db.session.commit()
 

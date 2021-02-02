@@ -19,13 +19,13 @@ def test_xxe(app):  # pylint: disable=unused-argument
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_host_handles = [{'host': '127.128.129.130'}]
-    expected_vuln_handles = [
-        {'host': '127.128.129.130', 'vuln': 'nessus.104631', 'service': 'tcp/443'},
-        {'host': '127.128.129.130', 'vuln': 'nessus.19506'}
+    expected_hosts = ['127.128.129.130']
+    expected_vulns = [
+        ('127.128.129.130', ('127.128.129.130', 'tcp', 443), 'nessus.104631'),
+        ('127.128.129.130', None, 'nessus.19506')
     ]
 
-    hosts, _, vulns, _ = ParserModule.parse_path('tests/server/data/parser-nessus-simple.xml')
+    pidb = ParserModule.parse_path('tests/server/data/parser-nessus-simple.xml')
 
-    assert [x.handle for x in hosts] == expected_host_handles
-    assert [x.handle for x in vulns] == expected_vuln_handles
+    assert [x.handle for x in pidb.hosts.values()] == expected_hosts
+    assert [x.handle for x in pidb.vulns.values()] == expected_vulns

@@ -41,7 +41,7 @@ def storage_import(path, parser):
         if not os.path.isfile(item):
             current_app.logger.error(f'invalid path "{item}"')
             sys.exit(1)
-        import_parsed(*parser_impl.parse_path(item))
+        import_parsed(parser_impl.parse_path(item))
 
     sys.exit(0)
 

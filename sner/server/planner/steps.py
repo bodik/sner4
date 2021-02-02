@@ -84,7 +84,7 @@ def load_job(ctx, queue):
     ctx.job = job
     queue_module_config = yaml.safe_load(job.queue.config)
     parser = REGISTERED_PARSERS[queue_module_config['module']]
-    ctx.data = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
+    ctx.data = parser.parse_path(job.output_abspath)
 
     return ctx
 
@@ -94,7 +94,7 @@ def import_job(ctx):
     """import data to storage"""
 
     current_app.logger.info(f'import_job {ctx.job.id} ({ctx.job.queue.name})')
-    import_parsed(**ctx.data)
+    import_parsed(ctx.data)
 
     return ctx
 
@@ -120,8 +120,8 @@ def project_servicelist(ctx):
     """project service list from context data"""
 
     data = []
-    for service in ctx.data['services']:
-        data.append(f'{service.proto}://{format_host_address(service.handle["host"])}:{service.port}')
+    for service in ctx.data.services.values():
+        data.append(f'{service.proto}://{format_host_address(ctx.data.hosts[service.host_handle].address)}:{service.port}')
     ctx.data = data
 
     return ctx
@@ -132,7 +132,7 @@ def project_hostlist(ctx):
     """project host list from context data"""
 
     data = []
-    for host in ctx.data['hosts']:
+    for host in ctx.data.hosts.values():
         data.append(f'{host.address}')
     ctx.data = data
 
@@ -143,15 +143,22 @@ def project_hostlist(ctx):
 def filter_tarpits(ctx, threshold=200):
     """filter filter hosts with too much services detected"""
 
-    hosts = defaultdict(int)
-    for service in ctx.data.get('services', []):
-        hosts[service.handle['host']] += 1
-    hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, hosts.items()))
+    host_services_count = defaultdict(int)
+    for service in ctx.data.services.values():
+        host_services_count[service.host_handle] += 1
+    hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, host_services_count.items()))
 
     if hosts_over_threshold:
         current_app.logger.info(f'filter_tarpits {ctx.job.id} {hosts_over_threshold}')
-        for collection in ctx.data:
-            ctx.data[collection] = list(filter(lambda x: x.handle['host'] not in hosts_over_threshold, ctx.data[collection]))
+
+        for key, val in list(ctx.data.hosts.items()):
+            if val.address in hosts_over_threshold:
+                ctx.data.hosts.pop(key)
+
+        for collection in ['services', 'vulns', 'notes']:
+            for key, val in list(getattr(ctx.data, collection).items()):
+                if val.host_handle in hosts_over_threshold:
+                    getattr(ctx.data, collection).pop(key)
 
     return ctx
 

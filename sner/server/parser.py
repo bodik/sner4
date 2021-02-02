@@ -1,9 +1,12 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
 sner parsers core objects
+
+The parser subsystem is responsible for parsing data from various scanning
+tools. Parsers should come via sner.plugin package and each parser must
+implement ParserBase interface.
 """
 
-import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -25,30 +28,41 @@ def load_parser_plugins():
         REGISTERED_PARSERS[plugin_name] = getattr(module, 'ParserModule')
 
 
-class ParsedItemsDict(dict):
-    """parsed items; used to merge parsed items with the same handle"""
+class ParsedItemsTable(dict):
+    """parsed items dict"""
 
     def upsert(self, item):
-        """insert or update existing object by .handle key"""
+        """insert or update existing object by id"""
 
-        if item.hash() not in self:
-            self[item.hash()] = item
+        if item.handle in self:
+            self[item.handle].update(item)
         else:
-            self[item.hash()].update(item)
+            self[item.handle] = item
 
 
-@dataclass
-class ParsedItemBase(ABC):
-    """
-    Parsed items base class. All parsed items attributes should corespond with storage.model.
-    'handle' is a dict of related model identifiers used for merge same objects from several
-    distinct agent outputs.
-    """
+class ParsedItemsDb:  # pylint: disable=too-few-public-methods
+    """container for parsed items"""
 
-    handle: dict
+    def __init__(self):
+        self.hosts = ParsedItemsTable()
+        self.services = ParsedItemsTable()
+        self.vulns = ParsedItemsTable()
+        self.notes = ParsedItemsTable()
+
+    def __add__(self, obj):
+        """merge all containers from other pi"""
+
+        for key in self.__dict__:
+            for item in getattr(obj, key).values():
+                getattr(self, key).upsert(item)
+        return self
+
+
+class ParsedItemBase:  # pylint: disable=too-few-public-methods
+    """parsed items base object; shared functions"""
 
     def update(self, obj):
-        """update from other object"""
+        """update data from other object"""
 
         for key, value in obj.__dict__.items():
             # do not overwrite with None
@@ -64,10 +78,6 @@ class ParsedItemBase(ABC):
             # set new value
             setattr(self, key, value)
 
-    def hash(self):
-        """produce hashed handle for use as a dict key"""
-        return hash(json.dumps(self.handle, sort_keys=True))
-
 
 @dataclass
 class ParsedHost(ParsedItemBase):
@@ -78,11 +88,17 @@ class ParsedHost(ParsedItemBase):
     hostnames: list = None
     os: str = None  # pylint: disable=invalid-name
 
+    @property
+    def handle(self):
+        """return item reference handle"""
+        return self.address
+
 
 @dataclass
 class ParsedService(ParsedItemBase):
     """parsed service"""
 
+    host_handle: tuple
     proto: str
     port: int
     state: str = None
@@ -90,27 +106,46 @@ class ParsedService(ParsedItemBase):
     info: str = None
     import_time: datetime = None
 
+    @property
+    def handle(self):
+        """return item reference handle"""
+        return (self.host_handle, self.proto, self.port)
 
-@dataclass
+
+@dataclass  # pylint: disable=too-many-instance-attributes
 class ParsedVuln(ParsedItemBase):
     """parsed vuln"""
 
+    host_handle: tuple
     name: str
-    xtype: str = None
+    xtype: str
+    service_handle: tuple = None
     severity: str = None
     descr: str = None
     data: str = None
     refs: list = None
     import_time: datetime = None
 
+    @property
+    def handle(self):
+        """return item reference handle"""
+        return (self.host_handle, self.service_handle, self.xtype)
+
 
 @dataclass
 class ParsedNote(ParsedItemBase):
     """parsed note"""
 
-    xtype: str = None
+    host_handle: tuple
+    xtype: str
+    service_handle: tuple = None
     data: str = None
     import_time: datetime = None
+
+    @property
+    def handle(self):
+        """return item reference handle"""
+        return (self.host_handle, self.service_handle, self.xtype)
 
 
 class ParserBase(ABC):  # pylint: disable=too-few-public-methods
@@ -123,41 +158,6 @@ class ParserBase(ABC):  # pylint: disable=too-few-public-methods
         Parse data from path. Must parse .zip archive produced by respective
         agent module. Optionaly can parse also raw output from external tool.
 
-        Returns tuple of lists of Parsed* objects representing model objects
-        for storage subsystem. The extra attribute `handle`, represents the
-        item key attributes and it's used to bind related models and
-        locate/upsert already existing items in the storage.
-
-        ```
-        def parse_path(path):
-            # sample static parser
-
-            parsed_host_1 = ParsedHost(
-                handle = {'host': '192.168.0.1'}
-                address = '192.168.0.1'
-            )
-
-            parsed_service_1 = ParsedService(
-                handle = {'host': '192.168.0.1', 'service': 'tcp/80'},
-                proto = 'tcp',
-                port = '80'
-            )
-
-            parsed_vuln_1 = ParsedVuln(
-                handle = {'host': '192.168.0.1', 'service': 'tcp/80', 'vuln': 'weak_pass1'},
-                xtype = 'weak_pass1',
-                name = 'weak password found'
-            )
-
-            parsed_note_1 = ParsedNote(
-                handle = {'host': '192.168.0.1', 'service': 'tcp/80', 'note': 'jarm.fp'},
-                xtype = 'jarm.fp',
-                data = '123'
-            )
-
-            return [parsed_host_1], [parsed_service_1], [parsed_vuln_1], [parsed_note_1]
-        ```
-
-        :return: tuple(hosts, services, vulns, notes)
-        :rtype: tuple
+        :return: pseudo database of parsed objects (hosts, services, vulns, notes)
+        :rtype: ParsedItemsDb
         """

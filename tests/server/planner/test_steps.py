@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from flask import current_app
 
-from sner.server.parser import ParsedHost, ParsedService
+from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedService
 from sner.server.planner.steps import (
     archive_job,
     Context,
@@ -37,7 +37,7 @@ def test_stop_pipeline():
     """test step"""
 
     with pytest.raises(StopPipeline):
-        stop_pipeline({})
+        stop_pipeline(Context())
 
 
 def test_load_import_archive(app, queue_factory, job_completed_factory):  # pylint: disable=unused-argument
@@ -55,8 +55,8 @@ def test_load_import_archive(app, queue_factory, job_completed_factory):  # pyli
 
     ctx = load_job(ctx, queue.name)
     assert ctx.job
-    assert len(ctx.data['hosts']) == 1
-    assert len(ctx.data['services']) == 5
+    assert len(ctx.data.hosts) == 1
+    assert len(ctx.data.services) == 5
 
     ctx = import_job(ctx)
     assert len(Host.query.all()) == 1
@@ -74,12 +74,17 @@ def test_load_import_archive(app, queue_factory, job_completed_factory):  # pyli
 def test_project_servicelist():
     """test project servicelist"""
 
-    ctx = Context(data={
-        'services': [
-            ParsedService(handle={'host': '127.0.2.1', 'service': 'tcp/1'}, proto='tcp', port='1'),
-            ParsedService(handle={'host': '::1', 'service': 'tcp/1'}, proto='tcp', port='1')
-        ]
-    })
+    pidb = ParsedItemsDb()
+
+    host = ParsedHost(address='127.0.2.1')
+    pidb.hosts.upsert(host)
+    pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port='1'))
+
+    host = ParsedHost(address='::1')
+    pidb.hosts.upsert(host)
+    pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port='1'))
+
+    ctx = Context(data=pidb)
 
     ctx = project_servicelist(ctx)
 
@@ -90,12 +95,11 @@ def test_project_servicelist():
 def test_project_hostlist():
     """test project hostlist"""
 
-    ctx = Context(data={
-        'hosts': [
-            ParsedHost(handle={'host': '127.0.2.1'}, address='127.0.2.1'),
-            ParsedHost(handle={'host': '::1'}, address='::1')
-        ]
-    })
+    pidb = ParsedItemsDb()
+    pidb.hosts.upsert(ParsedHost(address='127.0.2.1'))
+    pidb.hosts.upsert(ParsedHost(address='::1'))
+
+    ctx = Context(data=pidb)
 
     ctx = project_hostlist(ctx)
 
@@ -106,16 +110,22 @@ def test_project_hostlist():
 def test_filter_tarpits(app):  # pylint: disable=unused-argument
     """test filter tarpits"""
 
-    ctx = Context(
-        job=Job(id='atestjobid'),
-        data={'services': [ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')]}
-    )
+    pidb = ParsedItemsDb()
+
+    host = ParsedHost(address='127.0.3.1')
+    pidb.hosts.upsert(host)
+    pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port=1))
+
+    host = ParsedHost(address='127.0.4.1')
+    pidb.hosts.upsert(host)
     for port in range(201):
-        ctx.data['services'].append(ParsedService(handle={'host': '127.0.4.1', 'service': f'tcp/{port}'}, proto='tcp', port=f'{port}'))
+        pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port=port))
+
+    ctx = Context(job=Job(id='atestjobid'), data=pidb)
 
     ctx = filter_tarpits(ctx)
 
-    assert len(ctx.data['services']) == 1
+    assert len(ctx.data.services) == 1
 
 
 def test_filter_netranges():
@@ -147,10 +157,13 @@ def test_run_group(app):  # pylint: disable=unused-argument
         ]
     }
 
-    ctx = Context(
-        job=Job(id='atestjobid'),
-        data={'services': [ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')]}
-    )
+    pidb = ParsedItemsDb()
+    host = ParsedHost(address='127.0.3.1')
+    service = ParsedService(host_handle=host.handle, proto='tcp', port=1)
+    pidb.hosts.upsert(host)
+    pidb.services.upsert(service)
+
+    ctx = Context(job=Job(id='atestjobid'), data=pidb)
 
     ctx = run_group(ctx, 'a_test_group')
 

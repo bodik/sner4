@@ -9,8 +9,8 @@ from sner.plugin.six_enum_discover.parser import ParserModule
 def test_host_list():
     """check host list extraction"""
 
-    expected_host_handles = [{'host': '::1'}]
+    expected_hosts = ['::1']
 
-    hosts, _, _, _ = ParserModule.parse_path('tests/server/data/parser-six_enum_discover-job.zip')
+    pidb = ParserModule.parse_path('tests/server/data/parser-six_enum_discover-job.zip')
 
-    assert [x.handle for x in hosts] == expected_host_handles
+    assert [x.handle for x in pidb.hosts.values()] == expected_hosts

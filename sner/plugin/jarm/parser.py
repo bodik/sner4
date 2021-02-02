@@ -9,7 +9,7 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService
+from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedNote, ParsedService, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -21,20 +21,19 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     def parse_path(cls, path):
         """parse data from path"""
 
-        hosts, services, notes = Pdict(), Pdict(), Pdict()
+        pidb = ParsedItemsDb()
 
         with ZipFile(path) as fzip:
-            for ftmp in [fname for fname in fzip.namelist() if re.match(cls.ARCHIVE_PATHS, fname)]:
-                thosts, tservices, _, tnotes = cls._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
-                for storage, items in [(hosts, thosts), (services, tservices), (notes, tnotes)]:
-                    for item in items:
-                        storage.upsert(item)
+            for fname in filter(lambda x: re.match(cls.ARCHIVE_PATHS, x), fzip.namelist()):
+                pidb += cls._parse_data(file_from_zip(path, fname).decode('utf-8'))
 
-        return list(hosts.values()), list(services.values()), [], list(notes.values())
+        return pidb
 
     @staticmethod
     def _parse_data(data):
         """parse raw string data"""
+
+        pidb = ParsedItemsDb()
 
         host = None
         service = None
@@ -43,31 +42,22 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         for line in data.splitlines():
             if line.startswith('Resolved IP:'):
                 address = line.split(' ')[-1]
-                host = ParsedHost(
-                    handle={'host': address},
-                    address=address
-                )
+                host = ParsedHost(address=address)
 
             if host and line.startswith('Port:'):
                 port = line.split(' ')[-1]
-                service = ParsedService(
-                    handle={'host': host.address, 'service': f'tcp/{port}'},
-                    proto='tcp',
-                    port=port
-                )
+                service = ParsedService(host_handle=host.handle, proto='tcp', port=port)
 
             if service and line.startswith('JARM:'):
                 jarm = line.split(' ')[-1]
                 if jarm != '00000000000000000000000000000000000000000000000000000000000000':
-                    note = ParsedNote(
-                        handle={'host': host.address, 'service': service.handle['service'], 'note': f'jarm.fp'},
-                        xtype='jarm.fp',
-                        data=jarm
-                    )
+                    note = ParsedNote(host_handle=host.handle, xtype='jarm.fp', service_handle=service.handle, data=jarm)
 
         if host and service and note:
-            return [host], [service], [], [note]
-        return [], [], [], []
+            pidb.hosts.upsert(host)
+            pidb.services.upsert(service)
+            pidb.notes.upsert(note)
+        return pidb
 
 
 if __name__ == '__main__':  # pragma: no cover

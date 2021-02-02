@@ -8,7 +8,7 @@ import sys
 from pprint import pprint
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, ParsedHost, ParsedNote
+from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedNote, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -18,14 +18,16 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     def parse_path(path):
         """parse data from path"""
 
-        hosts, notes = [], []
+        pidb = ParsedItemsDb()
         data = json.loads(file_from_zip(path, 'output.json'))
 
         for addr, via in data.items():
-            hosts.append(ParsedHost(handle={'host': addr}, address=addr))
-            notes.append(ParsedNote(handle={'host': addr}, xtype='six_dns_discover.via', data=json.dumps(via)))
+            host = ParsedHost(address=addr)
+            note = ParsedNote(host_handle=host.handle, xtype='six_dns_discover.via', data=json.dumps(via))
+            pidb.hosts.upsert(host)
+            pidb.notes.upsert(note)
 
-        return hosts, [], [], notes
+        return pidb
 
 
 if __name__ == '__main__':  # pragma: no cover

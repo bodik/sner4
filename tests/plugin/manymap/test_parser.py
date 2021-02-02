@@ -9,9 +9,10 @@ from sner.plugin.manymap.parser import ParserModule
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_host_handles = [{'host': '127.0.0.1'}]
-    expected_service_handles = [{'host': '127.0.0.1', 'service': 'tcp/18000'}]
+    expected_hosts = ['127.0.0.1']
+    expected_services = [('127.0.0.1', 'tcp', 18000)]
 
-    hosts, services, _, _ = ParserModule.parse_path('tests/server/data/parser-manymap-job.zip')
-    assert [x.handle for x in hosts] == expected_host_handles
-    assert [x.handle for x in services] == expected_service_handles
+    pidb = ParserModule.parse_path('tests/server/data/parser-manymap-job.zip')
+
+    assert [x.handle for x in pidb.hosts.values()] == expected_hosts
+    assert [x.handle for x in pidb.services.values()] == expected_services
