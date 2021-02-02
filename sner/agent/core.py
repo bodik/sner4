@@ -15,6 +15,7 @@ from argparse import ArgumentParser
 from base64 import b64encode
 from contextlib import contextmanager
 from time import sleep
+from uuid import uuid4
 from zipfile import ZipFile, ZIP_DEFLATED
 
 import jsonschema
@@ -260,9 +261,10 @@ class AssignableAgent(AgentBase):
     def run(self, **kwargs):
         """process user supplied assignment"""
 
-        assignment = {'id': 'output'}
-        assignment.update(json.loads(kwargs['input_a']))
+        assignment = {'id': str(uuid4())}
+        assignment.update(json.loads(kwargs['assignment']))
         jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+        self.log.debug('start job.id: %s', assignment['id'])
 
         with self.terminate_context():
             retval = self.process_assignment(assignment)
@@ -309,7 +311,7 @@ def main(argv=None):
 
     # agent with custom assignment
     if args.assignment:
-        return AssignableAgent().run(input_a=args.assignment)
+        return AssignableAgent().run(assignment=args.assignment)
 
     # standard agent
     config = copy.deepcopy(DEFAULT_CONFIG)
