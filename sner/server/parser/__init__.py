@@ -17,6 +17,7 @@ def register_parser(name):
     return register_parser_real
 
 
+import sner.server.parser.jarm  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.manymap  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.nessus  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.parser.nmap  # noqa: E402  pylint: disable=wrong-import-position

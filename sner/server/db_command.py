@@ -121,6 +121,13 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
+        name='sner_data jarm scan',
+        config=yaml_dump({'module': 'jarm', 'delay': 5}),
+        group_size=50,
+        priority=15,
+    ))
+
+    db.session.add(Queue(
         name='sner_data script scan basic',
         config=yaml_dump({
             'module': 'manymap',

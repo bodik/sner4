@@ -36,6 +36,8 @@
 #        - step: project_servicelist
 #        - step: enqueue
 #          queue: 'sner_data version scan basic'
+#        - step: enqueue
+#          queue: 'sner_data jarm scan'
 #        - step: archive_job
 #
 #    - type: queue
@@ -46,6 +48,8 @@
 #        - step: project_servicelist
 #        - step: enqueue
 #          queue: 'sner_data version scan basic'
+#        - step: enqueue
+#          queue: 'sner_data jarm scan'
 #        - step: archive_job
 #
 #    - type: queue
@@ -55,6 +59,12 @@
 #        - step: import_job
 #        - step: archive_job
 #
+#    - type: queue
+#      steps:
+#        - step: load_job
+#          queue: 'sner_data jarm scan'
+#        - step: import_job
+#        - step: archive_job
 #
 #    # ADVANCED: priority port sweep scan
 #    - type: queue
