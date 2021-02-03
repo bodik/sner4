@@ -7,19 +7,23 @@ import logging
 import signal
 from contextlib import contextmanager
 from copy import deepcopy
+from datetime import datetime
+from pathlib import Path
 from time import sleep
 
 from flask import current_app
-from schema import Schema, Or
+from pytimeparse import parse as timeparse
+from schema import Or, Schema
 
 from sner.server.extensions import db
 from sner.server.planner.steps import registered_steps, StopPipeline
 
 
-PIPELINE_CONFIG_SCHEMA = Schema({
-    'type': Or('queue', 'generic'),
-    'steps': list
-})
+PIPELINE_CONFIG_SCHEMA = Schema(Or(
+    {'type': 'queue', 'steps': list},
+    {'type': 'interval', 'name': str, 'interval': str, 'steps': list},
+    {'type': 'generic', 'steps': list}
+))
 
 
 class Context(dict):
@@ -28,17 +32,46 @@ class Context(dict):
 
 def run_pipeline(config):
     """
-    run pipeline. type:queue pipelines are running until stop is signaled, all others are run only once
+    run pipeline, queue pipelines runs until stop is signaled
     """
 
+    if config['type'] == 'queue':
+        run_queue_pipeline(config)
+    elif config['type'] == 'interval':
+        run_interval_pipeline(config)
+    else:
+        run_generic_pipeline(config)
+
+
+def run_queue_pipeline(config):
+    """run queue pipeline"""
+
     try:
-        if config['type'] == 'queue':
-            while True:
-                run_generic_pipeline(config)
-        else:
+        while True:
             run_generic_pipeline(config)
     except StopPipeline:
         return
+
+
+def run_interval_pipeline(config):
+    """run interval pipeline"""
+
+    name = config['name']
+    interval = config['interval']
+
+    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
+    if lastrun_path.exists():
+        lastrun = datetime.fromisoformat(lastrun_path.read_text())
+        if (datetime.utcnow().timestamp() - lastrun.timestamp()) < timeparse(interval):
+            return
+
+    try:
+        run_generic_pipeline(config)
+    except StopPipeline:
+        pass
+
+    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
+    lastrun_path.write_text(datetime.utcnow().isoformat())
 
 
 def run_generic_pipeline(config):

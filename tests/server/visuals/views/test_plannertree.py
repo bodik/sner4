@@ -3,8 +3,10 @@
 visuals.views.workflowtree tests
 """
 
-import json
 from http import HTTPStatus
+
+import json
+import yaml
 
 from flask import current_app, url_for
 
@@ -19,30 +21,29 @@ def test_plannertree_route(cl_operator):
 def test_plannertree_json_route(cl_operator, queue_factory):
     """workflowtree.json route test"""
 
-    queue_factory.create(name='test queue 1')
-    queue_factory.create(name='test queue 2')
+    queue_factory.create(name='queue1')
+    queue_factory.create(name='queue2')
 
-    current_app.config['SNER_PLANNER']['pipelines'] = [
-        {
-            'name': 'test1',
-            'type': 'queue',
-            'steps': [
-                {'step': 'load_job', 'queue': 'test queue 1'},
-                {'step': 'enqueue', 'queue': 'test queue 2'},
-                {'step': 'archive_job'},
-            ]
-        },
-        {
-            'name': 'test2',
-            'type': 'queue',
-            'steps': [
-                {'step': 'load_job', 'queue': 'test queue 2'},
-                {'step': 'import_job'},
-                {'step': 'archive_job'}
-                # break pylint duplicate-code
-            ]
-        }
-    ]
+    current_app.config['SNER_PLANNER'] = yaml.safe_load("""
+        step_groups:
+          group1:
+            - step: enqueue
+              queue: queue2
+        pipelines:
+          - type: queue
+            steps:
+              - step: load_job
+                queue: queue1
+              - step: run_group
+                name: group1
+              - step: archive_job
+          - type: queue
+            steps:
+              - step: load_job
+                queue: queue2
+              - step: import_job
+              - step: archive_job
+    """)
 
     response = cl_operator.get(url_for('visuals.plannertree_json_route', crop=0))
     assert response.status_code == HTTPStatus.OK

@@ -79,70 +79,49 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner_disco syn scan top10000',
+        name='disco syn scan top10000',
         config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn', 'timing_perhost': 4}),
         group_size=1000,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='sner_data version scan basic',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner_data version scan intense',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 8 -Pn', 'delay': 10}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner_disco ipv6 dns discover',
+        name='disco ipv6 dns discover',
         config=yaml_dump({'module': 'six_dns_discover', 'delay': 1}),
         group_size=1000,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='sner_disco ipv6 enum discover',
+        name='disco ipv6 enum discover',
         config=yaml_dump({'module': 'six_enum_discover', 'rate': 100}),
         group_size=5,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='sner_data jarm scan',
+        name='data version scan basic',
+        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 5}),
+        group_size=50,
+        priority=15,
+    ))
+
+    db.session.add(Queue(
+        name='data jarm scan',
         config=yaml_dump({'module': 'jarm', 'delay': 5}),
         group_size=50,
         priority=15,
     ))
 
     db.session.add(Queue(
-        name='sner_data script scan basic',
+        name='data script scan basic',
         config=yaml_dump({
             'module': 'manymap',
             'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',
-            'delay': 10
+            'delay': 5
         }),
         group_size=50,
         priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner_sweep ack scan portA',
-        config=yaml_dump({'module': 'nmap', 'args': '-sA -p1099 -Pn', 'timing_perhost': 1}),
-        group_size=4000,
-        priority=50,
-    ))
-
-    db.session.add(Queue(
-        name='sner_sweep version scan basic',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 10}),
-        group_size=50,
-        priority=55,
     ))
 
     # storage test data host1

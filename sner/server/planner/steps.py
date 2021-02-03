@@ -4,6 +4,7 @@ sner planner pipeline steps
 """
 
 from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
@@ -35,40 +36,14 @@ def register_step(fnc):
     return fnc
 
 
-def should_run(name, interval):
-    """checks .lastrun and returns true if calle should run acording to interval"""
-
-    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
-    if lastrun_path.exists():
-        lastrun = datetime.fromisoformat(lastrun_path.read_text())
-        if (datetime.utcnow().timestamp() - lastrun.timestamp()) < interval:
-            return False
-    return True
-
-
-def update_lastrun(name):
-    """update .lastrun file"""
-
-    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
-    lastrun_path.write_text(datetime.utcnow().isoformat())
-
-
 class StopPipeline(Exception):
     """stop pipeline signal"""
 
 
 @register_step
-def debug(ctx):
-    """debug current context"""
-
-    current_app.logger.debug(ctx)
-
-
-@register_step
-def stop_pipeline(ctx):
-    """stop pipeline"""
-
-    raise StopPipeline()
+def stop_pipeline(_):
+    """raises StopPipeline; used in tests"""
+    raise StopPipeline
 
 
 @register_step
@@ -93,6 +68,20 @@ def import_job(ctx):
 
     current_app.logger.info(f'import_job {ctx["job"].id} ({ctx["job"].queue.name})')
     import_parsed(**ctx['data'])
+
+
+@register_step
+def archive_job(ctx):
+    """archive job step"""
+
+    job = ctx['job']
+    job_id, queue_name = job.id, job.queue.name
+
+    current_app.logger.info(f'archive_job {job_id} ({queue_name})')
+    archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    copy2(job.output_abspath, archive_dir)
+    job_delete(job)
 
 
 @register_step
@@ -143,23 +132,103 @@ def filter_netranges(ctx, netranges):
 def enqueue(ctx, queue):
     """enqueue to queue from context data"""
 
-    current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue}"')
-    queue = Queue.query.filter(Queue.name == queue).one()
-    queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
+    if ctx['data']:
+        current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue}"')
+        queue = Queue.query.filter(Queue.name == queue).one()
+        queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
 
 
 @register_step
-def archive_job(ctx):
-    """archive job step"""
+def run_group(ctx, name):
+    """run multiple steps defined by name"""
 
-    job = ctx['job']
-    job_id, queue_name = job.id, job.queue.name
+    for step_config in current_app.config['SNER_PLANNER']['step_groups'][name]:
+        current_app.logger.debug(f'run step: {step_config}')
+        args = deepcopy(step_config)
+        step = args.pop('step')
+        registered_steps[step](ctx, **args)
 
-    current_app.logger.info(f'archive_job {job_id} ({queue_name})')
-    archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
-    archive_dir.mkdir(parents=True, exist_ok=True)
-    copy2(job.output_abspath, archive_dir)
-    job_delete(job)
+
+@register_step
+def enumerate_ipv4(ctx, netranges):
+    """enumerates list of netranges"""
+
+    ctx['data'] = []
+    for netrange in netranges:
+        ctx['data'] += enumerate_network(netrange)
+
+    if ctx['data']:
+        current_app.logger.info(f'enumerate_ipv4, enumerated {len(ctx["data"])} items')
+
+
+@register_step
+def rescan_services(ctx, interval):
+    """rescan services from storage; update known services info"""
+
+    now = datetime.utcnow()
+    rescan_horizont = now - timedelta(seconds=timeparse(interval))
+    query = Service.query.filter(or_(Service.rescan_time < rescan_horizont, Service.rescan_time == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
+
+    rescan, ids = [], []
+    for service in windowed_query(query, Service.id):
+        item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
+        rescan.append(item)
+        ids.append(service.id)
+    # orm is bypassed for performance reasons in case of large rescans
+    update_statement = Service.__table__.update().where(Service.id.in_(ids)).values(rescan_time=now)
+    db.session.execute(update_statement)
+    db.session.commit()
+    db.session.expire_all()
+
+    ctx['data'] = rescan
+    if rescan:
+        current_app.logger.info(f'rescan_services, rescan {len(rescan)} items')
+
+
+@register_step
+def rescan_hosts(ctx, interval):
+    """rescan hosts from storage; discovers new services on hosts"""
+
+    now = datetime.utcnow()
+    rescan_horizont = now - timedelta(seconds=timeparse(interval))
+    query = Host.query.filter(or_(Host.rescan_time < rescan_horizont, Host.rescan_time == None))  # noqa: E711  pylint: disable=singleton-comparison
+
+    rescan, ids = [], []
+    for host in windowed_query(query, Host.id):
+        rescan.append(host.address)
+        ids.append(host.id)
+    # orm is bypassed for performance reasons in case of large rescans
+    update_statement = Host.__table__.update().where(Host.id.in_(ids)).values(rescan_time=now)
+    db.session.execute(update_statement)
+    db.session.commit()
+    db.session.expire_all()
+
+    ctx['data'] = rescan
+    if rescan:
+        current_app.logger.info(f'rescan_hosts, rescan {len(rescan)} items')
+
+
+@register_step
+def storage_ipv6_enum(ctx):
+    """discover ipv6 hosts via enumeration around already discovered storage addresses"""
+
+    targets = set()
+    for host in Host.query.filter(func.family(Host.address) == 6).order_by(Host.address).all():
+        exploded = IPv6Address(host.address).exploded
+        # do not enumerate EUI-64 hosts/nets
+        if exploded[27:32] == 'ff:fe':
+            continue
+
+        # generate mask for scan6 tool
+        exploded = exploded.split(':')
+        exploded[-1] = '0-ffff'
+        target = ':'.join(exploded)
+
+        targets.add(target)
+
+    ctx['data'] = targets
+    if targets:
+        current_app.logger.info(f'storage_ipv6_enum, queued {len(targets)} items')
 
 
 @register_step
@@ -200,127 +269,3 @@ def storage_cleanup(_):
     db.session.commit()
 
     current_app.logger.debug(f'finished storage_cleanup')
-
-
-@register_step
-def rescan_services(_, interval, queue):
-    """rescan services from storage; update known services info"""
-
-    qref = Queue.query.filter(Queue.name == queue).one()
-
-    now = datetime.utcnow()
-    rescan_horizont = now - timedelta(seconds=timeparse(interval))
-    query = Service.query.filter(or_(Service.rescan_time < rescan_horizont, Service.rescan_time == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
-
-    rescan, ids = [], []
-    for service in windowed_query(query, Service.id):
-        item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
-        rescan.append(item)
-        ids.append(service.id)
-    # orm is bypassed for performance reasons in case of large rescans
-    update_statement = Service.__table__.update().where(Service.id.in_(ids)).values(rescan_time=now)
-    db.session.execute(update_statement)
-    db.session.commit()
-    db.session.expire_all()
-
-    rescan = filter_already_queued(qref, rescan)
-    queue_enqueue(qref, rescan)
-
-    if rescan:
-        current_app.logger.info(f'rescan_services, rescan {len(rescan)} items')
-
-
-@register_step
-def rescan_hosts(_, interval, queue):
-    """rescan hosts from storage; discovers new services on hosts"""
-
-    qref = Queue.query.filter(Queue.name == queue).one()
-
-    now = datetime.utcnow()
-    rescan_horizont = now - timedelta(seconds=timeparse(interval))
-    query = Host.query.filter(or_(Host.rescan_time < rescan_horizont, Host.rescan_time == None))  # noqa: E711  pylint: disable=singleton-comparison
-
-    rescan, ids = [], []
-    for host in windowed_query(query, Host.id):
-        rescan.append(host.address)
-        ids.append(host.id)
-    # orm is bypassed for performance reasons in case of large rescans
-    update_statement = Host.__table__.update().where(Host.id.in_(ids)).values(rescan_time=now)
-    db.session.execute(update_statement)
-    db.session.commit()
-    db.session.expire_all()
-
-    rescan = filter_already_queued(qref, rescan)
-    queue_enqueue(qref, rescan)
-
-    if rescan:
-        current_app.logger.info(f'rescan_hosts, rescan {len(rescan)} items')
-
-
-@register_step
-def discover_ipv4(_, interval, netranges, queue):
-    """enqueues all netranges into discovery queue"""
-
-    queue = Queue.query.filter(Queue.name == queue).one()
-
-    if not should_run('discover_ipv4', timeparse(interval)):
-        return
-
-    count = 0
-    for netrange in netranges:
-        targets = filter_already_queued(queue, enumerate_network(netrange))
-        count += len(targets)
-        queue_enqueue(queue, targets)
-
-    if count:
-        current_app.logger.info(f'discover_ipv4, queued {count} items')
-    update_lastrun('discover_ipv4')
-
-
-@register_step
-def discover_ipv6_dns(_, interval, netranges, queue):
-    """enqueues all netranges into dns discovery queue"""
-
-    if not should_run('discover_ipv6_dns', timeparse(interval)):
-        return
-
-    queue = Queue.query.filter(Queue.name == queue).one()
-    count = 0
-    for netrange in netranges:
-        targets = filter_already_queued(queue, enumerate_network(netrange))
-        count += len(targets)
-        queue_enqueue(queue, targets)
-
-    if count:
-        current_app.logger.info(f'discover_ipv6_dns, queued {count} items')
-    update_lastrun('discover_ipv6_dns')
-
-
-@register_step
-def discover_ipv6_enum(_, interval, queue):
-    """enqueues ranged derived from storage registered ipv6 addresses"""
-
-    if not should_run('discover_ipv6_enum', timeparse(interval)):
-        return
-
-    queue = Queue.query.filter(Queue.name == queue).one()
-    targets = set()
-    query = Host.query.filter(func.family(Host.address) == 6).order_by(Host.address)
-    for host in query.all():
-        exploded = IPv6Address(host.address).exploded
-        # do not enumerate EUI-64 hosts/nets
-        if exploded[27:32] == 'ff:fe':
-            continue
-
-        exploded = exploded.split(':')
-        exploded[-1] = '0-ffff'
-        target = ':'.join(exploded)
-
-        targets.add(target)
-
-    targets = filter_already_queued(queue, targets)
-    queue_enqueue(queue, targets)
-
-    if targets:
-        current_app.logger.info(f'discover_ipv6_enum, queued {len(targets)} items')
-    update_lastrun('discover_ipv6_enum')
