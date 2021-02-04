@@ -9,11 +9,10 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, register_parser
+from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService
 
 
-@register_parser('jarm')  # pylint: disable=too-few-public-methods
-class JarmParser(ParserBase):
+class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """jarm output parser"""
 
     ARCHIVE_PATHS = r'output-[0-9]+.out'
@@ -26,7 +25,7 @@ class JarmParser(ParserBase):
 
         with ZipFile(path) as fzip:
             for ftmp in [fname for fname in fzip.namelist() if re.match(cls.ARCHIVE_PATHS, fname)]:
-                thosts, tservices, _, tnotes = JarmParser._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
+                thosts, tservices, _, tnotes = cls._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
                 for storage, items in [(hosts, thosts), (services, tservices), (notes, tnotes)]:
                     for item in items:
                         storage.upsert(item)
@@ -72,4 +71,4 @@ class JarmParser(ParserBase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    pprint(JarmParser.parse_path(sys.argv[1]))
+    pprint(ParserModule.parse_path(sys.argv[1]))

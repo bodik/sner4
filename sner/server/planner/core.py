@@ -16,7 +16,7 @@ from pytimeparse import parse as timeparse
 from schema import Or, Schema
 
 from sner.server.extensions import db
-from sner.server.planner.steps import registered_steps, StopPipeline
+from sner.server.planner.steps import REGISTERED_STEPS, StopPipeline
 
 
 PIPELINE_CONFIG_SCHEMA = Schema(Or(
@@ -83,7 +83,7 @@ def run_generic_pipeline(config):
         current_app.logger.debug(f'run step: {step_config}')
         args = deepcopy(step_config)
         step = args.pop('step')
-        registered_steps[step](ctx, **args)
+        REGISTERED_STEPS[step](ctx, **args)
 
 
 class Planner:

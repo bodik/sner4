@@ -23,16 +23,8 @@ import requests
 
 import sner.agent.protocol
 from sner.lib import get_dotted, load_yaml
-from sner.agent.modules import registered_modules
+from sner.agent.modules import load_agent_plugins, REGISTERED_MODULES
 from sner.version import __version__
-
-# import and register plugins
-import sner.plugin.dummy.agent
-import sner.plugin.jarm.agent
-import sner.plugin.manymap.agent
-import sner.plugin.nmap.agent
-import sner.plugin.six_dns_discover.agent
-import sner.plugin.six_enum_discover.agent
 
 
 LOGGER_NAME = 'sner.agent'
@@ -107,6 +99,8 @@ class AgentBase(ABC):
         self.original_signal_handlers = {}
         self.loop = None
 
+        load_agent_plugins()
+
     @abstractmethod
     def run(self, **kwargs):
         """abstract run method; must be implemented by specific agent"""
@@ -140,7 +134,7 @@ class AgentBase(ABC):
         os.chdir(jobdir)
 
         try:
-            self.module_instance = registered_modules[assignment['config']['module']]()
+            self.module_instance = REGISTERED_MODULES[assignment['config']['module']]()
             retval = self.module_instance.run(assignment)
         except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
             self.log.exception(e)

@@ -14,11 +14,10 @@ from zipfile import ZipFile
 import libnmap.parser
 
 from sner.lib import file_from_zip, is_zip
-from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, register_parser
+from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService
 
 
-@register_parser('nmap')  # pylint: disable=too-few-public-methods
-class NmapParser(ParserBase):
+class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """nmap xml output parser"""
 
     ARCHIVE_PATHS = r'output\.xml|output6\.xml'
@@ -32,25 +31,25 @@ class NmapParser(ParserBase):
 
             with ZipFile(path) as fzip:
                 for ftmp in [fname for fname in fzip.namelist() if re.match(cls.ARCHIVE_PATHS, fname)]:
-                    thosts, tservices, tvulns, tnotes = NmapParser._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
+                    thosts, tservices, tvulns, tnotes = cls._parse_data(file_from_zip(path, ftmp).decode('utf-8'))
                     for storage, items in [(hosts, thosts), (services, tservices), (vulns, tvulns), (notes, tnotes)]:
                         for item in items:
                             storage.upsert(item)
 
             return list(hosts.values()), list(services.values()), list(vulns.values()), list(notes.values())
 
-        return NmapParser._parse_data(Path(path).read_text())
+        return cls._parse_data(Path(path).read_text())
 
-    @staticmethod
-    def _parse_data(data):
+    @classmethod
+    def _parse_data(cls, data):
         """parse raw string data"""
 
         report = libnmap.parser.NmapParser.parse_fromstring(data)
 
-        hosts = NmapParser._parse_hosts(report)
-        services = NmapParser._parse_services(report)
+        hosts = cls._parse_hosts(report)
+        services = cls._parse_services(report)
         vulns = []
-        notes = NmapParser._parse_notes(report)
+        notes = cls._parse_notes(report)
 
         return hosts, services, vulns, notes
 
@@ -131,4 +130,4 @@ class NmapParser(ParserBase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    pprint(NmapParser.parse_path(sys.argv[1]))
+    pprint(ParserModule.parse_path(sys.argv[1]))

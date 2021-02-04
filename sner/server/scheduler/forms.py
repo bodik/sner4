@@ -12,7 +12,7 @@ from schema import SchemaError
 from wtforms import BooleanField, IntegerField, SelectField, SubmitField, ValidationError
 from wtforms.validators import InputRequired, Length, NumberRange
 
-from sner.agent.modules import registered_modules
+from sner.agent.modules import REGISTERED_MODULES
 from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.scheduler.models import ExclFamily
 
@@ -47,11 +47,11 @@ def valid_agent_config(form, field):
     except (yaml.YAMLError, AttributeError) as e:
         raise ValidationError(f'Invalid YAML: {str(e)}')
 
-    if (not isinstance(config, dict)) or ('module' not in config) or (config['module'] not in registered_modules):
+    if (not isinstance(config, dict)) or ('module' not in config) or (config['module'] not in REGISTERED_MODULES):
         raise ValidationError('Invalid module specified')
 
     try:
-        registered_modules[config['module']].CONFIG_SCHEMA.validate(config)
+        REGISTERED_MODULES[config['module']].CONFIG_SCHEMA.validate(config)
     except SchemaError as e:
         raise ValidationError(f'Invalid config: {str(e)}')
 

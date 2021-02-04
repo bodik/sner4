@@ -12,8 +12,10 @@ from flask import Flask, render_template
 from flask_wtf.csrf import generate_csrf
 from sqlalchemy import func
 
+from sner.agent.modules import load_agent_plugins
 from sner.lib import get_dotted, load_yaml
 from sner.server.extensions import db, jsglue, login_manager, webauthn
+from sner.server.parser import load_parser_plugins
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
 
@@ -35,14 +37,6 @@ from sner.server.storage.commands import command as storage_command
 from sner.server.auth.models import User, WebauthnCredential
 from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
-
-# import and register plugins
-import sner.plugin.jarm.parser  # pylint: disable=unused-import
-import sner.plugin.manymap.parser  # pylint: disable=unused-import
-import sner.plugin.nessus.parser  # pylint: disable=unused-import
-import sner.plugin.nmap.parser  # pylint: disable=unused-import
-import sner.plugin.six_dns_discover.parser  # pylint: disable=unused-import
-import sner.plugin.six_enum_discover.parser  # noqa: F401  pylint: disable=unused-import
 
 
 DEFAULT_CONFIG = {
@@ -106,6 +100,10 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_message = 'Not logged in'
     login_manager.login_message_category = 'warning'
     webauthn.init_app(app)
+
+    # load sner.plugin components
+    load_agent_plugins()
+    load_parser_plugins()
 
     app.register_blueprint(api_blueprint, url_prefix='/api')
     app.register_blueprint(auth_blueprint, url_prefix='/auth')

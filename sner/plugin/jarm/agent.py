@@ -7,11 +7,10 @@ from time import sleep
 
 from schema import Schema
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('jarm')
-class Jarm(ModuleBase):
+class AgentModule(ModuleBase):
     """
     jarm fingerprinter
 

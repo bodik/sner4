@@ -17,7 +17,7 @@ from sqlalchemy import func, not_, or_
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.parser import registered_parsers
+from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import import_parsed
 from sner.server.scheduler.core import enumerate_network, filter_already_queued, job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue
@@ -25,14 +25,14 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import windowed_query
 
 
-registered_steps = {}  # pylint: disable=invalid-name
+REGISTERED_STEPS = {}
 
 
 def register_step(fnc):
     """register step function to registry"""
 
-    if fnc.__name__ not in registered_steps:
-        registered_steps[fnc.__name__] = fnc
+    if fnc.__name__ not in REGISTERED_STEPS:
+        REGISTERED_STEPS[fnc.__name__] = fnc
     return fnc
 
 
@@ -58,7 +58,7 @@ def load_job(ctx, queue):
     current_app.logger.info(f'load_job {job.id} ({qref.name})')
     ctx['job'] = job
     queue_module_config = yaml.safe_load(job.queue.config)
-    parser = registered_parsers[queue_module_config['module']]
+    parser = REGISTERED_PARSERS[queue_module_config['module']]
     ctx['data'] = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
 
 
@@ -146,7 +146,7 @@ def run_group(ctx, name):
         current_app.logger.debug(f'run step: {step_config}')
         args = deepcopy(step_config)
         step = args.pop('step')
-        registered_steps[step](ctx, **args)
+        REGISTERED_STEPS[step](ctx, **args)
 
 
 @register_step

@@ -8,11 +8,10 @@ from time import sleep
 
 from schema import Schema
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('manymap')
-class Manymap(ModuleBase):
+class AgentModule(ModuleBase):
     """
     internet endpoints nmap-based scanner
 

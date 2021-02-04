@@ -3,7 +3,7 @@
 jarm output parser tests
 """
 
-from sner.plugin.jarm.parser import JarmParser
+from sner.plugin.jarm.parser import ParserModule
 
 
 def test_parse_path():
@@ -13,7 +13,7 @@ def test_parse_path():
     expected_service_handles = [{'host': '127.0.0.1', 'service': 'tcp/443'}]
     expected_note_handles = [{'host': '127.0.0.1', 'service': 'tcp/443', 'note': 'jarm.fp'}]
 
-    hosts, services, _, notes = JarmParser.parse_path('tests/server/data/parser-jarm-job.zip')
+    hosts, services, _, notes = ParserModule.parse_path('tests/server/data/parser-jarm-job.zip')
 
     assert [x.handle for x in hosts] == expected_host_handles
     assert [x.handle for x in services] == expected_service_handles

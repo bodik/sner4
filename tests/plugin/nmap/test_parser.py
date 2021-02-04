@@ -6,7 +6,7 @@ nmap output parser tests
 import pytest
 from libnmap.parser import NmapParserException
 
-from sner.plugin.nmap.parser import NmapParser
+from sner.plugin.nmap.parser import ParserModule
 
 
 def test_xxe():
@@ -15,7 +15,7 @@ def test_xxe():
     # https://docs.python.org/3/library/xml.html#xml-vulnerabilities
     # etree exception is masked by library to it's own exception type
     with pytest.raises(NmapParserException):
-        NmapParser.parse_path('tests/server/data/parser-nmap-xxe.xml')
+        ParserModule.parse_path('tests/server/data/parser-nmap-xxe.xml')
 
 
 def test_parse_path():
@@ -30,7 +30,7 @@ def test_parse_path():
         {'host': '127.0.0.1', 'service': 'tcp/5432'}
     ]
 
-    hosts, services, _, _ = NmapParser.parse_path('tests/server/data/parser-nmap-output.xml')
+    hosts, services, _, _ = ParserModule.parse_path('tests/server/data/parser-nmap-output.xml')
 
     assert [x.handle for x in hosts] == expected_host_handles
     assert [x.handle for x in services] == expected_service_handles

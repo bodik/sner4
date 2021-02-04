@@ -9,11 +9,10 @@ from pathlib import Path
 
 from schema import Schema, Optional
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('nmap')
-class Nmap(ModuleBase):
+class AgentModule(ModuleBase):
     """
     nmap module
 

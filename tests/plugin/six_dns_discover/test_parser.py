@@ -3,7 +3,7 @@
 six_dns_discover output parser tests
 """
 
-from sner.plugin.six_dns_discover.parser import SixDnsDiscoverParser
+from sner.plugin.six_dns_discover.parser import ParserModule
 
 
 def test_host_list():
@@ -12,7 +12,7 @@ def test_host_list():
     expected_host_handles = [{'host': '::1'}]
     expected_note_handles = [{'host': '::1'}]
 
-    hosts, _, _, notes = SixDnsDiscoverParser.parse_path('tests/server/data/parser-six_dns_discover-job.zip')
+    hosts, _, _, notes = ParserModule.parse_path('tests/server/data/parser-six_dns_discover-job.zip')
 
     assert [x.handle for x in hosts] == expected_host_handles
     assert [x.handle for x in notes] == expected_note_handles

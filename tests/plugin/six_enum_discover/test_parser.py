@@ -3,7 +3,7 @@
 six_enum_discover output parser tests
 """
 
-from sner.plugin.six_enum_discover.parser import SixEnumDiscoverParser
+from sner.plugin.six_enum_discover.parser import ParserModule
 
 
 def test_host_list():
@@ -11,6 +11,6 @@ def test_host_list():
 
     expected_host_handles = [{'host': '::1'}]
 
-    hosts, _, _, _ = SixEnumDiscoverParser.parse_path('tests/server/data/parser-six_enum_discover-job.zip')
+    hosts, _, _, _ = ParserModule.parse_path('tests/server/data/parser-six_enum_discover-job.zip')
 
     assert [x.handle for x in hosts] == expected_host_handles

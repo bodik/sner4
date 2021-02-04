@@ -5,11 +5,10 @@ sner agent six enum from storage discover
 
 from schema import Schema
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('six_enum_discover')
-class SixEnumDiscover(ModuleBase):
+class AgentModule(ModuleBase):
     """
     enumeration based ipv6 discover
 

@@ -14,7 +14,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.parser import registered_parsers
+from sner.server.parser import REGISTERED_PARSERS
 from sner.server.sqlafilter import filter_parser
 from sner.server.storage.core import import_parsed, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
@@ -32,11 +32,11 @@ def command():
 def storage_import(path, parser):
     """import data"""
 
-    if parser not in registered_parsers:
+    if parser not in REGISTERED_PARSERS:
         current_app.logger.error('no such parser')
         sys.exit(1)
 
-    parser_impl = registered_parsers[parser]
+    parser_impl = REGISTERED_PARSERS[parser]
     for item in path:
         if not os.path.isfile(item):
             current_app.logger.error(f'invalid path "{item}"')

@@ -9,34 +9,33 @@ from pprint import pprint
 
 from tenable.reports import NessusReportv2
 
-from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, ParsedVuln, register_parser
+from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, ParsedVuln
 from sner.server.storage.models import SeverityEnum
 from sner.server.utils import SnerJSONEncoder
 
 
-@register_parser('nessus')  # pylint: disable=too-few-public-methods
-class NessusParser(ParserBase):
+class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """nessus .nessus output parser"""
 
     SEVERITY_MAP = ['info', 'low', 'medium', 'high', 'critical']
 
-    @staticmethod
-    def parse_path(path):
+    @classmethod
+    def parse_path(cls, path):
         """parse path"""
 
-        return NessusParser._parse_report(NessusReportv2(path))
+        return cls._parse_report(NessusReportv2(path))
 
-    @staticmethod
-    def _parse_report(report):
+    @classmethod
+    def _parse_report(cls, report):
         """parses host data from report item"""
 
         hosts, services, vulns, notes = Pdict(), Pdict(), Pdict(), Pdict()
 
         for report_item in report:
-            host = NessusParser._parse_host(report_item)
-            service = NessusParser._parse_service(report_item)
-            vuln = NessusParser._parse_vuln(report_item, service)
-            note = NessusParser._parse_note(report_item, service)
+            host = cls._parse_host(report_item)
+            service = cls._parse_service(report_item)
+            vuln = cls._parse_vuln(report_item, service)
+            note = cls._parse_note(report_item, service)
 
             for storage, item in [(hosts, host), (services, service), (vulns, vuln), (notes, note)]:
                 if item:
@@ -80,8 +79,8 @@ class NessusParser(ParserBase):
             import_time=report_item['HOST_START']
         )
 
-    @staticmethod
-    def _parse_vuln(report_item, service=None):
+    @classmethod
+    def _parse_vuln(cls, report_item, service=None):
         """parse vuln data"""
 
         handle = {'host': report_item['host-ip'], 'vuln': f'nessus.{report_item["pluginID"]}'}
@@ -92,9 +91,9 @@ class NessusParser(ParserBase):
             handle=handle,
             name=report_item['plugin_name'],
             xtype=f'nessus.{report_item["pluginID"]}',
-            severity=SeverityEnum(NessusParser.SEVERITY_MAP[report_item['severity']]),
+            severity=SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),
             descr=f'## Synopsis\n\n{report_item["synopsis"]}\n\n## Description\n\n{report_item["description"]}',
-            refs=NessusParser._parse_refs(report_item),
+            refs=cls._parse_refs(report_item),
             import_time=report_item['HOST_START'],
         )
 
@@ -143,4 +142,4 @@ class NessusParser(ParserBase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    pprint(NessusParser.parse_path(sys.argv[1]))
+    pprint(ParserModule.parse_path(sys.argv[1]))

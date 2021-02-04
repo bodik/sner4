@@ -10,11 +10,10 @@ from time import sleep
 
 from schema import Schema
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('six_dns_discover')
-class SixDnsDiscover(ModuleBase):
+class AgentModule(ModuleBase):
     """
     dns based ipv6 from ipv4 address discover
 

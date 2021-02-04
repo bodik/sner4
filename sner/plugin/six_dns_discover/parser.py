@@ -8,11 +8,10 @@ import sys
 from pprint import pprint
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, ParsedHost, ParsedNote, register_parser
+from sner.server.parser import ParserBase, ParsedHost, ParsedNote
 
 
-@register_parser('six_dns_discover')  # pylint: disable=too-few-public-methods
-class SixDnsDiscoverParser(ParserBase):
+class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """six dns parser, pulls list of hosts for discovery module"""
 
     @staticmethod
@@ -30,4 +29,4 @@ class SixDnsDiscoverParser(ParserBase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    pprint(SixDnsDiscoverParser.parse_path(sys.argv[1]))
+    pprint(ParserModule.parse_path(sys.argv[1]))

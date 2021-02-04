@@ -5,11 +5,10 @@ sner agent dummy module
 
 from schema import Schema
 
-from sner.agent.modules import ModuleBase, register_module
+from sner.agent.modules import ModuleBase
 
 
-@register_module('dummy')
-class Dummy(ModuleBase):
+class AgentModule(ModuleBase):
     """
     testing module implementation
 

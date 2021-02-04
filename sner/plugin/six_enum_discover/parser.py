@@ -9,11 +9,10 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParserBase, ParsedHost, register_parser
+from sner.server.parser import ParserBase, ParsedHost
 
 
-@register_parser('six_enum_discover')  # pylint: disable=too-few-public-methods
-class SixEnumDiscoverParser(ParserBase):
+class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """six enum parser, pulls list of hosts for discovery module"""
 
     @staticmethod
@@ -31,4 +30,4 @@ class SixEnumDiscoverParser(ParserBase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    pprint(SixEnumDiscoverParser.parse_path(sys.argv[1]))
+    pprint(ParserModule.parse_path(sys.argv[1]))

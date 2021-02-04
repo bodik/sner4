@@ -24,22 +24,25 @@ import signal
 import shlex
 import subprocess
 from abc import ABC, abstractmethod
+from importlib import import_module
 from pathlib import Path
 
 from schema import Schema
 
+import sner.plugin
+
+
+REGISTERED_MODULES = {}
 SERVICE_TARGET_REGEXP = r'^(?P<proto>tcp|udp)://(?P<host>[0-9\.]{7,15}|[0-9a-zA-Z\.\-]{1,256}|\[[0-9a-fA-F:]{3,45}\]|\[[0-9a-zA-Z\.\-]{1,256}\]):(?P<port>[0-9]+)$'  # noqa: 501  pylint: disable=line-too-long
-registered_modules = {}  # pylint: disable=invalid-name
 
 
-def register_module(name):
-    """register module class to registry"""
+def load_agent_plugins():
+    """load all agent plugins/modules"""
 
-    def register_module_real(cls):
-        if cls not in registered_modules:
-            registered_modules[name] = cls
-        return cls
-    return register_module_real
+    for plugin_path in Path(sner.plugin.__file__).parent.glob('*/agent.py'):
+        plugin_name = plugin_path.parent.name
+        module = import_module(f'sner.plugin.{plugin_name}.agent')
+        REGISTERED_MODULES[plugin_name] = getattr(module, 'AgentModule')
 
 
 class ModuleBase(ABC):

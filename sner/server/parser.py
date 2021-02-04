@@ -7,19 +7,22 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
+from importlib import import_module
+from pathlib import Path
+
+import sner.plugin
 
 
-registered_parsers = {}  # pylint: disable=invalid-name
+REGISTERED_PARSERS = {}
 
 
-def register_parser(name):
-    """register parser class to registry"""
+def load_parser_plugins():
+    """load all parser plugins/modules"""
 
-    def register_parser_real(cls):
-        if cls not in registered_parsers:
-            registered_parsers[name] = cls
-        return cls
-    return register_parser_real
+    for plugin_path in Path(sner.plugin.__file__).parent.glob('*/parser.py'):
+        plugin_name = plugin_path.parent.name
+        module = import_module(f'sner.plugin.{plugin_name}.parser')
+        REGISTERED_PARSERS[plugin_name] = getattr(module, 'ParserModule')
 
 
 class ParsedItemsDict(dict):

@@ -3,7 +3,7 @@
 manymap nmap-based output parser tests
 """
 
-from sner.plugin.manymap.parser import ManymapParser
+from sner.plugin.manymap.parser import ParserModule
 
 
 def test_parse_path():
@@ -12,6 +12,6 @@ def test_parse_path():
     expected_host_handles = [{'host': '127.0.0.1'}]
     expected_service_handles = [{'host': '127.0.0.1', 'service': 'tcp/18000'}]
 
-    hosts, services, _, _ = ManymapParser.parse_path('tests/server/data/parser-manymap-job.zip')
+    hosts, services, _, _ = ParserModule.parse_path('tests/server/data/parser-manymap-job.zip')
     assert [x.handle for x in hosts] == expected_host_handles
     assert [x.handle for x in services] == expected_service_handles
