@@ -53,8 +53,8 @@ def run_interval_pipeline(config):
 
     name = config['name']
     interval = config['interval']
+    lastrun_path = Path(current_app.config['SNER_VAR']) / f'lastrun.{name}'
 
-    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
     if lastrun_path.exists():
         lastrun = datetime.fromisoformat(lastrun_path.read_text())
         if (datetime.utcnow().timestamp() - lastrun.timestamp()) < timeparse(interval):
@@ -66,7 +66,6 @@ def run_interval_pipeline(config):
         # stop_pipeline is emited during tests to check backoff interval
         pass
 
-    lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
     lastrun_path.write_text(datetime.utcnow().isoformat())
 
 
