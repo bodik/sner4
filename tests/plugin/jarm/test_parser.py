@@ -3,7 +3,7 @@
 jarm output parser tests
 """
 
-from sner.server.parser.jarm import JarmParser
+from sner.plugin.jarm.parser import JarmParser
 
 
 def test_parse_path():

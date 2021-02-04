@@ -9,8 +9,7 @@ from pprint import pprint
 
 from tenable.reports import NessusReportv2
 
-from sner.server.parser import register_parser
-from sner.server.parser.core import ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, ParsedVuln, ParserBase
+from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, ParsedVuln, register_parser
 from sner.server.storage.models import SeverityEnum
 from sner.server.utils import SnerJSONEncoder
 

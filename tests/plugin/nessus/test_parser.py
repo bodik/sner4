@@ -6,7 +6,7 @@ nessus output parser tests
 import pytest
 from defusedxml.common import EntitiesForbidden
 
-from sner.server.parser.nessus import NessusParser
+from sner.plugin.nessus.parser import NessusParser
 
 
 def test_xxe(app):  # pylint: disable=unused-argument

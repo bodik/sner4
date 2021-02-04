@@ -3,7 +3,7 @@
 manymap nmap-based output parser tests
 """
 
-from sner.server.parser.manymap import ManymapParser
+from sner.plugin.manymap.parser import ManymapParser
 
 
 def test_parse_path():

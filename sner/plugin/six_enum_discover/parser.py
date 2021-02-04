@@ -9,8 +9,7 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import register_parser
-from sner.server.parser.core import ParsedHost, ParserBase
+from sner.server.parser import ParserBase, ParsedHost, register_parser
 
 
 @register_parser('six_enum_discover')  # pylint: disable=too-few-public-methods

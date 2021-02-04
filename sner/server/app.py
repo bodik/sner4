@@ -36,6 +36,14 @@ from sner.server.auth.models import User, WebauthnCredential
 from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
 
+# import and register plugins
+import sner.plugin.jarm.parser  # pylint: disable=unused-import
+import sner.plugin.manymap.parser  # pylint: disable=unused-import
+import sner.plugin.nessus.parser  # pylint: disable=unused-import
+import sner.plugin.nmap.parser  # pylint: disable=unused-import
+import sner.plugin.six_dns_discover.parser  # pylint: disable=unused-import
+import sner.plugin.six_enum_discover.parser  # noqa: F401  pylint: disable=unused-import
+
 
 DEFAULT_CONFIG = {
     # flask

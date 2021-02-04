@@ -26,6 +26,7 @@ from sner.lib import get_dotted, load_yaml
 from sner.agent.modules import registered_modules
 from sner.version import __version__
 
+# import and register plugins
 import sner.plugin.dummy.agent
 import sner.plugin.jarm.agent
 import sner.plugin.manymap.agent

@@ -9,6 +9,19 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
+registered_parsers = {}  # pylint: disable=invalid-name
+
+
+def register_parser(name):
+    """register parser class to registry"""
+
+    def register_parser_real(cls):
+        if cls not in registered_parsers:
+            registered_parsers[name] = cls
+        return cls
+    return register_parser_real
+
+
 class ParsedItemsDict(dict):
     """parsed items; used to merge parsed items with the same handle"""
 
@@ -104,7 +117,43 @@ class ParserBase(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def parse_path(path):
         """
-        parse data from path
+        Parse data from path. Must parse .zip archive produced by respective
+        agent module. Optionaly can parse also raw output from external tool.
+
+        Returns tuple of lists of Parsed* objects representing model objects
+        for storage subsystem. The extra attribute `handle`, represents the
+        item key attributes and it's used to bind related models and
+        locate/upsert already existing items in the storage.
+
+        ```
+        def parse_path(path):
+            # sample static parser
+
+            parsed_host_1 = ParsedHost(
+                handle = {'host': '192.168.0.1'}
+                address = '192.168.0.1'
+            )
+
+            parsed_service_1 = ParsedService(
+                handle = {'host': '192.168.0.1', 'service': 'tcp/80'},
+                proto = 'tcp',
+                port = '80'
+            )
+
+            parsed_vuln_1 = ParsedVuln(
+                handle = {'host': '192.168.0.1', 'service': 'tcp/80', 'vuln': 'weak_pass1'},
+                xtype = 'weak_pass1',
+                name = 'weak password found'
+            )
+
+            parsed_note_1 = ParsedNote(
+                handle = {'host': '192.168.0.1', 'service': 'tcp/80', 'note': 'jarm.fp'},
+                xtype = 'jarm.fp',
+                data = '123'
+            )
+
+            return [parsed_host_1], [parsed_service_1], [parsed_vuln_1], [parsed_note_1]
+        ```
 
         :return: tuple(hosts, services, vulns, notes)
         :rtype: tuple

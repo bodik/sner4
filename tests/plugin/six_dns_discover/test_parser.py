@@ -3,7 +3,7 @@
 six_dns_discover output parser tests
 """
 
-from sner.server.parser.six_dns_discover import SixDnsDiscoverParser
+from sner.plugin.six_dns_discover.parser import SixDnsDiscoverParser
 
 
 def test_host_list():

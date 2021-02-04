@@ -14,9 +14,7 @@ from zipfile import ZipFile
 import libnmap.parser
 
 from sner.lib import file_from_zip, is_zip
-from sner.server.parser import register_parser
-from sner.server.parser.core import ParsedItemsDict as Pdict
-from sner.server.parser.core import ParsedHost, ParsedNote, ParsedService, ParserBase
+from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDict as Pdict, ParsedNote, ParsedService, register_parser
 
 
 @register_parser('nmap')  # pylint: disable=too-few-public-methods

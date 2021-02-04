@@ -8,8 +8,7 @@ import sys
 from pprint import pprint
 
 from sner.lib import file_from_zip
-from sner.server.parser import register_parser
-from sner.server.parser.core import ParsedHost, ParsedNote, ParserBase
+from sner.server.parser import ParserBase, ParsedHost, ParsedNote, register_parser
 
 
 @register_parser('six_dns_discover')  # pylint: disable=too-few-public-methods

@@ -6,7 +6,7 @@ nmap output parser tests
 import pytest
 from libnmap.parser import NmapParserException
 
-from sner.server.parser.nmap import NmapParser
+from sner.plugin.nmap.parser import NmapParser
 
 
 def test_xxe():

@@ -3,7 +3,7 @@
 six_enum_discover output parser tests
 """
 
-from sner.server.parser.six_enum_discover import SixEnumDiscoverParser
+from sner.plugin.six_enum_discover.parser import SixEnumDiscoverParser
 
 
 def test_host_list():

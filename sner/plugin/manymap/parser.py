@@ -6,8 +6,8 @@ parsers to import from agent module manymap output to storage
 import sys
 from pprint import pprint
 
+from sner.plugin.nmap.parser import NmapParser
 from sner.server.parser import register_parser
-from sner.server.parser.nmap import NmapParser
 
 
 @register_parser('manymap')  # pylint: disable=too-few-public-methods
