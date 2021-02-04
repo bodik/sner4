@@ -57,14 +57,14 @@ tools, while *data management* part focuses on data analysis and management.
               agent  +--+--+  server                |
                         |                           |
      +-------------+    |      +--------------+     |     +-----------------+
-     |             |    |      |              |     |     |                 |  module1
-     |  agent      |<--------->|  scheduler   |---------->|  parser         |  module2
-     |             |    |      |              |     |     |                 |  moduleX
+     |             |    |      |              |     |     |                 |  plugin1
+     |  agent      |<--------->|  scheduler   |---------->|  parser         |  plugin2
+     |             |    |      |              |     |     |                 |  pluginX
      +-------------+    |      +--------------+     |     +-----------------+
                         |            ^              |              |
-      module1           |            |              +              |
-      module2           |            |                            \|/
-      moduleX           |      +--------------+           +-----------------+
+      plugin1           |            |              +              |
+      plugin2           |            |                            \|/
+      pluginX           |      +--------------+           +-----------------+
                         |      |              |           |                 |
                         |      |   planner    |---------->|  db/storage     |
                         |      |              |           |                 |
@@ -76,10 +76,7 @@ tools, while *data management* part focuses on data analysis and management.
                         |                                 |  visuals        |
                         |                                 |                 |
                         |                                 +-----------------+
-                        |
-                        |                                  visual1
-                        +                                  visual2
-                                                           visual3
+                        + 
 ```
 
 
@@ -99,6 +96,9 @@ server-side file based storage.
 Various components provides limited command-line interface through `server`
 command. Flask shell can be used to access the ORM model directly for advanced
 analysis or out-of-interface data management.
+
+Agent and parser features are partialy implemented via simple system of plugins
+allowing to extend toolset used within those components.
 
 
 ### 2.2 Reconnaissance subsystem
