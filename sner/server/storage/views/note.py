@@ -11,7 +11,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, get_related_models
 from sner.server.storage.forms import NoteForm
 from sner.server.storage.models import Host, Note, Service
@@ -49,7 +49,7 @@ def note_list_json_route():
     ]
     query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     notes = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(notes)

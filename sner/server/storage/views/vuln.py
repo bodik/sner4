@@ -15,7 +15,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, get_related_models, tag_model_multiid, vuln_export, vuln_report
 from sner.server.storage.forms import MultiidForm, VulnForm
 from sner.server.storage.models import Host, Service, Vuln
@@ -55,7 +55,7 @@ def vuln_list_json_route():
     ]
     query = db.session.query().select_from(Vuln).outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')
@@ -170,7 +170,7 @@ def vuln_grouped_json_route():
     # join allows filter over host attrs
     query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, Vuln.tags)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')

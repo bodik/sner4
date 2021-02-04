@@ -21,7 +21,7 @@ from sner.server.forms import ButtonForm
 from sner.server.scheduler.forms import ExclForm, ExclImportForm
 from sner.server.scheduler.models import Excl, ExclFamily
 from sner.server.scheduler.views import blueprint
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.utils import SnerJSONEncoder
 
 
@@ -50,7 +50,7 @@ def excl_list_json_route():
     ]
     query = db.session.query().select_from(Excl)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     excls = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(excls, cls=SnerJSONEncoder), mimetype='application/json')

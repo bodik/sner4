@@ -15,7 +15,7 @@ from sqlalchemy_filters import apply_filters
 from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import import_parsed, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 
@@ -95,7 +95,7 @@ def storage_service_list(**kwargs):
 
     query = Service.query
     if kwargs['filter']:
-        query = apply_filters(query, filter_parser.parse(kwargs['filter']), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(kwargs['filter']), do_auto_join=False)
 
     fmt = '{proto}://{host}:{port}'
     if kwargs['short']:

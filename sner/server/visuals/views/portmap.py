@@ -11,7 +11,7 @@ from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host, Service
 from sner.server.visuals.views import blueprint
 
@@ -29,13 +29,13 @@ def portmap_route():
     query = db.session.query(Service.state, func.count(Service.id).label('state_count')).join(Host) \
         .group_by(Service.state).order_by(desc('state_count'))
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
     portstates = query.all()
 
     # join allows filter over host attrs
     query = db.session.query(Service.port, func.count(Service.id)).join(Host).order_by(Service.port).group_by(Service.port)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
     portmap = [{'port': port, 'count': count} for port, count in query.all()]
 
     # compute sizing for rendered element
@@ -66,7 +66,7 @@ def portmap_portstat_route(port):
         .filter(Service.port == port).order_by(Host.address)
 
     if 'filter' in request.values:
-        parsed_filter = filter_parser.parse(request.values.get('filter'))
+        parsed_filter = FILTER_PARSER.parse(request.values.get('filter'))
         stats = apply_filters(stats, parsed_filter, do_auto_join=False)
         infos = apply_filters(infos, parsed_filter, do_auto_join=False)
         comments = apply_filters(comments, parsed_filter, do_auto_join=False)

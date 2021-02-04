@@ -11,7 +11,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, tag_model_multiid
 from sner.server.storage.forms import HostForm
 from sner.server.storage.models import Host, Note, Service, Vuln
@@ -52,7 +52,7 @@ def host_list_json_route():
         .outerjoin(query_cnt_vulns, Host.id == query_cnt_vulns.c.host_id) \
         .outerjoin(query_cnt_notes, Host.id == query_cnt_notes.c.host_id)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     hosts = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(hosts)

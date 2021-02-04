@@ -12,7 +12,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model
 from sner.server.storage.forms import ServiceForm
 from sner.server.storage.models import Host, Service
@@ -57,7 +57,7 @@ def service_list_json_route():
     ]
     query = db.session.query().select_from(Service).outerjoin(Host)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(services)
@@ -142,7 +142,7 @@ def service_grouped_json_route():
     # join allows filter over host attrs
     query = db.session.query().select_from(Service).join(Host).group_by(info_column)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(services)

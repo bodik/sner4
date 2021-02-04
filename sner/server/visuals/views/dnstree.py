@@ -7,7 +7,7 @@ from flask import jsonify, render_template, request
 from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import role_required
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host
 from sner.server.visuals.views import blueprint
 
@@ -46,7 +46,7 @@ def dnstree_json_route():
 
     query = Host.query
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
     crop = request.values.get('crop', 0, type=int)
 
     hostnames_tree = {}

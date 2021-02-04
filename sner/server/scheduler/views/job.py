@@ -17,7 +17,7 @@ from sner.server.forms import ButtonForm
 from sner.server.scheduler.core import job_delete, queue_enqueue
 from sner.server.scheduler.models import Job, Queue
 from sner.server.scheduler.views import blueprint
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.utils import SnerJSONEncoder
 
 
@@ -46,7 +46,7 @@ def job_list_json_route():
     ]
     query = db.session.query().select_from(Job).outerjoin(Queue)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     jobs = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(jobs, cls=SnerJSONEncoder), mimetype='application/json')

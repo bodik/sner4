@@ -15,7 +15,7 @@ from sner.server.scheduler.core import job_delete, queue_delete, queue_enqueue
 from sner.server.scheduler.forms import QueueEnqueueForm, QueueForm
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.scheduler.views import blueprint
-from sner.server.sqlafilter import filter_parser
+from sner.server.sqlafilter import FILTER_PARSER
 
 
 @blueprint.route('/queue/list', methods=['GET'])
@@ -49,7 +49,7 @@ def queue_list_json_route():
         .outerjoin(query_nr_targets, Queue.id == query_nr_targets.c.queue_id) \
         .outerjoin(query_nr_jobs, Queue.id == query_nr_jobs.c.queue_id)
     if 'filter' in request.values:
-        query = apply_filters(query, filter_parser.parse(request.values.get('filter')), do_auto_join=False)
+        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     queues = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(queues)
