@@ -8,4 +8,5 @@ good-names=e
 ignored-classes=SQLAlchemy, sqlalchemy.orm.scoping.scoped_session
 
 [SIMILARITIES]
+min-similarity-lines=8
 ignore-imports=yes

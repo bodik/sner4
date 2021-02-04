@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module manymap tests
+manymap plugin agent tests
 """
 
 import json

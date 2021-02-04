@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module six_enum_discover
+six_enum_discover plugin agent tests
 """
 
 import json
@@ -14,7 +14,14 @@ from sner.lib import file_from_zip
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
     """six_enum_discover test"""
 
-    test_a = {'id': str(uuid4()), 'config': {'module': 'six_enum_discover', 'rate': 100}, 'targets': ['::1']}
+    test_a = {
+        'id': str(uuid4()),
+        'config': {
+            'module': 'six_enum_discover',
+            'rate': 100
+        },
+        'targets': ['::1']
+    }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
 

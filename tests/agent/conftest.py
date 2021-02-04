@@ -26,17 +26,17 @@ def cleanup_markedprocess():
 
 
 @pytest.fixture
-def dummy_a():
-    """test dummy assignment"""
+def dummy_target(queue_factory, target_factory):  # pylint: disable=redefined-outer-name
+    """dummy target fixture"""
 
-    yield {
-        'id': str(uuid4()),
-        'config': {
-            'module': 'dummy',
-            'args': '--static_assignment'
-        },
-        'targets': ['target1']
+    config = {
+        'module': 'dummy',
+        'args': '--arg1',
     }
+
+    queue = queue_factory.create(name='testqueue', config=yaml_dump(config))
+    target = target_factory.create(queue=queue, target='target1')
+    yield target
 
 
 @pytest.fixture
@@ -51,15 +51,6 @@ def longrun_a():
         },
         'targets': ['127.0.0.127']
     }
-
-
-@pytest.fixture
-def dummy_target(dummy_a, queue_factory, target_factory):  # pylint: disable=redefined-outer-name
-    """dummy target fixture"""
-
-    queue = queue_factory.create(name='testqueue', config=yaml_dump(dummy_a['config']))
-    target = target_factory.create(queue=queue, target=dummy_a['targets'][0])
-    yield target
 
 
 @pytest.fixture

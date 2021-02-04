@@ -45,15 +45,15 @@ db:
 
 lint: flake8 pylint
 flake8:
-	python -m flake8 sner bin/agent bin/server tests
+	python -m flake8 bin/agent bin/server sner tests
 pylint:
-	python -m pylint sner bin/agent bin/server tests
+	python -m pylint bin/agent bin/server sner tests
 
 test:
-	python -m pytest -v tests/server tests/agent
+	python -m pytest -v tests/agent tests/plugin tests/server
 
 coverage:
-	coverage run --source sner -m pytest tests/server tests/agent -x -vv
+	coverage run --source sner -m pytest tests/agent tests/plugin tests/server -x -vv
 	coverage report --show-missing --fail-under 100
 
 

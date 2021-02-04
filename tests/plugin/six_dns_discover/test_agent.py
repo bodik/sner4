@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module nmap tests
+six_dns_discover plugin agent test
 """
 
 import json
@@ -11,16 +11,17 @@ from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
-    """jarm module execution test"""
+    """dix_dns_discover test"""
 
     test_a = {
         'id': str(uuid4()),
-        'config': {'module': 'jarm', 'delay': 0},
-        'targets': ['tcp://127.0.0.1:1', 'udp://127.0.0.1:1']
+        'config': {
+            'module': 'six_dns_discover',
+            'delay': 1
+        },
+        'targets': ['127.0.0.1', '0.0.0.0']
     }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0
-    assert \
-        'JARM: 00000000000000000000000000000000000000000000000000000000000000' \
-        in file_from_zip(f'{test_a["id"]}.zip', 'output-0.out').decode('utf-8')
+    assert '::1' in json.loads(file_from_zip(f'{test_a["id"]}.zip', 'output.json').decode('utf-8'))

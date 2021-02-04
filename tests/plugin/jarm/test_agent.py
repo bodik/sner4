@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module dummy tests
+jarm plugin agent tests
 """
 
 import json
@@ -11,15 +11,16 @@ from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
-    """nmap module execution test"""
+    """jarm module execution test"""
 
     test_a = {
         'id': str(uuid4()),
-        'config': {'module': 'nmap', 'args': '-sL', 'timing_perhost': 1},
-        'targets': ['127.0.0.1', '::1', '[ip6-localhost]']
+        'config': {'module': 'jarm', 'delay': 0},
+        'targets': ['tcp://127.0.0.1:1', 'udp://127.0.0.1:1']
     }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0
-    assert 'Host: 127.0.0.1 (localhost)' in file_from_zip(f'{test_a["id"]}.zip', 'output.gnmap').decode('utf-8')
-    assert 'Host: ::1 (localhost)' in file_from_zip(f'{test_a["id"]}.zip', 'output6.gnmap').decode('utf-8')
+    assert \
+        'JARM: 00000000000000000000000000000000000000000000000000000000000000' \
+        in file_from_zip(f'{test_a["id"]}.zip', 'output-0.out').decode('utf-8')

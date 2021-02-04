@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-agent module six_dns_discover
+nmap plugin agent test
 """
 
 import json
@@ -11,17 +11,15 @@ from sner.lib import file_from_zip
 
 
 def test_basic(tmpworkdir):  # pylint: disable=unused-argument
-    """dix_dns_discover test"""
+    """nmap module execution test"""
 
     test_a = {
         'id': str(uuid4()),
-        'config': {
-            'module': 'six_dns_discover',
-            'delay': 1
-        },
-        'targets': ['127.0.0.1', '0.0.0.0']
+        'config': {'module': 'nmap', 'args': '-sL', 'timing_perhost': 1},
+        'targets': ['127.0.0.1', '::1', '[ip6-localhost]']
     }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
     assert result == 0
-    assert '::1' in json.loads(file_from_zip(f'{test_a["id"]}.zip', 'output.json').decode('utf-8'))
+    assert 'Host: 127.0.0.1 (localhost)' in file_from_zip(f'{test_a["id"]}.zip', 'output.gnmap').decode('utf-8')
+    assert 'Host: ::1 (localhost)' in file_from_zip(f'{test_a["id"]}.zip', 'output6.gnmap').decode('utf-8')

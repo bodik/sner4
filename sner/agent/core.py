@@ -26,6 +26,13 @@ from sner.lib import get_dotted, load_yaml
 from sner.agent.modules import registered_modules
 from sner.version import __version__
 
+import sner.plugin.dummy.agent
+import sner.plugin.jarm.agent
+import sner.plugin.manymap.agent
+import sner.plugin.nmap.agent
+import sner.plugin.six_dns_discover.agent
+import sner.plugin.six_enum_discover.agent
+
 
 LOGGER_NAME = 'sner.agent'
 DEFAULT_CONFIG = {

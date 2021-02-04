@@ -19,12 +19,14 @@ def test_version(tmpworkdir):  # pylint: disable=unused-argument
     assert result == 0
 
 
-def test_commandline_assignment(tmpworkdir, dummy_a):  # pylint: disable=unused-argument
+def test_commandline_assignment(tmpworkdir):  # pylint: disable=unused-argument
     """test custom assignment passed from command line"""
 
-    result = agent_main(['--assignment', json.dumps(dummy_a)])
+    test_a = {'id': str(uuid4()), 'config': {'module': 'dummy', 'args': '--arg1'}, 'targets': []}
+
+    result = agent_main(['--assignment', json.dumps(test_a)])
     assert result == 0
-    assert Path(f'{dummy_a["id"]}.zip').exists()
+    assert Path(f'{test_a["id"]}.zip').exists()
 
 
 def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
