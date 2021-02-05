@@ -9,9 +9,9 @@ import pytest
 from flask import current_app
 
 from sner.server.parser import ParsedHost, ParsedService
-from sner.server.planner.core import Context
 from sner.server.planner.steps import (
     archive_job,
+    Context,
     enqueue,
     enumerate_ipv4,
     filter_netranges,

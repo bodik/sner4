@@ -6,7 +6,6 @@ planner core
 import logging
 import signal
 from contextlib import contextmanager
-from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from time import sleep
@@ -16,7 +15,7 @@ from pytimeparse import parse as timeparse
 from schema import Or, Schema
 
 from sner.server.extensions import db
-from sner.server.planner.steps import REGISTERED_STEPS, StopPipeline
+from sner.server.planner.steps import run_steps, StopPipeline
 
 
 PIPELINE_CONFIG_SCHEMA = Schema(Or(
@@ -24,16 +23,6 @@ PIPELINE_CONFIG_SCHEMA = Schema(Or(
     {'type': 'interval', 'name': str, 'interval': str, 'steps': list},
     {'type': 'generic', 'steps': list}
 ))
-
-
-class Context(dict):
-    """context object"""
-
-    def __getattr__(self, attr):
-        return self[attr]
-
-    def __setattr__(self, attr, value):
-        self[attr] = value
 
 
 def run_pipeline(config):
@@ -46,7 +35,7 @@ def run_pipeline(config):
     elif config['type'] == 'interval':
         run_interval_pipeline(config)
     else:
-        run_generic_pipeline(config)
+        run_steps(config['steps'])
 
 
 def run_queue_pipeline(config):
@@ -54,7 +43,7 @@ def run_queue_pipeline(config):
 
     try:
         while True:
-            run_generic_pipeline(config)
+            run_steps(config['steps'])
     except StopPipeline:
         return
 
@@ -72,25 +61,13 @@ def run_interval_pipeline(config):
             return
 
     try:
-        run_generic_pipeline(config)
+        run_steps(config['steps'])
     except StopPipeline:
+        # stop_pipeline is emited during tests to check backoff interval
         pass
 
     lastrun_path = Path(current_app.config['SNER_VAR']) / f'{name}.lastrun'
     lastrun_path.write_text(datetime.utcnow().isoformat())
-
-
-def run_generic_pipeline(config):
-    """run generic/simple pipeline"""
-
-    current_app.logger.debug(f'run pipeline: {config}')
-    ctx = Context()
-
-    for step_config in config['steps']:
-        current_app.logger.debug(f'run step: {step_config}')
-        args = deepcopy(step_config)
-        step = args.pop('step')
-        ctx = REGISTERED_STEPS[step](ctx, **args)
 
 
 class Planner:

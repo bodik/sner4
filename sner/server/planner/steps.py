@@ -40,6 +40,31 @@ class StopPipeline(Exception):
     """stop pipeline signal"""
 
 
+class Context(dict):
+    """context object"""
+
+    def __getattr__(self, attr):
+        return self[attr]
+
+    def __setattr__(self, attr, value):
+        self[attr] = value
+
+
+def run_steps(steps, ctx=None):
+    """run steps in array of steps"""
+
+    if not ctx:
+        ctx = Context()
+
+    for step_config in steps:
+        current_app.logger.debug(f'run step: {step_config}')
+        args = deepcopy(step_config)
+        step_name = args.pop('step')
+        ctx = REGISTERED_STEPS[step_name](ctx, **args)
+
+    return ctx
+
+
 @register_step
 def stop_pipeline(_):
     """raises StopPipeline; used in tests"""
@@ -158,13 +183,7 @@ def enqueue(ctx, queue):
 def run_group(ctx, name):
     """run multiple steps defined by name"""
 
-    for step_config in current_app.config['SNER_PLANNER']['step_groups'][name]:
-        current_app.logger.debug(f'run step: {step_config}')
-        args = deepcopy(step_config)
-        step = args.pop('step')
-        ctx = REGISTERED_STEPS[step](ctx, **args)
-
-    return ctx
+    return run_steps(current_app.config['SNER_PLANNER']['step_groups'][name], ctx)
 
 
 @register_step
