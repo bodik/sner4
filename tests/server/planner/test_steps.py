@@ -51,86 +51,89 @@ def test_load_import_archive(app, queue_factory, job_completed_factory):  # pyli
         queue=queue,
         make_output=Path('tests/server/data/parser-nmap-job.zip').read_bytes()
     )
-
     ctx = Context()
 
-    load_job(ctx, queue.name)
-    assert ctx['job']
-    assert len(ctx['data']['hosts']) == 1
-    assert len(ctx['data']['services']) == 5
+    ctx = load_job(ctx, queue.name)
+    assert ctx.job
+    assert len(ctx.data['hosts']) == 1
+    assert len(ctx.data['services']) == 5
 
-    import_job(ctx)
+    ctx = import_job(ctx)
     assert len(Host.query.all()) == 1
     assert len(Service.query.all()) == 5
 
-    archive_job(ctx)
-    archive_path = Path(current_app.config['SNER_VAR']) / 'planner_archive' / f'{ctx["job"].id}'
+    ctx = archive_job(ctx)
+    archive_path = Path(current_app.config['SNER_VAR']) / 'planner_archive' / f'{ctx.job.id}'
     assert archive_path.exists()
 
     # trigger stop pipeline when no job finished
     with pytest.raises(StopPipeline):
-        load_job(ctx, queue.name)
+        ctx = load_job(ctx, queue.name)
 
 
 def test_project_servicelist():
     """test project servicelist"""
 
-    ctx = Context()
-    ctx['data'] = {'services': [
-        ParsedService(handle={'host': '127.0.2.1', 'service': 'tcp/1'}, proto='tcp', port='1'),
-        ParsedService(handle={'host': '::1', 'service': 'tcp/1'}, proto='tcp', port='1')
-    ]}
-    project_servicelist(ctx)
+    ctx = Context(data={
+        'services': [
+            ParsedService(handle={'host': '127.0.2.1', 'service': 'tcp/1'}, proto='tcp', port='1'),
+            ParsedService(handle={'host': '::1', 'service': 'tcp/1'}, proto='tcp', port='1')
+        ]
+    })
+
+    ctx = project_servicelist(ctx)
 
     expected = ['tcp://127.0.2.1:1', 'tcp://[::1]:1']
-    assert ctx['data'] == expected
+    assert ctx.data == expected
 
 
 def test_project_hostlist():
     """test project hostlist"""
 
-    ctx = Context()
-    ctx['data'] = {'hosts': [
-        ParsedHost(handle={'host': '127.0.2.1'}, address='127.0.2.1'),
-        ParsedHost(handle={'host': '::1'}, address='::1')
-    ]}
-    project_hostlist(ctx)
+    ctx = Context(data={
+        'hosts': [
+            ParsedHost(handle={'host': '127.0.2.1'}, address='127.0.2.1'),
+            ParsedHost(handle={'host': '::1'}, address='::1')
+        ]
+    })
+
+    ctx = project_hostlist(ctx)
 
     expected = ['127.0.2.1', '::1']
-    assert ctx['data'] == expected
+    assert ctx.data == expected
 
 
 def test_filter_tarpits(app):  # pylint: disable=unused-argument
     """test filter tarpits"""
 
-    ctx = Context()
-    ctx['job'] = Job(id='atestjobid')
-    ctx['data'] = {'services': [
-        ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')
-    ]}
+    ctx = Context(
+        job=Job(id='atestjobid'),
+        data={'services': [ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')]}
+    )
     for port in range(201):
-        ctx['data']['services'].append(ParsedService(handle={'host': '127.0.4.1', 'service': f'tcp/{port}'}, proto='tcp', port=f'{port}'))
-    filter_tarpits(ctx)
+        ctx.data['services'].append(ParsedService(handle={'host': '127.0.4.1', 'service': f'tcp/{port}'}, proto='tcp', port=f'{port}'))
 
-    assert len(ctx['data']['services']) == 1
+    ctx = filter_tarpits(ctx)
+
+    assert len(ctx.data['services']) == 1
 
 
 def test_filter_netranges():
     """test filter netranges"""
 
-    ctx = Context()
-    ctx['data'] = ['127.0.0.1', '127.0.1.1']
-    filter_netranges(ctx, ['::/0', '127.0.0.0/24'])
+    ctx = Context(data=['127.0.0.1', '127.0.1.1'])
 
-    assert ctx['data'] == ['127.0.0.1']
+    ctx = filter_netranges(ctx, ['::/0', '127.0.0.0/24'])
+
+    assert ctx.data == ['127.0.0.1']
 
 
 def test_enqueue(app, queue):  # pylint: disable=unused-argument
     """test enqueue"""
 
-    ctx = Context()
-    ctx['data'] = ['target1']
-    enqueue(ctx, queue.name)
+    ctx = Context(data=['target1'])
+
+    ctx = enqueue(ctx, queue.name)
 
     assert Target.query.count() == 1
 
@@ -144,24 +147,22 @@ def test_run_group(app):  # pylint: disable=unused-argument
         ]
     }
 
-    ctx = Context()
-    ctx['job'] = Job(id='atestjobid')
-    ctx['data'] = {'services': [
-        ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')
-    ]}
+    ctx = Context(
+        job=Job(id='atestjobid'),
+        data={'services': [ParsedService(handle={'host': '127.0.3.1', 'service': 'tcp/1'}, proto='tcp', port='1')]}
+    )
 
-    run_group(ctx, 'a_test_group')
+    ctx = run_group(ctx, 'a_test_group')
 
-    assert ctx['data'] == ['tcp://127.0.3.1:1']
+    assert ctx.data == ['tcp://127.0.3.1:1']
 
 
 def test_enumerate_ipv4(app):  # pylint: disable=unused-argument
     """test enumerate_ipv4"""
 
-    ctx = Context()
-    enumerate_ipv4(ctx, netranges=['127.0.0.0/24'])
+    ctx = enumerate_ipv4(Context(), netranges=['127.0.0.0/24'])
 
-    assert len(ctx['data']) == 256
+    assert len(ctx.data) == 256
 
 
 def test_rescan_services(app, host_factory, service_factory, queue_factory):  # pylint: disable=unused-argument
@@ -174,10 +175,9 @@ def test_rescan_services(app, host_factory, service_factory, queue_factory):  # 
         config=yaml_dump({'module': 'nmap', 'args': 'arg1'}),
     )
 
-    ctx = Context()
-    rescan_services(ctx, '0s')
+    ctx = rescan_services(Context(), '0s')
 
-    assert len(ctx['data']) == 2
+    assert len(ctx.data) == 2
 
 
 def test_rescan_hosts(app, host_factory, queue_factory):  # pylint: disable=unused-argument
@@ -190,10 +190,9 @@ def test_rescan_hosts(app, host_factory, queue_factory):  # pylint: disable=unus
         config=yaml_dump({'module': 'nmap', 'args': 'arg1'}),
     )
 
-    ctx = Context()
-    rescan_hosts(ctx, '0s')
+    ctx = rescan_hosts(Context(), '0s')
 
-    assert len(ctx['data']) == 2
+    assert len(ctx.data) == 2
 
 
 def test_storage_ipv6_enum(app, queue, host_factory):  # pylint: disable=unused-argument
@@ -202,10 +201,9 @@ def test_storage_ipv6_enum(app, queue, host_factory):  # pylint: disable=unused-
     host_factory.create(address='::1')
     host_factory.create(address='::00ff:fe00:1')
 
-    ctx = Context()
-    storage_ipv6_enum(ctx)
+    ctx = storage_ipv6_enum(Context())
 
-    assert len(ctx['data']) == 1
+    assert len(ctx.data) == 1
 
 
 def test_storage_cleanup(app, host_factory, service_factory, note_factory):  # pylint: disable=unused-argument
@@ -218,7 +216,7 @@ def test_storage_cleanup(app, host_factory, service_factory, note_factory):  # p
     host2 = host_factory.create(address='127.127.127.136', hostname=None, os=None, comment=None)
     note_factory.create(host=host2, xtype='hostnames', data='adata')
 
-    storage_cleanup({})
+    storage_cleanup(Context())
 
     assert Host.query.count() == 1
     assert Service.query.count() == 1

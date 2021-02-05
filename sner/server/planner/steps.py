@@ -56,25 +56,29 @@ def load_job(ctx, queue):
         raise StopPipeline()
 
     current_app.logger.info(f'load_job {job.id} ({qref.name})')
-    ctx['job'] = job
+    ctx.job = job
     queue_module_config = yaml.safe_load(job.queue.config)
     parser = REGISTERED_PARSERS[queue_module_config['module']]
-    ctx['data'] = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
+    ctx.data = dict(zip(['hosts', 'services', 'vulns', 'notes'], parser.parse_path(job.output_abspath)))
+
+    return ctx
 
 
 @register_step
 def import_job(ctx):
     """import data to storage"""
 
-    current_app.logger.info(f'import_job {ctx["job"].id} ({ctx["job"].queue.name})')
-    import_parsed(**ctx['data'])
+    current_app.logger.info(f'import_job {ctx.job.id} ({ctx.job.queue.name})')
+    import_parsed(**ctx.data)
+
+    return ctx
 
 
 @register_step
 def archive_job(ctx):
     """archive job step"""
 
-    job = ctx['job']
+    job = ctx.job
     job_id, queue_name = job.id, job.queue.name
 
     current_app.logger.info(f'archive_job {job_id} ({queue_name})')
@@ -83,15 +87,19 @@ def archive_job(ctx):
     copy2(job.output_abspath, archive_dir)
     job_delete(job)
 
+    return ctx
+
 
 @register_step
 def project_servicelist(ctx):
     """project service list from context data"""
 
     data = []
-    for service in ctx['data']['services']:
+    for service in ctx.data['services']:
         data.append(f'{service.proto}://{format_host_address(service.handle["host"])}:{service.port}')
-    ctx['data'] = data
+    ctx.data = data
+
+    return ctx
 
 
 @register_step
@@ -99,9 +107,11 @@ def project_hostlist(ctx):
     """project host list from context data"""
 
     data = []
-    for host in ctx['data']['hosts']:
+    for host in ctx.data['hosts']:
         data.append(f'{host.address}')
-    ctx['data'] = data
+    ctx.data = data
+
+    return ctx
 
 
 @register_step
@@ -109,14 +119,16 @@ def filter_tarpits(ctx, threshold=200):
     """filter filter hosts with too much services detected"""
 
     hosts = defaultdict(int)
-    for service in ctx['data'].get('services', []):
+    for service in ctx.data.get('services', []):
         hosts[service.handle['host']] += 1
     hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, hosts.items()))
 
     if hosts_over_threshold:
-        current_app.logger.info(f'filter_tarpits {ctx["job"].id} {hosts_over_threshold}')
-        for collection in ctx['data']:
-            ctx['data'][collection] = list(filter(lambda x: x.handle['host'] not in hosts_over_threshold, ctx['data'][collection]))
+        current_app.logger.info(f'filter_tarpits {ctx.job.id} {hosts_over_threshold}')
+        for collection in ctx.data:
+            ctx.data[collection] = list(filter(lambda x: x.handle['host'] not in hosts_over_threshold, ctx.data[collection]))
+
+    return ctx
 
 
 @register_step
@@ -124,18 +136,22 @@ def filter_netranges(ctx, netranges):
     """filter ctx data, whitelist only specified netranges"""
 
     whitelist = [ip_network(net) for net in netranges]
-    data = [item for item in ctx['data'] if any([ip_address(item) in net for net in whitelist])]
-    ctx['data'] = data
+    data = [item for item in ctx.data if any([ip_address(item) in net for net in whitelist])]
+    ctx.data = data
+
+    return ctx
 
 
 @register_step
 def enqueue(ctx, queue):
     """enqueue to queue from context data"""
 
-    if ctx['data']:
-        current_app.logger.info(f'enqueue {len(ctx["data"])} targets to "{queue}"')
+    if ctx.data:
+        current_app.logger.info(f'enqueue {len(ctx.data)} targets to "{queue}"')
         queue = Queue.query.filter(Queue.name == queue).one()
-        queue_enqueue(queue, filter_already_queued(queue, ctx['data']))
+        queue_enqueue(queue, filter_already_queued(queue, ctx.data))
+
+    return ctx
 
 
 @register_step
@@ -146,19 +162,23 @@ def run_group(ctx, name):
         current_app.logger.debug(f'run step: {step_config}')
         args = deepcopy(step_config)
         step = args.pop('step')
-        REGISTERED_STEPS[step](ctx, **args)
+        ctx = REGISTERED_STEPS[step](ctx, **args)
+
+    return ctx
 
 
 @register_step
 def enumerate_ipv4(ctx, netranges):
     """enumerates list of netranges"""
 
-    ctx['data'] = []
+    ctx.data = []
     for netrange in netranges:
-        ctx['data'] += enumerate_network(netrange)
+        ctx.data += enumerate_network(netrange)
 
-    if ctx['data']:
-        current_app.logger.info(f'enumerate_ipv4, enumerated {len(ctx["data"])} items')
+    if ctx.data:
+        current_app.logger.info(f'enumerate_ipv4, enumerated {len(ctx.data)} items')
+
+    return ctx
 
 
 @register_step
@@ -180,9 +200,11 @@ def rescan_services(ctx, interval):
     db.session.commit()
     db.session.expire_all()
 
-    ctx['data'] = rescan
+    ctx.data = rescan
     if rescan:
         current_app.logger.info(f'rescan_services, rescan {len(rescan)} items')
+
+    return ctx
 
 
 @register_step
@@ -203,9 +225,11 @@ def rescan_hosts(ctx, interval):
     db.session.commit()
     db.session.expire_all()
 
-    ctx['data'] = rescan
+    ctx.data = rescan
     if rescan:
         current_app.logger.info(f'rescan_hosts, rescan {len(rescan)} items')
+
+    return ctx
 
 
 @register_step
@@ -226,13 +250,15 @@ def storage_ipv6_enum(ctx):
 
         targets.add(target)
 
-    ctx['data'] = targets
+    ctx.data = targets
     if targets:
         current_app.logger.info(f'storage_ipv6_enum, queued {len(targets)} items')
 
+    return ctx
+
 
 @register_step
-def storage_cleanup(_):
+def storage_cleanup(ctx):
     """clean up storage from various import artifacts"""
 
     # NOTE: Services must be deleted via ORM otherwise relationship defined
@@ -269,3 +295,5 @@ def storage_cleanup(_):
     db.session.commit()
 
     current_app.logger.debug(f'finished storage_cleanup')
+
+    return ctx

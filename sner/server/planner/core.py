@@ -29,6 +29,12 @@ PIPELINE_CONFIG_SCHEMA = Schema(Or(
 class Context(dict):
     """context object"""
 
+    def __getattr__(self, attr):
+        return self[attr]
+
+    def __setattr__(self, attr, value):
+        self[attr] = value
+
 
 def run_pipeline(config):
     """
@@ -79,11 +85,12 @@ def run_generic_pipeline(config):
 
     current_app.logger.debug(f'run pipeline: {config}')
     ctx = Context()
+
     for step_config in config['steps']:
         current_app.logger.debug(f'run step: {step_config}')
         args = deepcopy(step_config)
         step = args.pop('step')
-        REGISTERED_STEPS[step](ctx, **args)
+        ctx = REGISTERED_STEPS[step](ctx, **args)
 
 
 class Planner:
