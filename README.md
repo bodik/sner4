@@ -114,11 +114,16 @@ current task - on SIGUSR1, immediate termination on SIGTERM).
 
 All requests from agent must be authenticated with apikey for user account in
 role *agent*. Key can be specified in configuration file or by command-line
-switch.
+switch. Agent can signal it's (special) capabilities, which can be used to
+fine-grained workload routing.
 
-Currently available modules are: dummy (testing), nmap (IP address scanning or
-service sweep scanning), manymap (specific service scanning), six_dns_discover
-(IPv6 address discovery from IPv4 and DNS records).
+Currently available modules are:
+
+* dummy (testing)
+* nmap (host/service discovery and service scanning)
+* manymap (service scanning)
+* six_dns_discover (IPv6 address discovery from IPv4 and DNS records)
+* six_enum_discover (scan6 ipv6 address discover/enumerator)
 
 
 #### Server: Scheduler
@@ -131,7 +136,8 @@ operator.
 * **Queue** -- an agent module configuration (yaml encoded), scheduling specs
   (group_size, priority, active) and list of targets. Each module has a
   different config and target specification, see corresponding module
-  implementation for details.
+  implementation for details. Queue can also demand set of agent capabilities
+  which must be satisfied in order to assign job from queue.
 
 * **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
   continuous recons, some parts of monitored networks must be avoided for
