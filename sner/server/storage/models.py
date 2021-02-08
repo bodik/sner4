@@ -24,9 +24,6 @@ class StorageModelBase(db.Model):
         for key, value in obj.__dict__.items():
             if value and hasattr(self, key):
                 setattr(self, key, value)
-#        for key in self.__dict__:
-#            if hasattr(obj, key) and getattr(obj, key):
-#                setattr(self, key, getattr(obj, key))
 
 
 class Host(StorageModelBase):
