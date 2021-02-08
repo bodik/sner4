@@ -148,6 +148,10 @@ def test_service_list_command(runner, service):
     assert result.exit_code == 0
     assert result.output.strip() == host.hostname
 
+    result = runner.invoke(command, ['service-list', '--simple'])
+    assert result.exit_code == 0
+    assert result.output.strip() == f'{host.address} {service.port}'
+
     result = runner.invoke(command, ['service-list', '--filter', f'Service.port=="{service.port}"'])
     assert result.exit_code == 0
-    assert f'{service.proto}://{host.address}:{service.port}\n' == result.output
+    assert result.output.strip() == f'{service.proto}://{host.address}:{service.port}'

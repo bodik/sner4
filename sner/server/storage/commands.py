@@ -73,7 +73,8 @@ def storage_vuln_export():
 @with_appcontext
 @click.option('--filter', help='filter query')
 @click.option('--hostnames', is_flag=True, help='show host.hostname')
-@click.option('--short', is_flag=True, help='show only service.host.address/hostname')
+@click.option('--short', is_flag=True, help='show service.host.address/hostname')
+@click.option('--simple', is_flag=True, help='show "service.host.addresss service.port"')
 @click.option('--long', is_flag=True, help='show service extended info')
 def storage_service_list(**kwargs):
     """service listing; used to feed manymap queues from storage data"""
@@ -100,6 +101,8 @@ def storage_service_list(**kwargs):
     fmt = '{proto}://{host}:{port}'
     if kwargs['short']:
         fmt = '{host}'
+    elif kwargs['simple']:
+        fmt = '{host} {port}'
     elif kwargs['long']:
         fmt = '{proto}://{host}:{port} {name} {state} {info}'
 
