@@ -4,12 +4,13 @@ six_enum_discover output parser tests
 """
 
 from sner.plugin.six_enum_discover.parser import ParserModule
+from sner.server.parser import HostHandle
 
 
 def test_host_list():
     """check host list extraction"""
 
-    expected_hosts = ['::1']
+    expected_hosts = [HostHandle('::1')]
 
     pidb = ParserModule.parse_path('tests/server/data/parser-six_enum_discover-job.zip')
 

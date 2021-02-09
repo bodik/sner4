@@ -8,6 +8,7 @@ implement ParserBase interface.
 """
 
 from abc import ABC, abstractmethod
+from collections import namedtuple
 from dataclasses import dataclass
 from datetime import datetime
 from importlib import import_module
@@ -17,6 +18,10 @@ import sner.plugin
 
 
 REGISTERED_PARSERS = {}
+
+HostHandle = namedtuple('HostHandle', ['address'])
+ServiceHandle = namedtuple('ServiceHandle', ['host', 'proto', 'port'])
+DataHandle = namedtuple('DataHandle', ['host', 'service', 'xtype'])
 
 
 def load_parser_plugins():
@@ -91,7 +96,7 @@ class ParsedHost(ParsedItemBase):
     @property
     def handle(self):
         """return item reference handle"""
-        return self.address
+        return HostHandle(self.address)
 
 
 @dataclass
@@ -109,7 +114,7 @@ class ParsedService(ParsedItemBase):
     @property
     def handle(self):
         """return item reference handle"""
-        return (self.host_handle, self.proto, self.port)
+        return ServiceHandle(self.host_handle, self.proto, self.port)
 
 
 @dataclass  # pylint: disable=too-many-instance-attributes
@@ -129,7 +134,7 @@ class ParsedVuln(ParsedItemBase):
     @property
     def handle(self):
         """return item reference handle"""
-        return (self.host_handle, self.service_handle, self.xtype)
+        return DataHandle(self.host_handle, self.service_handle, self.xtype)
 
 
 @dataclass
@@ -145,7 +150,7 @@ class ParsedNote(ParsedItemBase):
     @property
     def handle(self):
         """return item reference handle"""
-        return (self.host_handle, self.service_handle, self.xtype)
+        return DataHandle(self.host_handle, self.service_handle, self.xtype)
 
 
 class ParserBase(ABC):  # pylint: disable=too-few-public-methods

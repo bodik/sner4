@@ -4,13 +4,14 @@ manymap nmap-based output parser tests
 """
 
 from sner.plugin.manymap.parser import ParserModule
+from sner.server.parser import HostHandle, ServiceHandle
 
 
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_hosts = ['127.0.0.1']
-    expected_services = [('127.0.0.1', 'tcp', 18000)]
+    expected_hosts = [HostHandle('127.0.0.1')]
+    expected_services = [ServiceHandle(expected_hosts[0], 'tcp', 18000)]
 
     pidb = ParserModule.parse_path('tests/server/data/parser-manymap-job.zip')
 

@@ -125,6 +125,7 @@ def test_filter_tarpits(app):  # pylint: disable=unused-argument
 
     ctx = filter_tarpits(ctx)
 
+    assert len(ctx.data.hosts) == 1
     assert len(ctx.data.services) == 1
 
 

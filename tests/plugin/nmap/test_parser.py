@@ -7,6 +7,7 @@ import pytest
 from libnmap.parser import NmapParserException
 
 from sner.plugin.nmap.parser import ParserModule
+from sner.server.parser import HostHandle, ServiceHandle
 
 
 def test_xxe():
@@ -21,17 +22,17 @@ def test_xxe():
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_hosts = ['127.0.0.1']
+    expected_hosts = [HostHandle('127.0.0.1')]
     expected_services = [
-        ('127.0.0.1', 'tcp', 22),
-        ('127.0.0.1', 'tcp', 25),
-        ('127.0.0.1', 'tcp', 139),
-        ('127.0.0.1', 'tcp', 445),
-        ('127.0.0.1', 'tcp', 5432)
+        ServiceHandle(expected_hosts[0], 'tcp', 22),
+        ServiceHandle(expected_hosts[0], 'tcp', 25),
+        ServiceHandle(expected_hosts[0], 'tcp', 139),
+        ServiceHandle(expected_hosts[0], 'tcp', 445),
+        ServiceHandle(expected_hosts[0], 'tcp', 5432)
     ]
 
     pidb = ParserModule.parse_path('tests/server/data/parser-nmap-output.xml')
 
     assert [x.handle for x in pidb.hosts.values()] == expected_hosts
     assert [x.handle for x in pidb.services.values()] == expected_services
-    assert len(list(filter(lambda x: x[-1] == 'cpe', map(lambda x: x.handle, pidb.notes.values())))) == 5
+    assert len(list(filter(lambda x: x.xtype == 'cpe', map(lambda x: x.handle, pidb.notes.values())))) == 5

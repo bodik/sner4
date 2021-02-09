@@ -145,7 +145,7 @@ def filter_tarpits(ctx, threshold=200):
 
     host_services_count = defaultdict(int)
     for service in ctx.data.services.values():
-        host_services_count[service.host_handle] += 1
+        host_services_count[ctx.data.hosts[service.host_handle].address] += 1
     hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, host_services_count.items()))
 
     if hosts_over_threshold:
@@ -157,7 +157,7 @@ def filter_tarpits(ctx, threshold=200):
 
         for collection in ['services', 'vulns', 'notes']:
             for key, val in list(getattr(ctx.data, collection).items()):
-                if val.host_handle in hosts_over_threshold:
+                if val.host_handle.address in hosts_over_threshold:
                     getattr(ctx.data, collection).pop(key)
 
     return ctx
