@@ -34,4 +34,4 @@ def test_parse_path():
 
     assert [x.handle for x in pidb.hosts.values()] == expected_hosts
     assert [x.handle for x in pidb.services.values()] == expected_services
-    assert len(list(filter(lambda x: x[-1]=='cpe', map(lambda x: x.handle, pidb.notes.values())))) == 5
+    assert len(list(filter(lambda x: x[-1] == 'cpe', map(lambda x: x.handle, pidb.notes.values())))) == 5
