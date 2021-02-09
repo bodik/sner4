@@ -45,21 +45,33 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         pidb = ParsedItemsDb()
 
         for ihost in report.hosts:
-            host = cls._parse_host(ihost)
+            host, cpe_note = cls._parse_host(ihost)
             import_time = datetime.fromtimestamp(int(ihost.starttime))
-            pidb.hosts[host.handle] = host
+            pidb.hosts.upsert(host)
+            if cpe_note:
+                pidb.notes.upsert(cpe_note)
 
             for iscript in ihost.scripts_results:
                 note = cls._parse_note(iscript, host.handle, import_time)
-                pidb.notes[note.handle] = note
+                pidb.notes.upsert(note)
 
             for iservice in ihost.services:
                 service = cls._parse_service(iservice, host.handle, import_time)
-                pidb.services[service.handle] = service
+                pidb.services.upsert(service)
+
+                if iservice.cpelist:
+                    note = ParsedNote(
+                        host_handle=host.handle,
+                        service_handle=service.handle,
+                        xtype='cpe',
+                        data=json.dumps([x.cpestring for x in iservice.cpelist]),
+                        import_time=import_time
+                    )
+                    pidb.notes.upsert(note)
 
                 for iscript in iservice.scripts_results:
                     note = cls._parse_note(iscript, host.handle, import_time, service.handle)
-                    pidb.notes[note.handle] = note
+                    pidb.notes.upsert(note)
 
         return pidb
 
@@ -68,6 +80,8 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         """parse host"""
 
         host = ParsedHost(address=ihost.address)
+        cpe_note = None
+
         if ihost.hostnames:
             host.hostnames = list(set(ihost.hostnames))
             if not host.hostname:
@@ -76,8 +90,9 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         for osmatch in ihost.os_match_probabilities():
             if osmatch.accuracy == 100:
                 host.os = osmatch.name
+                cpe_note = ParsedNote(host_handle=host.handle, xtype='cpe', data=json.dumps(osmatch.get_cpe()))
 
-        return host
+        return host, cpe_note
 
     @staticmethod
     def _parse_service(iservice, host_handle, import_time):
