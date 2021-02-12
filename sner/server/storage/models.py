@@ -21,7 +21,8 @@ class StorageModelBase(db.Model):
     def update(self, obj):
         """Update model from data object. Existing values are not overwriten with empty values."""
 
-        for key, value in obj.__dict__.items():
+        iterator = obj.__dict__ if hasattr(obj, '__dict__') else obj
+        for key, value in iterator.items():
             if value and hasattr(self, key):
                 setattr(self, key, value)
 
