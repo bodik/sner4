@@ -1,5 +1,7 @@
 coverage
+cpe
 defusedxml
+elasticsearch
 fido2
 file-magic
 flake8

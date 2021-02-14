@@ -8,6 +8,9 @@
 #  tags_vuln: ['info', 'report', 'todo', 'falsepositive']
 #  tags_annotate: ['sslhell']
 #  trim_report_cells: 65000
+#  vulnsearch:
+#    cvesearch: https://u:p@hostname:15443
+#    esd: https://u:p@hostname:443/esd
 #
 #
 #agent:

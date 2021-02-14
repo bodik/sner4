@@ -181,7 +181,6 @@ modules. See the `server storage import` for help. Parsers can also import
 default output formats of various security tools and scanners (currently: nmap,
 nessus).
 
-
 #### Server: Visuals
 
 Visualization modules can be used to visualize various informations stored in
@@ -192,6 +191,26 @@ database or current configuration:
 * Portmap explorer
 * (Service) Port infos
 
+#### Snerlytics: Storage vulnsearch (experimental)
+
+Experimental subsystem allowing to corelate nmap detected service CPEs with
+external https://github.com/cve-search/cve-search (by circl.lu) and analyze the
+data via ELK stack.
+
+* install via https://github.com/bodik/sner-ansible playbooks/snerlytics.yml
+* configure external systems urls in config file
+* run synchronization process `bin/server storage sync-vulnsearch`
+
+Note: python requests does not use system ca-certificates, in dev environment
+helper and mangling certifi store can be used to connect via non-globaly
+trusted CAs.
+
+```
+echo "ip dev-snerlytics" >> /etc/hosts
+extra/get_peer_certificate.py dev-snerlytics > /usr/local/share/ca-certificates/dev-snerlytics.crt
+update-ca-certificates
+ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packages/certifi/cacert.pem
+```
 
 
 ## 3 Installation

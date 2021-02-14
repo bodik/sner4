@@ -18,6 +18,7 @@ from sner.server.parser import REGISTERED_PARSERS
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import import_parsed, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
+from sner.server.storage.vulnsearch import sync_es_index
 
 
 @click.group(name='storage', help='sner.server storage management')
@@ -108,3 +109,24 @@ def storage_service_list(**kwargs):
 
     for tmp in query.all():
         print(fmt.format(**get_data(tmp), host=get_host(tmp, kwargs['hostnames'])))
+
+
+@command.command(name='sync-vulnsearch', help='synchronize vulnsearch elk index')
+@with_appcontext
+@click.option('--namelen', default=100, help='emited name length')
+@click.option('--cvesearch', help='cvesearch base url')
+@click.option('--esd', help='elasticsearch url')
+def storage_sync_vulnsearch(**kwargs):
+    """synchronize vulnsearch elk index"""
+
+    cvesearch = kwargs.get('cvesearch') or current_app.config['SNER_VULNSEARCH'].get('cvesearch')
+    if not cvesearch:
+        current_app.logger.error('cvesearch url required (config or cmdline)')
+        sys.exit(1)
+
+    esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
+    if not esd:
+        current_app.logger.error('esd url required (config or cmdline)')
+        sys.exit(1)
+
+    sync_es_index(cvesearch, esd, kwargs['namelen'])

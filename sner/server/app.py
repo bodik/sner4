@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_DATABASE_URI': 'postgresql:///sner',
     'SQLALCHEMY_ECHO': False,
 
-    # sner
+    # sner-web
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['agent', 'user', 'operator', 'admin'],
     'SNER_SESSION_IDLETIME': 3600,
@@ -56,7 +56,10 @@ DEFAULT_CONFIG = {
     'SNER_TAGS_VULN': ['info', 'report', 'todo', 'falsepositive'],
     'SNER_TAGS_ANNOTATE': ['sslhell'],
     'SNER_TRIM_REPORT_CELLS': 65000,
-    'SNER_PLANNER': {}
+
+    # other sner subsystems
+    'SNER_PLANNER': {},
+    'SNER_VULNSEARCH': {}
 }
 
 
@@ -70,14 +73,16 @@ def config_from_yaml(filename):
         'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
         # sqlalchemy
         'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
-        # sner
+        # sner-web
         'SNER_VAR': get_dotted(config_dict, 'server.var'),
         'SNER_SESSION_IDLETIME': get_dotted(config_dict, 'server.session_idletime'),
         'SNER_TAGS_HOST': get_dotted(config_dict, 'server.tags_host'),
         'SNER_TAGS_VULN': get_dotted(config_dict, 'server.tags_vuln'),
         'SNER_TAGS_ANNOTATE': get_dotted(config_dict, 'server.tags_annotate'),
         'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells'),
-        'SNER_PLANNER': get_dotted(config_dict, 'planner')
+        # other sner subsystems
+        'SNER_PLANNER': get_dotted(config_dict, 'planner'),
+        'SNER_VULNSEARCH': get_dotted(config_dict, 'server.vulnsearch')
     }
     return {k: v for k, v in config.items() if v is not None}
 
