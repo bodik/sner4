@@ -13,6 +13,7 @@ import requests
 from cpe import CPE
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk as es_bulk
+from flask import current_app
 
 from sner.server.storage.models import Note
 from sner.server.utils import windowed_query
@@ -20,12 +21,21 @@ from sner.server.utils import windowed_query
 ES_INDEX = 'vulnsearch'
 
 
-@functools.lru_cache(maxsize=1024)
+@functools.lru_cache(maxsize=256)
 def cvefor(cpe, cvesearch_url):  # pragma: nocover  ; mocked
     """query cvesearch and filter out response"""
 
     res = requests.get(f'{cvesearch_url}/api/cvefor/{cpe}')
-    return res.json() if res.status_code == HTTPStatus.OK else []
+    if res.status_code != HTTPStatus.OK:
+        return []
+
+    # filter unused/oversized data; ex. linux:linux_kernel:xyz is about 800MB
+    data = res.json()
+    res = None  # free memory
+    for cve in data:
+        for field in ['vulnerable_configuration', 'vulnerable_configuration_cpe_2_2', 'vulnerable_product']:
+            cve.pop(field, None)
+    return data
 
 
 def vulndata(note, parsed_cpe, cve, namelen):
@@ -131,3 +141,6 @@ def sync_es_index(cvesearch_url, esd_url, namelen):
 
     # update alias and prune old indexes
     update_managed_indices(esclient, current_index)
+
+    # print cache stats
+    current_app.logger.debug(f'cvefor cache: {cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect

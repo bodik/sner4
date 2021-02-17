@@ -4,6 +4,7 @@ storage.commands tests
 """
 
 import csv
+import functools
 import json
 from io import StringIO
 from unittest.mock import patch
@@ -164,8 +165,12 @@ def test_service_list_command(runner, service):
 def test_syncvulnsearch_command(runner, note_factory):
     """test sync-vulnsearch command"""
 
-    def cvefor_mock(_, __):
-        """mock external cvesearch service"""
+    @functools.lru_cache(maxsize=256)
+    def cvefor_mock(_1, _2):
+        """
+        mock external cvesearch service.
+        note: function prototype should match original so the cache stats debug code does not break.
+        """
 
         return [{
             'id': 'CVE-0000-0000',
