@@ -87,9 +87,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     app = Flask('sner.server')
     app.config.update(DEFAULT_CONFIG)  # default config
-    app.config.update(config_from_yaml('/etc/sner.yaml'))  # service configuration
-    app.config.update(config_from_yaml(config_file))  # passed from other programs, eg. tests
-    app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi config
+    app.config.update(config_from_yaml(config_file or '/etc/sner.yaml'))  # service configuration
+    app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
 
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 
