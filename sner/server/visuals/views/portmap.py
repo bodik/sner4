@@ -53,16 +53,19 @@ def portmap_route():
 def portmap_portstat_route(port):
     """generate port statistics fragment"""
 
-    stats = db.session.query(Service.proto, func.count(Service.id)).filter(Service.port == port) \
+    stats = db.session.query(Service.proto, func.count(Service.id)).join(Host) \
+        .filter(Service.port == port) \
         .group_by(Service.proto).order_by(Service.proto)
 
-    infos = db.session.query(Service.info, func.count(Service.id).label('info_count')) \
-        .filter(Service.port == port, Service.info != '', Service.info != None).group_by(Service.info).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
+    infos = db.session.query(Service.info, func.count(Service.id).label('info_count')).join(Host) \
+        .filter(Service.port == port, Service.info != '', Service.info != None) \
+        .group_by(Service.info).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
 
-    comments = db.session.query(func.distinct(Service.comment)).filter(Service.port == port, Service.comment != '').order_by(Service.comment)
+    comments = db.session.query(func.distinct(Service.comment)).join(Host) \
+        .filter(Service.port == port, Service.comment != '') \
+        .order_by(Service.comment)
 
-    hosts = db.session.query(Host.address, Host.hostname, Host.id) \
-        .select_from(Service).outerjoin(Host) \
+    hosts = db.session.query(Host.address, Host.hostname, Host.id).select_from(Service).outerjoin(Host) \
         .filter(Service.port == port).order_by(Host.address)
 
     if 'filter' in request.values:
