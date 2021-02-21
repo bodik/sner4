@@ -1,6 +1,30 @@
 # sner4 changelog
 
-## 0.4.3 - fix bugs
+## 0.5.0 - towards vulnsearch [BC BREAK]
+
+* features
+  * queue requirements and agent capabilities for node-grained workload management
+  * local agent invocation id autogeneration
+  * jarm scanning
+  * syn scan as main service discovery, ack scan removal
+  * ui cosmetics
+  * service-list simple output
+  * dev helpers (db, cert pinning)a
+  * nmap parser pull cpe info for hosts and services
+  * vulnsearch, use cpe info to create basic snerlytics view
+
+* other
+  * planner refactoring, all steps explicitly using and passing context, add run_group step
+  * agent and parser modules refactored to plugins with dynamic loading
+  * various tests cometics (sqlaf, pws)
+  * parser internal structures uses stricter types (namedtuples)
+
+* bc breaks
+  * protocol, get assignment parameters from url to qstring
+  * api, dropped '/v1/' from url
+  * db schema, queue model attrs
+
+## 0.4.3 - fix bugs (unreleased)
 
 * fix:
   * fix add-agent command
