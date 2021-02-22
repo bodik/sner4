@@ -9,7 +9,7 @@
   * syn scan as main service discovery, ack scan removal
   * ui cosmetics
   * service-list simple output
-  * dev helpers (db, cert pinning)a
+  * dev helpers (db)
   * nmap parser pull cpe info for hosts and services
   * vulnsearch, use cpe info to create basic snerlytics view
 
