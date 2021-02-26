@@ -69,7 +69,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         return ParsedService(
             host_handle=host_handle,
-            proto=report_item['protocol'],
+            proto=report_item['protocol'].lower(),
             port=report_item['port'],
             state='open:nessus',
             name=report_item['svc_name'],
