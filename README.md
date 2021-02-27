@@ -83,13 +83,13 @@ tools, while *data management* part focuses on data analysis and management.
 
 ## 2 Features
 
-### 2.1 Common features
+### 2.1 General features
 
 User web interface uses cookie based session management with username+password
 w/o OTP or FIDO2 Webauthn password-less authentication. REST API used by agents
-uses header-based apikey authentication. Role-based authorization is applied on
-web application request routing level.
+uses header-based apikey authentication.
 
+Role-based authorization is applied on web application request routing level.
 Default Flask session implementation has been replaced with custom session
 server-side file based storage. 
 
@@ -205,12 +205,6 @@ Note: python requests does not use system ca-certificates, in dev environment
 helper and mangling certifi store can be used to connect via non-globaly
 trusted CAs.
 
-```
-echo "ip dev-snerlytics" >> /etc/hosts
-extra/get_peer_certificate.py dev-snerlytics > /usr/local/share/ca-certificates/dev-snerlytics.crt
-update-ca-certificates
-ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packages/certifi/cacert.pem
-```
 
 
 ## 3 Installation
@@ -287,6 +281,12 @@ make test-extra
 make db-create-default
 make db
 bin/server run
+
+# pin certificate for snerlytics in devcloud
+echo "ip dev-snerlytics" >> /etc/hosts
+get_peer_certificate.py dev-snerlytics > /usr/local/share/ca-certificates/dev-snerlytics.crt
+update-ca-certificates
+ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packages/certifi/cacert.pem
 ```
 
 
