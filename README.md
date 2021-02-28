@@ -323,33 +323,18 @@ ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packa
 #### Use-case: Basic recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner_disco syn scan top10000' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'disco syn scan top10000' --file=-
 bin/agent --debug
 bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
 ```
 
+
 #### Use-case: Long-term scanning strategy with Planner
 
-1. Configure and run planner, configure pipelines as needed.
-
-    ```
-    editor /etc/sner.yaml
-    systemctl restart sner-planer.service
-    ```
-
-2. Queue targets for service discovery (if not using discovery stages)
-
-    ```
-    bin/server scheduler enumips 192.168.0.0/16 \
-        | bin/server scheduler queue-enqueue 'sner_disco ack scan top10000' --file=-
-    ```
-
-3. Optionaly: Services without identification can be requeued for high intensity version scan.
-
-    ```
-    bin/server storage service-list --filter 'Service.state ilike "open%" AND (Service.info == "" OR Service.info is_null "")' \
-        | bin/server scheduler queue-enqueue 'sner_data version scan intense' --file=-
-    ```
+```
+editor /etc/sner.yaml
+systemctl restart sner-planer.service
+```
 
 
 #### Use-case: External scan data processing
