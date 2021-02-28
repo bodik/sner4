@@ -9,7 +9,7 @@
   * syn scan as main service discovery, ack scan removal
   * ui cosmetics
   * service-list simple output
-  * dev helpers (db)
+  * dev helpers add and cleanup (db, vim.local)
   * nmap parser pull cpe info for hosts and services
   * vulnsearch, use cpe info to create basic snerlytics view
 
@@ -18,6 +18,7 @@
   * agent and parser modules refactored to plugins with dynamic loading
   * various tests cometics (sqlaf, pws)
   * parser internal structures uses stricter types (namedtuples)
+  * nessus parser normalize protocol string
 
 * bc breaks
   * protocol, get assignment parameters from url to qstring
