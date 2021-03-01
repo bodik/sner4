@@ -141,6 +141,7 @@ def sync_es_index(cvesearch_url, esd_url, namelen):
 
     # update alias and prune old indexes
     update_managed_indices(esclient, current_index)
+    esclient.indices.refresh(current_index)
 
     # print cache stats
     current_app.logger.debug(f'cvefor cache: {cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect
