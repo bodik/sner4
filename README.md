@@ -117,13 +117,7 @@ role *agent*. Key can be specified in configuration file or by command-line
 switch. Agent can signal it's (special) capabilities, which can be used to
 fine-grained workload routing.
 
-Currently available modules are:
-
-* dummy (testing)
-* nmap (host/service discovery and service scanning)
-* manymap (service scanning)
-* six_dns_discover (IPv6 address discovery from IPv4 and DNS records)
-* six_enum_discover (scan6 ipv6 address discover/enumerator)
+For currently available modules see `sner/plugin/*/agent.py`
 
 
 #### Server: Scheduler
