@@ -101,6 +101,20 @@ def test_vuln_list_route_filtering(live_server, sl_operator, vulns_filtering):  
     check_vulns_filtering(sl_operator, 'vuln_list_table')
 
 
+def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vuln_factory, service):  # pylint: disable=unused-argument
+    """service endpoint uris dropdown test"""
+
+    test_vuln = vuln_factory.create(service=service)
+
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
+    check_service_endpoint_dropdown(
+        sl_operator,
+        sl_operator.find_element_by_id('vuln_list_table'),
+        f'{test_vuln.service.port}/{test_vuln.service.proto}'
+    )
+
+
 def test_vuln_view_route_tagging(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """test vuln view tagging features"""
 
@@ -114,20 +128,6 @@ def test_vuln_view_route_tagging(live_server, sl_operator, vuln):  # pylint: dis
 
     db.session.refresh(vuln)
     assert 'info' in Vuln.query.get(vuln.id).tags
-
-
-def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vuln_factory, service):  # pylint: disable=unused-argument
-    """service endpoint uris dropdown test"""
-
-    test_vuln = vuln_factory.create(service=service)
-
-    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
-    dt_rendered(sl_operator, 'vuln_list_table', test_vuln.comment)
-    check_service_endpoint_dropdown(
-        sl_operator,
-        sl_operator.find_element_by_id('vuln_list_table'),
-        f'{test_vuln.service.port}/{test_vuln.service.proto}'
-    )
 
 
 def test_vuln_view_route_annotate(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
