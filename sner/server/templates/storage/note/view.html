@@ -31,13 +31,15 @@ $(document).ready(function() {
 			<td class="service_endpoint_dropdown">
 				<span class="render_hbs" data-hbs="storage.hbs.service_endpoint_dropdown" data-hbs_context='{{ {'host_address': note.host.address, 'host_hostname': note.host.hostname, 'service_proto': note.service.proto|default(None), 'service_port': note.service.port|default(None), 'value': note.service|string}|tojson }}'></span>
 			</td>
+			<th>via_target</th>
+			<td>{{ note.via_target }}</td>
 		</tr>
 		<tr>
 			<th>xtype</th>
 			<td>{{ note.xtype }}</td>
 			<th>tags</th>
 			<td
-				class="render_hbs abutton_annotate_view"
+				class="render_hbs abutton_annotate_view" colspan="3"
 				data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': note.tags}|tojson }}'
 				data-annotate_route="storage.note_annotate_route" data-model_id="{{note.id}}">
 				{{ note.tags }}
@@ -46,7 +48,7 @@ $(document).ready(function() {
 		<tr>
 			<th>comment</th>
 			<td
-				class="abutton_annotate_view" colspan="3"
+				class="abutton_annotate_view" colspan="5"
 				data-annotate_route="storage.note_annotate_route" data-model_id="{{note.id}}">
 				{{ note.comment }}
 			</td>

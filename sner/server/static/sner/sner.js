@@ -179,6 +179,28 @@ class SnerDatatablesModule {
 		});
 		return data;
 	}
+
+	/**
+	 * toggle via_target column view in current session via sessionStorage
+	 *
+	 */
+	toggle_viatarget_column_visibility() {
+		if (!confirm('Toggle will remove any datatable states and reaload the page. Are you sure?')) { return; }
+
+		sessionStorage.setItem(
+			'dt_viatarget_column_visible',
+			JSON.stringify(!JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible')))
+		);
+
+		/* the saved states must be removed, the save state has precedence over dt initialization values */
+		Object.keys(sessionStorage).forEach(function(key) {
+			if (key.startsWith('DataTables_')) {
+				sessionStorage.removeItem(key);
+			}
+		});
+
+		location.reload();
+	}
 }
 
 

@@ -47,13 +47,14 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         for ihost in report.hosts:
             host, cpe_note = cls._parse_host(ihost)
+            via_target = ihost.user_target_hostname or host.address
             import_time = datetime.fromtimestamp(int(ihost.starttime or time()))
             pidb.hosts.upsert(host)
             if cpe_note:
                 pidb.notes.upsert(cpe_note)
 
             for iscript in ihost.scripts_results:
-                note = cls._parse_note(iscript, host.handle, import_time)
+                note = cls._parse_note(iscript, host.handle, None, via_target, import_time)
                 pidb.notes.upsert(note)
 
             for iservice in ihost.services:
@@ -64,6 +65,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
                     note = ParsedNote(
                         host_handle=host.handle,
                         service_handle=service.handle,
+                        via_target=via_target,
                         xtype='cpe',
                         data=json.dumps([x.cpestring for x in iservice.cpelist]),
                         import_time=import_time
@@ -71,7 +73,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
                     pidb.notes.upsert(note)
 
                 for iscript in iservice.scripts_results:
-                    note = cls._parse_note(iscript, host.handle, import_time, service.handle)
+                    note = cls._parse_note(iscript, host.handle, service.handle, via_target, import_time)
                     pidb.notes.upsert(note)
 
         return pidb
@@ -115,12 +117,13 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         return service
 
     @staticmethod
-    def _parse_note(iscript, host_handle, import_time, service_handle=None):
+    def _parse_note(iscript, host_handle, service_handle, via_target, import_time):
         """parse note"""
 
         return ParsedNote(
             host_handle=host_handle,
             service_handle=service_handle,
+            via_target=via_target,
             xtype=f'nmap.{iscript["id"]}',
             data=json.dumps(iscript),
             import_time=import_time

@@ -37,13 +37,15 @@ $(document).ready(function() {
 			<td class="service_endpoint_dropdown">
 				<span class="render_hbs" data-hbs="storage.hbs.service_endpoint_dropdown" data-hbs_context='{{ {'host_address': vuln.host.address, 'host_hostname': vuln.host.hostname, 'service_proto': vuln.service.proto|default(None), 'service_port': vuln.service.port|default(None), 'value': vuln.service|string}|tojson }}'></span>
 			</td>
+			<th>via_target</th>
+			<td>{{ vuln.via_target }}</td>
 		</tr>
 		<tr>
 			<th>xtype</th>
 			<td>{{ vuln.xtype }}</td>
 
 			<th>severity</th>
-			<td>
+			<td colspan="3">
 				<span class="render_hbs" data-hbs="storage.hbs.severity_label" data-hbs_context='{{ {'severity': vuln.severity|string}|tojson }}'>{{ vuln.severity }}</span>
 			</td>
 		</tr>
@@ -54,7 +56,7 @@ $(document).ready(function() {
 			</td>
 			<th>tags</th>
 			<td
-				class="render_hbs abutton_annotate_view"
+				class="render_hbs abutton_annotate_view" colspan="3"
 				data-hbs="storage.hbs.tag_labels" data-hbs_context='{{ {'tags': vuln.tags}|tojson }}'
 				data-annotate_route="storage.vuln_annotate_route" data-model_id="{{vuln.id}}">
 				{{ vuln.tags }}
@@ -63,7 +65,7 @@ $(document).ready(function() {
 		<tr>
 			<th>comment</th>
 			<td
-				class="abutton_annotate_view" colspan="3"
+				class="abutton_annotate_view" colspan="5"
 				data-annotate_route="storage.vuln_annotate_route" data-model_id="{{vuln.id}}">
 				{{ vuln.comment }}
 			</td>

@@ -13,7 +13,7 @@ def test_parse_path():
     expected_hosts = [HostHandle('127.0.0.1')]
     # TODO: port cast int
     expected_services = [ServiceHandle(expected_hosts[0], 'tcp', '443')]
-    expected_notes = [DataHandle(expected_hosts[0], expected_services[0], 'jarm.fp')]
+    expected_notes = [DataHandle(expected_hosts[0], expected_services[0], 'localhost', 'jarm.fp')]
 
     pidb = ParserModule.parse_path('tests/server/data/parser-jarm-job.zip')
 

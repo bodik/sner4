@@ -60,7 +60,7 @@
 </plugin_output>
 </ReportItem>
 </ReportHost>
-<ReportHost name="127.128.129.130"><HostProperties>
+<ReportHost name="serveralias.localhost"><HostProperties>
 <tag name="LastUnauthenticatedResults">1578312081</tag>
 <tag name="Credentialed_Scan">false</tag>
 <tag name="policy-used">Basic Network Scan</tag>

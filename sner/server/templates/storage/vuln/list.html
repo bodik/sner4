@@ -21,6 +21,7 @@
 					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
 				}
 			}),
+			Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
 			Sner.dt.column('name', {'render': function(data, type, row, meta) { return Sner.storage.hbs.vuln_link(row); }}),
 			Sner.dt.column('xtype', {'visible': false}),
 			Sner.dt.column('severity', {'render': function(data, type, row, meta) { return Sner.storage.hbs.severity_label(row); }}),

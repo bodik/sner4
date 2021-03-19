@@ -130,9 +130,14 @@ def import_vulns(pidb):
                 Service.port == pidb.services[ivuln.service_handle].port
             ).one()
 
-        vuln = Vuln.query.filter(Vuln.host == host, Vuln.service == service, Vuln.xtype == ivuln.xtype).one_or_none()
+        vuln = Vuln.query.filter(
+            Vuln.host == host,
+            Vuln.service == service,
+            Vuln.via_target == ivuln.via_target,
+            Vuln.xtype == ivuln.xtype
+        ).one_or_none()
         if not vuln:
-            vuln = Vuln(host=host, service=service, xtype=ivuln.xtype)
+            vuln = Vuln(host=host, service=service, via_target=ivuln.via_target, xtype=ivuln.xtype)
             db.session.add(vuln)
 
         vuln.update(ivuln)
@@ -153,9 +158,14 @@ def import_notes(pidb):
                 Service.port == pidb.services[inote.service_handle].port
             ).one()
 
-        note = Note.query.filter(Note.host == host, Note.service == service, Note.xtype == inote.xtype).one_or_none()
+        note = Note.query.filter(
+            Note.host == host,
+            Note.service == service,
+            Note.via_target == inote.via_target,
+            Note.xtype == inote.xtype
+        ).one_or_none()
         if not note:
-            note = Note(host=host, service=service, xtype=inote.xtype)
+            note = Note(host=host, service=service, via_target=inote.via_target, xtype=inote.xtype)
             db.session.add(note)
 
         note.update(inote)

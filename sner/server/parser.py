@@ -21,7 +21,7 @@ REGISTERED_PARSERS = {}
 
 HostHandle = namedtuple('HostHandle', ['address'])
 ServiceHandle = namedtuple('ServiceHandle', ['host', 'proto', 'port'])
-DataHandle = namedtuple('DataHandle', ['host', 'service', 'xtype'])
+DataHandle = namedtuple('DataHandle', ['host', 'service', 'via_target', 'xtype'])
 
 
 def load_parser_plugins():
@@ -125,6 +125,7 @@ class ParsedVuln(ParsedItemBase):
     name: str
     xtype: str
     service_handle: tuple = None
+    via_target: str = None
     severity: str = None
     descr: str = None
     data: str = None
@@ -134,7 +135,7 @@ class ParsedVuln(ParsedItemBase):
     @property
     def handle(self):
         """return item reference handle"""
-        return DataHandle(self.host_handle, self.service_handle, self.xtype)
+        return DataHandle(self.host_handle, self.service_handle, self.via_target, self.xtype)
 
 
 @dataclass
@@ -144,13 +145,14 @@ class ParsedNote(ParsedItemBase):
     host_handle: tuple
     xtype: str
     service_handle: tuple = None
+    via_target: str = None
     data: str = None
     import_time: datetime = None
 
     @property
     def handle(self):
         """return item reference handle"""
-        return DataHandle(self.host_handle, self.service_handle, self.xtype)
+        return DataHandle(self.host_handle, self.service_handle, self.via_target, self.xtype)
 
 
 class ParserBase(ABC):  # pylint: disable=too-few-public-methods

@@ -1,6 +1,32 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
 sqlalchemy models
+
+## Note on Vuln/Note via_target attribute
+
+The core of storage data structure are models Host and Service, which
+represents IP-centric view on the monitored network -- core informations for
+the IP/TCP/UDP discovery and scanning.
+
+Than there's a World-Wide-Web, where name-based virtualhosting might apply and
+it's usage yields in an unusual situations in tools used to scan. Namely
+HTTP/WEB scanning modules of Nmap and Nessus yields different results with
+different target specifications such as hostname1, hostname2, ipaddress, but
+under same set of identifiers (module name, vulnerability name). Eg. when
+scanning 'appa' and 'appb' servers hosted at single 'address', there might be
+two vulnerabilities names 'SQL Injection' with same 'Nessus NASL ID' on the
+same target IP address, but having different content.
+
+During import (and in continuous network monitoring), we'd like to keep
+IP-centric base of Host model so in simple case, some data might get
+overwritten when upsert of vulnerability takes account Host.address, service
+and vuln.name.
+
+To solve the issue, Note and Vuln has additional model attribute 'via_target',
+which is also taken into account during storage upserts, and parsers should
+fill in the best value as possible in order to prevent accidental data
+overwrite and support upsert/update mechanism used during continuous network
+monitoring.
 """
 # pylint: disable=too-few-public-methods,abstract-method
 
@@ -90,6 +116,7 @@ class Vuln(StorageModelBase):
     id = db.Column(db.Integer, primary_key=True)
     host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
+    via_target = db.Column(db.String(250))
     name = db.Column(db.String(1000), nullable=False)
     xtype = db.Column(db.String(250))
     severity = db.Column(db.Enum(SeverityEnum), nullable=False)
@@ -116,6 +143,7 @@ class Note(StorageModelBase):
     id = db.Column(db.Integer, primary_key=True)
     host_id = db.Column(db.Integer, db.ForeignKey('host.id', ondelete='CASCADE'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete='CASCADE'))
+    via_target = db.Column(db.String(250))
     xtype = db.Column(db.String(250))
     data = db.Column(db.Text)
     tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])

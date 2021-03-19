@@ -37,9 +37,13 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         host = None
         service = None
+        via_target = None
         note = None
 
         for line in data.splitlines():
+            if line.startswith('Domain:'):
+                via_target = line.split(' ')[-1]
+
             if line.startswith('Resolved IP:'):
                 address = line.split(' ')[-1]
                 host = ParsedHost(address=address)
@@ -51,7 +55,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
             if service and line.startswith('JARM:'):
                 jarm = line.split(' ')[-1]
                 if jarm != '00000000000000000000000000000000000000000000000000000000000000':
-                    note = ParsedNote(host_handle=host.handle, xtype='jarm.fp', service_handle=service.handle, data=jarm)
+                    note = ParsedNote(host_handle=host.handle, service_handle=service.handle, via_target=via_target, xtype='jarm.fp', data=jarm)
 
         if host and service and note:
             pidb.hosts.upsert(host)

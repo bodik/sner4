@@ -91,6 +91,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         vuln = ParsedVuln(
             host_handle=host_handle,
             service_handle=service_handle,
+            via_target=report_item['host-report-name'],
             name=report_item['plugin_name'],
             xtype=f'nessus.{report_item["pluginID"]}',
             severity=SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),

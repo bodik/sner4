@@ -45,6 +45,7 @@ def vuln_list_json_route():
         ColumnDT(Service.proto, mData='service_proto'),
         ColumnDT(Service.port, mData='service_port'),
         ColumnDT(func.concat_ws('/', Service.port, Service.proto), mData='service'),
+        ColumnDT(Vuln.via_target, mData='via_target'),
         ColumnDT(Vuln.name, mData='name'),
         ColumnDT(Vuln.xtype, mData='xtype'),
         ColumnDT(Vuln.severity, mData='severity'),
