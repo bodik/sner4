@@ -21,7 +21,7 @@ pytest-factoryboy
 pytest-flask
 pytest-httpserver
 pytest-selenium
-python-libnmap
+git+https://github.com/bodik/python-libnmap@devel-usertargetname#egg=python-libnmap
 pytimeparse
 pyyaml
 requests

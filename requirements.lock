@@ -57,7 +57,7 @@ pytest-metadata==1.8.0
 pytest-selenium==1.17.0
 pytest-variables==1.9.0
 python-dateutil==2.8.1
-python-libnmap==0.7.0
+python-libnmap @ git+https://github.com/bodik/python-libnmap@9a40fe62bd27ebcad8e7bf7d88a4a65b3d7d20ee
 pytimeparse==1.1.8
 PyYAML==5.3
 requests==2.23.0
