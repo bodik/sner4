@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 WEBDRIVER_WAIT = 10
 
 
-class no_ajax_pending():  # pylint: disable=invalid-name,too-few-public-methods
+class JsNoAjaxPending():  # pylint: disable=too-few-public-methods
     """custom expected_condition, wait for all ajax calls to finish"""
 
     def __call__(self, driver):
@@ -26,7 +26,7 @@ def webdriver_waituntil(sclnt, condition):
 def dt_wait_processing(sclnt, dt_id):
     """wait until all ajax finished and dt_id processing (hopefully) ended"""
 
-    webdriver_waituntil(sclnt, no_ajax_pending())
+    webdriver_waituntil(sclnt, JsNoAjaxPending())
     webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.ID, '%s_processing' % dt_id)))
     return sclnt.find_element_by_id(dt_id)
 
