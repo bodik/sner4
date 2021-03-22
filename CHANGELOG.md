@@ -1,5 +1,12 @@
 # sner4 changelog
 
+## 0.5.1 - cosmetics
+
+* documentation cosmetics
+* vulnserach ensure complete index
+* tests naming cosmetics
+
+
 ## 0.5.0 - towards vulnsearch [BC BREAK]
 
 * features
