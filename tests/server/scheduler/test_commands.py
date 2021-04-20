@@ -13,15 +13,20 @@ def test_enumips_command(runner, tmpworkdir):  # pylint: disable=unused-argument
     """basic enumerator test"""
 
     apath = Path('enumips.txt')
-    apath.write_text('127.0.0.132/30\n127.0.1.123/32\n')
+    apath.write_text('127.0.1.123/32\n127.0.2.0/31\nfe80::1:0/126')
 
     result = runner.invoke(command, ['enumips', '127.0.0.128/30', '--file', apath])
     assert result.exit_code == 0
 
+    assert len(result.output.splitlines()) == 11
+    assert '127.0.1.123' in result.output
+    assert '127.0.2.0' in result.output
+    assert '127.0.2.1' in result.output
+    assert '127.0.0.128' in result.output
     assert '127.0.0.129' in result.output
     assert '127.0.0.130' in result.output
-    assert '127.0.0.133' in result.output
-    assert '127.0.1.123' in result.output
+    assert '127.0.0.131' in result.output
+    assert 'fe80::1:3' in result.output
 
 
 def test_rangetocidr_command(runner):

@@ -16,9 +16,17 @@ def enumerate_network(arg):
 
     network = ip_network(arg, strict=False)
     data = list(map(str, network.hosts()))
-    data.insert(0, str(network.network_address))
-    if network.prefixlen != network.max_prefixlen:
-        data.append(str(network.broadcast_address))
+
+    # input is single address
+    if network.prefixlen == network.max_prefixlen:
+        data.insert(0, str(network.network_address))
+
+    # add network/bcast addresses to range if it's not point-to-point link
+    if network.prefixlen < (network.max_prefixlen-1):
+        data.insert(0, str(network.network_address))
+        if network.version == 4:
+            data.append(str(network.broadcast_address))
+
     return data
 
 
