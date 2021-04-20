@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from pprint import pprint
+from time import time
 from zipfile import ZipFile
 
 import libnmap.parser
@@ -46,7 +47,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         for ihost in report.hosts:
             host, cpe_note = cls._parse_host(ihost)
-            import_time = datetime.fromtimestamp(int(ihost.starttime))
+            import_time = datetime.fromtimestamp(int(ihost.starttime or time()))
             pidb.hosts.upsert(host)
             if cpe_note:
                 pidb.notes.upsert(cpe_note)
