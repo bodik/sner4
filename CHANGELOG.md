@@ -1,5 +1,12 @@
 # sner4 changelog
 
+## 0.5.2 - fixing stuff
+
+* plugin nessus: nessus report can contain ip addres in host-rdns
+* server: scheduler enumips enums 4 hosts on /31 ipv4 network
+* server: ihost.starttime in nmap import can be empty (via -sL scan)
+
+
 ## 0.5.1 - cosmetics
 
 * documentation cosmetics
