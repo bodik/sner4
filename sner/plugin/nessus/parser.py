@@ -5,6 +5,7 @@ parsers to import from agent outputs to storage
 
 import json
 import sys
+from ipaddress import ip_address
 from pprint import pprint
 
 from tenable.reports import NessusReportv2
@@ -43,13 +44,20 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         return pidb
 
-    @staticmethod
-    def _parse_host(report_item):
+    @classmethod
+    def _parse_host(cls, report_item):
         """parse host data from report item"""
 
         host = ParsedHost(address=report_item['host-ip'])
 
-        hostnames = list(set(filter(None, [report_item.get('host-fqdn'), report_item.get('host-rdns')])))
+        hostnames = []
+        if 'host-fqdn' in report_item:
+            hostnames.append(report_item['host-fqdn'])
+        # host-rdns might contain address
+        if ('host-rdns' in report_item) and (not cls.is_addr(report_item['host-rdns'])):
+            hostnames.append(report_item['host-rdns'])
+        hostnames = list(set(hostnames))
+
         if hostnames:
             host.hostnames = hostnames
             if not host.hostname:
@@ -119,6 +127,16 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
             refs.append(f'NSS-{report_item["pluginID"]}')
 
         return refs
+
+    @staticmethod
+    def is_addr(addr):
+        """check if argument is internet address"""
+
+        try:
+            ip_address(addr)
+            return True
+        except ValueError:
+            return False
 
 
 if __name__ == '__main__':  # pragma: no cover
