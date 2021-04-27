@@ -48,7 +48,7 @@ class SnerDatatablesModule {
 			'dom': '<"row"<"col-sm-6"l><"col-sm-6"f>> <"row"<"col-sm-12"p>> <"row"<"col-sm-12"rt>> <"row"<"col-sm-6"i><"col-sm-6"p>>',
 			'info': true,
 			'paging': true,
-			'pageLength': 50,
+			'pageLength': 200,
 			'lengthMenu': [ 10, 50, 100, 200, 500, 1000 ],
 
 			// behaviors
