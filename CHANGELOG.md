@@ -1,5 +1,11 @@
 # sner4 changelog
 
+## 0.6.0 - vulnoverwrite [BC BREAK]
+
+* server, plugin: update database schema for vuln, note to contain via_target field which allows handling name based virtualhost reports data
+* server: ui, change default datatables page length
+
+
 ## 0.5.2 - fixing stuff
 
 * plugin nessus: nessus report can contain ip addres in host-rdns
