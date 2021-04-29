@@ -114,6 +114,7 @@ def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vul
         f'{test_vuln.service.port}/{test_vuln.service.proto}'
     )
 
+
 def test_vuln_list_route_viatarget_visibility_toggle(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """viatarget visibility toggle"""
 
