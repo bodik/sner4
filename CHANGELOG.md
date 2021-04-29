@@ -4,6 +4,7 @@
 
 * server, plugin: update database schema for vuln, note to contain via_target field which allows handling name based virtualhost reports data
 * server: ui, change default datatables page length
+* general: misc tests compatibility or stabilitiy fixes
 
 
 ## 0.5.2 - fixing stuff
