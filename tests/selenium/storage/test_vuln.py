@@ -114,27 +114,27 @@ def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vul
         f'{test_vuln.service.port}/{test_vuln.service.proto}'
     )
 
-
 def test_vuln_list_route_viatarget_visibility_toggle(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """viatarget visibility toggle"""
 
-    class JsDocumentReady():  # pylint: disable=too-few-public-methods
+    class JsDocumentReloaded():  # pylint: disable=too-few-public-methods
         """custom expected_condition, wait for document to be realoaded"""
 
         def __call__(self, driver):
-            return driver.execute_script('return(document.readyState==="complete")')
+            return driver.execute_script('return(document.readyState==="complete" && document.title!=="reload helper")')
 
     sl_operator.get(url_for('storage.vuln_list_route', _external=True))
     dt_rendered(sl_operator, 'vuln_list_table', vuln.comment)
 
     webdriver_waituntil(sl_operator, EC.invisibility_of_element_located((By.XPATH, '//th[contains(text(), "via_target")]')))
+    sl_operator.execute_script('document.title="reload helper"')
 
     sl_operator.find_element_by_xpath('//li[contains(@class, "dropdown")]/a[@id="dropdownUser"]').click()
     webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, '//a[contains(text(), "Toggle via_target")]')))
     sl_operator.find_element_by_xpath('//a[contains(text(), "Toggle via_target")]').click()
     webdriver_waituntil(sl_operator, EC.alert_is_present())
     sl_operator.switch_to.alert.accept()
-    webdriver_waituntil(sl_operator, JsDocumentReady())
+    webdriver_waituntil(sl_operator, JsDocumentReloaded())
     dt_rendered(sl_operator, 'vuln_list_table', vuln.comment)
 
     webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, '//th[contains(text(), "via_target")]')))
