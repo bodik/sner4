@@ -1,5 +1,11 @@
 # sner4 changelog
 
+## 0.6.1 - handlebars security update
+
+* security: bump handlebars (CVE-2021-23369)
+* add skeleton script
+
+
 ## 0.6.0 - vulnoverwrite [BC BREAK]
 
 * server, plugin: update database schema for vuln, note to contain via_target field which allows handling name based virtualhost reports data
