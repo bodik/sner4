@@ -9,7 +9,7 @@ import json
 import re
 
 from flask import make_response, url_for
-from jinja2 import Markup
+from markupsafe import Markup
 
 JSGLUE_JS_PATH = '/jsglue.js'
 JSGLUE_NAMESPACE = 'Flask'
