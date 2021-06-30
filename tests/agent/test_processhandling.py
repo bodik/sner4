@@ -10,6 +10,7 @@ from http import HTTPStatus
 from time import sleep
 from uuid import uuid4
 
+from flask import url_for
 from werkzeug.wrappers import Response
 
 from sner.agent.core import main as agent_main
@@ -41,7 +42,7 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
     proc_agent = multiprocessing.Process(
         target=agent_main,
         args=([
-            '--server', live_server.url(),
+            '--server', url_for('index_route', _external=True),
             '--apikey', apikey,
             '--queue', Queue.query.get(longrun_target.queue_id).name,
             '--oneshot',

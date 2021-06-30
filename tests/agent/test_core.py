@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from uuid import uuid4
 
+from flask import url_for
+
 from sner.agent.core import main as agent_main
 from sner.lib import file_from_zip
 from sner.server.scheduler.models import Job, Queue
@@ -43,7 +45,7 @@ def test_run_with_liveserver(tmpworkdir, live_server, apikey, dummy_target):  # 
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
     result = agent_main([
-        '--server', live_server.url(),
+        '--server', url_for('index_route', _external=True),
         '--apikey', apikey,
         '--queue', Queue.query.get(dummy_target.queue_id).name,
         '--caps', 'cap1', 'cap2',

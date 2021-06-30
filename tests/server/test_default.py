@@ -71,7 +71,7 @@ def test_cli():
     """test sner server cli/main flask wrapper"""
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        with patch.object(sys, 'argv', []):
+        with patch.object(sys, 'argv', ['dummy']):
             with patch.object(os, 'environ', {}):
                 cli()
     assert pytest_wrapped_e.type == SystemExit

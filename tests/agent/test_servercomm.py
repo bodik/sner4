@@ -12,6 +12,7 @@ from http import HTTPStatus
 from time import sleep
 from uuid import uuid4
 
+from flask import url_for
 from werkzeug.wrappers import Response
 
 from sner.agent.core import main as agent_main
@@ -85,10 +86,13 @@ def test_fail_server_communication(tmpworkdir, httpserver):  # pylint: disable=u
 def test_empty_server_communication(tmpworkdir, live_server, apikey):  # pylint: disable=unused-argument,redefined-outer-name
     """tests oneshot vs wait on assignment on empty server"""
 
-    result = agent_main(['--server', live_server.url(), '--apikey', apikey, '--debug', '--oneshot'])
+    result = agent_main(['--server', url_for('index_route', _external=True), '--apikey', apikey, '--debug', '--oneshot'])
     assert result == 0
 
-    proc_agent = multiprocessing.Process(target=agent_main, args=(['--server', live_server.url(), '--apikey', apikey, '--debug'],))
+    proc_agent = multiprocessing.Process(
+        target=agent_main,
+        args=(['--server', url_for('index_route', _external=True), '--apikey', apikey, '--debug'],)
+    )
     proc_agent.start()
     sleep(2)
     assert proc_agent.pid
