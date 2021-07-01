@@ -320,6 +320,6 @@ def storage_cleanup(ctx):
         db.session.delete(host)
     db.session.commit()
 
-    current_app.logger.debug(f'finished storage_cleanup')
+    current_app.logger.debug('finished storage_cleanup')
 
     return ctx

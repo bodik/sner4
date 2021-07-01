@@ -29,4 +29,4 @@ def test_portmap_portstat_route(cl_operator, service):
 
     response = cl_operator.get(url_for('visuals.portmap_portstat_route', port=0))
     assert response.status_code == HTTPStatus.OK
-    assert response.lxml.xpath(f'//h2[text()="Port 0"]')
+    assert response.lxml.xpath('//h2[text()="Port 0"]')
