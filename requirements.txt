@@ -14,7 +14,7 @@ jsonschema
 lark-parser
 lxml
 psycopg2
-pylint
+pylint==2.4.4
 pytenable
 pytest
 pytest-factoryboy
@@ -28,5 +28,5 @@ requests
 schema
 soft-webauthn
 sqlalchemy-datatables
-sqlalchemy-filters
+git+https://github.com/bodik/sqlalchemy-filters@version_0.12.0-rb2#egg=sqlalchemy-filters
 webtest
