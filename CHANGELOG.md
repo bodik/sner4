@@ -1,5 +1,15 @@
 # sner4 changelog
 
+## 0.6.2 - bump packages and updates for prod
+
+* bump used dependencies
+* feature: vuln-report and vuln-export filtering and grouping
+* feature: add nc/netcat zero io scanner parser
+* feature: storage import command dry run support
+* feature: report, export add brackets to ipv6 addrs
+* scripts: various helper scripts
+
+
 ## 0.6.1 - handlebars security update
 
 * security: bump handlebars (CVE-2021-23369)
