@@ -1,6 +1,5 @@
 # sner -- slow network recon
 
-Travis: [![Build Status](https://travis-ci.org/bodik/sner4.svg?branch=master)](https://travis-ci.org/bodik/sner4)
 GitHub Actions: [![Tests CI](https://github.com/bodik/sner4/workflows/Tests%20CI/badge.svg)](https://github.com/bodik/sner4/actions)
 
 ## Table of Contents
@@ -367,10 +366,9 @@ $ bin/server shell
 ## 5 Development
 
 * Server is Flask based application with heavy usage of DataTable and
-  Handlebars. Agent is an standalone python module. See `.travis.yml` to get
-  started.
+  Handlebars. Agent is an standalone python module.
 
-* Project uses flake8, pylint, pytest, coverage, selenium and travis-ci.org to
+* Project uses flake8, pylint, pytest, coverage, selenium and GitHub Actions to
   ensure functionality and coding standards.
 
 * Any review or contribution is welcome.
