@@ -10,8 +10,10 @@ from io import StringIO
 
 from flask import current_app, jsonify, render_template
 from sqlalchemy import case, func
+from sqlalchemy_filters import apply_filters
 
 from sner.server.extensions import db
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.forms import AnnotateForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 
@@ -213,7 +215,7 @@ def list_to_lines(data):
     return '\n'.join(data) if data else ''
 
 
-def vuln_report():
+def vuln_report(qfilter=None, group_by_host=False):
     """generate report from storage data"""
 
     host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
@@ -244,6 +246,12 @@ def vuln_report():
         .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
         .group_by(Vuln.name, Vuln.descr, Vuln.severity, Vuln.tags)
 
+    if group_by_host:
+        query = query.group_by(host_ident)
+
+    if qfilter:
+        query = apply_filters(query, FILTER_PARSER.parse(qfilter), do_auto_join=False)
+
     content_trimmed = False
     fieldnames = [
         'id', 'asset', 'vulnerability', 'severity', 'advisory', 'state',
@@ -257,7 +265,10 @@ def vuln_report():
         rdata = row._asdict()
 
         # must count endpoints, multiple addrs can coline in hostnames
-        rdata['asset'] = rdata['host_ident'][0] if len(rdata['endpoint_address']) == 1 else 'misc'
+        if group_by_host:
+            rdata['asset'] = rdata['host_ident'][0]
+        else:
+            rdata['asset'] = rdata['host_ident'][0] if len(rdata['endpoint_address']) == 1 else 'misc'
         for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
             rdata[col] = list_to_lines(rdata[col])
         rdata['references'] = list_to_lines(map(url_for_ref, rdata['references']))
@@ -271,7 +282,7 @@ def vuln_report():
     return output_buffer.getvalue()
 
 
-def vuln_export():
+def vuln_export(qfilter=None):
     """export all vulns in storage without aggregation"""
 
     host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
@@ -292,6 +303,9 @@ def vuln_export():
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id)
+
+    if qfilter:
+        query = apply_filters(query, FILTER_PARSER.parse(qfilter), do_auto_join=False)
 
     content_trimmed = False
     fieldnames = [

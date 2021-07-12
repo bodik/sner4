@@ -51,8 +51,9 @@
 {% block content %}
 {% call cm.heading(['Vulns']) %}
 	<div class="pl-2">
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_report_route') }}">Generate report</a>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_export_route') }}">Export</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_report_route', filter=request.values.filter or None) }}">Report</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_report_route', filter=request.values.filter or None, group_by_host=True) }}">Report by host</a>
+		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_export_route', filter=request.values.filter or None) }}">Export</a>
 		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}

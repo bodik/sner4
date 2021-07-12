@@ -56,18 +56,23 @@ def storage_flush():
     db.session.commit()
 
 
-@command.command(name='report', help='generate vuln report')
+@command.command(name='vuln-report', help='generate vulnerabilities report')
 @with_appcontext
-def storage_report():
+@click.option('--filter', help='filter query')
+@click.option('--group_by_host', is_flag=True, help='generate report per host')
+def storage_vuln_report(**kwargs):
     """generate vuln report"""
-    print(vuln_report())
+
+    print(vuln_report(kwargs.get('filter'), kwargs.get('group_by_host')))
 
 
 @command.command(name='vuln-export', help='export vulnerabilities')
 @with_appcontext
-def storage_vuln_export():
+@click.option('--filter', help='filter query')
+def storage_vuln_export(**kwargs):
     """export vulnerabilities"""
-    print(vuln_export())
+
+    print(vuln_export(kwargs.get('filter')))
 
 
 @command.command(name='service-list', help='service (filtered) listing')

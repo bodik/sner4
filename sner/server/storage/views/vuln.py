@@ -183,7 +183,7 @@ def vuln_report_route():
     """generate vulns report"""
 
     return Response(
-        vuln_report(),
+        vuln_report(request.values.get('filter'), request.values.get('group_by_host')),
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=report-%s.csv' % datetime.now().isoformat()}
     )
@@ -195,7 +195,7 @@ def vuln_export_route():
     """vulns export"""
 
     return Response(
-        vuln_export(),
+        vuln_export(request.values.get('filter')),
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=export-%s.csv' % datetime.now().isoformat()}
     )

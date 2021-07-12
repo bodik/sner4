@@ -95,8 +95,8 @@ def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-a
     assert not Note.query.all()
 
 
-def test_report_command(runner, host_factory, vuln_factory):
-    """test vuln report command"""
+def test_vuln_report_command(runner, host_factory, vuln_factory):
+    """test vuln-report command"""
 
     # additional test data required for 'misc' test (eg. multiple endpoints having same vuln)
     vuln = vuln_factory.create()
@@ -107,11 +107,14 @@ def test_report_command(runner, host_factory, vuln_factory):
     vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.unknown, descr='A'*1001)
 
-    result = runner.invoke(command, ['report'])
+    result = runner.invoke(command, ['vuln-report'])
     assert result.exit_code == 0
     assert f',"{vuln_name}",' in result.output
     assert ',"misc",' in result.output
     assert ',"TRIMMED",' in result.output
+
+    result = runner.invoke(command, ['vuln-report', '--group_by_host', '--filter', 'Host.address == "127.3.3.1"'])
+    assert result.exit_code == 0
 
 
 def test_vuln_export_command(runner, host_factory, vuln_factory):
@@ -127,6 +130,9 @@ def test_vuln_export_command(runner, host_factory, vuln_factory):
     assert result.exit_code == 0
     assert ',"TRIMMED",' in result.output
     assert len(list(csv.reader(StringIO(result.stdout), delimiter=','))) == 6
+
+    result = runner.invoke(command, ['vuln-export', '--filter', 'Host.address == "127.3.3.1"'])
+    assert result.exit_code == 0
 
 
 def test_service_list_command(runner, service):
