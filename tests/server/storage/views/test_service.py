@@ -35,6 +35,13 @@ def test_service_list_json_route(cl_operator, service):
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['info'] == service.info
 
+    # test filtering library for joined models handling
+    response = cl_operator.post(
+        url_for('storage.service_list_json_route', filter=f'Host.address=="{service.host.address}"'),
+        {'draw': 1, 'start': 0, 'length': 1}
+    )
+    assert response.status_code == HTTPStatus.OK
+
 
 def test_service_add_route(cl_operator, host, service_factory):
     """service add route test"""
