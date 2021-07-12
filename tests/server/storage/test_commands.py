@@ -83,6 +83,17 @@ def test_import_command_manymap_job(runner):
     assert host.services[0].info == 'product: Werkzeug httpd version: 0.15.5 extrainfo: Python 3.7.3'
 
 
+def test_import_command_nc(runner):
+    """test nc parser"""
+
+    result = runner.invoke(command, ['import', 'nc', 'tests/server/data/parser-nc.txt'])
+    assert result.exit_code == 0
+
+    host = Host.query.one()
+    assert len(host.services) == 2
+    assert sorted([x.port for x in host.services]) == [21, 22]
+
+
 def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument
     """flush storage database"""
 

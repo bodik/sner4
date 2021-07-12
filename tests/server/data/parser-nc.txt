@@ -1,0 +1,5 @@
+# artificial output file
+# linux nc
+localhost [127.0.0.1] 22 (ssh) open
+# openbsd nc
+Connection to 127.0.0.1 21 port [tcp/ftp] succeeded!
