@@ -6,6 +6,7 @@ db commands tests
 import os
 
 from flask import current_app
+from sqlalchemy import inspect
 
 from sner.server.db_command import command
 from sner.server.extensions import db
@@ -42,6 +43,6 @@ def test_remove_command(runner):
     result = runner.invoke(command, ['remove'])
     assert result.exit_code == 0
 
-    assert not db.engine.table_names()
+    assert not inspect(db.engine).get_table_names()
     assert not os.path.exists(test_dir)
     assert not os.path.exists(test_path)
