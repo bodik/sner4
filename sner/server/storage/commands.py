@@ -28,9 +28,10 @@ def command():
 
 @command.command(name='import', help='import data from files')
 @with_appcontext
+@click.option('--dry', is_flag=True, help='do not update database, only print new items')
 @click.argument('parser')
 @click.argument('path', nargs=-1)
-def storage_import(path, parser):
+def storage_import(path, parser, **kwargs):
     """import data"""
 
     if parser not in REGISTERED_PARSERS:
@@ -42,7 +43,7 @@ def storage_import(path, parser):
         if not os.path.isfile(item):
             current_app.logger.error(f'invalid path "{item}"')
             sys.exit(1)
-        import_parsed(parser_impl.parse_path(item))
+        import_parsed(parser_impl.parse_path(item), kwargs.get('dry'))
 
     sys.exit(0)
 

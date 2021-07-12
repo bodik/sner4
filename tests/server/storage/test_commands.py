@@ -30,6 +30,22 @@ def test_import_command_invalidpath(runner):
     assert result.exit_code == 1
 
 
+def test_import_command_dryrun(runner):
+    """test import dry run"""
+
+    result = runner.invoke(command, ['import', '--dry', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
+    assert result.exit_code == 0
+    assert 'new host:' in result.output
+    assert 'new service:' in result.output
+    assert 'new note:' in result.output
+
+    result = runner.invoke(command, ['import', '--dry', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
+    assert result.exit_code == 0
+    assert 'new host:' in result.output
+    assert 'new service:' in result.output
+    assert 'new vuln:' in result.output
+
+
 def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument
     """flush storage database"""
 
