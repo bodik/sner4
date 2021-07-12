@@ -254,11 +254,12 @@ def list_to_lines(data):
     return '\n'.join(data) if data else ''
 
 
-def vuln_report(qfilter=None, group_by_host=False):
+def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-locals
     """generate report from storage data"""
 
-    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
-    endpoint_address = func.concat_ws(':', Host.address, Service.port)
+    host_address_format = case([(func.family(Host.address) == 6, func.concat('[', func.host(Host.address), ']'))], else_=func.host(Host.address))
+    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=host_address_format)
+    endpoint_address = func.concat_ws(':', host_address_format, Service.port)
     endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
 
     # note1: refs (itself and array) must be unnested in order to be correctly uniq and agg as individual elements by used axis
@@ -324,8 +325,9 @@ def vuln_report(qfilter=None, group_by_host=False):
 def vuln_export(qfilter=None):
     """export all vulns in storage without aggregation"""
 
-    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=func.host(Host.address))
-    endpoint_address = func.concat_ws(':', Host.address, Service.port)
+    host_address_format = case([(func.family(Host.address) == 6, func.concat('[', func.host(Host.address), ']'))], else_=func.host(Host.address))
+    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=host_address_format)
+    endpoint_address = func.concat_ws(':', host_address_format, Service.port)
     endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
 
     query = db.session \

@@ -65,7 +65,7 @@ def test_vuln_report_command(runner, host_factory, vuln_factory):
     vuln = vuln_factory.create()
     vuln_name = vuln.name
     host1 = host_factory.create(address='127.3.3.1', hostname='testhost2.testdomain.tests')
-    host2 = host_factory.create(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    host2 = host_factory.create(address='::127:3:3:2', hostname='testhost2.testdomain.tests')
     vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.unknown, descr='A'*1001)
@@ -75,6 +75,7 @@ def test_vuln_report_command(runner, host_factory, vuln_factory):
     assert f',"{vuln_name}",' in result.output
     assert ',"misc",' in result.output
     assert ',"TRIMMED",' in result.output
+    assert '[::127:3:3:2]' in result.output
 
     result = runner.invoke(command, ['vuln-report', '--group_by_host', '--filter', 'Host.address == "127.3.3.1"'])
     assert result.exit_code == 0
@@ -84,7 +85,7 @@ def test_vuln_export_command(runner, host_factory, vuln_factory):
     """test vuln-export command"""
 
     host1 = host_factory.create(address='127.3.3.1', hostname='testhost2.testdomain.tests')
-    host2 = host_factory.create(address='127.3.3.2', hostname='testhost2.testdomain.tests')
+    host2 = host_factory.create(address='::127:3:3:2', hostname='testhost2.testdomain.tests')
     vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.critical)
     vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.unknown, descr='A'*1001)
@@ -92,6 +93,7 @@ def test_vuln_export_command(runner, host_factory, vuln_factory):
     result = runner.invoke(command, ['vuln-export'])
     assert result.exit_code == 0
     assert ',"TRIMMED",' in result.output
+    assert '[::127:3:3:2]' in result.output
     assert len(list(csv.reader(StringIO(result.stdout), delimiter=','))) == 6
 
     result = runner.invoke(command, ['vuln-export', '--filter', 'Host.address == "127.3.3.1"'])
