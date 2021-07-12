@@ -6,7 +6,7 @@ individual parser plugin tests
 import json
 
 from sner.server.storage.commands import command
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
+from sner.server.storage.models import Host, Note, Service, Vuln
 
 
 def test_import_command_nmap_job(runner):
@@ -71,4 +71,3 @@ def test_import_command_nc(runner):
     host = Host.query.one()
     assert len(host.services) == 2
     assert sorted([x.port for x in host.services]) == [21, 22]
-
