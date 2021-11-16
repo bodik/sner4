@@ -28,21 +28,21 @@ def dt_wait_processing(sclnt, dt_id):
 
     webdriver_waituntil(sclnt, JsNoAjaxPending())
     webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.ID, '%s_processing' % dt_id)))
-    return sclnt.find_element_by_id(dt_id)
+    return sclnt.find_element(By.ID, dt_id)
 
 
 def dt_rendered(sclnt, dt_id, td_data):
     """test for td_data rendered in dt_id, eg. datatable rendered test data"""
 
     dt_wait_processing(sclnt, dt_id)
-    assert sclnt.find_element_by_xpath('//table[@id="%s"]/tbody/tr/td[text()="%s"]' % (dt_id, td_data))
+    assert sclnt.find_element(By.XPATH, '//table[@id="%s"]/tbody/tr/td[text()="%s"]' % (dt_id, td_data))
 
 
 def dt_inrow_delete(sclnt, dt_id, index=0):
     """test delete row/item rendered in _buttons by default ajaxed datatables"""
 
     dt_wait_processing(sclnt, dt_id)
-    sclnt.find_element_by_id(dt_id).find_elements_by_class_name('abutton_submit_dataurl_delete')[index].click()
+    sclnt.find_element(By.ID, dt_id).find_elements(By.CLASS_NAME, 'abutton_submit_dataurl_delete')[index].click()
     webdriver_waituntil(sclnt, EC.alert_is_present())
     sclnt.switch_to.alert.accept()
     dt_wait_processing(sclnt, dt_id)

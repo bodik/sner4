@@ -28,8 +28,8 @@ def test_login_webauthn(live_server, selenium, webauthn_credential_factory):  # 
     db.session.commit()
 
     selenium.get(url_for('auth.login_route', _external=True))
-    selenium.find_element_by_xpath('//form//input[@name="username"]').send_keys(wncred.user.username)
-    selenium.find_element_by_xpath('//form//input[@type="submit"]').click()
+    selenium.find_element(By.XPATH, '//form//input[@name="username"]').send_keys(wncred.user.username)
+    selenium.find_element(By.XPATH, '//form//input[@type="submit"]').click()
 
     # some javascript code must be emulated
     webdriver_waituntil(selenium, js_variable_ready('window.pkcro_raw'))

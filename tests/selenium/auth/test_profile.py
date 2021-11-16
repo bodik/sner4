@@ -7,6 +7,7 @@ from base64 import b64decode, b64encode
 
 from fido2 import cbor
 from flask import url_for
+from selenium.webdriver.common.by import By
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server.auth.models import User
@@ -27,8 +28,8 @@ def test_profile_webauthn_register_route(live_server, sl_user):  # pylint: disab
     attestation = device.create(pkcco, 'https://%s' % webauthn.rp.id)
     sl_user.execute_script('pack_attestation(CBOR.decode(Sner.base64_to_array_buffer("%s")));' % b64encode(cbor.encode(attestation)).decode('utf-8'))
     # and back to standard test codeflow
-    sl_user.find_element_by_xpath('//form[@id="webauthn_register_form"]//input[@name="name"]').send_keys('pytest token')
-    sl_user.find_element_by_xpath('//form[@id="webauthn_register_form"]//input[@type="submit"]').click()
+    sl_user.find_element(By.XPATH, '//form[@id="webauthn_register_form"]//input[@name="name"]').send_keys('pytest token')
+    sl_user.find_element(By.XPATH, '//form[@id="webauthn_register_form"]//input[@type="submit"]').click()
 
     user = User.query.filter(User.username == 'pytest_user').one()
     assert user.webauthn_credentials

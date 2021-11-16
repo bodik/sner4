@@ -31,9 +31,9 @@ def selenium_in_roles(sclnt, roles):
     db.session.commit()
 
     sclnt.get(url_for('auth.login_route', _external=True))
-    sclnt.find_element_by_xpath('//form//input[@name="username"]').send_keys(tmp_user.username)
-    sclnt.find_element_by_xpath('//form//input[@name="password"]').send_keys(tmp_password)
-    sclnt.find_element_by_xpath('//form//input[@type="submit"]').click()
+    sclnt.find_element(By.XPATH, '//form//input[@name="username"]').send_keys(tmp_user.username)
+    sclnt.find_element(By.XPATH, '//form//input[@name="password"]').send_keys(tmp_password)
+    sclnt.find_element(By.XPATH, '//form//input[@type="submit"]').click()
     webdriver_waituntil(sclnt, EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]')))
 
     return sclnt

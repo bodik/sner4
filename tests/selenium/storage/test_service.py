@@ -4,6 +4,7 @@ selenium ui tests for storage.service component
 """
 
 from flask import url_for
+from selenium.webdriver.common.by import By
 
 from sner.server.extensions import db
 from sner.server.storage.models import Service
@@ -43,4 +44,4 @@ def test_service_list_route_service_endpoint_dropdown(live_server, sl_operator, 
 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
     dt_rendered(sl_operator, 'service_list_table', service.comment)
-    check_service_endpoint_dropdown(sl_operator, sl_operator.find_element_by_id('service_list_table'), service.port)
+    check_service_endpoint_dropdown(sl_operator, sl_operator.find_element(By.ID, 'service_list_table'), service.port)
