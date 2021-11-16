@@ -32,6 +32,10 @@
 	{%- set error_output = '' -%}
 	{%- set form_group_classes = 'form-group' -%}
 
+	{%- if field.render_kw.class -%}
+		{%- set field_classes = field_classes + field.render_kw.class -%}
+	{%- endif -%}
+
 	{%- if label -%}
 		{%- if horizontal -%}
 			{%- set label_classes = 'col-sm-2 col-form-label' -%}

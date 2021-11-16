@@ -78,7 +78,7 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
 
     sclnt.find_element_by_css_selector('#modal-global form textarea[name="comment"]').send_keys('annotated comment')
     sclnt.find_element_by_css_selector('#modal-global form').submit()
-    webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))
     webdriver_waituntil(sclnt, JsNoAjaxPending())
 
     db.session.refresh(test_model)

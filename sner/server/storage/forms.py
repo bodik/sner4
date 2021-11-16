@@ -66,7 +66,7 @@ class VulnForm(FlaskForm):
     descr = TextAreaNoneField('Descr', render_kw={'rows': '5'})
     data = TextAreaNoneField('Data', render_kw={'rows': '5'})
     refs = TextAreaListField('Refs', render_kw={'rows': '5'})
-    tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor'})
+    tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor', 'rows': 6})
     comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()

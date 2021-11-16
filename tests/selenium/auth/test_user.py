@@ -43,7 +43,7 @@ def test_user_apikey_route(live_server, sl_admin, user):  # pylint: disable=unus
     sl_admin.find_element_by_xpath('//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=user.id, action='generate')).click()
     webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
-    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))
     dt_rendered(sl_admin, 'user_list_table', user.username)
 
     db.session.refresh(user)
@@ -52,7 +52,7 @@ def test_user_apikey_route(live_server, sl_admin, user):  # pylint: disable=unus
     sl_admin.find_element_by_xpath('//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=user.id, action='revoke')).click()
     webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element_by_xpath('//div[@id="modal-global"]//button[@class="close"]').click()
-    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"')))
+    webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))
     dt_rendered(sl_admin, 'user_list_table', user.username)
 
     db.session.refresh(user)

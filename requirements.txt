@@ -28,5 +28,5 @@ requests
 schema
 soft-webauthn
 sqlalchemy-datatables
-git+https://github.com/bodik/sqlalchemy-filters@version_0.12.0-rb2#egg=sqlalchemy-filters
+git+https://github.com/bodik/sqlalchemy-filters@master-forked#egg=sqlalchemy-filters
 webtest

@@ -14,10 +14,6 @@ install-deps:
 	# required by psycopg2
 	sudo apt-get -y install gcc python3-dev libpq-dev
 	pip install -r requirements.lock
-	# remove after update to selenium 4.x
-	if [ -d venv/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=venv/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
-	if [ -d /home/travis/virtualenv/python3.7.6/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=/home/travis/virtualenv/python3.7.6/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
-	if [ -d /opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/selenium ]; then patch --backup --directory=/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/selenium --strip=3 < extra/fix-python-selenium-resourcewarning.patch; fi
 	# tool: jarm
 	sudo git clone --branch sner4-integration https://github.com/bodik/jarm /opt/jarm
 	sudo ln -sf /opt/jarm/jarm.py /usr/local/bin/jarm
@@ -62,7 +58,7 @@ install-extra: /usr/local/bin/geckodriver
 
 /usr/local/bin/geckodriver:
 	rm -f /tmp/geckodriver.tar.gz
-	wget --no-verbose -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+	wget --no-verbose -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz
 	sudo tar xzf /tmp/geckodriver.tar.gz -C /usr/local/bin geckodriver
 
 test-extra:
