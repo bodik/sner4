@@ -91,4 +91,4 @@ def test_version():
             cli()
 
     assert pytest_wrapped_e.value.code == 0
-    assert 'Sner %s' % __version__ in buf_stdout.getvalue()
+    assert f'Sner {__version__}' in buf_stdout.getvalue()

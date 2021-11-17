@@ -34,8 +34,8 @@ def test_initdata_command(runner):
 def test_remove_command(runner):
     """db remove test"""
 
-    test_dir = '%s/dbremovetest' % current_app.config['SNER_VAR']
-    test_path = '%s/dbremovetest.txt' % current_app.config['SNER_VAR']
+    test_dir = f'{current_app.config["SNER_VAR"]}/dbremovetest'
+    test_path = f'{current_app.config["SNER_VAR"]}/dbremovetest.txt'
     with open(test_path, 'w') as ftmp:
         ftmp.write('db remove test')
     os.mkdir(test_dir)

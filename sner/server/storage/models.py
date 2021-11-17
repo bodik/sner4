@@ -71,7 +71,7 @@ class Host(StorageModelBase):
     notes = relationship('Note', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return '<Host %s: %s (%s)>' % (self.id, self.address, self.hostname if self.hostname else '')
+        return f'<Host {self.id}: {self.address} ({self.hostname or ""})>'
 
 
 class Service(StorageModelBase):
@@ -96,7 +96,7 @@ class Service(StorageModelBase):
     notes = relationship('Note', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return '<Service %s: %s.%d>' % (self.id, self.proto, self.port)
+        return f'<Service {self.id}: {self.proto}.{self.port}>'
 
 
 class SeverityEnum(SelectableEnum):
@@ -134,7 +134,7 @@ class Vuln(StorageModelBase):
     service = relationship('Service', back_populates='vulns')
 
     def __repr__(self):
-        return '<Vuln %s: %s>' % (self.id, self.xtype)
+        return f'<Vuln {self.id}: {self.xtype}>'
 
 
 class Note(StorageModelBase):
@@ -156,4 +156,4 @@ class Note(StorageModelBase):
     service = relationship('Service', back_populates='notes')
 
     def __repr__(self):
-        return '<Note %s: %s>' % (self.id, self.xtype)
+        return f'<Note {self.id}: {self.xtype}>'

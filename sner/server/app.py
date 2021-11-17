@@ -160,7 +160,7 @@ def cli():
     """server command wrapper"""
 
     if '--version' in sys.argv:
-        print('Sner %s' % __version__)
+        print(f'Sner {__version__}')
     if '--debug' in sys.argv:
         os.environ['FLASK_ENV'] = 'development'
         sys.argv.remove('--debug')

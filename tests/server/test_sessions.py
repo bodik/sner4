@@ -32,7 +32,7 @@ def test_timedout_session(client):
     sid, session_path = create_timedout_session(client)
     client.app.session_interface.gc_probability = 0.0  # gc collector must not interfere
 
-    response = client.get(url_for('index_route'), headers={'cookie': 'session=%s' % sid})
+    response = client.get(url_for('index_route'), headers={'cookie': f'session={sid}'})
     assert response.status_code == HTTPStatus.OK
     assert sid != dict_from_cookiejar(client.cookiejar)['session']
     assert not os.path.exists(session_path)
@@ -42,7 +42,7 @@ def test_notexist_session(client):
     """test non-existent session id handling"""
 
     sid = client.app.session_interface._generate_sid()  # pylint: disable=protected-access
-    response = client.get(url_for('index_route'), headers={'cookie': 'session=%s' % sid})
+    response = client.get(url_for('index_route'), headers={'cookie': f'session={sid}'})
     assert response.status_code == HTTPStatus.OK
     assert sid != dict_from_cookiejar(client.cookiejar)['session']
 

@@ -27,7 +27,7 @@ def dt_wait_processing(sclnt, dt_id):
     """wait until all ajax finished and dt_id processing (hopefully) ended"""
 
     webdriver_waituntil(sclnt, JsNoAjaxPending())
-    webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.ID, '%s_processing' % dt_id)))
+    webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.ID, f'{dt_id}_processing')))
     return sclnt.find_element(By.ID, dt_id)
 
 
@@ -35,7 +35,7 @@ def dt_rendered(sclnt, dt_id, td_data):
     """test for td_data rendered in dt_id, eg. datatable rendered test data"""
 
     dt_wait_processing(sclnt, dt_id)
-    assert sclnt.find_element(By.XPATH, '//table[@id="%s"]/tbody/tr/td[text()="%s"]' % (dt_id, td_data))
+    assert sclnt.find_element(By.XPATH, f'//table[@id="{dt_id}"]/tbody/tr/td[text()="{td_data}"]')
 
 
 def dt_inrow_delete(sclnt, dt_id, index=0):

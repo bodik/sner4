@@ -119,7 +119,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         if 'bid' in report_item:
             refs += [f'BID-{ref}' for ref in ensure_list(report_item['bid'])]
         if 'xref' in report_item:
-            refs += ['%s-%s' % tuple(ref.split(':', maxsplit=1)) for ref in ensure_list(report_item['xref'])]
+            refs += ['%s-%s' % tuple(ref.split(':', maxsplit=1)) for ref in ensure_list(report_item['xref'])]  # pylint: disable=consider-using-f-string
         if 'see_also' in report_item:
             refs += [f'URL-{ref}' for ref in report_item['see_also'].splitlines()]
         if 'metasploit_name' in report_item:

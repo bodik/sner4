@@ -11,4 +11,4 @@ class js_variable_ready():  # pylint: disable=invalid-name,too-few-public-method
         self.variable = variable
 
     def __call__(self, driver):
-        return driver.execute_script('return(%s !== undefined);' % self.variable)
+        return driver.execute_script(f'return({self.variable} !== undefined);')

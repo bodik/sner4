@@ -10,7 +10,7 @@ def check(testcase, expected):
     """test helper"""
 
     output = FILTER_PARSER.parse(testcase)
-    print('testcase: %s outputs %s' % (testcase, output))
+    print(f'testcase: {testcase} outputs {output}')
     assert output == expected
 
 

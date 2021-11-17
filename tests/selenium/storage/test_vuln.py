@@ -16,7 +16,7 @@ from tests.selenium.storage import check_annotate, check_select_rows, check_serv
 def check_vulns_filtering(sclnt, dt_id):
     """test vuln views filtering functions"""
 
-    toolbar_id = '%s_toolbar' % dt_id
+    toolbar_id = f'{dt_id}_toolbar'
 
     # there should be 4 rows in total
     dt_elem = dt_wait_processing(sclnt, dt_id)

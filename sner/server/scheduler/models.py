@@ -32,12 +32,12 @@ class Queue(db.Model):
     jobs = relationship('Job', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return '<Queue %s: %s>' % (self.id, self.name)
+        return f'<Queue {self.id}: {self.name}>'
 
     @property
     def data_abspath(self):
         """return absolute path of the queue data directory"""
-        return os.path.join(current_app.config['SNER_VAR'], 'scheduler', 'queue-%s' % self.id) if self.id else None
+        return os.path.join(current_app.config['SNER_VAR'], 'scheduler', f'queue-{self.id}') if self.id else None
 
 
 class Target(db.Model):
@@ -50,7 +50,7 @@ class Target(db.Model):
     queue = relationship('Queue', back_populates='targets')
 
     def __repr__(self):
-        return '<Target %s: %s>' % (self.id, self.target)
+        return f'<Target {self.id}: {self.target}>'
 
 
 class Job(db.Model):
@@ -66,7 +66,7 @@ class Job(db.Model):
     queue = relationship('Queue', back_populates='jobs')
 
     def __repr__(self):
-        return '<Job %s>' % self.id
+        return f'<Job {self.id}>'
 
     @property
     def output_abspath(self):
@@ -94,7 +94,7 @@ class Excl(db.Model):
     comment = db.Column(db.Text)
 
     def __repr__(self):
-        return '<Excl %s>' % self.id
+        return f'<Excl {self.id}>'
 
     @validates('family')
     def validate_family(self, key, new_family):  # pylint: disable=unused-argument

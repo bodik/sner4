@@ -17,7 +17,7 @@ def check_select_rows(sclnt, dt_id):
 
     # there should be two rows in total
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    toolbar_elem = sclnt.find_element(By.ID, '%s_toolbar' % dt_id)
+    toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
     assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
 
     # user must be able to select only one
@@ -38,7 +38,7 @@ def check_vulns_multiactions(sclnt, dt_id):
 
     # there should be two rows in total
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    toolbar_elem = sclnt.find_element(By.ID, '%s_toolbar' % dt_id)
+    toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
     assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
 
     # one cloud be be tagged
@@ -73,7 +73,7 @@ def check_annotate(sclnt, annotate_elem_class, test_model):
 
     # disable fade, the timing interferes with the test
     sclnt.execute_script('$("div#modal-global").toggleClass("fade")')
-    ActionChains(sclnt).double_click(sclnt.find_element(By.XPATH, '//td[contains(@class, "%s")]' % annotate_elem_class)).perform()
+    ActionChains(sclnt).double_click(sclnt.find_element(By.XPATH, f'//td[contains(@class, "{annotate_elem_class}")]')).perform()
     webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Annotate"]')))
 
     sclnt.find_element(By.CSS_SELECTOR, '#modal-global form textarea[name="comment"]').send_keys('annotated comment')

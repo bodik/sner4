@@ -40,7 +40,8 @@ def test_user_apikey_route(live_server, sl_admin, user):  # pylint: disable=unus
     # disable fade, the timing interferes with the test
     sl_admin.execute_script('$("div#modal-global").toggleClass("fade")')
 
-    sl_admin.find_element(By.XPATH, '//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=user.id, action='generate')).click()
+    url = url_for('auth.user_apikey_route', user_id=user.id, action='generate')
+    sl_admin.find_element(By.XPATH, f'//a[@data-url="{url}"]').click()
     webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element(By.XPATH, '//div[@id="modal-global"]//button[@class="close"]').click()
     webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))
@@ -49,7 +50,8 @@ def test_user_apikey_route(live_server, sl_admin, user):  # pylint: disable=unus
     db.session.refresh(user)
     assert user.apikey
 
-    sl_admin.find_element(By.XPATH, '//a[@data-url="%s"]' % url_for('auth.user_apikey_route', user_id=user.id, action='revoke')).click()
+    url = url_for('auth.user_apikey_route', user_id=user.id, action='revoke')
+    sl_admin.find_element(By.XPATH, f'//a[@data-url="{url}"]').click()
     webdriver_waituntil(sl_admin, EC.visibility_of_element_located((By.XPATH, '//h4[@class="modal-title" and text()="Apikey operation"]')))
     sl_admin.find_element(By.XPATH, '//div[@id="modal-global"]//button[@class="close"]').click()
     webdriver_waituntil(sl_admin, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))

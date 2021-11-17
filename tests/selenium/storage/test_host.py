@@ -16,7 +16,7 @@ from tests.selenium.storage import check_annotate, check_select_rows, check_serv
 def switch_tab(sclnt, tab_name, dt_name, control_data):
     """switches host view tab and waits until dt is rendered"""
 
-    sclnt.find_element(By.XPATH, '//ul[@id="host_view_tabs"]//a[contains(@class, "nav-link") and @href="#%s"]' % tab_name).click()
+    sclnt.find_element(By.XPATH, f'//ul[@id="host_view_tabs"]//a[contains(@class, "nav-link") and @href="#{tab_name}"]').click()
     webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.ID, dt_name)))
     dt_rendered(sclnt, dt_name, control_data)
 

@@ -41,7 +41,7 @@ class User(db.Model, flask_login.UserMixin):
         return False
 
     def __repr__(self):
-        return '<User %s: %s>' % (self.id, self.username)
+        return f'<User {self.id}: {self.username}>'
 
 
 class WebauthnCredential(db.Model):
@@ -57,4 +57,4 @@ class WebauthnCredential(db.Model):
     user = relationship('User', back_populates='webauthn_credentials')
 
     def __repr__(self):
-        return '<WebauthnCredential %s: %s>' % (self.id, self.user_id)
+        return f'<WebauthnCredential {self.id}: {self.user_id}>'

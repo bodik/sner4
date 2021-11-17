@@ -144,4 +144,4 @@ def excl_export_route():
     return Response(
         output_buffer.getvalue(),
         mimetype='text/csv',
-        headers={'Content-Disposition': 'attachment; filename=excl-%s.csv' % datetime.now().isoformat()})
+        headers={'Content-Disposition': f'attachment; filename=excl-{datetime.now().isoformat()}.csv'})

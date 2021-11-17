@@ -24,7 +24,7 @@ def get_routes(app):
         if (app.config['APPLICATION_ROOT'] == '/') or (not app.config['APPLICATION_ROOT']):
             rule = r.rule
         else:  # pragma: no cover ; not tested
-            rule = '{root}{rule}'.format(root=app.config['APPLICATION_ROOT'], rule=r.rule)
+            rule = '{root}{rule}'.format(root=app.config['APPLICATION_ROOT'], rule=r.rule)  # pylint: disable=consider-using-f-string
         rule_args = [x.split(':')[-1] for x in rule_parser.findall(rule)]
         rule_tr = splitter.split(rule)
         output.append((endpoint, rule_tr, rule_args))
@@ -133,7 +133,7 @@ var %s = new (function(){
             throw {name: 'BuildError', message: "Couldn't find the matching endpoint."};
         }
     };
-});""" % (JSGLUE_NAMESPACE, json.dumps(rules))
+});""" % (JSGLUE_NAMESPACE, json.dumps(rules))  # pylint: disable=consider-using-f-string
 
     @staticmethod
     def include():
