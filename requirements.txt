@@ -14,7 +14,7 @@ jsonschema
 lark-parser
 lxml
 psycopg2
-pylint==2.4.4
+pylint
 pytenable
 pytest
 pytest-factoryboy

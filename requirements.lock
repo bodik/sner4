@@ -1,5 +1,5 @@
 arrow==1.2.1
-astroid==2.3.3
+astroid==2.8.5
 async-generator==1.10
 attrs==21.2.0
 beautifulsoup4==4.10.0
@@ -42,13 +42,14 @@ marshmallow==3.14.1
 mccabe==0.6.1
 outcome==1.1.0
 packaging==21.2
+platformdirs==2.4.0
 pluggy==1.0.0
 psycopg2==2.9.2
 py==1.11.0
 pycodestyle==2.8.0
 pycparser==2.21
 pyflakes==2.4.0
-pylint==2.4.4
+pylint==2.11.1
 pyOpenSSL==21.0.0
 pyparsing==2.4.7
 pyrsistent==0.18.0
