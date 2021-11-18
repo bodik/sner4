@@ -5,6 +5,7 @@ auth default tests
 
 import os
 from http import HTTPStatus
+from pathlib import Path
 from time import time
 
 from flask import url_for
@@ -18,8 +19,7 @@ def create_timedout_session(clnt):
     session_path = os.path.join(clnt.app.session_interface.storage, sid)
 
     os.makedirs(clnt.app.session_interface.storage)
-    with open(session_path, 'w') as ftmp:
-        ftmp.write('{}')
+    Path(session_path).write_text('{}', encoding='utf-8')
     timedout = time() - clnt.app.session_interface.max_idle_time - 1
     os.utime(session_path, (timedout, timedout))
 

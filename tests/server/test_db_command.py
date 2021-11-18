@@ -3,7 +3,7 @@
 db commands tests
 """
 
-import os
+from pathlib import Path
 
 from flask import current_app
 from sqlalchemy import inspect
@@ -34,15 +34,14 @@ def test_initdata_command(runner):
 def test_remove_command(runner):
     """db remove test"""
 
-    test_dir = f'{current_app.config["SNER_VAR"]}/dbremovetest'
-    test_path = f'{current_app.config["SNER_VAR"]}/dbremovetest.txt'
-    with open(test_path, 'w') as ftmp:
-        ftmp.write('db remove test')
-    os.mkdir(test_dir)
+    test_dir = Path(f'{current_app.config["SNER_VAR"]}/dbremovetest')
+    test_path = Path(f'{current_app.config["SNER_VAR"]}/dbremovetest.txt')
+    test_path.write_text('db remove test', 'utf-8')
+    test_dir.mkdir()
 
     result = runner.invoke(command, ['remove'])
     assert result.exit_code == 0
 
     assert not inspect(db.engine).get_table_names()
-    assert not os.path.exists(test_dir)
-    assert not os.path.exists(test_path)
+    assert not test_dir.exists()
+    assert not test_path.exists()

@@ -31,7 +31,8 @@ def portinfos_json_route():
     info_column = service_info_column(request.args.get('crop'))
     # join allows filter over host attrs
     query = db.session.query(info_column.label('info'), func.count(Service.id).label('info_count')).join(Host) \
-        .filter(Service.info != '', Service.info != None).group_by(info_column).order_by(desc('info_count'))  # noqa: E501,E711  pylint: disable=singleton-comparison
+        .filter(Service.info != '', Service.info != None) \
+        .group_by(info_column).order_by(desc('info_count'))  # noqa: E711  pylint: disable=singleton-comparison
 
     if 'filter' in request.values:
         query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)

@@ -13,7 +13,7 @@ from sner.server.forms import StringNoneField
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
-def strong_password(form, field):
+def strong_password(_, field):
     """validate password field"""
 
     pwsr = PWS.check_strength(field.data)

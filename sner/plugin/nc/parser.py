@@ -38,7 +38,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         rex1 = re.compile(ParserModule.REGEX)
         rex2 = re.compile(ParserModule.REGEX_OPENBSD)
 
-        for line in Path(path).read_text().splitlines():
+        for line in Path(path).read_text(encoding='utf-8').splitlines():
 
             match = rex1.match(line)
             if match:

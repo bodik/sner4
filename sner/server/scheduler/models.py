@@ -110,7 +110,7 @@ class Excl(db.Model):
                 try:
                     re.compile(self.value)
                 except re.error:
-                    raise ValueError('Invalid regex')
+                    raise ValueError('Invalid regex') from None
 
         return new_family
 
@@ -124,6 +124,6 @@ class Excl(db.Model):
             try:
                 re.compile(new_value)
             except re.error:
-                raise ValueError('Invalid regex')
+                raise ValueError('Invalid regex') from None
 
         return new_value

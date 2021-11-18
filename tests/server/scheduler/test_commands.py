@@ -13,7 +13,7 @@ def test_enumips_command(runner, tmpworkdir):  # pylint: disable=unused-argument
     """basic enumerator test"""
 
     apath = Path('enumips.txt')
-    apath.write_text('127.0.1.123/32\n127.0.2.0/31\nfe80::1:0/126')
+    apath.write_text('127.0.1.123/32\n127.0.2.0/31\nfe80::1:0/126', encoding='utf-8')
 
     result = runner.invoke(command, ['enumips', '127.0.0.128/30', '--file', apath])
     assert result.exit_code == 0
@@ -44,7 +44,7 @@ def test_queue_enqueue_command(runner, tmpworkdir, queue, target_factory):  # py
 
     atarget = target_factory.build(queue=queue)
     apath = Path('ips.txt')
-    apath.write_text(f'{atarget.target}\n \n ')
+    apath.write_text(f'{atarget.target}\n \n ', encoding='utf-8')
 
     result = runner.invoke(command, ['queue-enqueue', 'notexist', atarget.target])
     assert result.exit_code == 1

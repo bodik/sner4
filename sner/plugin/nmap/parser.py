@@ -36,7 +36,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
             return pidb
 
-        return cls._parse_data(Path(path).read_text())
+        return cls._parse_data(Path(path).read_text(encoding='utf-8'))
 
     @classmethod
     def _parse_data(cls, data):

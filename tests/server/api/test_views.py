@@ -127,7 +127,7 @@ def test_scheduler_job_output_route(client, apikey, job):
     assert response.status_code == HTTPStatus.OK
 
     assert job.retval == 12345
-    assert Path(job.output_abspath).read_text() == 'a-test-file-contents'
+    assert Path(job.output_abspath).read_text(encoding='utf-8') == 'a-test-file-contents'
 
     response = client.post_json(
         url_for('api.scheduler_job_output_route'),

@@ -51,7 +51,7 @@ class AgentModule(ModuleBase):
             if not self.loop:  # pragma: no cover  ; not tested
                 break
 
-        Path('output.json').write_text(json.dumps(result))
+        Path('output.json').write_text(json.dumps(result), encoding='utf-8')
         return 0
 
     def terminate(self):  # pragma: no cover  ; not tested / running over multiprocessing

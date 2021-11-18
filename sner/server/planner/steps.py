@@ -168,7 +168,7 @@ def filter_netranges(ctx, netranges):
     """filter ctx data, whitelist only specified netranges"""
 
     whitelist = [ip_network(net) for net in netranges]
-    data = [item for item in ctx.data if any([ip_address(item) in net for net in whitelist])]
+    data = [item for item in ctx.data if any(ip_address(item) in net for net in whitelist)]
     ctx.data = data
 
     return ctx

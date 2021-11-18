@@ -62,7 +62,7 @@ class ModuleBase(ABC):
     def run(self, assignment):  # pylint: disable=no-self-use
         """run module for assignment"""
 
-        Path('assignment.json').write_text(json.dumps(assignment))
+        Path('assignment.json').write_text(json.dumps(assignment), encoding='utf-8')
         self.CONFIG_SCHEMA.validate(assignment['config'])
 
     @abstractmethod
@@ -82,8 +82,8 @@ class ModuleBase(ABC):
         """execute command and capture output"""
 
         cmdarg = shlex.split(cmd) if isinstance(cmd, str) else cmd
-        with open(output_file, 'w') as output_fd:
-            self.process = subprocess.Popen(cmdarg, stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)
+        with open(output_file, 'w', encoding='utf-8') as output_fd:
+            self.process = subprocess.Popen(cmdarg, stdin=subprocess.DEVNULL, stdout=output_fd, stderr=subprocess.STDOUT)  # noqa: E501  pylint: disable=consider-using-with
             retval = self.process.wait()
             self.process = None
         return retval

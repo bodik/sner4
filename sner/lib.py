@@ -25,7 +25,7 @@ def load_yaml(filename):
     """load yaml from file, silence file not found"""
 
     if filename and os.path.exists(filename):
-        with open(filename, 'r') as ftmp:
+        with open(filename, 'r', encoding='utf-8') as ftmp:
             return yaml.safe_load(ftmp.read())
     return {}
 

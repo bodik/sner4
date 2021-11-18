@@ -58,7 +58,7 @@ class AgentModule(ModuleBase):
     def run_scan(self, assignment, targets, targets_file, output_file, extra_args=None):  # pylint: disable=too-many-arguments
         """run scan"""
 
-        Path(targets_file).write_text('\n'.join(targets))
+        Path(targets_file).write_text('\n'.join(targets), encoding='utf-8')
 
         timing_args = []
         if 'timing_perhost' in assignment['config']:

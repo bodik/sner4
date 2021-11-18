@@ -7,6 +7,7 @@ import json
 import os
 import re
 from binascii import hexlify
+from functools import partial
 from random import random
 from time import time
 
@@ -73,7 +74,7 @@ class FilesystemSessionInterface(SessionInterface):
             try:
                 if os.path.getatime(session_path) > (time()-self.max_idle_time):
                     os.utime(session_path)
-                    with open(session_path, 'r') as ftmp:
+                    with open(session_path, 'r', encoding='utf-8') as ftmp:
                         return Session(json.loads(ftmp.read()), sid=sid, new=False)
                 os.remove(session_path)
             except (OSError, json.decoder.JSONDecodeError):
@@ -99,7 +100,7 @@ class FilesystemSessionInterface(SessionInterface):
             if self._validate_sid(session.sid):
                 session_path = os.path.join(self.storage, session.sid)
                 os.makedirs(self.storage, exist_ok=True)  # due to pylint app fixture, cannot be in constructor
-                with open(session_path, 'w', 0o600) as ftmp:
+                with open(session_path, 'w', encoding='utf-8', opener=partial(os.open, mode=0o600)) as ftmp:
                     ftmp.write(json.dumps(session))
 
         if session.new:
