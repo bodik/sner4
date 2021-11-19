@@ -77,8 +77,8 @@ class Job(db.Model):
 class ExclFamily(SelectableEnum):
     """exclusion family enum"""
 
-    network = 'network'
-    regex = 'regex'
+    NETWORK = 'NETWORK'
+    REGEX = 'REGEX'
 
 
 class Excl(db.Model):
@@ -104,9 +104,9 @@ class Excl(db.Model):
             raise ValueError('Invalid family')
 
         if self.value:
-            if new_family == ExclFamily.network:
+            if new_family == ExclFamily.NETWORK:
                 ip_network(self.value)
-            if new_family == ExclFamily.regex:
+            if new_family == ExclFamily.REGEX:
                 try:
                     re.compile(self.value)
                 except re.error:
@@ -118,9 +118,9 @@ class Excl(db.Model):
     def validate_value(self, key, new_value):  # pylint: disable=unused-argument
         """validate value acording to the current family"""
 
-        if self.family == ExclFamily.network:
+        if self.family == ExclFamily.NETWORK:
             ip_network(new_value)
-        if self.family == ExclFamily.regex:
+        if self.family == ExclFamily.REGEX:
             try:
                 re.compile(new_value)
             except re.error:

@@ -21,23 +21,23 @@ def test_model_excl_validation():
     assert str(pytest_wrapped_e.value) == 'Invalid family'
 
     with pytest.raises(ValueError) as pytest_wrapped_e:
-        Excl(family=ExclFamily.network, value='invalid')
+        Excl(family=ExclFamily.NETWORK, value='invalid')
     assert str(pytest_wrapped_e.value) == "'invalid' does not appear to be an IPv4 or IPv6 network"
 
     with pytest.raises(ValueError) as pytest_wrapped_e:
-        Excl(family=ExclFamily.regex, value='invalid(')
+        Excl(family=ExclFamily.REGEX, value='invalid(')
     assert str(pytest_wrapped_e.value) == 'Invalid regex'
 
     test_excl = Excl(value='invalid(')
     with pytest.raises(ValueError):
-        test_excl.family = ExclFamily.network
+        test_excl.family = ExclFamily.NETWORK
     with pytest.raises(ValueError):
-        test_excl.family = ExclFamily.regex
+        test_excl.family = ExclFamily.REGEX
 
-    test_excl = Excl(family=ExclFamily.network)
+    test_excl = Excl(family=ExclFamily.NETWORK)
     with pytest.raises(ValueError):
         test_excl.value = 'invalid('
-    test_excl = Excl(family=ExclFamily.regex)
+    test_excl = Excl(family=ExclFamily.REGEX)
     with pytest.raises(ValueError):
         test_excl.value = 'invalid('
 

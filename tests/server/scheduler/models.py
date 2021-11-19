@@ -84,7 +84,7 @@ class ExclNetworkFactory(BaseModelFactory):  # pylint: disable=too-few-public-me
         """test excl network model factory"""
         model = Excl
 
-    family = ExclFamily.network
+    family = ExclFamily.NETWORK
     value = '127.66.66.0/26'
     comment = 'blocked test netrange, no traffic should go there'
 
@@ -95,6 +95,6 @@ class ExclRegexFactory(BaseModelFactory):  # pylint: disable=too-few-public-meth
         """test excl regex model factory"""
         model = Excl
 
-    family = ExclFamily.regex
+    family = ExclFamily.REGEX
     value = 'notarget[012]'
     comment = 'targets blocked by regex'

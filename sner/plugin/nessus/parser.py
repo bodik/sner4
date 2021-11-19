@@ -18,7 +18,7 @@ from sner.server.utils import SnerJSONEncoder
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """nessus .nessus output parser"""
 
-    SEVERITY_MAP = ['info', 'low', 'medium', 'high', 'critical']
+    SEVERITY_MAP = ['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
     @classmethod
     def parse_path(cls, path):

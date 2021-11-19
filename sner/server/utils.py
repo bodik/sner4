@@ -60,7 +60,7 @@ class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
         """returns bool if value matches the initialized match_to"""
 
 
-@ExclMatcher.register(ExclFamily.network)  # pylint: disable=too-few-public-methods
+@ExclMatcher.register(ExclFamily.NETWORK)  # pylint: disable=too-few-public-methods
 class ExclNetworkMatcher(ExclMatcherImplInterface):
     """network matcher"""
 
@@ -83,7 +83,7 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):
         return False
 
 
-@ExclMatcher.register(ExclFamily.regex)  # pylint: disable=too-few-public-methods
+@ExclMatcher.register(ExclFamily.REGEX)  # pylint: disable=too-few-public-methods
 class ExclRegexMatcher(ExclMatcherImplInterface):
     """regex matcher"""
 

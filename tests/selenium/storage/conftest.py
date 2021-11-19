@@ -13,8 +13,8 @@ def vulns_multiaction(host, vuln_factory):
     """prepare vulns for multiple selection and actions tests"""
 
     yield [
-        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, comment='comment1'),
-        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, comment='comment2')
+        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.INFO, comment='comment1'),
+        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.INFO, comment='comment2')
     ]
 
 
@@ -23,8 +23,8 @@ def vulns_filtering(host, vuln_factory):
     """prepare set of vulns needed for basic filtering tests"""
 
     yield [
-        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.info, tags=None),
-        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.info, tags=['tagx']),
-        vuln_factory.create(host=host, name='vuln 3', xtype='test.123', severity=SeverityEnum.info, tags=['info']),
-        vuln_factory.create(host=host, name='vuln 4', xtype='test.123', severity=SeverityEnum.info, tags=['report'])
+        vuln_factory.create(host=host, name='vuln 1', xtype='test.123', severity=SeverityEnum.INFO, tags=None),
+        vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.INFO, tags=['tagx']),
+        vuln_factory.create(host=host, name='vuln 3', xtype='test.123', severity=SeverityEnum.INFO, tags=['info']),
+        vuln_factory.create(host=host, name='vuln 4', xtype='test.123', severity=SeverityEnum.INFO, tags=['report'])
     ]

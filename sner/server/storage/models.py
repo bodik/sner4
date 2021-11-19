@@ -102,12 +102,12 @@ class Service(StorageModelBase):
 class SeverityEnum(SelectableEnum):
     """severity enum"""
 
-    unknown = 'unknown'
-    info = 'info'
-    low = 'low'
-    medium = 'medium'
-    high = 'high'
-    critical = 'critical'
+    UNKNOWN = 'unknown'
+    INFO = 'info'
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+    CRITICAL = 'critical'
 
 
 class Vuln(StorageModelBase):

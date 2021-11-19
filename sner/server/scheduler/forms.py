@@ -27,12 +27,12 @@ def valid_excl_family(form, field):  # pylint: disable=unused-argument
 def valid_excl_value(form, field):
     """validate exclusion value"""
 
-    if form.family.data == ExclFamily.network:
+    if form.family.data == ExclFamily.NETWORK:
         try:
             ip_network(field.data)
         except ValueError as e:
             raise ValidationError(str(e)) from None
-    elif form.family.data == ExclFamily.regex:
+    elif form.family.data == ExclFamily.REGEX:
         try:
             re.compile(field.data)
         except re.error:

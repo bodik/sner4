@@ -54,8 +54,8 @@ def initdata():  # pylint: disable=too-many-statements
     db.session.add(User(username='user1', active=True, roles=['user', 'operator', 'admin']))
 
     # scheduler test data
-    db.session.add(Excl(family=ExclFamily.network, value='127.66.66.0/26', comment='blacklist 1'))
-    db.session.add(Excl(family=ExclFamily.regex, value=r'^tcp://.*:22$', comment='avoid ssh'))
+    db.session.add(Excl(family=ExclFamily.NETWORK, value='127.66.66.0/26', comment='blacklist 1'))
+    db.session.add(Excl(family=ExclFamily.REGEX, value=r'^tcp://.*:22$', comment='avoid ssh'))
 
     queue = Queue(
         name='dev dummy',
@@ -125,7 +125,7 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     # storage test data host1
-    aggregable_vuln = {'name': 'aggregable vuln', 'xtype': 'x.agg', 'severity': SeverityEnum.medium}
+    aggregable_vuln = {'name': 'aggregable vuln', 'xtype': 'x.agg', 'severity': SeverityEnum.MEDIUM}
 
     host = Host(
         address='127.4.4.4',
@@ -168,7 +168,7 @@ def initdata():  # pylint: disable=too-many-statements
         host=host,
         name='test vulnerability',
         xtype='testxtype.123',
-        severity=SeverityEnum.critical,
+        severity=SeverityEnum.CRITICAL,
         comment='a test vulnerability comment',
         refs=['ref1', 'ref2'],
         tags=['tag1', 'tag2']
@@ -178,7 +178,7 @@ def initdata():  # pylint: disable=too-many-statements
         host=host,
         name='another test vulnerability',
         xtype='testxtype.124',
-        severity=SeverityEnum.high,
+        severity=SeverityEnum.HIGH,
         comment='another vulnerability comment',
         tags=None
     ))
@@ -187,7 +187,7 @@ def initdata():  # pylint: disable=too-many-statements
         host=host,
         name='vulnerability1',
         xtype='testxtype.124',
-        severity=SeverityEnum.medium,
+        severity=SeverityEnum.MEDIUM,
         tags=['info']
     ))
 
@@ -195,7 +195,7 @@ def initdata():  # pylint: disable=too-many-statements
         host=host,
         name='vulnerability2',
         xtype='testxtype.124',
-        severity=SeverityEnum.low,
+        severity=SeverityEnum.LOW,
         tags=['report']
     ))
 
@@ -203,7 +203,7 @@ def initdata():  # pylint: disable=too-many-statements
         host=host,
         name='vulnerability2',
         xtype='testxtype.124',
-        severity=SeverityEnum.info,
+        severity=SeverityEnum.INFO,
         tags=['info']
     ))
 
@@ -212,7 +212,7 @@ def initdata():  # pylint: disable=too-many-statements
         service=Service.query.first(),
         name='vulnerability3',
         xtype='testxtype.124',
-        severity=SeverityEnum.unknown,
+        severity=SeverityEnum.UNKNOWN,
         tags=['report']
     ))
 
