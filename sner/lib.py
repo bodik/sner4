@@ -4,6 +4,8 @@ shared functions
 """
 
 import os
+import signal
+from contextlib import contextmanager
 from zipfile import ZipFile
 
 import magic
@@ -46,3 +48,19 @@ def file_from_zip(zippath, filename):
 def format_host_address(value):
     """format ipv4 vs ipv6 address to string"""
     return value if ':' not in value else f'[{value}]'
+
+
+class TerminateContextMixin:  # pylint: disable=too-few-public-methods
+    """terminate context mixin"""
+
+    @contextmanager
+    def terminate_context(self):
+        """terminate context manager; should restore handlers despite of underlying code exceptions"""
+
+        self.original_signal_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self.terminate)
+        self.original_signal_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self.terminate)
+        try:
+            yield
+        finally:
+            signal.signal(signal.SIGINT, self.original_signal_handlers[signal.SIGINT])
+            signal.signal(signal.SIGTERM, self.original_signal_handlers[signal.SIGTERM])

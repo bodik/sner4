@@ -4,8 +4,6 @@ planner core
 """
 
 import logging
-import signal
-from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from time import sleep
@@ -14,6 +12,7 @@ from flask import current_app
 from pytimeparse import parse as timeparse
 from schema import Or, Schema
 
+from sner.lib import TerminateContextMixin
 from sner.server.extensions import db
 from sner.server.planner.steps import run_steps, StopPipeline
 
@@ -69,7 +68,7 @@ def run_interval_pipeline(config):
     lastrun_path.write_text(datetime.utcnow().isoformat())
 
 
-class Planner:
+class Planner(TerminateContextMixin):
     """planner"""
 
     LOOPSLEEP = 60
@@ -81,20 +80,6 @@ class Planner:
         self.original_signal_handlers = {}
         self.loop = None
         self.oneshot = oneshot
-
-    @contextmanager
-    def terminate_context(self):
-        """terminate context manager; should restore handlers despite of underlying code exceptions"""
-
-        # break pylint duplicate-code
-        self.original_signal_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self.terminate)
-        self.original_signal_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self.terminate)
-        try:
-            # break pylint duplicate-code
-            yield
-        finally:
-            signal.signal(signal.SIGINT, self.original_signal_handlers[signal.SIGINT])
-            signal.signal(signal.SIGTERM, self.original_signal_handlers[signal.SIGTERM])
 
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""

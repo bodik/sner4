@@ -22,7 +22,7 @@ import jsonschema
 import requests
 
 import sner.agent.protocol
-from sner.lib import get_dotted, load_yaml
+from sner.lib import get_dotted, load_yaml, TerminateContextMixin
 from sner.agent.modules import load_agent_plugins, REGISTERED_MODULES
 from sner.version import __version__
 
@@ -90,7 +90,7 @@ def zipdir(path, zipto):
                     output_zip.write(filepath, arcname)
 
 
-class AgentBase(ABC):
+class AgentBase(ABC, TerminateContextMixin):
     """base agent impl containing main (sub)process handling code"""
 
     def __init__(self):
@@ -112,18 +112,6 @@ class AgentBase(ABC):
         self.loop = False
         if self.module_instance:
             self.module_instance.terminate()
-
-    @contextmanager
-    def terminate_context(self):
-        """terminate context manager; should restore handlers despite of underlying code exceptions"""
-
-        self.original_signal_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self.terminate)
-        self.original_signal_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self.terminate)
-        try:
-            yield
-        finally:
-            signal.signal(signal.SIGINT, self.original_signal_handlers[signal.SIGINT])
-            signal.signal(signal.SIGTERM, self.original_signal_handlers[signal.SIGTERM])
 
     def process_assignment(self, assignment):
         """process assignment"""
