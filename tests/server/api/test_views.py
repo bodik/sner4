@@ -69,7 +69,7 @@ def test_scheduler_job_assign_route_exclusion(client, apikey, queue, excl_networ
     assert not decode_assignment(response)
 
 
-def test_scheduler_job_assign_locked(client, apikey, target):  # pylint: disable=unused-argument
+def test_scheduler_job_assign_route_locked(client, apikey, target):  # pylint: disable=unused-argument
     """job assign route test lock handling"""
 
     # flush current session and create new independent connection to simulate lock from other agent
@@ -82,7 +82,7 @@ def test_scheduler_job_assign_locked(client, apikey, target):  # pylint: disable
         assert not decode_assignment(response)
 
 
-def test_scheduler_job_assign_caps(client, apikey, queue_factory, target_factory):  # pylint: disable=unused-argument
+def test_scheduler_job_assign_route_caps(client, apikey, queue_factory, target_factory):  # pylint: disable=unused-argument
     """test assignment with client capabilities"""
 
     queue1 = queue_factory.create(name='q1', priority=20)
