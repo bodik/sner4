@@ -5,8 +5,10 @@ scheduler shared functions
 
 import os
 from ipaddress import ip_network
+from random import random
 
 from sner.server.extensions import db
+from sner.server.scheduler.heatmap import Heatmap
 from sner.server.scheduler.models import Target
 from sner.server.utils import windowed_query
 
@@ -44,7 +46,7 @@ def queue_enqueue(queue, targets):
     enqueued = []
     for target in map(lambda x: x.strip(), targets):
         if target != '':
-            enqueued.append({'target': target, 'queue_id': queue.id})
+            enqueued.append({'target': target, 'hashval': Heatmap.hashval(target), 'rand': random(), 'queue_id': queue.id})
     if enqueued:
         db.session.execute(Target.__table__.insert().values(enqueued))
         db.session.commit()

@@ -13,6 +13,7 @@ from flask import current_app, url_for
 from sqlalchemy import create_engine
 
 from sner.agent.core import apikey_header
+from sner.server.scheduler.heatmap import Heatmap
 from sner.server.extensions import db
 from sner.server.scheduler.models import Queue, Target
 
@@ -116,6 +117,19 @@ def test_scheduler_job_assign_route_caps(client, apikey, queue_factory, target_f
     assert 't3' in decode_assignment(response)['targets']
 
 
+def test_scheduler_job_assign_route_heatmap(client, apikey, target):  # pylint: disable=unused-argument
+    """job assign route test heatmap handling"""
+
+    heatmap = Heatmap()
+    for _ in range(current_app.config['SNER_HEATMAP_HOT_LEVEL']):
+        heatmap.put(target.hashval)
+    heatmap.save()
+
+    response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
+    assert response.status_code == HTTPStatus.OK
+    assert not decode_assignment(response)
+
+
 def test_scheduler_job_output_route(client, apikey, job):
     """job output route test"""
 
@@ -136,6 +150,23 @@ def test_scheduler_job_output_route(client, apikey, job):
         status='*'
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_scheduler_job_output_route_locked(client, apikey, job):
+    """job output route test locked"""
+
+    # flush current session and create new independent connection to simulate lock from other agent
+    db.session.commit()
+    with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
+        conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
+
+        response = client.post_json(
+            url_for('api.scheduler_job_output_route'),
+            {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+            headers=apikey_header(apikey),
+            status='*'
+        )
+        assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
 
 
 def test_stats_prometheus_route(client, queue):  # pylint: disable=unused-argument

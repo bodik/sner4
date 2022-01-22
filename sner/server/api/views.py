@@ -23,6 +23,7 @@ from sqlalchemy.sql.expression import cast, func
 import sner.agent.protocol
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
+from sner.server.scheduler.heatmap import Heatmap
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import ExclMatcher
@@ -49,7 +50,7 @@ def wait_for_lock(table_name):
     return False
 
 
-def select_queue(queue_name, client_caps):
+def iterate_queues(queue_name, client_caps):
     """
     select queue
         * queue must be active
@@ -63,39 +64,42 @@ def select_queue(queue_name, client_caps):
     query = Queue.query.filter(Queue.active).filter(Queue.targets.any()).filter(Queue.reqs.contained_by(ccaps))
     if queue_name:
         query = query.filter(Queue.name == queue_name)
-    queue = query.order_by(Queue.priority.desc(), func.random()).first()
-    return queue
+    for queue in query.order_by(Queue.priority.desc(), func.random()).all():
+        yield queue
 
 
 def assign_targets(queue):
     """
-    select targets for job
+    try to select targets from queue respecting current heatmap discarding excluded targets in the process
     """
 
-    # Pop targets until `group_size` of targets are selected or no targets left in queue.
-    # Blacklisted/excluded targets are discarded from queue in the process.
-    # Queue is popped for queue.group_size each time for performance reasons.
-    assigned_targets = []
+    heatmap = Heatmap()
     blacklist = ExclMatcher()
-    while True:
-        targets = Target.query.filter(Target.queue == queue).order_by(func.random()).limit(queue.group_size).all()
-        if not targets:
-            break
+    assigned_targets = []
+    delete_targets = []
 
-        delete_targets = []
-        for target in targets:
-            delete_targets.append(target.id)
-            if blacklist.match(target.target):
-                continue
-            assigned_targets.append(target.target)
-            if len(assigned_targets) == queue.group_size:
-                break
-        Target.query.filter(Target.id.in_(delete_targets)).delete(synchronize_session=False)
-        db.session.commit()
-        db.session.expire_all()
+    # bypassing ORM should provide iterator cursor yielding data on demand (instead of large buffering)
+    for item in db.session.execute('SELECT id, target, hashval FROM target WHERE queue_id = :queue_id ORDER BY rand', {'queue_id': queue.id}):
+        iid, itarget, ihashval = item
+
+        if blacklist.match(itarget):
+            delete_targets.append(iid)
+            continue
+
+        if heatmap.is_hot(ihashval):
+            continue
+
+        assigned_targets.append(itarget)
+        delete_targets.append(iid)
+        heatmap.put(ihashval)
 
         if len(assigned_targets) == queue.group_size:
             break
+
+    if delete_targets:
+        Target.query.filter(Target.id.in_(delete_targets)).delete(synchronize_session=False)
+    if assigned_targets:
+        heatmap.save()
 
     return assigned_targets
 
@@ -107,31 +111,29 @@ def scheduler_job_assign_route():
     assign job for worker
     """
 
-    nowork = jsonify({})
+    assignment = {}  # nowork
+    selected_queue = None
+    assigned_targets = None
 
     if not wait_for_lock(Target.__tablename__):
-        return nowork
+        return assignment
 
-    queue = select_queue(request.args.get('queue'), request.args.getlist('caps'))
-    if not queue:
-        # release lock and return response-nowork
-        db.session.commit()
-        return nowork
+    for queue in iterate_queues(request.args.get('queue'), request.args.getlist('caps')):
+        assigned_targets = assign_targets(queue)
+        if assigned_targets:
+            selected_queue = queue
+            break
 
-    assigned_targets = assign_targets(queue)
-    if not assigned_targets:
-        # release lock and return response-nowork
-        db.session.commit()
-        return nowork
+    if assigned_targets:
+        assignment = {
+            'id': str(uuid4()),
+            'config': {} if selected_queue.config is None else yaml.safe_load(selected_queue.config),
+            'targets': assigned_targets
+        }
+        job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=selected_queue)
+        db.session.add(job)
 
-    assignment = {
-        'id': str(uuid4()),
-        'config': {} if queue.config is None else yaml.safe_load(queue.config),
-        'targets': assigned_targets
-    }
-    job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
-    db.session.add(job)
-    db.session.commit()
+    db.session.commit()  # releases lock
     return jsonify(assignment)
 
 
@@ -152,12 +154,22 @@ def scheduler_job_output_route():
     if job and (not job.retval):
         # requests for invalid, deleted, repeated or clashing job ids are discarded
         # agent should delete the output on it's side as well
+
+        if not wait_for_lock(Target.__tablename__):
+            return jsonify({'title': 'Server busy'}), HTTPStatus.TOO_MANY_REQUESTS
+
         job.retval = retval
         os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
         with open(job.output_abspath, 'wb') as ftmp:
             ftmp.write(output)
         job.time_end = datetime.utcnow()
-        db.session.commit()
+
+        heatmap = Heatmap()
+        for target in json.loads(job.assignment)['targets']:
+            heatmap.pop(Heatmap.hashval(target))
+        heatmap.save()
+
+        db.session.commit()  # commit job record and release lock
 
     return '', HTTPStatus.OK
 

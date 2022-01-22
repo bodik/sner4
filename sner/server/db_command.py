@@ -5,6 +5,7 @@ sner.server db command module
 
 import os
 import shutil
+from random import random
 
 import click
 from flask import current_app
@@ -12,6 +13,7 @@ from flask.cli import with_appcontext
 
 from sner.server.auth.models import User
 from sner.server.extensions import db
+from sner.server.scheduler.heatmap import Heatmap
 from sner.server.scheduler.models import Excl, ExclFamily, Queue, Target
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 from sner.server.utils import yaml_dump
@@ -66,7 +68,7 @@ def initdata():  # pylint: disable=too-many-statements
     )
     db.session.add(queue)
     for target in range(3):
-        db.session.add(Target(target=target, queue=queue))
+        db.session.add(Target(target=target, hashval=Heatmap.hashval(target), rand=random(), queue=queue))
 
     db.session.add(Queue(
         name='pentest full syn scan',

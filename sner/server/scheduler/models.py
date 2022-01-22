@@ -12,6 +12,7 @@ from ipaddress import ip_network
 from flask import current_app
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship, validates
+from sqlalchemy.schema import Index
 
 from sner.server.extensions import db
 from sner.server.models import SelectableEnum
@@ -45,12 +46,17 @@ class Target(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     target = db.Column(db.Text, nullable=False)
+    hashval = db.Column(db.Text, nullable=False)
+    rand = db.Column(db.Float, nullable=False)
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
 
     queue = relationship('Queue', back_populates='targets')
 
     def __repr__(self):
         return f'<Target {self.id}: {self.target}>'
+
+
+Index('rand_index', Target.__table__.c.rand)
 
 
 class Job(db.Model):

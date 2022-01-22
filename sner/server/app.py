@@ -59,7 +59,8 @@ DEFAULT_CONFIG = {
 
     # other sner subsystems
     'SNER_PLANNER': {},
-    'SNER_VULNSEARCH': {}
+    'SNER_VULNSEARCH': {},
+    'SNER_HEATMAP_HOT_LEVEL': 10
 }
 
 
@@ -82,7 +83,8 @@ def config_from_yaml(filename):
         'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells'),
         # other sner subsystems
         'SNER_PLANNER': get_dotted(config_dict, 'planner'),
-        'SNER_VULNSEARCH': get_dotted(config_dict, 'server.vulnsearch')
+        'SNER_VULNSEARCH': get_dotted(config_dict, 'server.vulnsearch'),
+        'SNER_HEATMAP_HOT_LEVEL': get_dotted(config_dict, 'server.heatmap_hot_level')
     }
     return {k: v for k, v in config.items() if v is not None}
 

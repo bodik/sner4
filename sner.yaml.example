@@ -11,6 +11,7 @@
 #  vulnsearch:
 #    cvesearch: https://u:p@hostname:15443
 #    esd: https://u:p@hostname:443/esd
+#  heatmap_hot_level: 10
 #
 #
 #agent:
