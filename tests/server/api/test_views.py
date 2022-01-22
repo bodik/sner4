@@ -8,10 +8,12 @@ import json
 from http import HTTPStatus
 from ipaddress import ip_network
 from pathlib import Path
+from unittest.mock import patch
 
 from flask import current_app, url_for
 from sqlalchemy import create_engine
 
+import sner.server.api.views
 from sner.agent.core import apikey_header
 from sner.server.scheduler.heatmap import Heatmap
 from sner.server.extensions import db
@@ -78,7 +80,8 @@ def test_scheduler_job_assign_route_locked(client, apikey, target):  # pylint: d
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
         conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
 
-        response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
+        with patch.object(sner.server.api.views, 'TIMEOUT_ASSIGN', 1):
+            response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
         assert response.status_code == HTTPStatus.OK
         assert not decode_assignment(response)
 
@@ -160,12 +163,13 @@ def test_scheduler_job_output_route_locked(client, apikey, job):
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
         conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
 
-        response = client.post_json(
-            url_for('api.scheduler_job_output_route'),
-            {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
-            headers=apikey_header(apikey),
-            status='*'
-        )
+        with patch.object(sner.server.api.views, 'TIMEOUT_OUTPUT', 1):
+            response = client.post_json(
+                url_for('api.scheduler_job_output_route'),
+                {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+                headers=apikey_header(apikey),
+                status='*'
+            )
         assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
 
 

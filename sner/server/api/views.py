@@ -9,8 +9,6 @@ import json
 import os
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from random import random
-from time import sleep
 from uuid import uuid4
 
 import jsonschema
@@ -31,20 +29,18 @@ from sner.server.utils import ExclMatcher
 
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
+TIMEOUT_ASSIGN = 3
+TIMEOUT_OUTPUT = 30
 
-def wait_for_lock(table_name):
+
+def wait_for_lock(table_name, timeout):
     """wait for database lock. lock must be released by caller either by commit or rollback"""
 
-    counter = 3
-    while counter:
-        counter -= 1
-        try:
-            db.session.execute(f'LOCK TABLE {table_name} NOWAIT')
-            return True
-        except SQLAlchemyError:
-            db.session.rollback()
-            if counter:
-                sleep(random())
+    try:
+        db.session.execute(f'SET LOCAL lock_timeout={timeout*1000}; LOCK TABLE {table_name}')
+        return True
+    except SQLAlchemyError:
+        db.session.rollback()
 
     current_app.logger.warning('failed to acquire table lock')
     return False
@@ -115,7 +111,7 @@ def scheduler_job_assign_route():
     selected_queue = None
     assigned_targets = None
 
-    if not wait_for_lock(Target.__tablename__):
+    if not wait_for_lock(Target.__tablename__, TIMEOUT_ASSIGN):
         return assignment
 
     for queue in iterate_queues(request.args.get('queue'), request.args.getlist('caps')):
@@ -155,7 +151,7 @@ def scheduler_job_output_route():
         # requests for invalid, deleted, repeated or clashing job ids are discarded
         # agent should delete the output on it's side as well
 
-        if not wait_for_lock(Target.__tablename__):
+        if not wait_for_lock(Target.__tablename__, TIMEOUT_OUTPUT):
             return jsonify({'title': 'Server busy'}), HTTPStatus.TOO_MANY_REQUESTS
 
         job.retval = retval
