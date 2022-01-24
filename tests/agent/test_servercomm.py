@@ -10,11 +10,13 @@ import signal
 from contextlib import contextmanager
 from http import HTTPStatus
 from time import sleep
+from unittest.mock import patch
 from uuid import uuid4
 
 from flask import url_for
 from werkzeug.wrappers import Response
 
+import sner.agent.core
 from sner.agent.core import main as agent_main
 
 
@@ -76,8 +78,11 @@ def test_fail_server_communication(tmpworkdir, httpserver):  # pylint: disable=u
 
     sserver = FailServer(httpserver)
 
-    with terminate_after(1):
-        agent_main(['--server', sserver.url, '--apikey', 'dummy', '--debug', '--backofftime', '0.1'])
+    # backoff_time is configurable via config, but since test is running in
+    # tempdir is easier to patch the module instead of mocking config
+    with patch.dict(sner.agent.core.DEFAULT_CONFIG, {'BACKOFF_TIME': 0.1}):
+        with terminate_after(1):
+            agent_main(['--server', sserver.url, '--apikey', 'dummy', '--debug'])
 
     assert sserver.cnt_assign > 1
     assert sserver.cnt_output > 1

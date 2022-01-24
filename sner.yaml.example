@@ -21,6 +21,9 @@
 #  caps:
 #    - capability1
 #    - capability2
+#  backoff_time: 5.0
+#  net_timeout: 300
+#  oneshot: False
 #
 #
 #planner:

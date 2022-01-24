@@ -31,7 +31,11 @@ LOGGER_NAME = 'sner.agent'
 DEFAULT_CONFIG = {
     'SERVER': 'http://localhost:18000',
     'APIKEY': None,
-    'QUEUE': None
+    'QUEUE': None,
+    'CAPS': None,
+    'BACKOFF_TIME': 5.0,
+    'NET_TIMEOUT': 300,
+    'ONESHOT': False
 }
 
 
@@ -56,7 +60,10 @@ def config_from_yaml(filename):
         'SERVER': get_dotted(config_dict, 'agent.server'),
         'APIKEY': get_dotted(config_dict, 'agent.apikey'),
         'QUEUE': get_dotted(config_dict, 'agent.queue'),
-        'CAPS': get_dotted(config_dict, 'agent.caps')
+        'CAPS': get_dotted(config_dict, 'agent.caps'),
+        'BACKOFF_TIME': get_dotted(config_dict, 'agent.backoff_time'),
+        'NET_TIMEOUT': get_dotted(config_dict, 'agent.net_timeout'),
+        'ONESHOT': get_dotted(config_dict, 'agent.oneshot')
     }
     return {k: v for k, v in config.items() if v is not None}
 
@@ -69,12 +76,14 @@ def config_from_args(args):
         'APIKEY': args.apikey,
         'QUEUE': args.queue,
         'CAPS': args.caps,
+        'ONESHOT': args.oneshot,
     }
     return {k: v for k, v in config.items() if v is not None}
 
 
 def apikey_header(apikey):
     """generate apikey header"""
+
     return {'Authorization': f'Apikey {apikey}'}
 
 
@@ -140,15 +149,16 @@ class AgentBase(ABC, TerminateContextMixin):
 class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attributes
     """agent to fetch and execute assignments from central job server"""
 
-    def __init__(self, server, apikey, queue=None, caps=None, oneshot=False, backoff_time=5.0):  # pylint: disable=too-many-arguments
+    def __init__(self, config=DEFAULT_CONFIG):
         super().__init__()
 
-        self.server = server
-        self.apikey = apikey
-        self.queue = queue
-        self.caps = caps
-        self.oneshot = oneshot
-        self.backoff_time = backoff_time
+        self.server = config['SERVER']
+        self.apikey = config['APIKEY']
+        self.queue = config['QUEUE']
+        self.caps = config['CAPS']
+        self.backoff_time = config['BACKOFF_TIME']
+        self.net_timeout = config['NET_TIMEOUT']
+        self.oneshot = config['ONESHOT']
 
         self.loop = True
         self.get_assignment_url = f'{self.server}/api/scheduler/job/assign'
@@ -186,7 +196,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                     self.get_assignment_url,
                     headers=apikey_header(self.apikey),
                     params=self.get_assignment_params,
-                    timeout=10
+                    timeout=self.net_timeout
                 )
                 response.raise_for_status()
                 assignment = response.json()
@@ -214,7 +224,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         uploaded = False
         while not uploaded:
             try:
-                response = requests.post(self.upload_output_url, json=output, headers=apikey_header(self.apikey), timeout=10)
+                response = requests.post(self.upload_output_url, json=output, headers=apikey_header(self.apikey), timeout=self.net_timeout)
                 response.raise_for_status()
                 uploaded = True
             except requests.exceptions.RequestException as e:
@@ -283,7 +293,6 @@ def main(argv=None):
     parser.add_argument('--queue', help='specific queue selector')
     parser.add_argument('--caps', nargs='+', help='agent capabilities tags')
     parser.add_argument('--oneshot', action='store_true', help='process single assignment and exit')
-    parser.add_argument('--backofftime', type=float, default=5.0, help='backoff time for repeating requests; used to speedup tests')
 
     args = parser.parse_args(argv)
     if args.debug:
@@ -307,4 +316,4 @@ def main(argv=None):
     config = copy.deepcopy(DEFAULT_CONFIG)
     config.update(config_from_yaml(args.config))
     config.update(config_from_args(args))
-    return ServerableAgent(config.get('SERVER'), config.get('APIKEY'), config.get('QUEUE'), config.get('CAPS'), args.oneshot, args.backofftime).run()
+    return ServerableAgent(config).run()
