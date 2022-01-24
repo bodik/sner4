@@ -75,7 +75,11 @@ def assign_targets(queue):
     delete_targets = []
 
     # bypassing ORM should provide iterator cursor yielding data on demand (instead of large buffering)
-    for item in db.session.execute('SELECT id, target, hashval FROM target WHERE queue_id = :queue_id ORDER BY rand', {'queue_id': queue.id}):
+    for item in db.session.execute(
+        'SELECT id, target, hashval FROM target WHERE queue_id = :queue_id ORDER BY rand',
+        {'queue_id': queue.id},
+        execution_options={'stream_results': True}
+    ):
         iid, itarget, ihashval = item
 
         if blacklist.match(itarget):
