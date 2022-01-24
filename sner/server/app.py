@@ -13,7 +13,7 @@ from flask_wtf.csrf import generate_csrf
 from sqlalchemy import func
 
 from sner.agent.modules import load_agent_plugins
-from sner.lib import get_dotted, load_yaml
+from sner.lib import load_yaml
 from sner.server.extensions import db, jsglue, login_manager, webauthn
 from sner.server.parser import load_parser_plugins
 from sner.server.sessions import FilesystemSessionInterface
@@ -68,25 +68,9 @@ def config_from_yaml(filename):
     """pull config variables from config file"""
 
     config_dict = load_yaml(filename)
-    config = {
-        # flask
-        'APPLICATION_ROOT': get_dotted(config_dict, 'server.application_root'),
-        'SECRET_KEY': get_dotted(config_dict, 'server.secret'),
-        # sqlalchemy
-        'SQLALCHEMY_DATABASE_URI': get_dotted(config_dict, 'server.db'),
-        # sner-web
-        'SNER_VAR': get_dotted(config_dict, 'server.var'),
-        'SNER_SESSION_IDLETIME': get_dotted(config_dict, 'server.session_idletime'),
-        'SNER_TAGS_HOST': get_dotted(config_dict, 'server.tags_host'),
-        'SNER_TAGS_VULN': get_dotted(config_dict, 'server.tags_vuln'),
-        'SNER_TAGS_ANNOTATE': get_dotted(config_dict, 'server.tags_annotate'),
-        'SNER_TRIM_REPORT_CELLS': get_dotted(config_dict, 'server.trim_report_cells'),
-        # other sner subsystems
-        'SNER_PLANNER': get_dotted(config_dict, 'planner'),
-        'SNER_VULNSEARCH': get_dotted(config_dict, 'server.vulnsearch'),
-        'SNER_HEATMAP_HOT_LEVEL': get_dotted(config_dict, 'server.heatmap_hot_level')
-    }
-    return {k: v for k, v in config.items() if v is not None}
+    config = {k.upper(): v for k, v in config_dict.get('server', {}).items()}
+    config['SNER_PLANNER'] = config_dict.get('planner', {})
+    return config
 
 
 def create_app(config_file=None, config_env='SNER_CONFIG'):

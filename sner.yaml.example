@@ -1,23 +1,29 @@
 #server:
-#  secret: 'changeit'
+#  secret_key: 'changeit'
 #  application_root: '/sner'
-#  db: 'postgresql://user:password@localhost/sner'
-#  var: '/var/lib/sner'
-#  session_idletime: 3600
-#  tags_host: ['reviewed']
-#  tags_vuln: ['info', 'report', 'todo', 'falsepositive']
-#  tags_annotate: ['sslhell']
-#  trim_report_cells: 65000
-#  vulnsearch:
-#    cvesearch: https://u:p@hostname:15443
-#    esd: https://u:p@hostname:443/esd
-#  heatmap_hot_level: 10
+#  sqlalchemy_database_uri: 'postgresql://user:password@localhost/sner'
+#  sner_var: '/var/lib/sner'
+#  sner_session_idletime: 3600
+#  sner_tags_host:
+#    - reviewed
+#  sner_tags_vuln:
+#    - info
+#    - report
+#    - todo
+#    - falsepositive
+#  sner_tags_annotate:
+#    - sslhell
+#  sner_trim_report_cells: 65000
+#  sner_vulnsearch:
+#    cvesearch: 'https://u:p@hostname:15443'
+#    esd: 'https://u:p@hostname:443/esd'
+#  sner_heatmap_hot_level: 10
 #
 #
 #agent:
 #  server: 'http://localhost:18000'
 #  apikey: 'generateit'
-#  queue: a_queue_name
+#  queue: 'a_queue_name'
 #  caps:
 #    - capability1
 #    - capability2

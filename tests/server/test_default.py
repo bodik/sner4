@@ -13,18 +13,8 @@ from unittest.mock import patch
 import pytest
 from flask import url_for
 
-from sner.lib import get_dotted
 from sner.server.app import cli
 from sner.version import __version__
-
-
-def test_get_dotted_function():
-    """test dotted access to the nested dictionary helper"""
-
-    data = {'a': {'b': 1}}
-    assert get_dotted(data, 'a') == {'b': 1}
-    assert get_dotted(data, 'a.b') == 1
-    assert get_dotted(data, 'a.b.c') is None
 
 
 def test_datetime_filter(app):
