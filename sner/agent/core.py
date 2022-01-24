@@ -22,7 +22,7 @@ import jsonschema
 import requests
 
 import sner.agent.protocol
-from sner.lib import get_dotted, load_yaml, TerminateContextMixin
+from sner.lib import load_yaml, TerminateContextMixin
 from sner.agent.modules import load_agent_plugins, REGISTERED_MODULES
 from sner.version import __version__
 
@@ -55,30 +55,17 @@ def setup_logger():
 def config_from_yaml(filename):
     """pull config variables from config file"""
 
-    config_dict = load_yaml(filename)
-    config = {
-        'SERVER': get_dotted(config_dict, 'agent.server'),
-        'APIKEY': get_dotted(config_dict, 'agent.apikey'),
-        'QUEUE': get_dotted(config_dict, 'agent.queue'),
-        'CAPS': get_dotted(config_dict, 'agent.caps'),
-        'BACKOFF_TIME': get_dotted(config_dict, 'agent.backoff_time'),
-        'NET_TIMEOUT': get_dotted(config_dict, 'agent.net_timeout'),
-        'ONESHOT': get_dotted(config_dict, 'agent.oneshot')
-    }
-    return {k: v for k, v in config.items() if v is not None}
+    return {k.upper(): v for k, v in load_yaml(filename).get('agent', {}).items()}
 
 
 def config_from_args(args):
     """pull config variables from parsed args/generic object"""
 
-    config = {
-        'SERVER': args.server,
-        'APIKEY': args.apikey,
-        'QUEUE': args.queue,
-        'CAPS': args.caps,
-        'ONESHOT': args.oneshot,
-    }
-    return {k: v for k, v in config.items() if v is not None}
+    config = {}
+    for item in ['server', 'apikey', 'queue', 'caps', 'oneshot']:
+        if getattr(args, item) is not None:
+            config[item.upper()] = getattr(args, item)
+    return config
 
 
 def apikey_header(apikey):
@@ -149,7 +136,7 @@ class AgentBase(ABC, TerminateContextMixin):
 class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attributes
     """agent to fetch and execute assignments from central job server"""
 
-    def __init__(self, config=DEFAULT_CONFIG):
+    def __init__(self, config):
         super().__init__()
 
         self.server = config['SERVER']
