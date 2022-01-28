@@ -15,9 +15,9 @@ from sqlalchemy import create_engine
 
 import sner.server.api.views
 from sner.agent.core import apikey_header
-from sner.server.scheduler.heatmap import Heatmap
 from sner.server.extensions import db
-from sner.server.scheduler.models import Queue, Target
+from sner.server.scheduler.core import target_hashval
+from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
 
 
 def decode_assignment(response):
@@ -80,7 +80,7 @@ def test_scheduler_job_assign_route_locked(client, apikey, target):  # pylint: d
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
         conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
 
-        with patch.object(sner.server.api.views, 'TIMEOUT_ASSIGN', 1):
+        with patch.object(sner.server.scheduler.core, 'TIMEOUT_ASSIGN', 1):
             response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
         assert response.status_code == HTTPStatus.OK
         assert not decode_assignment(response)
@@ -120,27 +120,15 @@ def test_scheduler_job_assign_route_caps(client, apikey, queue_factory, target_f
     assert 't3' in decode_assignment(response)['targets']
 
 
-def test_scheduler_job_assign_route_heatmap(client, apikey, target):  # pylint: disable=unused-argument
-    """job assign route test heatmap handling"""
-
-    heatmap = Heatmap()
-    for _ in range(current_app.config['SNER_HEATMAP_HOT_LEVEL']):
-        heatmap.put(target.hashval)
-    heatmap.save()
-
-    response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
-    assert response.status_code == HTTPStatus.OK
-    assert not decode_assignment(response)
-
-
 def test_scheduler_job_output_route(client, apikey, job):
     """job output route test"""
 
-    response = client.post_json(
-        url_for('api.scheduler_job_output_route'),
-        {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
-        headers=apikey_header(apikey)
-    )
+    with patch.object(sner.server.scheduler.core, 'HEATMAP_GC_PROBABILITY', 1.0):
+        response = client.post_json(
+            url_for('api.scheduler_job_output_route'),
+            {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+            headers=apikey_header(apikey)
+        )
     assert response.status_code == HTTPStatus.OK
 
     assert job.retval == 12345
@@ -163,7 +151,7 @@ def test_scheduler_job_output_route_locked(client, apikey, job):
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
         conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
 
-        with patch.object(sner.server.api.views, 'TIMEOUT_OUTPUT', 1):
+        with patch.object(sner.server.scheduler.core, 'TIMEOUT_OUTPUT', 1):
             response = client.post_json(
                 url_for('api.scheduler_job_output_route'),
                 {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
@@ -171,6 +159,40 @@ def test_scheduler_job_output_route_locked(client, apikey, job):
                 status='*'
             )
         assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
+
+
+def test_scheduler_job_lifecycle_with_heatmap(client, apikey, queue, target_factory):
+    """job assign route test"""
+
+    current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 1
+    target_factory.create(queue=queue, target='127.0.0.1', hashval=target_hashval('127.0.0.1'))
+    target_factory.create(queue=queue, target='127.0.0.2', hashval=target_hashval('127.0.0.2'))
+
+    assert len(Target.query.all()) == 2
+    assert len(Readynet.query.all()) == 1
+    assert len(Job.query.all()) == 0
+    assert len(Heatmap.query.all()) == 0
+
+    response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))
+    assert response.status_code == HTTPStatus.OK
+    assignment = decode_assignment(response)
+    assert isinstance(assignment, dict)
+
+    assert len(Target.query.all()) == 1
+    assert len(Readynet.query.all()) == 0
+    assert len(Job.query.all()) == 1
+    assert len(Heatmap.query.all()) == 1
+
+    response = client.post_json(
+        url_for('api.scheduler_job_output_route'),
+        {'id': assignment['id'], 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+        headers=apikey_header(apikey)
+    )
+    assert response.status_code == HTTPStatus.OK
+
+    assert len(Target.query.all()) == 1
+    assert len(Readynet.query.all()) == 1
+    assert len(Job.query.all()) == 1
 
 
 def test_stats_prometheus_route(client, queue):  # pylint: disable=unused-argument

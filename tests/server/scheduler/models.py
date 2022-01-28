@@ -6,13 +6,12 @@ scheduler test models
 import json
 from datetime import datetime
 from pathlib import Path
-from random import random
 from uuid import uuid4
 from zipfile import ZipFile
 
 from factory import LazyAttribute, post_generation, SubFactory
 
-from sner.server.scheduler.heatmap import Heatmap
+from sner.server.scheduler.core import heatmap_put, readynet_updates, target_hashval
 from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
 from sner.server.utils import yaml_dump
 from tests import BaseModelFactory
@@ -39,8 +38,18 @@ class TargetFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
 
     queue = SubFactory(QueueFactory)
     target = 'testtarget'
-    hashval = Heatmap.hashval(target)
-    rand = random()
+    hashval = target_hashval(target)
+
+    @post_generation
+    def make_output(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
+        """create on-disk output if create requested"""
+
+        if not create:
+            return
+
+        # if target gets created in database, readynets must be updated
+        # in order to be assignable
+        readynet_updates(self.queue, {self.hashval})
 
 
 class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
@@ -60,10 +69,11 @@ class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     def account_heatmap(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
         """account heatmap with prefabricated job targets"""
 
-        heatmap = Heatmap()
+        if not create:
+            return
+
         for target in json.loads(self.assignment)['targets']:
-            heatmap.put(Heatmap.hashval(target))
-        heatmap.save()
+            heatmap_put(target_hashval(target))
 
 
 class JobCompletedFactory(JobFactory):  # pylint: disable=too-few-public-methods

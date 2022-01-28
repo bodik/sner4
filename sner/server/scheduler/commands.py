@@ -10,9 +10,8 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 
-from sner.server.extensions import db
-from sner.server.scheduler.core import enumerate_network, job_delete, queue_enqueue
-from sner.server.scheduler.models import Job, Queue, Target
+from sner.server.scheduler.core import enumerate_network, queue_enqueue, queue_flush, queue_prune
+from sner.server.scheduler.models import Queue
 
 
 @click.group(name='scheduler', help='sner.server scheduler management')
@@ -74,8 +73,7 @@ def queue_flush_command(queue_name):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    Target.query.filter(Target.queue_id == queue.id).delete()
-    db.session.commit()
+    queue_flush(queue)
     sys.exit(0)
 
 
@@ -90,6 +88,5 @@ def queue_prune_command(queue_name):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    for job in Job.query.filter(Job.queue_id == queue.id).all():
-        job_delete(job)
+    queue_prune(queue)
     sys.exit(0)

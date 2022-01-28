@@ -12,7 +12,7 @@ from ipaddress import ip_network
 from flask import current_app
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship, validates
-from sqlalchemy.schema import Index
+from sqlalchemy.schema import Index, PrimaryKeyConstraint
 
 from sner.server.extensions import db
 from sner.server.models import SelectableEnum
@@ -47,16 +47,42 @@ class Target(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     target = db.Column(db.Text, nullable=False)
     hashval = db.Column(db.Text, nullable=False)
-    rand = db.Column(db.Float, nullable=False)
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
 
     queue = relationship('Queue', back_populates='targets')
+
+    __table_args__ = (
+        Index('target_queueid_hashval', 'queue_id', 'hashval'),  # get_assignment: select random target from queue
+        Index('target_hashval', 'hashval')  # job_done: enable readynet on all queues
+    )
 
     def __repr__(self):
         return f'<Target {self.id}: {self.target}>'
 
 
-Index('rand_index', Target.__table__.c.rand)
+class Heatmap(db.Model):
+    """rate-limit heatmap item"""
+
+    hashval = db.Column(db.String, nullable=False, primary_key=True)
+    count = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f'<Heatmap {self.hashval}: {self.count}>'
+
+
+class Readynet(db.Model):
+    """represents list of networks available for job assignment"""
+
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
+    hashval = db.Column(db.String, nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('queue_id', 'hashval'),  # enqueue: ensure uniqueness
+        Index('readynet_hashval', 'hashval')  # get_assignment: remove readynet when hot
+    )
+
+    def __repr__(self):
+        return f'<Readynet {self.queue_id} {self.hashval}>'
 
 
 class Job(db.Model):

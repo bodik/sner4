@@ -3,6 +3,8 @@
 scheduler queue views
 """
 
+from http import HTTPStatus
+
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
@@ -11,7 +13,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.scheduler.core import job_delete, queue_delete, queue_enqueue
+from sner.server.scheduler.core import queue_delete, queue_enqueue, queue_flush, queue_prune
 from sner.server.scheduler.forms import QueueEnqueueForm, QueueForm
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.scheduler.views import blueprint
@@ -111,8 +113,7 @@ def queue_flush_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        Target.query.filter(Target.queue_id == queue_id).delete()
-        db.session.commit()
+        queue_flush(Queue.query.get(queue_id))
         return redirect(url_for('scheduler.queue_list_route'))
 
     return render_template('button-generic.html', form=form, button_caption='Flush')
@@ -126,9 +127,11 @@ def queue_prune_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        for job in Queue.query.get(queue_id).jobs:
-            job_delete(job)
-        return redirect(url_for('scheduler.queue_list_route'))
+        try:
+            queue_prune(Queue.query.get(queue_id))
+            return redirect(url_for('scheduler.queue_list_route'))
+        except RuntimeError as exc:
+            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-generic.html', form=form, button_caption='Prune')
 
