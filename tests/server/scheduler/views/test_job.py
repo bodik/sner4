@@ -53,6 +53,16 @@ def test_job_delete_route(cl_operator, job_completed):
     assert not Path(job_completed_output_abspath).exists()
 
 
+def test_job_delete_route_runningjob(cl_operator, job):
+    """job delete route test fail with running job"""
+
+    form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=job.id)).form
+    response = form.submit(expect_errors=True)
+    assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    assert Job.query.get(job.id)
+
+
 def test_job_repeat_route(cl_operator, job):
     """repeat route test"""
 

@@ -60,8 +60,11 @@ def job_delete_route(job_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        job_delete(Job.query.get(job_id))
-        return redirect(url_for('scheduler.job_list_route'))
+        try:
+            job_delete(Job.query.get(job_id))
+            return redirect(url_for('scheduler.job_list_route'))
+        except RuntimeError as exc:
+            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-delete.html', form=form)
 
