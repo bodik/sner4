@@ -5,16 +5,17 @@ scheduler job views
 
 import json
 from datetime import datetime
+from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
-from flask import redirect, render_template, request, Response, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.scheduler.core import job_delete, queue_enqueue
+from sner.server.scheduler.core import job_delete, job_reconcile, job_repeat
 from sner.server.scheduler.models import Job, Queue
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import FILTER_PARSER
@@ -69,6 +70,22 @@ def job_delete_route(job_id):
     return render_template('button-delete.html', form=form)
 
 
+@blueprint.route('/job/reconcile/<job_id>', methods=['GET', 'POST'])
+@role_required('operator')
+def job_reconcile_route(job_id):
+    """reconcile job"""
+
+    form = ButtonForm()
+    if form.validate_on_submit():
+        try:
+            job_reconcile(Job.query.get(job_id))
+            return redirect(url_for('scheduler.job_list_route'))
+        except RuntimeError as exc:
+            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+    return render_template('button-generic.html', form=form)
+
+
 @blueprint.route('/job/repeat/<job_id>', methods=['GET', 'POST'])
 @role_required('operator')
 def job_repeat_route(job_id):
@@ -77,8 +94,7 @@ def job_repeat_route(job_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        job = Job.query.get(job_id)
-        queue_enqueue(job.queue, json.loads(job.assignment)['targets'])
+        job_repeat(Job.query.get(job_id))
         return redirect(url_for('scheduler.job_list_route'))
 
     return render_template('button-generic.html', form=form)

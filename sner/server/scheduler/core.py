@@ -177,8 +177,28 @@ def queue_delete(queue):
         job_delete(job)
     if os.path.exists(queue.data_abspath):
         os.rmdir(queue.data_abspath)
+    wait_for_lock(Target.__tablename__, 0)
     db.session.delete(queue)
     db.session.commit()
+
+
+def job_reconcile(job):
+    """
+    job reconcile. broken agent might generate orphaned jobs with targets accounted in heatmap.
+    reconcile job forces to fail selected job and reclaim it's heatmap counts.
+    """
+
+    wait_for_lock(Target.__tablename__, 0)
+    job.retval = -1
+    for target in json.loads(job.assignment)['targets']:
+        heatmap_pop(target_hashval(target))
+    db.session.commit()
+
+
+def job_repeat(job):
+    """job repeat; reschedule targets"""
+
+    queue_enqueue(job.queue, json.loads(job.assignment)['targets'])
 
 
 def job_delete(job):
@@ -324,8 +344,7 @@ def job_process_output(request_json):
         job.time_end = datetime.utcnow()
 
         for target in json.loads(job.assignment)['targets']:
-            thashval = target_hashval(target)
-            heatmap_pop(thashval)
+            heatmap_pop(target_hashval(target))
 
         db.session.commit()  # commit job record and release lock
 
