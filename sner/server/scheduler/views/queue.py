@@ -144,7 +144,10 @@ def queue_delete_route(queue_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        queue_delete(Queue.query.get(queue_id))
-        return redirect(url_for('scheduler.queue_list_route'))
+        try:
+            queue_delete(Queue.query.get(queue_id))
+            return redirect(url_for('scheduler.queue_list_route'))
+        except RuntimeError as exc:
+            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-delete.html', form=form)
