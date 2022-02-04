@@ -357,20 +357,3 @@ $ bin/server shell
 >>> for tmp in webservices:
 ...   print('%s:%s' % (tmp.host.address, tmp.port))
 ```
-
-
-
-## 5 Development
-
-* Server is Flask based application with heavy usage of DataTable and
-  Handlebars. Agent is an standalone python module.
-
-* Project uses flake8, pylint, pytest, coverage, selenium and GitHub Actions to
-  ensure functionality and coding standards.
-
-* Any review or contribution is welcome.
-
-### Known issues
-
-* Selenium python driver does not correctly cleanup the urllib3 pool manager, which yields into ResourceWarning, it's fixed 4.0 branch currently in development (09/2020)
-  The isssue is monkeypatched to `venv` during `install-deps`.
