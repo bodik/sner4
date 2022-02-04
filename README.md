@@ -121,16 +121,12 @@ For currently available modules see `sner/plugin/*/agent.py`
 
 #### Server: Scheduler
 
-Scheduler provides workload configuration container and distribution mechanism
-through definitions of Queues, Exclusions, Targets and Jobs. Despite it's name,
-scheduler is a mostly passive component which is managed by planner or human
-operator.
+Scheduler provides workload configuration container, distribution mechanism
+and rate-limiting scheduling.
 
-* **Queue** -- an agent module configuration (yaml encoded), scheduling specs
-  (group_size, priority, active) and list of targets. Each module has a
-  different config and target specification, see corresponding module
-  implementation for details. Queue can also demand set of agent capabilities
-  which must be satisfied in order to assign job from queue.
+* **Queue** -- a list of targets and coresponding agent module and scheduling
+  attributes container.  Each module has a different config and target
+  specification, see corresponding module implementation for details.
 
 * **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
   continuous recons, some parts of monitored networks must be avoided for
@@ -140,9 +136,10 @@ operator.
   all targets matching any configured exclusion during assignment creation
   process.
 
-* **Job** -- one assignment/job for the agent. JSON encoded assignment and the
-  job output in the form of a ZIP archive, parseable by *Data management* (Storage)
-  subsystem.
+* **Job** -- workload unit object, eg. assignment and agent output tuple.
+
+* **Heatmap**, **Readynet** -- internal structures for rate-limited target
+  selection.
 
 CLI helpers are available for IP ranges enumerations and queues/targets
 management.

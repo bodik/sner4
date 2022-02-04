@@ -3,32 +3,26 @@
 scheduler shared functions
 """
 
-import base64
-import binascii
 import json
-import os
+from collections import namedtuple
 from datetime import datetime
-from http import HTTPStatus
 from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
+from pathlib import Path
 from random import random
 from uuid import uuid4
 
-import jsonschema
 import yaml
 from flask import current_app
 from sqlalchemy import cast, delete, distinct, func, select
 from sqlalchemy.dialects.postgresql import ARRAY as pg_ARRAY, insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 
-import sner.agent.protocol
 from sner.server.extensions import db
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
 from sner.server.utils import ExclMatcher, windowed_query
 
 
-TIMEOUT_ASSIGN = 3
-TIMEOUT_OUTPUT = 30
-HEATMAP_GC_PROBABILITY = 0.1
+SCHEDULER_LOCK_NUMBER = 1
 
 
 def enumerate_network(arg):
@@ -59,221 +53,295 @@ def filter_already_queued(queue, targets):
     return targets
 
 
-def wait_for_lock(table_name, timeout):
-    """wait for database lock. lock must be released by caller either by commit or rollback"""
+class QueueManager:
+    """Governs queues, readynets and targets"""
 
-    try:
-        db.session.execute(f'SET LOCAL lock_timeout={timeout*1000}; LOCK TABLE {table_name}')
-        return True
-    except SQLAlchemyError:
-        db.session.rollback()
+    @staticmethod
+    def enqueue(queue, targets):
+        """enqueue targets to queue"""
 
-    current_app.logger.warning('failed to acquire table lock')
-    return False
+        enqueued = []
+        enqueued_hashvals = set()
 
+        for target in filter(None, map(lambda x: x.strip(), targets)):
+            thashval = SchedulerService.hashval(target)
+            enqueued.append({'queue_id': queue.id, 'target': target, 'hashval': thashval})
+            enqueued_hashvals.add(thashval)
 
-def target_hashval(value):
-    """computes rate-limit heatmap hash value"""
+        if enqueued:
+            SchedulerService.get_lock()
 
-    try:
-        addr = ip_address(value)
-        if isinstance(addr, IPv4Address):
-            return str(ip_network(f'{ip_address(value)}/24', strict=False))
-        if isinstance(addr, IPv6Address):
-            return str(ip_network(f'{ip_address(value)}/48', strict=False))
-    except ValueError:
-        pass
+            db.session.execute(pg_insert(Target.__table__), enqueued)
+            hot_hashvals = set(SchedulerService.grep_hot_hashvals(enqueued_hashvals))
+            for thashval in (enqueued_hashvals - hot_hashvals):
+                db.session.execute(
+                    pg_insert(Readynet)
+                    .values(queue_id=queue.id, hashval=thashval)
+                    .on_conflict_do_nothing(index_elements=[Readynet.queue_id, Readynet.hashval])
+                )
+            db.session.commit()
 
-    return value
+            SchedulerService.release_lock()
 
+    @staticmethod
+    def flush(queue):
+        """queue flush; flush all targets from queue"""
 
-def heatmap_put(value):
-    """account value (increment counter) in heatmap and update readynets"""
+        SchedulerService.get_lock()
 
-    heatmap_hashval_count = db.session.execute(
-        pg_insert(Heatmap.__table__)
-        .values(hashval=value, count=1)
-        .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count+1))
-        .returning(Heatmap.count)
-    ).scalar()
-    if heatmap_hashval_count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']:
-        db.session.execute(delete(Readynet.__table__).filter(Readynet.hashval == value))
+        Target.query.filter(Target.queue_id == queue.id).delete()
+        Readynet.query.filter(Readynet.queue_id == queue.id).delete()
+        db.session.commit()
 
+        SchedulerService.release_lock()
 
-def heatmap_pop(value):
-    """account value (decrement counter) in heatmap and update readynets"""
+    @staticmethod
+    def prune(queue):
+        """queue prune; delete all queue jobs"""
 
-    heatmap_hashval_count = db.session.execute(
-        pg_insert(Heatmap.__table__)
-        .values(hashval=value, count=1)
-        .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count-1))
-        .returning(Heatmap.count)
-    ).scalar()
-    if heatmap_hashval_count+1 == current_app.config['SNER_HEATMAP_HOT_LEVEL']:
-        for queue_id in db.session.execute(select(func.distinct(Target.queue_id)).filter(Target.hashval == value)).scalars().all():
-            db.session.execute(pg_insert(Readynet.__table__).values(queue_id=queue_id, hashval=value))
+        for job in queue.jobs:
+            JobManager.delete(job)
 
-    if random() < HEATMAP_GC_PROBABILITY:
-        db.session.execute(delete(Heatmap.__table__).filter(Heatmap.count == 0))
+    @staticmethod
+    def delete(queue):
+        """queue delete; delete all jobs in cascade (deals with output files)"""
 
+        for job in queue.jobs:
+            JobManager.delete(job)
 
-def readynet_updates(queue, hashvals):
-    """for given queue, enable all non-hot readynets; used when enqueueing new targets"""
+        qpath = Path(queue.data_abspath)
+        if qpath.exists():
+            qpath.rmdir()
 
-    hot_readynets = set(db.session.execute(
-        select(Heatmap.hashval).filter(
-            Heatmap.hashval.in_(hashvals),
-            Heatmap.count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']
-        )
-    ).scalars().all())
-
-    for thashval in (hashvals - hot_readynets):
-        db.session.execute(
-            pg_insert(Readynet)
-            .values(queue_id=queue.id, hashval=thashval)
-            .on_conflict_do_nothing(index_elements=[Readynet.queue_id, Readynet.hashval])
-        )
+        SchedulerService.get_lock()
+        db.session.delete(queue)
+        db.session.commit()
+        SchedulerService.release_lock()
 
 
-def queue_enqueue(queue, targets):
-    """enqueue targets to queue"""
+class JobManager:
+    """job governance"""
 
-    enqueued = []
-    enqueued_hashvals = set()
+    @staticmethod
+    def create(queue, assigned_targets):
+        """
+        create job for queue with targets
 
-    for target in filter(None, map(lambda x: x.strip(), targets)):
-        thashval = target_hashval(target)
-        enqueued.append({'queue_id': queue.id, 'target': target, 'hashval': thashval})
-        enqueued_hashvals.add(thashval)
+        :return: agent assignment data
+        :rtype: dict
+        """
 
-    if enqueued:
-        wait_for_lock(Target.__tablename__, 0)
-        db.session.execute(pg_insert(Target.__table__), enqueued)
-        readynet_updates(queue, enqueued_hashvals)
+        assignment = {
+            'id': str(uuid4()),
+            'config': {} if queue.config is None else yaml.safe_load(queue.config),
+            'targets': assigned_targets
+        }
+        db.session.add(Job(id=assignment['id'], queue=queue, assignment=json.dumps(assignment)))
+        db.session.commit()
+        return assignment
+
+    @staticmethod
+    def finish(job, retval, output):
+        """writeback job results"""
+
+        opath = Path(job.output_abspath)
+        opath.parent.mkdir(parents=True, exist_ok=True)
+        opath.write_bytes(output)
+        job.retval = retval
+        job.time_end = datetime.utcnow()
+        db.session.commit()
+
+    @staticmethod
+    def reconcile(job):
+        """
+        job reconcile. broken agent might generate orphaned jobs with targets accounted in heatmap.
+        reconcile job forces to fail selected job and reclaim it's heatmap counts.
+        """
+
+        if job.retval is not None:
+            current_app.logger.error('cannot reconcile completed job %s', job.id)
+            raise RuntimeError('cannot reconcile completed job')
+
+        SchedulerService.get_lock()
+
+        job.retval = -1
+        for target in json.loads(job.assignment)['targets']:
+            SchedulerService.heatmap_pop(SchedulerService.hashval(target))
+
+        SchedulerService.release_lock()
+
+    @staticmethod
+    def repeat(job):
+        """job repeat; reschedule targets"""
+
+        QueueManager.enqueue(job.queue, json.loads(job.assignment)['targets'])
+
+    @staticmethod
+    def delete(job):
+        """job delete"""
+
+        # deleting running job would corrupt heatmap
+        if job.retval is None:
+            current_app.logger.error('cannot delete running job %s', job.id)
+            raise RuntimeError('cannot delete running job')
+
+        opath = Path(job.output_abspath)
+        if opath.exists():
+            opath.unlink()
+        db.session.delete(job)
         db.session.commit()
 
 
-def queue_flush(queue):
-    """queue flush; flush all targets from queue"""
-
-    wait_for_lock(Target.__tablename__, 0)
-    Target.query.filter(Target.queue_id == queue.id).delete()
-    Readynet.query.filter(Readynet.queue_id == queue.id).delete()
-    db.session.commit()  # release lock
+RandomTarget = namedtuple('RandomTarget', ['id', 'target', 'hashval'])
 
 
-def queue_prune(queue):
-    """queue prune; delete all queue jobs"""
-
-    for job in queue.jobs:
-        job_delete(job)
-    db.session.commit()
+class SchedulerServiceBusyException(Exception):
+    """raised when timeout is reached when obtaining scheduling service lock"""
 
 
-def queue_delete(queue):
-    """queue delete; delete all jobs in cascade (deals with output files)"""
-
-    for job in queue.jobs:
-        job_delete(job)
-    if os.path.exists(queue.data_abspath):
-        os.rmdir(queue.data_abspath)
-    wait_for_lock(Target.__tablename__, 0)
-    db.session.delete(queue)
-    db.session.commit()
-
-
-def job_reconcile(job):
+class SchedulerService:
     """
-    job reconcile. broken agent might generate orphaned jobs with targets accounted in heatmap.
-    reconcile job forces to fail selected job and reclaim it's heatmap counts.
+    rate-limiting scheduling service (nacelnik.mk1 design)
+
+    Naive implementation (queues/targets, heatmap) for rate-limiting but rantom
+    target selection does not perform well with large queue sizes. Either would
+    require to pass full heatmap processing for each target (ends up creating
+    large temporary tables) or requires re-iterating of all targets in
+    worst-case.
+
+    Nacelnik.Mk1 (apadrta@cesnet.cz) proposes maintaining datastructure
+    (queues/targets, readynet, heatmap) which optimizes target selection
+    via readynet pre-computed maps.
     """
 
-    wait_for_lock(Target.__tablename__, 0)
-    job.retval = -1
-    for target in json.loads(job.assignment)['targets']:
-        heatmap_pop(target_hashval(target))
-    db.session.commit()
+    TIMEOUT_JOB_ASSIGN = 3
+    TIMEOUT_JOB_OUTPUT = 30
+    HEATMAP_GC_PROBABILITY = 0.1
 
+    @staticmethod
+    def get_lock(timeout=0):
+        """wait for database lock or raise exception"""
 
-def job_repeat(job):
-    """job repeat; reschedule targets"""
+        try:
+            db.session.execute(
+                'SET LOCAL lock_timeout=:timeout; SELECT pg_advisory_lock(:locknum);',
+                {'timeout': timeout*100, 'locknum': SCHEDULER_LOCK_NUMBER}
+            )
+        except SQLAlchemyError:
+            db.session.rollback()
+            current_app.logger.warning('failed to acquire SchedulerService lock')
+            raise SchedulerServiceBusyException() from None
 
-    queue_enqueue(job.queue, json.loads(job.assignment)['targets'])
+    @staticmethod
+    def release_lock():
+        """release scheduling lock"""
 
+        db.session.execute('SELECT pg_advisory_unlock(:locknum);', {'locknum': SCHEDULER_LOCK_NUMBER})
 
-def job_delete(job):
-    """job delete; used by controller and respective command"""
+    @staticmethod
+    def hashval(value):
+        """computes rate-limit heatmap hash value"""
 
-    # deleting running job would corrupt heatmap
-    if job.retval is None:
-        current_app.logger.error('cannot delete running job %s', job.id)
-        raise RuntimeError('cannot delete running job')
+        try:
+            addr = ip_address(value)
+            if isinstance(addr, IPv4Address):
+                return str(ip_network(f'{ip_address(value)}/24', strict=False))
+            if isinstance(addr, IPv6Address):
+                return str(ip_network(f'{ip_address(value)}/48', strict=False))
+        except ValueError:
+            pass
 
-    if os.path.exists(job.output_abspath):
-        os.remove(job.output_abspath)
-    db.session.delete(job)
-    db.session.commit()
+        return value
 
+    @staticmethod
+    def heatmap_put(hashval):
+        """account value (increment counter) in heatmap and update readynets"""
 
-def assignment_select_queue(queue_name, client_caps):
-    """
-    select queue for target assignment accounting client request constraints
+        heat_count = db.session.execute(
+            pg_insert(Heatmap.__table__)
+            .values(hashval=hashval, count=1)
+            .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count+1))
+            .returning(Heatmap.count)
+        ).scalar()
 
-    * queue must be active
-    * client capabilities (caps) must conform queue requirements (reqs)
-    * queue must have any rate-limit available targets/networks enqueued
-    * must suffice client requested parameters (name)
-    * queue is selected with priority in respect, but at random on same prio levels
-    """
+        if heat_count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+            db.session.execute(delete(Readynet.__table__).filter(Readynet.hashval == hashval))
 
-    query = select(Queue).filter(
-        Queue.active,
-        Queue.reqs.contained_by(cast(client_caps, pg_ARRAY(db.String))),
-        Queue.id.in_(select(distinct(Readynet.queue_id)))
-    )
-    if queue_name:
-        query = query.filter(Queue.name == queue_name)
-    query = query.order_by(Queue.priority.desc(), func.random())
+        db.session.commit()
+        return heat_count
 
-    return db.session.execute(query).scalars().first()
+    @classmethod
+    def heatmap_pop(cls, hashval):
+        """account value (decrement counter) in heatmap and update readynets"""
 
+        heat_count = db.session.execute(
+            pg_insert(Heatmap.__table__)
+            .values(hashval=hashval, count=1)
+            .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count-1))
+            .returning(Heatmap.count)
+        ).scalar()
 
-def assignment_get(queue_name, client_caps):
-    """
-    assign job for agent
+        if random() < cls.HEATMAP_GC_PROBABILITY:
+            db.session.execute(delete(Heatmap.__table__).filter(Heatmap.count == 0))
 
-    * select suitable queue
-    * select random readynet for queue (readynets reflects current rate-limit heatmap state)
-    * pop random target within selected readynet
-    * cleanup readynet if queue does not hold any target in same readynet
-    * update rate-limit heatmap
-    * remove all queues readynets if readynet become hot
-    """
+        if heat_count+1 == current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+            for queue_id in db.session.execute(select(func.distinct(Target.queue_id)).filter(Target.hashval == hashval)).scalars().all():
+                db.session.execute(pg_insert(Readynet.__table__).values(queue_id=queue_id, hashval=hashval))
 
-    assignment = {}  # nowork
-    assigned_targets = []
-    blacklist = ExclMatcher()
+        db.session.commit()
+        return heat_count
 
-    # acquire lock
-    if not wait_for_lock(Target.__tablename__, TIMEOUT_ASSIGN):
-        return assignment
+    @staticmethod
+    def grep_hot_hashvals(hashvals):
+        """get hot hashvals among argument list"""
 
-    # select queue
-    queue = assignment_select_queue(queue_name, client_caps)
-    if not queue:
-        db.session.commit()  # release lock
-        return assignment
+        return db.session.execute(
+            select(Heatmap.hashval)
+            .filter(
+                Heatmap.hashval.in_(hashvals),
+                Heatmap.count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']
+            )
+        ).scalars().all()
 
-    # assign targets
-    while True:
+    @staticmethod
+    def _get_assignment_queue(queue_name, client_caps):
+        """
+        select queue for target assignment accounting client request constraints
+
+        * queue must be active
+        * client capabilities (caps) must conform queue requirements (reqs)
+        * queue must have any rate-limit available targets/networks enqueued
+        * must suffice client requested parameters (name)
+        * queue is selected with priority in respect, but at random on same prio levels
+
+        :return: selected queue
+        :rtype: sner.server.scheduler.model.Queue
+        """
+
+        query = select(Queue).filter(
+            Queue.active,
+            Queue.reqs.contained_by(cast(client_caps, pg_ARRAY(db.String))),
+            Queue.id.in_(select(distinct(Readynet.queue_id)))
+        )
+        if queue_name:
+            query = query.filter(Queue.name == queue_name)
+        query = query.order_by(Queue.priority.desc(), func.random())
+        return db.session.execute(query).scalars().first()
+
+    @staticmethod
+    def _pop_random_target(queue):
+        """
+        pop random target from queue and update readynet info
+
+        :return: random target properties as tuple
+        :rtype: sner.server.scheduler.core.RandomTarget
+        """
+
         readynet_hashval = db.session.execute(
-            select(Readynet.hashval)
-            .filter(Readynet.queue_id == queue.id)
-            .order_by(func.random())
-            .limit(1)
+            select(Readynet.hashval).filter(Readynet.queue_id == queue.id).order_by(func.random()).limit(1)
         ).scalar()
         if not readynet_hashval:
-            break
+            return None
 
         target_id, target = db.session.execute(
             select(Target.id, Target.target)
@@ -283,69 +351,72 @@ def assignment_get(queue_name, client_caps):
         ).first()
 
         db.session.execute(delete(Target.__table__).filter(Target.id == target_id))
+        # prune readynet if no targets left for current queue
         db.session.execute(
             delete(Readynet.__table__)
             .filter(
                 Readynet.queue_id == queue.id,
+                Readynet.hashval == readynet_hashval,
                 select(func.count(Target.id)).filter(Target.queue_id == queue.id, Target.hashval == readynet_hashval).scalar_subquery() == 0
             )
         )
 
-        if blacklist.match(target):
-            continue
-        assigned_targets.append(target)
-        heatmap_put(readynet_hashval)
-        if len(assigned_targets) == queue.group_size:
-            break
+        db.session.commit()
+        return RandomTarget(target_id, target, readynet_hashval)
 
-    # create job
-    if assigned_targets:
-        assignment = {
-            'id': str(uuid4()),
-            'config': {} if queue.config is None else yaml.safe_load(queue.config),
-            'targets': assigned_targets
-        }
-        job = Job(id=assignment['id'], assignment=json.dumps(assignment), queue=queue)
-        db.session.add(job)
+    @classmethod
+    def job_assign(cls, queue_name, client_caps):
+        """
+        assign job for agent
 
-    # release lock and respond to agent
-    db.session.commit()
-    return assignment
+        * select suitable queue
+        * pop random target
+            * select random readynet for queue (readynets reflects current rate-limit heatmap state)
+            * pop random target within selected readynet
+            * cleanup readynet if queue does not hold any target in same readynet
+        * update rate-limit heatmap
+            * deactivate readynet for all queues if it becomes hot
+        """
 
+        cls.get_lock(cls.TIMEOUT_JOB_ASSIGN)
 
-def job_process_output(request_json):
-    """
-    receive output from assigned job
+        assignment = {}  # nowork
+        assigned_targets = []
+        blacklist = ExclMatcher()
 
-    * for each target update rate-limit heatmap
-    * if readynet of the target becomes cool activate it for all queues
-    """
+        queue = cls._get_assignment_queue(queue_name, client_caps)
+        if not queue:
+            SchedulerService.release_lock()
+            return assignment
 
-    try:
-        jsonschema.validate(request_json, schema=sner.agent.protocol.output)
-        job_id = request_json['id']
-        retval = request_json['retval']
-        output = base64.b64decode(request_json['output'])
-    except (jsonschema.exceptions.ValidationError, binascii.Error):
-        raise RuntimeError('Invalid request', HTTPStatus.BAD_REQUEST) from None
+        while len(assigned_targets) < queue.group_size:
+            rtarget = cls._pop_random_target(queue)
+            if not rtarget:
+                break
+            if blacklist.match(rtarget.target):
+                continue
+            assigned_targets.append(rtarget.target)
+            cls.heatmap_put(rtarget.hashval)
 
-    # requests for invalid, deleted, repeated or clashing job ids are
-    # silently discarded agent should delete the output on it's side as
-    # well
-    job = Job.query.filter(Job.id == job_id).one_or_none()
-    if job and (job.retval is None):
-        if not wait_for_lock(Target.__tablename__, TIMEOUT_OUTPUT):
-            raise RuntimeError('Server busy', HTTPStatus.TOO_MANY_REQUESTS) from None
+        if assigned_targets:
+            assignment = JobManager.create(queue, assigned_targets)
 
-        job.retval = retval
-        os.makedirs(os.path.dirname(job.output_abspath), exist_ok=True)
-        with open(job.output_abspath, 'wb') as ftmp:
-            ftmp.write(output)
-        job.time_end = datetime.utcnow()
+        cls.release_lock()
+        return assignment
 
+    @classmethod
+    def job_output(cls, job, retval, output):
+        """
+        receive output from assigned job
+
+        * for each target update rate-limit heatmap
+            * if readynet of the target becomes cool activate it for all queues
+        """
+
+        cls.get_lock(cls.TIMEOUT_JOB_OUTPUT)
+
+        JobManager.finish(job, retval, output)
         for target in json.loads(job.assignment)['targets']:
-            heatmap_pop(target_hashval(target))
+            cls.heatmap_pop(cls.hashval(target))
 
-        db.session.commit()  # commit job record and release lock
-
-    return True
+        cls.release_lock()

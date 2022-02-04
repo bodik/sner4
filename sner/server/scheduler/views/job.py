@@ -15,7 +15,7 @@ from sqlalchemy_filters import apply_filters
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.scheduler.core import job_delete, job_reconcile, job_repeat
+from sner.server.scheduler.core import JobManager
 from sner.server.scheduler.models import Job, Queue
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import FILTER_PARSER
@@ -62,7 +62,7 @@ def job_delete_route(job_id):
 
     if form.validate_on_submit():
         try:
-            job_delete(Job.query.get(job_id))
+            JobManager.delete(Job.query.get(job_id))
             return redirect(url_for('scheduler.job_list_route'))
         except RuntimeError as exc:
             return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -78,7 +78,7 @@ def job_reconcile_route(job_id):
     form = ButtonForm()
     if form.validate_on_submit():
         try:
-            job_reconcile(Job.query.get(job_id))
+            JobManager.reconcile(Job.query.get(job_id))
             return redirect(url_for('scheduler.job_list_route'))
         except RuntimeError as exc:
             return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -94,7 +94,7 @@ def job_repeat_route(job_id):
     form = ButtonForm()
 
     if form.validate_on_submit():
-        job_repeat(Job.query.get(job_id))
+        JobManager.repeat(Job.query.get(job_id))
         return redirect(url_for('scheduler.job_list_route'))
 
     return render_template('button-generic.html', form=form)

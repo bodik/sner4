@@ -21,6 +21,7 @@
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td a.abutton_submit_dataurl_jobrepeat').on('click', {'dt': this.api()}, Sner.action_submit_dataurl);
+			this.find('td a.abutton_submit_dataurl_jobreconcile').on('click', {'dt': this.api()}, Sner.action_submit_dataurl);
 		}
 	};
 	$(document).ready(function() {

@@ -3,15 +3,19 @@
 api controller; only a stubs for binding routes implementations to application uri space
 """
 
+import binascii
+from base64 import b64decode
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
+import jsonschema
 from flask import Blueprint, jsonify, request, Response
 from sqlalchemy import func
 
+import sner.agent.protocol
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
-from sner.server.scheduler.core import assignment_get, job_process_output
+from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
 
@@ -24,7 +28,12 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 def scheduler_job_assign_route():
     """assign job for agent"""
 
-    return jsonify(assignment_get(request.args.get('queue'), request.args.getlist('caps')))
+    try:
+        resp = SchedulerService.job_assign(request.args.get('queue'), request.args.getlist('caps'))
+    except SchedulerServiceBusyException:
+        resp = {}  # nowork
+
+    return jsonify(resp)
 
 
 @blueprint.route('/scheduler/job/output', methods=['POST'])
@@ -33,10 +42,23 @@ def scheduler_job_output_route():
     """receive output from assigned job"""
 
     try:
-        job_process_output(request.json)
-        return '', HTTPStatus.OK
-    except RuntimeError as exc:
-        return jsonify({'title': exc.args[0]}), exc.args[1]
+        jsonschema.validate(request.json, schema=sner.agent.protocol.output)
+        output = b64decode(request.json['output'])
+    except (jsonschema.exceptions.ValidationError, binascii.Error):
+        return jsonify({'response': 'invalid request'}), HTTPStatus.BAD_REQUEST
+
+    job = Job.query.filter(Job.id == request.json['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
+    if not job:
+        # invalid/repeated requests are silently discarded, agent would delete working data
+        # on it's side as well
+        return jsonify({'response': 'invalid job'}), HTTPStatus.OK
+
+    try:
+        SchedulerService.job_output(job, request.json['retval'], output)
+    except SchedulerServiceBusyException:
+        return jsonify({'response': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
+
+    return jsonify({'response': 'success'}), HTTPStatus.OK
 
 
 @blueprint.route('/stats/prometheus')

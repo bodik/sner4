@@ -11,8 +11,9 @@ from zipfile import ZipFile
 
 from factory import LazyAttribute, post_generation, SubFactory
 
-from sner.server.scheduler.core import heatmap_put, readynet_updates, target_hashval
-from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Target
+from sner.server.extensions import db
+from sner.server.scheduler.core import SchedulerService
+from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Readynet, Target
 from sner.server.utils import yaml_dump
 from tests import BaseModelFactory
 
@@ -38,7 +39,7 @@ class TargetFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
 
     queue = SubFactory(QueueFactory)
     target = 'testtarget'
-    hashval = target_hashval(target)
+    hashval = SchedulerService.hashval(target)
 
     @post_generation
     def make_output(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
@@ -47,9 +48,10 @@ class TargetFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         if not create:
             return
 
-        # if target gets created in database, readynets must be updated
-        # in order to be assignable
-        readynet_updates(self.queue, {self.hashval})
+        # if target gets created in database, readynets must be updated in order to be assignable
+        if self.hashval not in SchedulerService.grep_hot_hashvals([self.hashval]):
+            db.session.merge(Readynet(queue_id=self.queue.id, hashval=self.hashval))  # pylint: disable=no-member
+            db.session.commit()
 
 
 class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
@@ -72,8 +74,10 @@ class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
         if not create:
             return
 
+        SchedulerService.get_lock()
         for target in json.loads(self.assignment)['targets']:
-            heatmap_put(target_hashval(target))
+            SchedulerService.heatmap_put(SchedulerService.hashval(target))
+        SchedulerService.release_lock()
 
 
 class JobCompletedFactory(JobFactory):  # pylint: disable=too-few-public-methods
@@ -97,6 +101,12 @@ class JobCompletedFactory(JobFactory):  # pylint: disable=too-few-public-methods
             with open(output_abspath, 'wb') as job_file:
                 with ZipFile(job_file, 'w') as zip_file:
                     zip_file.writestr('assignment.json', self.assignment)
+
+        return
+
+    @post_generation
+    def account_heatmap(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
+        """override JobFactory heatmap accounting"""
 
         return
 

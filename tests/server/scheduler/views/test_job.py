@@ -9,7 +9,7 @@ from pathlib import Path
 
 from flask import url_for
 
-from sner.server.scheduler.models import Job, Target
+from sner.server.scheduler.models import Heatmap, Job, Target
 
 
 def test_job_list_route(cl_operator):
@@ -61,6 +61,31 @@ def test_job_delete_route_runningjob(cl_operator, job):
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     assert Job.query.get(job.id)
+
+
+def test_job_reconcile_route(cl_operator, job):
+    """reconcile route test"""
+
+    assert Heatmap.query.filter(Heatmap.count > 0).count() == 2
+
+    form = cl_operator.get(url_for('scheduler.job_reconcile_route', job_id=job.id)).form
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
+
+    assert job.retval == -1
+    assert Heatmap.query.filter(Heatmap.count > 0).count() == 0
+
+
+def test_job_reconcile_completed(cl_operator, job_completed):
+    """reconcile route test"""
+
+    assert Heatmap.query.count() == 0
+
+    form = cl_operator.get(url_for('scheduler.job_reconcile_route', job_id=job_completed.id)).form
+    response = form.submit(expect_errors=True)
+    assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    assert Heatmap.query.count() == 0
 
 
 def test_job_repeat_route(cl_operator, job):

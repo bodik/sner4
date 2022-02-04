@@ -11,12 +11,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 from flask import current_app, url_for
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func, select
 
 import sner.server.api.views
 from sner.agent.core import apikey_header
 from sner.server.extensions import db
-from sner.server.scheduler.core import target_hashval
+from sner.server.scheduler.core import SchedulerService, SCHEDULER_LOCK_NUMBER
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
 
 
@@ -78,12 +78,15 @@ def test_scheduler_job_assign_route_locked(client, apikey, target):  # pylint: d
     # flush current session and create new independent connection to simulate lock from other agent
     db.session.commit()
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
-        conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
+        conn.execute(select(func.pg_advisory_lock(SCHEDULER_LOCK_NUMBER)))
 
-        with patch.object(sner.server.scheduler.core, 'TIMEOUT_ASSIGN', 1):
+        with patch.object(sner.server.scheduler.core.SchedulerService, 'TIMEOUT_JOB_ASSIGN', 1):
             response = client.get(url_for('api.scheduler_job_assign_route'), headers=apikey_header(apikey))  # should return response-nowork
-        assert response.status_code == HTTPStatus.OK
-        assert not decode_assignment(response)
+
+        conn.execute(select(func.pg_advisory_unlock(SCHEDULER_LOCK_NUMBER)))
+
+    assert response.status_code == HTTPStatus.OK
+    assert not decode_assignment(response)
 
 
 def test_scheduler_job_assign_route_caps(client, apikey, queue_factory, target_factory):  # pylint: disable=unused-argument
@@ -123,16 +126,19 @@ def test_scheduler_job_assign_route_caps(client, apikey, queue_factory, target_f
 def test_scheduler_job_output_route(client, apikey, job):
     """job output route test"""
 
-    with patch.object(sner.server.scheduler.core, 'HEATMAP_GC_PROBABILITY', 1.0):
+    with patch.object(sner.server.scheduler.core.SchedulerService, 'HEATMAP_GC_PROBABILITY', 1.0):
         response = client.post_json(
             url_for('api.scheduler_job_output_route'),
             {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
             headers=apikey_header(apikey)
         )
     assert response.status_code == HTTPStatus.OK
-
     assert job.retval == 12345
     assert Path(job.output_abspath).read_text(encoding='utf-8') == 'a-test-file-contents'
+
+
+def test_scheduler_job_output_route_invalidrequest(client, apikey):
+    """job output route test invalid and discarded requests"""
 
     response = client.post_json(
         url_for('api.scheduler_job_output_route'),
@@ -142,6 +148,13 @@ def test_scheduler_job_output_route(client, apikey, job):
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+    response = client.post_json(
+        url_for('api.scheduler_job_output_route'),
+        {'id': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'retval': 1, 'output': ''},
+        headers=apikey_header(apikey)
+    )
+    assert response.status_code == HTTPStatus.OK
+
 
 def test_scheduler_job_output_route_locked(client, apikey, job):
     """job output route test locked"""
@@ -149,24 +162,27 @@ def test_scheduler_job_output_route_locked(client, apikey, job):
     # flush current session and create new independent connection to simulate lock from other agent
     db.session.commit()
     with create_engine(current_app.config['SQLALCHEMY_DATABASE_URI']).connect() as conn:
-        conn.execute(f'LOCK TABLE {Target.__tablename__} NOWAIT')
+        conn.execute(select(func.pg_advisory_lock(SCHEDULER_LOCK_NUMBER)))
 
-        with patch.object(sner.server.scheduler.core, 'TIMEOUT_OUTPUT', 1):
+        with patch.object(sner.server.scheduler.core.SchedulerService, 'TIMEOUT_JOB_OUTPUT', 1):
             response = client.post_json(
                 url_for('api.scheduler_job_output_route'),
                 {'id': job.id, 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
                 headers=apikey_header(apikey),
                 status='*'
             )
-        assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
+
+        conn.execute(select(func.pg_advisory_unlock(SCHEDULER_LOCK_NUMBER)))
+
+    assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
 
 
 def test_scheduler_job_lifecycle_with_heatmap(client, apikey, queue, target_factory):
     """job assign route test"""
 
     current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 1
-    target_factory.create(queue=queue, target='127.0.0.1', hashval=target_hashval('127.0.0.1'))
-    target_factory.create(queue=queue, target='127.0.0.2', hashval=target_hashval('127.0.0.2'))
+    target_factory.create(queue=queue, target='127.0.0.1', hashval=SchedulerService.hashval('127.0.0.1'))
+    target_factory.create(queue=queue, target='127.0.0.2', hashval=SchedulerService.hashval('127.0.0.2'))
 
     assert len(Target.query.all()) == 2
     assert len(Readynet.query.all()) == 1

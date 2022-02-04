@@ -133,7 +133,7 @@ def test_queue_prune_route(cl_operator, job_completed):
 
 
 def test_queue_prune_route_runningjob(cl_operator, job):
-    """queue flush route test with running job"""
+    """queue flush route test with running job; should fail, delete running job would corrupt heatmap"""
 
     form = cl_operator.get(url_for('scheduler.queue_prune_route', queue_id=job.queue_id)).form
     response = form.submit(expect_errors=True)
@@ -154,3 +154,13 @@ def test_queue_delete_route(cl_operator, job_completed):
 
     assert not Queue.query.get(tqueue.id)
     assert not Path(tqueue.data_abspath).exists()
+
+
+def test_queue_delete_route_runningjob(cl_operator, job):
+    """queue delete route test with running job; should fail as deleting queue with running job would corrupt heatmap"""
+
+    form = cl_operator.get(url_for('scheduler.queue_delete_route', queue_id=job.queue_id)).form
+    response = form.submit(expect_errors=True)
+    assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    assert len(Job.query.filter(Job.queue_id == job.queue_id).all()) == 1

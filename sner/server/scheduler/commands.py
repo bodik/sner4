@@ -10,7 +10,7 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 
-from sner.server.scheduler.core import enumerate_network, queue_enqueue, queue_flush, queue_prune
+from sner.server.scheduler.core import enumerate_network, QueueManager
 from sner.server.scheduler.models import Queue
 
 
@@ -58,7 +58,7 @@ def queue_enqueue_command(queue_name, argtargets, **kwargs):
     argtargets = list(argtargets)
     if kwargs['file']:
         argtargets.extend(kwargs['file'].read().splitlines())
-    queue_enqueue(queue, argtargets)
+    QueueManager.enqueue(queue, argtargets)
     sys.exit(0)
 
 
@@ -73,7 +73,7 @@ def queue_flush_command(queue_name):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    queue_flush(queue)
+    QueueManager.flush(queue)
     sys.exit(0)
 
 
@@ -88,5 +88,5 @@ def queue_prune_command(queue_name):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    queue_prune(queue)
+    QueueManager.prune(queue)
     sys.exit(0)

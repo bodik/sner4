@@ -12,7 +12,7 @@ from flask.cli import with_appcontext
 
 from sner.server.auth.models import User
 from sner.server.extensions import db
-from sner.server.scheduler.core import queue_enqueue
+from sner.server.scheduler.core import QueueManager
 from sner.server.scheduler.models import Excl, ExclFamily, Queue
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 from sner.server.utils import yaml_dump
@@ -67,7 +67,7 @@ def initdata():  # pylint: disable=too-many-statements
     )
     db.session.add(queue)
     db.session.commit()  # required to obtain queue.id
-    queue_enqueue(queue, ['1', '2', '3'])
+    QueueManager.enqueue(queue, ['1', '2', '3'])
 
     db.session.add(Queue(
         name='pentest full syn scan',

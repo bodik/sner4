@@ -19,7 +19,7 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import import_parsed
-from sner.server.scheduler.core import enumerate_network, filter_already_queued, job_delete, queue_enqueue
+from sner.server.scheduler.core import enumerate_network, filter_already_queued, JobManager, QueueManager
 from sner.server.scheduler.models import Job, Queue
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import windowed_query
@@ -110,7 +110,7 @@ def archive_job(ctx):
     archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
     archive_dir.mkdir(parents=True, exist_ok=True)
     copy2(job.output_abspath, archive_dir)
-    job_delete(job)
+    JobManager.delete(job)
 
     return ctx
 
@@ -181,7 +181,7 @@ def enqueue(ctx, queue):
     if ctx.data:
         current_app.logger.info(f'enqueue {len(ctx.data)} targets to "{queue}"')
         queue = Queue.query.filter(Queue.name == queue).one()
-        queue_enqueue(queue, filter_already_queued(queue, ctx.data))
+        QueueManager.enqueue(queue, filter_already_queued(queue, ctx.data))
 
     return ctx
 
