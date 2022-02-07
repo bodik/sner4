@@ -41,12 +41,12 @@ db:
 
 lint: flake8 pylint
 flake8:
-	python -m flake8 bin/agent bin/server sner tests
+	flake8 bin/agent bin/server sner tests
 pylint:
-	python -m pylint bin/agent bin/server sner tests
+	pylint bin/agent bin/server sner tests
 
 test:
-	python -m pytest -v tests/agent tests/plugin tests/server
+	pytest -v tests/agent tests/plugin tests/server
 
 coverage:
 	coverage run --source sner -m pytest tests/agent tests/plugin tests/server -x -vv
@@ -62,4 +62,4 @@ install-extra: /usr/local/bin/geckodriver
 	sudo tar xzf /tmp/geckodriver.tar.gz -C /usr/local/bin geckodriver
 
 test-extra:
-	python -m pytest -x -vv tests/selenium
+	pytest -x -vv tests/selenium
