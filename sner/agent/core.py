@@ -120,8 +120,8 @@ class AgentBase(ABC, TerminateContextMixin):
         try:
             self.module_instance = REGISTERED_MODULES[assignment['config']['module']]()
             retval = self.module_instance.run(assignment)
-        except Exception as e:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
-            self.log.exception(e)
+        except Exception as exc:  # pylint: disable=broad-except ; modules can raise variety of exceptions, but agent must continue
+            self.log.exception(exc)
             retval = 1
         finally:
             self.module_instance = None
@@ -196,9 +196,9 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                         continue
                 jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
                 self.log.debug('got assignment: %s', assignment)
-            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as e:
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as exc:
                 assignment = None
-                self.log.warning('get_assignment error: %s', e)
+                self.log.warning('get_assignment error: %s', exc)
                 if self.oneshot:
                     return assignment, 1
                 sleep(self.backoff_time)
@@ -214,8 +214,8 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                 response = requests.post(self.upload_output_url, json=output, headers=apikey_header(self.apikey), timeout=self.net_timeout)
                 response.raise_for_status()
                 uploaded = True
-            except requests.exceptions.RequestException as e:
-                self.log.warning('upload_output error: %s', e)
+            except requests.exceptions.RequestException as exc:
+                self.log.warning('upload_output error: %s', exc)
                 sleep(self.backoff_time)
 
     def run(self, **kwargs):

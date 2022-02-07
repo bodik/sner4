@@ -114,8 +114,8 @@ def login_webauthn_route():
             login_user(user)
             return redirect_after_login()
 
-        except (KeyError, ValueError) as e:
-            current_app.logger.exception(e)
+        except (KeyError, ValueError) as exc:
+            current_app.logger.exception(exc)
             flash('Login error during Webauthn authentication.', 'error')
 
     return render_template('auth/login_webauthn.html', form=form)

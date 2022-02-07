@@ -99,8 +99,8 @@ class Planner(TerminateContextMixin):
                     try:
                         PIPELINE_CONFIG_SCHEMA.validate(pipeline)
                         run_pipeline(pipeline)
-                    except Exception as e:  # pylint: disable=broad-except  ; any exception can be raised during pipeline processing
-                        current_app.logger.error(f'pipeline failed, {pipeline}, {repr(e)}', exc_info=True)
+                    except Exception as exc:  # pylint: disable=broad-except  ; any exception can be raised during pipeline processing
+                        current_app.logger.error(f'pipeline failed, {pipeline}, {repr(exc)}', exc_info=True)
                 db.session.close()
 
                 if self.oneshot:

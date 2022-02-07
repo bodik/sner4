@@ -75,8 +75,8 @@ class ModuleBase(ABC):
         if self.process and (self.process.poll() is None):
             try:
                 os.kill(self.process.pid, signal.SIGTERM)
-            except OSError as e:
-                self.log.error(e)
+            except OSError as exc:
+                self.log.error(exc)
 
     def _execute(self, cmd, output_file='output'):
         """execute command and capture output"""

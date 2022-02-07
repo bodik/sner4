@@ -1,9 +1,6 @@
 [FORMAT]
 max-line-length=150
 
-[BASIC]
-good-names=e
-
 [TYPECHECK]
 ignored-classes=SQLAlchemy, sqlalchemy.orm.scoping.scoped_session
 

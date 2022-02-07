@@ -183,8 +183,8 @@ def profile_webauthn_register_route():
             db.session.commit()
 
             return redirect(url_for('auth.profile_route'))
-        except (KeyError, ValueError) as e:
-            current_app.logger.exception(e)
+        except (KeyError, ValueError) as exc:
+            current_app.logger.exception(exc)
             flash('Error during registration.', 'error')
 
     return render_template('auth/profile/webauthn_register.html', form=form)

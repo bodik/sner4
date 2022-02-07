@@ -30,8 +30,8 @@ def valid_excl_value(form, field):
     if form.family.data == ExclFamily.NETWORK:
         try:
             ip_network(field.data)
-        except ValueError as e:
-            raise ValidationError(str(e)) from None
+        except ValueError as exc:
+            raise ValidationError(str(exc)) from None
     elif form.family.data == ExclFamily.REGEX:
         try:
             re.compile(field.data)
@@ -44,16 +44,16 @@ def valid_agent_config(_, field):
 
     try:
         config = yaml.safe_load(field.data)
-    except (yaml.YAMLError, AttributeError) as e:
-        raise ValidationError(f'Invalid YAML: {str(e)}') from None
+    except (yaml.YAMLError, AttributeError) as exc:
+        raise ValidationError(f'Invalid YAML: {str(exc)}') from None
 
     if (not isinstance(config, dict)) or ('module' not in config) or (config['module'] not in REGISTERED_MODULES):
         raise ValidationError('Invalid module specified')
 
     try:
         REGISTERED_MODULES[config['module']].CONFIG_SCHEMA.validate(config)
-    except SchemaError as e:
-        raise ValidationError(f'Invalid config: {str(e)}') from None
+    except SchemaError as exc:
+        raise ValidationError(f'Invalid config: {str(exc)}') from None
 
 
 class QueueForm(FlaskForm):
