@@ -3,23 +3,29 @@
 scheduler shared functions
 """
 
+import csv
 import json
+import re
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from datetime import datetime
+from io import StringIO
 from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
 from pathlib import Path
 from random import random
 from uuid import uuid4
 
+import psycopg2
 import yaml
 from flask import current_app
 from sqlalchemy import cast, delete, distinct, func, select
 from sqlalchemy.dialects.postgresql import ARRAY as pg_ARRAY, insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 
+from sner.agent.modules import SERVICE_TARGET_REGEXP
 from sner.server.extensions import db
-from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
-from sner.server.utils import ExclMatcher, windowed_query
+from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Queue, Readynet, Target
+from sner.server.utils import windowed_query
 
 
 SCHEDULER_LOCK_NUMBER = 1
@@ -51,6 +57,120 @@ def filter_already_queued(queue, targets):
     current_targets = {x[0]: 0 for x in windowed_query(db.session.query(Target.target).filter(Target.queue == queue), Target.id)}
     targets = [tgt for tgt in targets if tgt not in current_targets]
     return targets
+
+
+class ExclMatcher():
+    """object matching value againts set of exclusions/rules"""
+
+    MATCHERS = {}
+
+    @staticmethod
+    def register(family):
+        """register matcher class to the excl.family"""
+
+        def register_real(cls):
+            if cls not in ExclMatcher.MATCHERS:
+                ExclMatcher.MATCHERS[family] = cls
+            return cls
+        return register_real
+
+    def __init__(self):
+        self.excls = []
+        for excl in Excl.query.all():
+            self.excls.append(ExclMatcher.MATCHERS[excl.family](excl.value))
+
+    def match(self, value):
+        """match value against all exclusions/matchers"""
+
+        for excl in self.excls:
+            if excl.match(value):
+                return True
+        return False
+
+
+class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
+    """base interface which must  be implemented by all available matchers"""
+
+    @abstractmethod
+    def __init__(self, match_to):
+        """constructor"""
+
+    @abstractmethod
+    def match(self, value):
+        """returns bool if value matches the initialized match_to"""
+
+
+@ExclMatcher.register(ExclFamily.NETWORK)  # pylint: disable=too-few-public-methods
+class ExclNetworkMatcher(ExclMatcherImplInterface):
+    """network matcher"""
+
+    def __init__(self, match_to):  # pylint: disable=super-init-not-called
+        self.match_to = ip_network(match_to)
+
+    def match(self, value):
+        try:
+            return ip_address(value) in self.match_to
+        except ValueError:
+            pass
+
+        try:
+            mtmp = re.match(SERVICE_TARGET_REGEXP, value)
+            if mtmp:
+                return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
+        except ValueError:
+            pass
+
+        return False
+
+
+@ExclMatcher.register(ExclFamily.REGEX)  # pylint: disable=too-few-public-methods
+class ExclRegexMatcher(ExclMatcherImplInterface):
+    """regex matcher"""
+
+    def __init__(self, match_to):  # pylint: disable=super-init-not-called
+        self.match_to = re.compile(match_to)
+
+    def match(self, value):
+        return bool(self.match_to.search(value))
+
+
+class ExclImportException(Exception):
+    """exclusion import error"""
+
+
+class ExclManager:
+    """exclustion manager"""
+
+    EXPORT_FIELDNAMES = ['family', 'value', 'comment']
+
+    @classmethod
+    def import_data(cls, data, replace):
+        """import from excl export csv"""
+        try:
+            imported = []
+            for row in csv.DictReader(StringIO(data), cls.EXPORT_FIELDNAMES, quoting=csv.QUOTE_MINIMAL):
+                imported.append(Excl(family=ExclFamily(row['family']), value=row['value'], comment=row['comment']))
+
+            if imported:
+                if replace:
+                    db.session.query(Excl).delete()
+                db.session.add_all(imported)
+                db.session.commit()
+        except (csv.Error, ValueError, SQLAlchemyError, psycopg2.Error) as exc:
+            db.session.rollback()
+            current_app.logger.exception(exc)
+            raise ExclImportException() from None
+
+    @classmethod
+    def export(cls):
+        """export excls to csv"""
+
+        output_buffer = StringIO()
+        output = csv.DictWriter(output_buffer, cls.EXPORT_FIELDNAMES, restval='', quoting=csv.QUOTE_ALL)
+        for row in db.session.query(Excl.family, Excl.value, Excl.comment).all():
+            output.writerow(row._asdict())
+
+        return output_buffer.getvalue()
 
 
 class QueueManager:

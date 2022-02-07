@@ -5,93 +5,14 @@ misc utils used in server
 
 import datetime
 import json
-import re
-from abc import ABC, abstractmethod
-from ipaddress import ip_address, ip_network
 from urllib.parse import urlunparse, urlparse
 
 import yaml
 from flask import current_app, request
 from werkzeug.exceptions import HTTPException
 
-from sner.agent.modules import SERVICE_TARGET_REGEXP
-from sner.server.scheduler.models import Excl, ExclFamily
+from sner.server.scheduler.models import ExclFamily
 from sner.server.storage.models import SeverityEnum
-
-
-class ExclMatcher():
-    """object matching value againts set of exclusions/rules"""
-
-    MATCHERS = {}
-
-    @staticmethod
-    def register(family):
-        """register matcher class to the excl.family"""
-
-        def register_real(cls):
-            if cls not in ExclMatcher.MATCHERS:
-                ExclMatcher.MATCHERS[family] = cls
-            return cls
-        return register_real
-
-    def __init__(self):
-        self.excls = []
-        for excl in Excl.query.all():
-            self.excls.append(ExclMatcher.MATCHERS[excl.family](excl.value))
-
-    def match(self, value):
-        """match value against all exclusions/matchers"""
-
-        for excl in self.excls:
-            if excl.match(value):
-                return True
-        return False
-
-
-class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
-    """base interface which must  be implemented by all available matchers"""
-
-    @abstractmethod
-    def __init__(self, match_to):
-        """constructor"""
-
-    @abstractmethod
-    def match(self, value):
-        """returns bool if value matches the initialized match_to"""
-
-
-@ExclMatcher.register(ExclFamily.NETWORK)  # pylint: disable=too-few-public-methods
-class ExclNetworkMatcher(ExclMatcherImplInterface):
-    """network matcher"""
-
-    def __init__(self, match_to):  # pylint: disable=super-init-not-called
-        self.match_to = ip_network(match_to)
-
-    def match(self, value):
-        try:
-            return ip_address(value) in self.match_to
-        except ValueError:
-            pass
-
-        try:
-            mtmp = re.match(SERVICE_TARGET_REGEXP, value)
-            if mtmp:
-                return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
-        except ValueError:
-            pass
-
-        return False
-
-
-@ExclMatcher.register(ExclFamily.REGEX)  # pylint: disable=too-few-public-methods
-class ExclRegexMatcher(ExclMatcherImplInterface):
-    """regex matcher"""
-
-    def __init__(self, match_to):  # pylint: disable=super-init-not-called
-        self.match_to = re.compile(match_to)
-
-    def match(self, value):
-        return bool(self.match_to.search(value))
 
 
 class SnerJSONEncoder(json.JSONEncoder):

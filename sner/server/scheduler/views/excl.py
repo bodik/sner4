@@ -3,29 +3,23 @@
 scheduler excl views
 """
 
-import csv
 import json
 from datetime import datetime
-from io import StringIO
 
-import psycopg2
 from datatables import ColumnDT, DataTables
-from flask import current_app, flash, redirect, render_template, request, Response, url_for
+from flask import flash, redirect, render_template, request, Response, url_for
 from sqlalchemy import literal_column
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
+from sner.server.scheduler.core import ExclImportException, ExclManager
 from sner.server.scheduler.forms import ExclForm, ExclImportForm
-from sner.server.scheduler.models import Excl, ExclFamily
+from sner.server.scheduler.models import Excl
 from sner.server.scheduler.views import blueprint
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.utils import SnerJSONEncoder
-
-
-EXPORT_FIELDNAMES = ['family', 'value', 'comment']
 
 
 @blueprint.route('/excl/list')
@@ -111,21 +105,10 @@ def excl_import_route():
 
     form = ExclImportForm()
     if form.validate_on_submit():
-        imported = []
         try:
-            for row in csv.DictReader(StringIO(form.data.data), EXPORT_FIELDNAMES, quoting=csv.QUOTE_MINIMAL):
-                imported.append(Excl(family=ExclFamily(row['family']), value=row['value'], comment=row['comment']))
-
-            if imported:
-                if form.replace.data:
-                    db.session.query(Excl).delete()
-                for tmp in imported:
-                    db.session.add(tmp)
-                db.session.commit()
-                return redirect(url_for('scheduler.excl_list_route'))
-        except (csv.Error, ValueError, SQLAlchemyError, psycopg2.Error) as e:
-            db.session.rollback()
-            current_app.logger.exception(e)
+            ExclManager.import_data(form.data.data, form.replace.data)
+            return redirect(url_for('scheduler.excl_list_route'))
+        except ExclImportException:
             flash('Import failed', 'error')
 
     return render_template('scheduler/excl/import.html', form=form)
@@ -136,12 +119,8 @@ def excl_import_route():
 def excl_export_route():
     """export excls to csv"""
 
-    output_buffer = StringIO()
-    output = csv.DictWriter(output_buffer, EXPORT_FIELDNAMES, restval='', quoting=csv.QUOTE_ALL)
-    for row in db.session.query(Excl.family, Excl.value, Excl.comment).all():
-        output.writerow(row._asdict())
-
     return Response(
-        output_buffer.getvalue(),
+        ExclManager.export(),
         mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment; filename=excl-{datetime.now().isoformat()}.csv'})
+        headers={'Content-Disposition': f'attachment; filename=excl-{datetime.now().isoformat()}.csv'}
+    )
