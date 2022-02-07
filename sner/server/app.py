@@ -60,7 +60,7 @@ DEFAULT_CONFIG = {
     # other sner subsystems
     'SNER_PLANNER': {},
     'SNER_VULNSEARCH': {},
-    'SNER_HEATMAP_HOT_LEVEL': 10
+    'SNER_HEATMAP_HOT_LEVEL': 0
 }
 
 

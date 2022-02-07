@@ -264,7 +264,7 @@ class SchedulerService:
             .returning(Heatmap.count)
         ).scalar()
 
-        if heat_count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+        if current_app.config['SNER_HEATMAP_HOT_LEVEL'] and (heat_count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']):
             db.session.execute(delete(Readynet.__table__).filter(Readynet.hashval == hashval))
 
         db.session.commit()
@@ -284,7 +284,7 @@ class SchedulerService:
         if random() < cls.HEATMAP_GC_PROBABILITY:
             db.session.execute(delete(Heatmap.__table__).filter(Heatmap.count == 0))
 
-        if heat_count+1 == current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+        if current_app.config['SNER_HEATMAP_HOT_LEVEL'] and (heat_count+1 == current_app.config['SNER_HEATMAP_HOT_LEVEL']):
             for queue_id in db.session.execute(select(func.distinct(Target.queue_id)).filter(Target.hashval == hashval)).scalars().all():
                 db.session.execute(pg_insert(Readynet.__table__).values(queue_id=queue_id, hashval=hashval))
 
@@ -294,6 +294,9 @@ class SchedulerService:
     @staticmethod
     def grep_hot_hashvals(hashvals):
         """get hot hashvals among argument list"""
+
+        if not current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+            return []
 
         return db.session.execute(
             select(Heatmap.hashval)
