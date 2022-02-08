@@ -31,124 +31,55 @@
 #  net_timeout: 300
 #  oneshot: False
 #
-#
 #planner:
-#  # common aliases
 #  common:
 #    home_netranges_ipv4: &home_netranges_ipv4 []
 #    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 #
-#  # step groups definitions
-#  step_groups:
-#    service_discovery:
-#      - step: enqueue
-#        queue: 'disco syn scan top10000'
+#  stages:
+#    # schedules
+#    stage_netlistenum:
+#      _class: NetlistEnum
+#      schedule: 120days
+#      netlist: *home_netranges_ipv4
 #
-#    service_scanning:
-#      - step: enqueue
-#        queue: 'data version scan basic'
-#      - step: enqueue
-#        queue: 'data jarm scan'
+#    stage_storagesixenum:
+#      _class: StorageSixEnum
+#      schedule: 90days
 #
-#  pipelines:
-#    # discovery pipelines
-#    - type: interval
-#      name: discover_ipv4
-#      interval: 120days
-#      steps:
-#        - step: enumerate_ipv4
-#          netranges: *home_netranges_ipv4
-#        - step: run_group
-#          name: service_discovery
+#    stage_storagerescan:
+#      _class: StorageRescan
+#      schedule: 1hour
+#      service_interval: 20days
+#      host_interval: 60days
 #
-#    - type: interval
-#      name: discover_ipv6_dns
-#      interval: 120days
-#      steps:
-#        - step: enumerate_ipv4
-#          netranges: *home_netranges_ipv4
-#        - step: enqueue
-#          queue: 'disco ipv6 dns discover'
+#    stage_storagecleanup:
+#      _class: StorageCleanup
 #
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'disco ipv6 dns discover'
-#        - step: project_hostlist
-#        - step: filter_netranges
-#          netranges: *home_netranges_ipv6
-#        - step: run_group
-#          name: service_discovery
-#        - step: archive_job
+#    # queue processors
+#    stage_sixdnsdisco:
+#      _class: SixDiscoQueueHandler
+#      queues: 'sner six_dns_discover'
+#      filter_nets: *home_netranges_ipv6
 #
+#    stage_sixenumdisco:
+#      _class: SixDiscoQueueHandler
+#      queues: 'sner six_enum_discover'
 #
-#    # scanning pipelines
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'disco syn scan top10000'
-#        - step: filter_tarpits
-#        - step: project_servicelist
-#        - step: run_group
-#          name: service_scanning
-#        - step: archive_job
+#    stage_servicedisco:
+#      _class: ServiceDisco
+#      queues: 'sner service_disco nmap'
 #
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'data version scan basic'
-#        - step: import_job
-#        - step: archive_job
+#    stage_servicescan:
+#      _class: StorageLoaderQueueHandler
+#      queues:
+#        - 'sner service_scan nmap version'
+#        - 'sner service_scan jarm'
 #
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'data script scan basic'
-#        - step: import_job
-#        - step: archive_job
+#    stage_standalonequeues:
+#      _class: StorageLoaderQueueHandler
+#      queues:
+#        - 'sner nmap script'
 #
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'data jarm scan'
-#        - step: import_job
-#        - step: archive_job
-#
-#
-#    # storage rescanning pipelines
-#    - type: generic
-#      steps:
-#        - step: rescan_services
-#          interval: '20days'
-#        - step: run_group
-#          name: service_scanning
-#
-#    - type: generic
-#      steps:
-#        - step: rescan_hosts
-#          interval: '60days'
-#        - step: run_group
-#          name: service_discovery
-#
-#    - type: interval
-#      name: storage_ipv6_enum
-#      interval: 120days
-#      steps:
-#        - step: storage_ipv6_enum
-#        - step: enqueue
-#          queue: 'disco ipv6 enum discover'
-#
-#    - type: queue
-#      steps:
-#        - step: load_job
-#          queue: 'disco ipv6 enum discover'
-#        - step: project_hostlist
-#        - step: run_group
-#          name: service_discovery
-#        - step: archive_job
-#
-#
-#    # maintenance pipeline
-#    - type: generic
-#      steps:
-#        - step: storage_cleanup
+#    stage_storageloader:
+#      _class: StorageLoader

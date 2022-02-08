@@ -80,42 +80,42 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='disco syn scan top10000',
-        config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn', 'timing_perhost': 4}),
-        group_size=1000,
-        priority=10,
-    ))
-
-    db.session.add(Queue(
-        name='disco ipv6 dns discover',
+        name='sner six_dns_discover',
         config=yaml_dump({'module': 'six_dns_discover', 'delay': 1}),
         group_size=1000,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='disco ipv6 enum discover',
+        name='sner six_enum_discover',
         config=yaml_dump({'module': 'six_enum_discover', 'rate': 100}),
         group_size=5,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='data version scan basic',
+        name='sner servicedisco nmap',
+        config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn', 'timing_perhost': 4}),
+        group_size=1000,
+        priority=10,
+    ))
+
+    db.session.add(Queue(
+        name='sner servicescan nmap version',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 5}),
         group_size=50,
         priority=15,
     ))
 
     db.session.add(Queue(
-        name='data jarm scan',
+        name='sner servicescan jarm',
         config=yaml_dump({'module': 'jarm', 'delay': 5}),
         group_size=50,
         priority=15,
     ))
 
     db.session.add(Queue(
-        name='data script scan basic',
+        name='sner nmap script',
         config=yaml_dump({
             'module': 'manymap',
             'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',

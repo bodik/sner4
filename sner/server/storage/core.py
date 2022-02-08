@@ -5,17 +5,21 @@ scheduler module functions
 
 import json
 from csv import DictWriter, QUOTE_ALL
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from io import StringIO
 
 from flask import current_app, jsonify, render_template
-from sqlalchemy import case, func
+from pytimeparse import parse as timeparse
+from sqlalchemy import case, func, or_, not_, select
 from sqlalchemy_filters import apply_filters
 
+from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.forms import AnnotateForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service, Vuln
+from sner.server.utils import windowed_query
 
 
 def get_related_models(model_name, model_id):
@@ -369,3 +373,103 @@ def vuln_export(qfilter=None):
     if content_trimmed:
         output.writerow({'host_ident': 'WARNING: some cells were trimmed'})
     return output_buffer.getvalue()
+
+
+class StorageManager:
+    """storage app logic"""
+
+    @staticmethod
+    def import_parsed(pidb):
+        """import"""
+
+        # TODO: refactor this stub
+        import_parsed(pidb)
+
+    @staticmethod
+    def get_all_six_address():
+        """return all host ipv6 addresses"""
+
+        return db.session.execute(select(Host.address).filter(func.family(Host.address) == 6)).scalars().all()
+
+    @staticmethod
+    def get_rescan_hosts(interval):
+        """rescan hosts from storage; discovers new services on hosts"""
+
+        now = datetime.utcnow()
+        rescan_horizont = now - timedelta(seconds=timeparse(interval))
+        query = Host.query.filter(or_(Host.rescan_time < rescan_horizont, Host.rescan_time == None))  # noqa: E501, E711  pylint: disable=singleton-comparison
+
+        rescan, ids = [], []
+        for host in windowed_query(query, Host.id):
+            rescan.append(host.address)
+            ids.append(host.id)
+        # orm is bypassed for performance reasons in case of large rescans
+        update_statement = Host.__table__.update().where(Host.id.in_(ids)).values(rescan_time=now)
+        db.session.execute(update_statement)
+        db.session.commit()
+        db.session.expire_all()
+
+        return rescan
+
+    @staticmethod
+    def get_rescan_services(interval):
+        """rescan services from storage; update known services info"""
+
+        now = datetime.utcnow()
+        rescan_horizont = now - timedelta(seconds=timeparse(interval))
+        query = Service.query.filter(or_(Service.rescan_time < rescan_horizont, Service.rescan_time == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
+
+        rescan, ids = [], []
+        for service in windowed_query(query, Service.id):
+            item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
+            rescan.append(item)
+            ids.append(service.id)
+        # orm is bypassed for performance reasons in case of large rescans
+        update_statement = Service.__table__.update().where(Service.id.in_(ids)).values(rescan_time=now)
+        db.session.execute(update_statement)
+        db.session.commit()
+        db.session.expire_all()
+
+        return rescan
+
+    @staticmethod
+    def cleanup_storage():
+        """clean up storage from various import artifacts"""
+
+        # NOTE: Services must be deleted via ORM otherwise relationship defined
+        # cascades (vulns, notes) would break. Hosts could be because of
+        # non-nullable foregin keys, but anyway we'll delete them with ORM too.
+
+        # remove any but open:* state services
+        query = Service.query.filter(not_(Service.state.ilike('open:%')))
+        for service in query.all():
+            db.session.delete(service)  # must not bypass orm due to relationship defined cascades to vulns and notes
+        db.session.commit()
+
+        # remove hosts without any data attribute, service, vuln or note
+        query = db.session.query(Host.id).filter(or_(Host.os == '', Host.os == None), or_(Host.comment == '', Host.comment == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
+        hosts_noinfo = [dbid for dbid, in query.all()]
+
+        # TODO: get scalars!
+        hosts_noservices = [
+            dbid
+            for dbid, in
+            db.session.query(Host.id).outerjoin(Service).having(func.count(Service.id) == 0).group_by(Host.id).all()
+        ]
+        hosts_novulns = [dbid for dbid, in db.session.query(Host.id).outerjoin(Vuln).having(func.count(Vuln.id) == 0).group_by(Host.id).all()]
+        hosts_nonotes = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 0).group_by(Host.id).all()]
+
+        hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_nonotes))
+        for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
+            db.session.delete(host)
+        db.session.commit()
+
+        # also remove all hosts not having any info but one note xtype hostnames
+        hosts_only_one_note = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 1).group_by(Host.id).all()]
+        query = db.session.query(Host.id).join(Note).filter(Host.id.in_(hosts_only_one_note), Note.xtype == 'hostnames')
+        hosts_only_note_hostnames = [dbid for dbid, in query.all()]
+
+        hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_only_note_hostnames))
+        for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
+            db.session.delete(host)
+        db.session.commit()

@@ -69,7 +69,8 @@ def config_from_yaml(filename):
 
     config_dict = load_yaml(filename)
     config = {k.upper(): v for k, v in config_dict.get('server', {}).items()}
-    config['SNER_PLANNER'] = config_dict.get('planner', {})
+    if 'planner' in config_dict:
+        config['SNER_PLANNER'] = config_dict['planner']
     return config
 
 

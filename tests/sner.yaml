@@ -5,4 +5,4 @@ server:
   sner_var: '/tmp/sner_test_var'
   sner_trim_report_cells: 1000
 
-planner:
+planner: {}

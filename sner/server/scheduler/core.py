@@ -13,6 +13,7 @@ from io import StringIO
 from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
 from pathlib import Path
 from random import random
+from shutil import copy2
 from uuid import uuid4
 
 import psycopg2
@@ -24,6 +25,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from sner.agent.modules import SERVICE_TARGET_REGEXP
 from sner.server.extensions import db
+from sner.server.parser import REGISTERED_PARSERS
 from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Queue, Readynet, Target
 from sner.server.utils import windowed_query
 
@@ -53,7 +55,7 @@ def enumerate_network(arg):
 def filter_already_queued(queue, targets):
     """filters already queued targets"""
 
-    # TODO: revisit need for filtering, on_conflict_do_nothing might work better  pylint: disable=fixme
+    # TODO: revisit need for filtering, on_conflict_do_nothing might work better
     current_targets = {x[0]: 0 for x in windowed_query(db.session.query(Target.target).filter(Target.queue == queue), Target.id)}
     targets = [tgt for tgt in targets if tgt not in current_targets]
     return targets
@@ -242,6 +244,7 @@ class QueueManager:
 class JobManager:
     """job governance"""
 
+    # TODO: naming here ?????
     @staticmethod
     def create(queue, assigned_targets):
         """
@@ -295,6 +298,23 @@ class JobManager:
         """job repeat; reschedule targets"""
 
         QueueManager.enqueue(job.queue, json.loads(job.assignment)['targets'])
+
+    @staticmethod
+    def parse(job):
+        """parse job and return data"""
+
+        module = yaml.safe_load(job.queue.config)['module']
+        parser_impl = REGISTERED_PARSERS[module]
+        return parser_impl.parse_path(job.output_abspath)
+
+    @staticmethod
+    def archive(job):
+        """job archive"""
+
+        current_app.logger.info(f'archive_job {job.id} ({job.queue.name})')
+        archive_dir = Path(current_app.config['SNER_VAR']) / 'planner_archive'
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        copy2(job.output_abspath, archive_dir)
 
     @staticmethod
     def delete(job):
