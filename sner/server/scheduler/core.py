@@ -193,10 +193,11 @@ class QueueManager:
         if enqueued:
             SchedulerService.get_lock()
 
-            db.session.execute(pg_insert(Target.__table__), enqueued)
+            conn = db.session.connection()
+            conn.execute(pg_insert(Target), enqueued)
             hot_hashvals = set(SchedulerService.grep_hot_hashvals(enqueued_hashvals))
             for thashval in (enqueued_hashvals - hot_hashvals):
-                db.session.execute(
+                conn.execute(
                     pg_insert(Readynet)
                     .values(queue_id=queue.id, hashval=thashval)
                     .on_conflict_do_nothing(index_elements=[Readynet.queue_id, Readynet.hashval])
@@ -397,15 +398,16 @@ class SchedulerService:
     def heatmap_put(hashval):
         """account value (increment counter) in heatmap and update readynets"""
 
-        heat_count = db.session.execute(
-            pg_insert(Heatmap.__table__)
+        conn = db.session.connection()
+        heat_count = conn.execute(
+            pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
             .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count+1))
             .returning(Heatmap.count)
         ).scalar()
 
         if current_app.config['SNER_HEATMAP_HOT_LEVEL'] and (heat_count >= current_app.config['SNER_HEATMAP_HOT_LEVEL']):
-            db.session.execute(delete(Readynet.__table__).filter(Readynet.hashval == hashval))
+            conn.execute(delete(Readynet).filter(Readynet.hashval == hashval))
 
         db.session.commit()
         return heat_count
@@ -414,19 +416,20 @@ class SchedulerService:
     def heatmap_pop(cls, hashval):
         """account value (decrement counter) in heatmap and update readynets"""
 
-        heat_count = db.session.execute(
-            pg_insert(Heatmap.__table__)
+        conn = db.session.connection()
+        heat_count = conn.execute(
+            pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
             .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count-1))
             .returning(Heatmap.count)
         ).scalar()
 
         if random() < cls.HEATMAP_GC_PROBABILITY:
-            db.session.execute(delete(Heatmap.__table__).filter(Heatmap.count == 0))
+            conn.execute(delete(Heatmap).filter(Heatmap.count == 0))
 
         if current_app.config['SNER_HEATMAP_HOT_LEVEL'] and (heat_count+1 == current_app.config['SNER_HEATMAP_HOT_LEVEL']):
             for queue_id in db.session.execute(select(func.distinct(Target.queue_id)).filter(Target.hashval == hashval)).scalars().all():
-                db.session.execute(pg_insert(Readynet.__table__).values(queue_id=queue_id, hashval=hashval))
+                conn.execute(pg_insert(Readynet).values(queue_id=queue_id, hashval=hashval))
 
         db.session.commit()
         return heat_count
@@ -438,7 +441,7 @@ class SchedulerService:
         if not current_app.config['SNER_HEATMAP_HOT_LEVEL']:
             return []
 
-        return db.session.execute(
+        return db.session.connection().execute(
             select(Heatmap.hashval)
             .filter(
                 Heatmap.hashval.in_(hashvals),
@@ -480,23 +483,25 @@ class SchedulerService:
         :rtype: sner.server.scheduler.core.RandomTarget
         """
 
-        readynet_hashval = db.session.execute(
+        conn = db.session.connection()
+
+        readynet_hashval = conn.execute(
             select(Readynet.hashval).filter(Readynet.queue_id == queue.id).order_by(func.random()).limit(1)
         ).scalar()
         if not readynet_hashval:
             return None
 
-        target_id, target = db.session.execute(
+        target_id, target = conn.execute(
             select(Target.id, Target.target)
             .filter(Target.queue_id == queue.id, Target.hashval == readynet_hashval)
             .order_by(func.random())
             .limit(1)
         ).first()
 
-        db.session.execute(delete(Target.__table__).filter(Target.id == target_id))
+        conn.execute(delete(Target).filter(Target.id == target_id))
         # prune readynet if no targets left for current queue
-        db.session.execute(
-            delete(Readynet.__table__)
+        conn.execute(
+            delete(Readynet)
             .filter(
                 Readynet.queue_id == queue.id,
                 Readynet.hashval == readynet_hashval,

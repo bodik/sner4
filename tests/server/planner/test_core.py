@@ -257,17 +257,9 @@ def test_storageloader(app, job_completed_nmap):  # pylint: disable=unused-argum
     assert Note.query.count() == 17
 
 
-def test_storagecleanup(app, host_factory, service_factory, note_factory):  # pylint: disable=unused-argument
+def test_storagecleanup(app, host_factory):  # pylint: disable=unused-argument
     """test planners cleanup storage stage"""
 
     host_factory.create(address='127.127.127.134', hostname=None, os=None, comment=None)
-    host1 = host_factory.create(address='127.127.127.135', os='identified')
-    service_factory.create(host=host1, proto='tcp', port=1, state='open:reason')
-    service_factory.create(host=host1, proto='tcp', port=1, state='filtered:reason')
-    host2 = host_factory.create(address='127.127.127.136', hostname=None, os=None, comment=None)
-    note_factory.create(host=host2, xtype='hostnames', data='adata')
-
     StorageCleanup().run()
-
-    assert Host.query.count() == 1
-    assert Service.query.count() == 1
+    assert Host.query.count() == 0

@@ -11,7 +11,7 @@ from io import StringIO
 
 from flask import current_app, jsonify, render_template
 from pytimeparse import parse as timeparse
-from sqlalchemy import case, func, or_, not_, select
+from sqlalchemy import case, delete, func, or_, not_, select, update
 from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
@@ -389,7 +389,7 @@ class StorageManager:
     def get_all_six_address():
         """return all host ipv6 addresses"""
 
-        return db.session.execute(select(Host.address).filter(func.family(Host.address) == 6)).scalars().all()
+        return db.session.connection().execute(select(Host.address).filter(func.family(Host.address) == 6)).scalars().all()
 
     @staticmethod
     def get_rescan_hosts(interval):
@@ -403,9 +403,9 @@ class StorageManager:
         for host in windowed_query(query, Host.id):
             rescan.append(host.address)
             ids.append(host.id)
+
         # orm is bypassed for performance reasons in case of large rescans
-        update_statement = Host.__table__.update().where(Host.id.in_(ids)).values(rescan_time=now)
-        db.session.execute(update_statement)
+        db.session.connection().execute(update(Host).where(Host.id.in_(ids)).values(rescan_time=now))
         db.session.commit()
         db.session.expire_all()
 
@@ -424,9 +424,9 @@ class StorageManager:
             item = f'{service.proto}://{format_host_address(service.host.address)}:{service.port}'
             rescan.append(item)
             ids.append(service.id)
+
         # orm is bypassed for performance reasons in case of large rescans
-        update_statement = Service.__table__.update().where(Service.id.in_(ids)).values(rescan_time=now)
-        db.session.execute(update_statement)
+        db.session.connection().execute(update(Service).where(Service.id.in_(ids)).values(rescan_time=now))
         db.session.commit()
         db.session.expire_all()
 
@@ -435,41 +435,33 @@ class StorageManager:
     @staticmethod
     def cleanup_storage():
         """clean up storage from various import artifacts"""
-
-        # NOTE: Services must be deleted via ORM otherwise relationship defined
-        # cascades (vulns, notes) would break. Hosts could be because of
-        # non-nullable foregin keys, but anyway we'll delete them with ORM too.
+        # bypassing ORM for performance reasons
+        conn = db.session.connection()
 
         # remove any but open:* state services
-        query = Service.query.filter(not_(Service.state.ilike('open:%')))
-        for service in query.all():
-            db.session.delete(service)  # must not bypass orm due to relationship defined cascades to vulns and notes
-        db.session.commit()
+        conn.execute(delete(Service).filter(not_(Service.state.ilike('open:%'))))
 
         # remove hosts without any data attribute, service, vuln or note
-        query = db.session.query(Host.id).filter(or_(Host.os == '', Host.os == None), or_(Host.comment == '', Host.comment == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
-        hosts_noinfo = [dbid for dbid, in query.all()]
-
-        # TODO: get scalars!
-        hosts_noservices = [
-            dbid
-            for dbid, in
-            db.session.query(Host.id).outerjoin(Service).having(func.count(Service.id) == 0).group_by(Host.id).all()
-        ]
-        hosts_novulns = [dbid for dbid, in db.session.query(Host.id).outerjoin(Vuln).having(func.count(Vuln.id) == 0).group_by(Host.id).all()]
-        hosts_nonotes = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 0).group_by(Host.id).all()]
+        hosts_noinfo = conn.execute(
+            select(Host.id).filter(or_(Host.os == '', Host.os == None), or_(Host.comment == '', Host.comment == None))  # noqa: E501,E711  pylint: disable=singleton-comparison
+        ).scalars().all()
+        hosts_noservices = conn.execute(
+            select(Host.id).outerjoin(Service).having(func.count(Service.id) == 0).group_by(Host.id)
+        ).scalars().all()
+        hosts_novulns = conn.execute(select(Host.id).outerjoin(Vuln).having(func.count(Vuln.id) == 0).group_by(Host.id)).scalars().all()
+        hosts_nonotes = conn.execute(select(Host.id).outerjoin(Note).having(func.count(Note.id) == 0).group_by(Host.id)).scalars().all()
 
         hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_nonotes))
-        for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
-            db.session.delete(host)
-        db.session.commit()
+        conn.execute(delete(Host).filter(Host.id.in_(hosts_to_delete)))
 
         # also remove all hosts not having any info but one note xtype hostnames
-        hosts_only_one_note = [dbid for dbid, in db.session.query(Host.id).outerjoin(Note).having(func.count(Note.id) == 1).group_by(Host.id).all()]
-        query = db.session.query(Host.id).join(Note).filter(Host.id.in_(hosts_only_one_note), Note.xtype == 'hostnames')
-        hosts_only_note_hostnames = [dbid for dbid, in query.all()]
+        hosts_only_one_note = conn.execute(select(Host.id).outerjoin(Note).having(func.count(Note.id) == 1).group_by(Host.id)).scalars().all()
+        hosts_only_note_hostnames = conn.execute(
+            select(Host.id).join(Note).filter(Host.id.in_(hosts_only_one_note), Note.xtype == 'hostnames')
+        ).scalars().all()
 
         hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_only_note_hostnames))
-        for host in Host.query.filter(Host.id.in_(hosts_to_delete)).all():
-            db.session.delete(host)
+        conn.execute(delete(Host).filter(Host.id.in_(hosts_to_delete)))
+
         db.session.commit()
+        db.session.expire_all()
