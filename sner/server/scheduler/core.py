@@ -27,7 +27,6 @@ from sner.agent.modules import SERVICE_TARGET_REGEXP
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Queue, Readynet, Target
-from sner.server.utils import windowed_query
 
 
 SCHEDULER_LOCK_NUMBER = 1
@@ -50,15 +49,6 @@ def enumerate_network(arg):
             data.append(str(network.broadcast_address))
 
     return data
-
-
-def filter_already_queued(queue, targets):
-    """filters already queued targets"""
-
-    # TODO: revisit need for filtering, on_conflict_do_nothing might work better
-    current_targets = {x[0]: 0 for x in windowed_query(db.session.query(Target.target).filter(Target.queue == queue), Target.id)}
-    targets = [tgt for tgt in targets if tgt not in current_targets]
-    return targets
 
 
 class ExclMatcher():

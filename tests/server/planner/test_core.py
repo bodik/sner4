@@ -234,12 +234,14 @@ def test_servicedisco(app, job_completed_nmap):  # pylint: disable=unused-argume
     assert 'tcp://127.0.0.1:139' in stage_servicescan.task_args
 
 
-def test_storageloaderqueuehandler_task(app, queue, job_completed_nmap):  # pylint: disable=unused-argument
+def test_storageloaderqueuehandler_task(app, queue, job_completed_nmap, target_factory):  # pylint: disable=unused-argument
     """test StorageLoaderQueueHandler base class"""
 
+    # test QueueHandler task
+    target_factory.create(queue=queue, target='target1')
     stage_storageloader = DummyStage()
-    StorageLoaderQueueHandler([queue.name], stage_storageloader).task(['target1'])
-    assert Target.query.filter(Target.queue == queue).count() == 1
+    StorageLoaderQueueHandler([queue.name], stage_storageloader).task(['target1', 'target2'])
+    assert Target.query.filter(Target.queue == queue).count() == 2
 
     stage_storageloader = DummyStage()
     StorageLoaderQueueHandler([job_completed_nmap.queue.name], stage_storageloader).run()

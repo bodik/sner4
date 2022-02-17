@@ -14,10 +14,12 @@ from time import sleep
 
 from flask import current_app
 from pytimeparse import parse as timeparse
+from sqlalchemy import select
 
 from sner.lib import format_host_address, TerminateContextMixin
-from sner.server.scheduler.core import enumerate_network, filter_already_queued, JobManager, QueueManager
-from sner.server.scheduler.models import Queue, Job
+from sner.server.extensions import db
+from sner.server.scheduler.core import enumerate_network, JobManager, QueueManager
+from sner.server.scheduler.models import Queue, Job, Target
 from sner.server.storage.core import StorageManager
 
 
@@ -228,8 +230,9 @@ class QueueHandler(Stage):
 
     def task(self, targets):
         for queue in Queue.query.filter(Queue.name.in_(self.queues)).all():
-            # TODO: revisit need for filtering, on_conflict_do_nothing might work better
-            QueueManager.enqueue(queue, filter_already_queued(queue, targets))
+            already_queued = db.session.connection().execute(select(Target.target).filter(Target.queue == queue)).scalars().all()
+            enqueue = list(set(targets) - set(already_queued))
+            QueueManager.enqueue(queue, enqueue)
 
 
 @register_stage
