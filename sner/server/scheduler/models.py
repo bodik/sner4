@@ -45,9 +45,9 @@ class Target(db.Model):
     """single target in queue"""
 
     id = db.Column(db.Integer, primary_key=True)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
     target = db.Column(db.Text, nullable=False)
     hashval = db.Column(db.Text, nullable=False)
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id', ondelete='CASCADE'), nullable=False)
 
     queue = relationship('Queue', back_populates='targets')
 
@@ -63,8 +63,12 @@ class Target(db.Model):
 class Heatmap(db.Model):
     """rate-limit heatmap item"""
 
-    hashval = db.Column(db.String, nullable=False, primary_key=True)
+    hashval = db.Column(db.String, nullable=False)
     count = db.Column(db.Integer, nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('hashval', name='heatmap_pkey'),
+    )
 
     def __repr__(self):
         return f'<Heatmap {self.hashval}: {self.count}>'
@@ -77,7 +81,7 @@ class Readynet(db.Model):
     hashval = db.Column(db.String, nullable=False)
 
     __table_args__ = (
-        PrimaryKeyConstraint('queue_id', 'hashval'),  # enqueue: ensure uniqueness
+        PrimaryKeyConstraint('queue_id', 'hashval', name='readynet_pkey'),  # enqueue: ensure uniqueness
         Index('readynet_hashval', 'hashval')  # get_assignment: remove readynet when hot
     )
 

@@ -200,7 +200,7 @@ class QueueManager:
                 conn.execute(
                     pg_insert(Readynet)
                     .values(queue_id=queue.id, hashval=thashval)
-                    .on_conflict_do_nothing(index_elements=[Readynet.queue_id, Readynet.hashval])
+                    .on_conflict_do_nothing(constraint='readynet_pkey')
                 )
             db.session.commit()
 
@@ -401,7 +401,7 @@ class SchedulerService:
         heat_count = conn.execute(
             pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
-            .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count+1))
+            .on_conflict_do_update(constraint='heatmap_pkey', set_=dict(count=Heatmap.count+1))
             .returning(Heatmap.count)
         ).scalar()
 
@@ -419,7 +419,7 @@ class SchedulerService:
         heat_count = conn.execute(
             pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
-            .on_conflict_do_update(index_elements=['hashval'], set_=dict(count=Heatmap.count-1))
+            .on_conflict_do_update(constraint='heatmap_pkey', set_=dict(count=Heatmap.count-1))
             .returning(Heatmap.count)
         ).scalar()
 
