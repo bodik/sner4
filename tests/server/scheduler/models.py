@@ -62,7 +62,6 @@ class JobFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
 
     id = LazyAttribute(lambda x: str(uuid4()))
     queue = SubFactory(QueueFactory)
-    # TODO: assignment does not match queue config
     assignment = json.dumps({'module': 'dummy', 'targets': ['1', '2']})
     retval = None
     time_start = datetime.now()

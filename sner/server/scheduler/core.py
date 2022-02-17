@@ -245,7 +245,6 @@ class QueueManager:
 class JobManager:
     """job governance"""
 
-    # TODO: naming here ?????
     @staticmethod
     def create(queue, assigned_targets):
         """
