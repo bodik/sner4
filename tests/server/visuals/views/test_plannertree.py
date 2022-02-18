@@ -25,28 +25,24 @@ def test_plannertree_json_route(cl_operator, queue_factory):
     queue_factory.create(name='queue2')
 
     current_app.config['SNER_PLANNER'] = yaml.safe_load("""
-        step_groups:
-          group1:
-            - step: enqueue
-              queue: queue2
-        pipelines:
-          - type: queue
-            steps:
-              - step: load_job
-                queue: queue1
-              - step: run_group
-                name: group1
-              - step: archive_job
-          - type: queue
-            steps:
-              - step: load_job
-                queue: queue2
-              - step: import_job
-              - step: archive_job
-    """)
+stages:
+  stage_storageloader:
+    _class: StorageLoader
+
+  stage_dummyschedule:
+    _class: DummySchedule
+    schedule: '0s'
+
+  stage_standalonequeues:
+    _class: StorageLoaderQueueHandler
+    queues:
+      - queue1
+      - queue2
+""")
 
     response = cl_operator.get(url_for('visuals.plannertree_json_route', crop=0))
     assert response.status_code == HTTPStatus.OK
 
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data
+    assert 'stage_storageloader' in [x['name'] for x in response_data['nodes']]

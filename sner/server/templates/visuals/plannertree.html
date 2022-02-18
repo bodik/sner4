@@ -56,6 +56,7 @@ if (!url_params.has('distance')) { url_params.set('distance', '200'); }
 //graph
 var colors = d3.scaleOrdinal(d3.schemeCategory20);
 var radius = 5;
+var innerBorder = 10;
 
 var width = $("#visual")[0].clientWidth;
 var height = window.innerHeight - remToPixels(9.0);
@@ -126,7 +127,7 @@ function update(nodes, links) {
 		.enter().append("circle")
 			.attr("class", "node")
 			.attr("r", function (d, i) { return (d.hasOwnProperty('size') ? d.size : 10); })
-			.style("fill", function (d, i) {return colors(i);})
+			.style("fill", function (d, i) {return (d.hasOwnProperty('color') ? d.color : colors(i)); })
 			.call(dragDrop)
 	nodeElements
 		.append("title")
@@ -154,8 +155,8 @@ function update(nodes, links) {
 
 function ticked() {
 	nodeElements
-		.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
-		.attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
+		.attr("cx", function(d) { return d.x = Math.max(radius + innerBorder, Math.min(width - radius - innerBorder, d.x)); })
+		.attr("cy", function(d) { return d.y = Math.max(radius + innerBorder, Math.min(height - radius - innerBorder, d.y)); });
 
 	textElements
 		.attr('x', function (d) { return d.x })

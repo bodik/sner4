@@ -3,9 +3,10 @@
 controller plannertree
 """
 
-from flask import current_app, jsonify, render_template
+from flask import jsonify, render_template
 
 from sner.server.auth.core import role_required
+from sner.server.planner.core import Planner, QueueHandler, Schedule, StorageLoader
 from sner.server.scheduler.models import Queue
 from sner.server.visuals.views import blueprint
 
@@ -21,38 +22,36 @@ def plannertree_route():
 @blueprint.route('/plannertree.json')
 @role_required('operator')
 def plannertree_json_route():
-    """planner pipelines simple (and incomplete) visualisation"""
+    """planner workflow visualisation"""
 
     def node_by_name(name):
         return next(filter(lambda obj: obj.get('name') == name, nodes), None)
 
-    def analyze_steps(ctx, steps):
-        for step in steps:
-            process_step(ctx, step)
-
-    def process_step(ctx, step):
-        if step['step'] == 'load_job':
-            ctx['source_queue'] = node_by_name(step['queue'])
-
-        if (step['step'] == 'import_job') and ctx.get('source_queue'):
-            ctx['links'].append({'source': ctx['source_queue']['id'], 'target': node_by_name('import_jobs')['id']})
-
-        if (step['step'] == 'enqueue') and ctx.get('source_queue'):
-            ctx['links'].append({'source': ctx['source_queue']['id'], 'target': node_by_name(step['queue'])['id']})
-
-        if step['step'] == 'run_group':
-            analyze_steps(ctx, current_app.config['SNER_PLANNER']['step_groups'][step['name']])
-
-    pipelines = current_app.config['SNER_PLANNER']['pipelines']
-    nodes = [{'id': 0, 'name': 'import_jobs', 'size': 20}]
+    nodes = []
     links = []
+    planner = Planner()
 
-    for idx, queue in enumerate(Queue.query.all(), 1):
-        nodes.append({'id': idx, 'name': queue.name})
+    for idx, queue in enumerate(Queue.query.all(), 0):
+        nodes.append({'id': idx, 'name': queue.name, 'color': 'gray'})
 
-    for pipeline in pipelines:
-        ctx = {'source_queue': None, 'links': []}
-        analyze_steps(ctx, pipeline['steps'])
-        links += ctx['links']
+    for idx, (stage_name, stage) in enumerate(planner.stages.items(), len(nodes)):
+        node = {'id': idx, 'name': stage_name, 'size': 15}
+        if isinstance(stage, Schedule):
+            node['color'] = 'violet'
+        if isinstance(stage, StorageLoader):
+            node['color'] = 'green'
+        if isinstance(stage, QueueHandler):
+            node['color'] = 'lightblue'
+        nodes.append(node)
+
+    for stage_name, stage in planner.stages.items():
+        if isinstance(stage, QueueHandler):
+            for queue in stage.queues:
+                links.append({'source': node_by_name(stage_name)['id'], 'target': node_by_name(queue)['id']})
+
+    stages_rev = {v: k for k, v in planner.stages.items()}
+    for stage, deps in planner.get_wiring().items():
+        for dep in deps:
+            links.append({'source': node_by_name(stages_rev[stage])['id'], 'target': node_by_name(stages_rev[dep])['id']})
 
     return jsonify({'nodes': nodes, 'links': links})

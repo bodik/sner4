@@ -73,10 +73,10 @@ def test_planner_dummy(app):  # pylint: disable=unused-argument
     """dummy run"""
 
     current_app.config['SNER_PLANNER'] = yaml.safe_load("""
-        stages:
-          stage_dummy:
-            _class: DummyStage
-    """)
+stages:
+  stage_dummy:
+    _class: DummyStage
+""")
 
     planner = Planner(oneshot=True)
     planner.run()
@@ -87,8 +87,42 @@ def test_planner_dummy(app):  # pylint: disable=unused-argument
     assert planner.stages['stage_dummy'].task_args == 'dummy'
 
 
-def test_planner_defaultconfig(app):  # pylint: disable=unused-argument
+def test_planner_stageexception(app, queue_factory, job_completed_factory):  # pylint: disable=unused-argument
+    """planner stage exception"""
+
+    queue = queue_factory.create(name='aqueue')
+    job_completed_factory.create(queue=queue)
+
+    current_app.config['SNER_PLANNER'] = yaml.safe_load("""
+stages:
+  stage_storageloader:
+    _class: StorageLoader
+
+  stage_broken:
+    _class: StorageLoaderQueueHandler
+    queues:
+      - aqueue
+""")
+
+    planner = Planner(oneshot=True)
+    # artificialy break stage to emit exception
+    planner.stages['stage_broken'].stage_storageloader = None
+    planner.run()
+
+
+def test_planner_defaultconfig(app, queue_factory):  # pylint: disable=unused-argument
     """try somewhat default config"""
+
+    queues = [
+        'sner nmap script',
+        'sner servicescan nmap version',
+        'sner servicescan jarm',
+        'sner servicedisco nmap',
+        'sner six_enum_discover',
+        'sner six_dns_discover',
+    ]
+    for queue in queues:
+        queue_factory.create(name=queue)
 
     current_app.config['SNER_PLANNER'] = yaml.safe_load("""
 common:
@@ -96,9 +130,41 @@ common:
   home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 
 stages:
+  # queue processors
+  stage_storageloader:
+    _class: StorageLoader
+
+  stage_standalonequeues:
+    _class: StorageLoaderQueueHandler
+    queues:
+      - 'sner nmap script'
+  stage_servicescan:
+    _class: StorageLoaderQueueHandler
+    queues:
+      - 'sner servicescan nmap version'
+      - 'sner servicescan jarm'
+
+  stage_servicedisco:
+    _class: ServiceDisco
+    queues:
+      - 'sner servicedisco nmap'
+
+  stage_sixenumdisco:
+    _class: SixDiscoQueueHandler
+    queues:
+      - 'sner six_enum_discover'
+
+  stage_sixdnsdisco:
+    _class: SixDiscoQueueHandler
+    queues:
+      - 'sner six_dns_discover'
+    filter_nets: *home_netranges_ipv6
+
   # schedules
+  stage_storagecleanup:
+    _class: StorageCleanup
+
   stage_netlistenum:
-    # TODO: sner 0.6 used two separate generators
     _class: NetlistEnum
     schedule: 120days
     netlist: *home_netranges_ipv4
@@ -112,37 +178,6 @@ stages:
     schedule: 1hour
     service_interval: 20days
     host_interval: 60days
-
-  stage_storagecleanup:
-    _class: StorageCleanup
-
-  # queue processors
-  stage_sixdnsdisco:
-    _class: SixDiscoQueueHandler
-    queues: 'six_dns_discover'
-    filter_nets: *home_netranges_ipv6
-
-  stage_sixenumdisco:
-    _class: SixDiscoQueueHandler
-    queues: 'six_enum_discover'
-
-  stage_servicedisco:
-    _class: ServiceDisco
-    queues: 'service_disco nmap'
-
-  stage_servicescan:
-    _class: StorageLoaderQueueHandler
-    queues:
-      - 'service_scan nmap version'
-      - 'service_scan jarm'
-
-  stage_standalonequeues:
-    _class: StorageLoaderQueueHandler
-    queues:
-      - 'nmap script scan'
-
-  stage_storageloader:
-    _class: StorageLoader
 """)
 
     planner = Planner(oneshot=True)
@@ -157,12 +192,12 @@ def test_planner_autowiring_error(app):  # pylint: disable=unused-argument
         planner.autowire('dummy', Stage)
 
 
-def test_planner_getwiring(app):  # pylint: disable=unused-argument
+def test_planner_getwiring(app, queue):  # pylint: disable=unused-argument
     """dummy run"""
 
     planner = Planner(oneshot=True)
     planner.autowire('stage_storageloader', StorageLoader)
-    planner.autowire('stage_finalqueue', StorageLoaderQueueHandler, queues=['dummy'])
+    planner.autowire('stage_finalqueue', StorageLoaderQueueHandler, queues=[queue.name])
 
     wiring = planner.get_wiring()
     assert len(wiring) == 2
@@ -237,12 +272,18 @@ def test_servicedisco(app, job_completed_nmap):  # pylint: disable=unused-argume
 def test_storageloaderqueuehandler_task(app, queue, job_completed_nmap, target_factory):  # pylint: disable=unused-argument
     """test StorageLoaderQueueHandler base class"""
 
+    stage_storageloader = DummyStage()
+
+    # test QueueHandler init
+    with pytest.raises(WiringError):
+        StorageLoaderQueueHandler(['notexist'], stage_storageloader)
+
     # test QueueHandler task
     target_factory.create(queue=queue, target='target1')
-    stage_storageloader = DummyStage()
     StorageLoaderQueueHandler([queue.name], stage_storageloader).task(['target1', 'target2'])
     assert Target.query.filter(Target.queue == queue).count() == 2
 
+    # test QueueHandler run
     stage_storageloader = DummyStage()
     StorageLoaderQueueHandler([job_completed_nmap.queue.name], stage_storageloader).run()
     assert stage_storageloader.task_count == 1

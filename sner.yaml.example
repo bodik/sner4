@@ -37,7 +37,40 @@
 #    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 #
 #  stages:
+#    # queue processors
+#    stage_storageloader:
+#      _class: StorageLoader
+#
+#    stage_standalonequeues:
+#      _class: StorageLoaderQueueHandler
+#      queues:
+#        - 'sner nmap script'
+#    stage_servicescan:
+#      _class: StorageLoaderQueueHandler
+#      queues:
+#        - 'sner servicescan nmap version'
+#        - 'sner servicescan jarm'
+#
+#    stage_servicedisco:
+#      _class: ServiceDisco
+#      queues:
+#        - 'sner servicedisco nmap'
+#
+#    stage_sixenumdisco:
+#      _class: SixDiscoQueueHandler
+#      queues:
+#        - 'sner six_enum_discover'
+#
+#    stage_sixdnsdisco:
+#      _class: SixDiscoQueueHandler
+#      queues:
+#        - 'sner six_dns_discover'
+#      filter_nets: *home_netranges_ipv6
+#
 #    # schedules
+#    stage_storagecleanup:
+#      _class: StorageCleanup
+#
 #    stage_netlistenum:
 #      _class: NetlistEnum
 #      schedule: 120days
@@ -52,34 +85,3 @@
 #      schedule: 1hour
 #      service_interval: 20days
 #      host_interval: 60days
-#
-#    stage_storagecleanup:
-#      _class: StorageCleanup
-#
-#    # queue processors
-#    stage_sixdnsdisco:
-#      _class: SixDiscoQueueHandler
-#      queues: 'sner six_dns_discover'
-#      filter_nets: *home_netranges_ipv6
-#
-#    stage_sixenumdisco:
-#      _class: SixDiscoQueueHandler
-#      queues: 'sner six_enum_discover'
-#
-#    stage_servicedisco:
-#      _class: ServiceDisco
-#      queues: 'sner service_disco nmap'
-#
-#    stage_servicescan:
-#      _class: StorageLoaderQueueHandler
-#      queues:
-#        - 'sner service_scan nmap version'
-#        - 'sner service_scan jarm'
-#
-#    stage_standalonequeues:
-#      _class: StorageLoaderQueueHandler
-#      queues:
-#        - 'sner nmap script'
-#
-#    stage_storageloader:
-#      _class: StorageLoader

@@ -7,6 +7,7 @@ import inspect
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
@@ -15,6 +16,7 @@ from time import sleep
 from flask import current_app
 from pytimeparse import parse as timeparse
 from sqlalchemy import select
+from sqlalchemy.orm.exc import NoResultFound
 
 from sner.lib import format_host_address, TerminateContextMixin
 from sner.server.extensions import db
@@ -114,8 +116,8 @@ class Planner(TerminateContextMixin):
         self.oneshot = oneshot
         self.stages = {}
 
-        stages_config = current_app.config['SNER_PLANNER'].get('stages', {})
-        for name, kwargs in reversed(list(stages_config.items())):  # reversed here preserves dependencies hierarchy
+        stages_config = deepcopy(current_app.config['SNER_PLANNER'].get('stages', {}))
+        for name, kwargs in stages_config.items():  # reversed here preserves dependencies hierarchy
             class_ = REGISTERED_STAGES[kwargs.pop('_class')]
             self.autowire(name, class_, **kwargs)
 
@@ -132,8 +134,9 @@ class Planner(TerminateContextMixin):
 
         try:
             self.stages[name] = class_(**resolved_kwargs)
-        except TypeError:
+        except TypeError as exc:
             self.log.error('autowiring error stage: %s class:%s resolved_kwargs:%s', name, class_.__name__, resolved_kwargs)
+            self.log.error(str(exc))
             raise WiringError('autowiring error') from None
 
     def get_wiring(self):
@@ -165,8 +168,8 @@ class Planner(TerminateContextMixin):
                 for name, stage in self.stages.items():
                     try:
                         stage.run()
-                    except Exception as exc:  # pylint: disable=broad-except  ; any exception can be raised during pipeline processing
-                        current_app.logger.error(f'stage failed, {name} {stage}, {repr(exc)}', exc_info=True)
+                    except Exception as exc:  # pylint: disable=broad-except  ; any exception can be raised during stage processing
+                        current_app.logger.error(f'stage failed, {name} {stage}, {exc}', exc_info=True)
 
                 if self.oneshot:
                     self.loop = False
@@ -220,6 +223,11 @@ class QueueHandler(Stage):
 
     def __init__(self, queues):
         self.queues = queues
+        for queue in self.queues:
+            try:
+                Queue.query.filter(Queue.name == queue).one()
+            except NoResultFound:
+                raise WiringError(f'missing queue "{queue}"') from None
 
     def _drain(self):
         for queue in Queue.query.filter(Queue.name.in_(self.queues)).all():
@@ -279,6 +287,14 @@ class StorageCleanup(Stage):
 
         StorageManager.cleanup_storage()
         current_app.logger.debug(f'{self.__class__} finished')
+
+
+@register_stage
+class DummySchedule(Schedule):
+    """dummy testing schedulee"""
+
+    def _run(self):
+        """dummy"""
 
 
 @register_stage
