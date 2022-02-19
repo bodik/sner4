@@ -203,22 +203,22 @@ trusted CAs.
 
 ```
 # prepare environment
-apt-get install git sudo make
+apt-get -y install git sudo make
 git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
-make venv
-. venv/bin/activate
-make install-deps
+make install
 
-# database and datadir
+# prepare datastore
 apt-get install postgresql-all
 sudo -u postgres psql -c "CREATE DATABASE sner;"
 sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
 mkdir -p /var/lib/sner
 chown www-data /var/lib/sner
+
+# configure sner and initialize database
 cp sner.yaml.example /etc/sner.yaml
 editor /etc/sner.yaml
-make db
+. venv/bin/activate && make db
 
 # configure gunicorn service
 cp extra/sner-web.service /etc/systemd/system/sner-web.service
@@ -227,8 +227,7 @@ systemctl enable --now sner-web.service
 
 # configure apache2 reverse proxy
 apt-get install apache2
-a2enmod proxy
-a2enmod proxy_http
+a2enmod proxy proxy_http
 cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 systemctl restart apache2
 
@@ -249,27 +248,21 @@ systemctl enable --now sner-planner.service
 
 ```
 # prepare environment
-apt-get install git sudo make
+apt-get -y install git sudo make
 git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
 ln -s ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
-make venv
+make install
+make install-db
 . venv/bin/activate
-make install-deps
-
-# install database
-apt-get install postgresql-all
+make db
 
 # run tests
-make db-create-test
 make test
-make coverage
-make install-extra
 make test-extra
+make coverage
 
 # run dev server
-make db-create-default
-make db
 bin/server run
 
 # pin certificate for snerlytics in devcloud

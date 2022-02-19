@@ -9,9 +9,12 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      - run: sudo apt-get install postgresql && sudo systemctl start postgresql
-      - run: make install-deps
-      - run: make install-extra
-      - run: make db-create-test
-      - run: make
-      - run: make test-extra
+      - run: sudo make install
+      - run: |
+          sudo apt-get -y install postgresql-all
+          sudo systemctl start postgresql
+          sudo -u postgres psql -c "CREATE DATABASE sner_test"
+          sudo -u postgres psql -c "CREATE USER ${USER}"
+          mkdir -p /tmp/sner_test_var
+      - run: . venv/bin/activate && make
+      - run: . venv/bin/activate && make test-extra
