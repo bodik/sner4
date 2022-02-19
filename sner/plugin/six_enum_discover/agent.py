@@ -38,7 +38,7 @@ class AgentModule(ModuleBase):
         ret = 0
 
         for idx, target in enumerate(assignment['targets']):
-            ret |= self._execute(['scan6', '--rate-limit', f'{assignment["config"]["rate"]}pps', '--dst-address', target], f'output-{idx}.txt')
+            ret |= self._execute(['scan6', '--rate-limit', f'{assignment["config"]["rate"]}pps', '--dst-addr', target], f'output-{idx}.txt')
             if not self.loop:  # pragma: no cover  ; not tested
                 break
 
