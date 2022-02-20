@@ -10,6 +10,7 @@ jobs:
         with:
           python-version: '3.7'
       - run: sudo make install
+      - run: sudo make install-extra
       - run: |
           sudo apt-get -y install postgresql-all
           sudo systemctl start postgresql

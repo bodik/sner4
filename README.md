@@ -253,6 +253,7 @@ git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
 ln -s ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
 make install
+make install-extra
 make install-db
 . venv/bin/activate
 make db

@@ -1,4 +1,4 @@
-.PHONY: all install freeze db lint test coverage test-extra
+.PHONY: all coverage db freeze install install-db install-extra test test-extra
 
 all: lint coverage
 
@@ -10,6 +10,8 @@ install:
 	sh bin/install_nmap.sh
 	sh bin/install_ipv6toolkit.sh
 	sh bin/install_jarm.sh
+
+install-extra:
 	sh bin/install_selenium.sh
 
 install-db:
