@@ -117,8 +117,8 @@ class ParsedService(ParsedItemBase):
         return ServiceHandle(self.host_handle, self.proto, self.port)
 
 
-@dataclass  # pylint: disable=too-many-instance-attributes
-class ParsedVuln(ParsedItemBase):
+@dataclass
+class ParsedVuln(ParsedItemBase):  # pylint: disable=too-many-instance-attributes
     """parsed vuln"""
 
     host_handle: tuple

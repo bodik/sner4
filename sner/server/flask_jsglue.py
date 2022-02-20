@@ -52,6 +52,7 @@ class JSGlue():
 
     def generate_js(self):
         rules = get_routes(self.app)
+        # pylint: disable=consider-using-f-string
         return """
 var %s = new (function(){
     'use strict';
@@ -133,7 +134,8 @@ var %s = new (function(){
             throw {name: 'BuildError', message: "Couldn't find the matching endpoint."};
         }
     };
-});""" % (JSGLUE_NAMESPACE, json.dumps(rules))  # pylint: disable=consider-using-f-string
+});""" % (JSGLUE_NAMESPACE, json.dumps(rules))
+        # pylint: enable=consider-using-f-string
 
     @staticmethod
     def include():

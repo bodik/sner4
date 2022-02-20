@@ -34,7 +34,7 @@ SCHEDULER_LOCK_NUMBER = 1
 
 def enumerate_network(arg):
     """enumerate ip address range"""
-    
+
     network = ip_network(arg, strict=False)
 
     # input is single address
@@ -94,8 +94,8 @@ class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
         """returns bool if value matches the initialized match_to"""
 
 
-@ExclMatcher.register(ExclFamily.NETWORK)  # pylint: disable=too-few-public-methods
-class ExclNetworkMatcher(ExclMatcherImplInterface):
+@ExclMatcher.register(ExclFamily.NETWORK)
+class ExclNetworkMatcher(ExclMatcherImplInterface):  # pylint: disable=too-few-public-methods
     """network matcher"""
 
     def __init__(self, match_to):  # pylint: disable=super-init-not-called
@@ -117,8 +117,8 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):
         return False
 
 
-@ExclMatcher.register(ExclFamily.REGEX)  # pylint: disable=too-few-public-methods
-class ExclRegexMatcher(ExclMatcherImplInterface):
+@ExclMatcher.register(ExclFamily.REGEX)
+class ExclRegexMatcher(ExclMatcherImplInterface):  # pylint: disable=too-few-public-methods
     """regex matcher"""
 
     def __init__(self, match_to):  # pylint: disable=super-init-not-called
