@@ -165,8 +165,8 @@ def test_syncvulnsearch_command(runner, note_factory):
     patch_update = patch.object(sner.server.storage.vulnsearch, 'update_managed_indices', update_managed_indices_mock)
 
     current_app.config['SNER_VULNSEARCH'] = {
-        'cvesearch': 'http://dummy',
-        'esd': 'http://dummy'
+        'cvesearch': 'http://dummy:80',
+        'esd': 'http://dummy:80'
     }
 
     with patch_cvefor, patch_esbulk, patch_update:
@@ -189,5 +189,5 @@ def test_syncvulnsearch_command_params(runner):
 
     patch_update = patch.object(sner.server.storage.vulnsearch, 'update_managed_indices', update_managed_indices_mock)
     with patch_update:
-        result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'dummy', '--esd', 'dummy'])
+        result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
     assert result.exit_code == 0
