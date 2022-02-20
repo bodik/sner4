@@ -34,13 +34,15 @@ SCHEDULER_LOCK_NUMBER = 1
 
 def enumerate_network(arg):
     """enumerate ip address range"""
-
+    
     network = ip_network(arg, strict=False)
-    data = list(map(str, network.hosts()))
 
     # input is single address
     if network.prefixlen == network.max_prefixlen:
-        data.insert(0, str(network.network_address))
+        return [str(network.network_address)]
+
+    # enumerate hosts
+    data = list(map(str, network.hosts()))
 
     # add network/bcast addresses to range if it's not point-to-point link
     if network.prefixlen < (network.max_prefixlen-1):
