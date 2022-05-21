@@ -8,7 +8,7 @@ import sys
 from pprint import pprint
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -22,7 +22,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         assignment = json.loads(file_from_zip(path, 'assignment.json'))
         for target in assignment['targets']:
-            pidb.hosts.upsert(ParsedHost(address=target))
+            pidb.upsert_host(target)
 
         return pidb
 

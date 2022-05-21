@@ -15,7 +15,7 @@ from zipfile import ZipFile
 import libnmap.parser
 
 from sner.lib import file_from_zip, is_zip
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedNote, ParsedService, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -27,107 +27,81 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     def parse_path(cls, path):
         """parse data from path"""
 
-        if is_zip(path):
-            pidb = ParsedItemsDb()
+        pidb = ParsedItemsDb()
 
+        if is_zip(path):
             with ZipFile(path) as fzip:
                 for fname in filter(lambda x: re.match(cls.ARCHIVE_PATHS, x), fzip.namelist()):
-                    pidb += cls._parse_data(file_from_zip(path, fname).decode('utf-8'))
+                    pidb = cls._parse_data(file_from_zip(path, fname).decode('utf-8'), pidb)
 
             return pidb
 
-        return cls._parse_data(Path(path).read_text(encoding='utf-8'))
+        return cls._parse_data(Path(path).read_text(encoding='utf-8'), pidb)
 
     @classmethod
-    def _parse_data(cls, data):
+    def _parse_data(cls, data, pidb):
         """parse raw string data"""
 
         report = libnmap.parser.NmapParser.parse_fromstring(data)
-        pidb = ParsedItemsDb()
 
         for ihost in report.hosts:
-            host, cpe_note = cls._parse_host(ihost)
-            via_target = ihost.user_target_hostname or host.address
+            # metadata
+            via_target = ihost.user_target_hostname or ihost.address
             import_time = datetime.fromtimestamp(int(ihost.starttime or time()))
-            pidb.hosts.upsert(host)
-            if cpe_note:
-                pidb.notes.upsert(cpe_note)
 
+            # parse host
+            host_data = {}
+            if ihost.hostnames:
+                host_data['hostnames'] = list(set(ihost.hostnames))
+                if not host_data.get('hostname'):
+                    host_data['hostname'] = host_data['hostnames'][0]
+
+            for osmatch in [item for item in ihost.os_match_probabilities() if item.accuracy == 100]:
+                host_data['os'] = osmatch.name
+                pidb.upsert_note(ihost.address, 'cpe', data=json.dumps(osmatch.get_cpe()))
+
+            pidb.upsert_host(ihost.address, **host_data)
+
+            # parse host scripts
             for iscript in ihost.scripts_results:
-                note = cls._parse_note(iscript, host.handle, None, via_target, import_time)
-                pidb.notes.upsert(note)
+                pidb.upsert_note(ihost.address, f'nmap.{iscript["id"]}', via_target=via_target, data=json.dumps(iscript), import_time=import_time)
 
+            # parse services
             for iservice in ihost.services:
-                service = cls._parse_service(iservice, host.handle, import_time)
-                pidb.services.upsert(service)
+                service_data = {
+                    'state': f'{iservice.state}:{iservice.reason}',
+                    'import_time': import_time
+                }
+                if iservice.service:
+                    service_data['name'] = iservice.service
+                if iservice.banner:
+                    service_data['info'] = iservice.banner
+                pidb.upsert_service(ihost.address, iservice.protocol, iservice.port, **service_data)
 
                 if iservice.cpelist:
-                    note = ParsedNote(
-                        host_handle=host.handle,
-                        service_handle=service.handle,
-                        via_target=via_target,
-                        xtype='cpe',
+                    pidb.upsert_note(
+                        ihost.address,
+                        'cpe',
+                        iservice.protocol,
+                        iservice.port,
+                        via_target,
                         data=json.dumps([x.cpestring for x in iservice.cpelist]),
                         import_time=import_time
                     )
-                    pidb.notes.upsert(note)
 
+                # parse service scripts
                 for iscript in iservice.scripts_results:
-                    note = cls._parse_note(iscript, host.handle, service.handle, via_target, import_time)
-                    pidb.notes.upsert(note)
+                    pidb.upsert_note(
+                        ihost.address,
+                        f'nmap.{iscript["id"]}',
+                        iservice.protocol,
+                        iservice.port,
+                        via_target,
+                        data=json.dumps(iscript),
+                        import_time=import_time
+                    )
 
         return pidb
-
-    @staticmethod
-    def _parse_host(ihost):
-        """parse host"""
-
-        host = ParsedHost(address=ihost.address)
-        cpe_note = None
-
-        if ihost.hostnames:
-            host.hostnames = list(set(ihost.hostnames))
-            if not host.hostname:
-                host.hostname = host.hostnames[0]
-
-        for osmatch in ihost.os_match_probabilities():
-            if osmatch.accuracy == 100:
-                host.os = osmatch.name
-                cpe_note = ParsedNote(host_handle=host.handle, xtype='cpe', data=json.dumps(osmatch.get_cpe()))
-
-        return host, cpe_note
-
-    @staticmethod
-    def _parse_service(iservice, host_handle, import_time):
-        """parse service"""
-
-        service = ParsedService(
-            host_handle=host_handle,
-            proto=iservice.protocol,
-            port=iservice.port,
-            state=f'{iservice.state}:{iservice.reason}',
-            import_time=import_time
-        )
-
-        if iservice.service:
-            service.name = iservice.service
-        if iservice.banner:
-            service.info = iservice.banner
-
-        return service
-
-    @staticmethod
-    def _parse_note(iscript, host_handle, service_handle, via_target, import_time):
-        """parse note"""
-
-        return ParsedNote(
-            host_handle=host_handle,
-            service_handle=service_handle,
-            via_target=via_target,
-            xtype=f'nmap.{iscript["id"]}',
-            data=json.dumps(iscript),
-            import_time=import_time
-        )
 
 
 if __name__ == '__main__':  # pragma: no cover

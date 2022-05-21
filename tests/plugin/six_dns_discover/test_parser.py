@@ -4,16 +4,15 @@ six_dns_discover output parser tests
 """
 
 from sner.plugin.six_dns_discover.parser import ParserModule
-from sner.server.parser import DataHandle, HostHandle
 
 
 def test_host_list():
     """check host list extraction"""
 
-    expected_hosts = [HostHandle('::1')]
-    expected_notes = [DataHandle(expected_hosts[0], None, None, 'six_dns_discover.via')]
+    expected_hosts = ['::1']
+    expected_notes = ['six_dns_discover.via']
 
     pidb = ParserModule.parse_path('tests/server/data/parser-six_dns_discover-job.zip')
 
-    assert [x.handle for x in pidb.hosts.values()] == expected_hosts
-    assert [x.handle for x in pidb.notes.values()] == expected_notes
+    assert [x.address for x in pidb.hosts] == expected_hosts
+    assert [x.xtype for x in pidb.notes] == expected_notes

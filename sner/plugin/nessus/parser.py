@@ -10,7 +10,7 @@ from pprint import pprint
 
 from tenable.reports import NessusReportv2
 
-from sner.server.parser import ParserBase, ParsedHost, ParsedItemsDb, ParsedService, ParsedVuln
+from sner.server.parser import ParsedItemsDb, ParserBase
 from sner.server.storage.models import SeverityEnum
 from sner.server.utils import SnerJSONEncoder
 
@@ -33,78 +33,61 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         pidb = ParsedItemsDb()
 
         for report_item in report:
-            host = cls._parse_host(report_item)
-            service = cls._parse_service(report_item, host.handle)
-            vuln = cls._parse_vuln(report_item, host.handle, service.handle if service else None)
+            # parse host
+            host_address = report_item['host-ip']
+            host_data = {}
 
-            pidb.hosts.upsert(host)
+            hostnames = set()
+            if 'host-fqdn' in report_item:
+                hostnames.add(report_item['host-fqdn'])
+            # host-rdns might contain address
+            if ('host-rdns' in report_item) and (not cls.is_addr(report_item['host-rdns'])):
+                hostnames.add(report_item['host-rdns'])
+            if hostnames:
+                host_data['hostnames'] = list(hostnames)
+                host_data['hostname'] = host_data['hostnames'][0]
+
+            if 'operating-system' in report_item:
+                host_data['os'] = report_item['operating-system']
+
+            pidb.upsert_host(host_address, **host_data)
+
+            # parse service
+            service = None
+            if report_item['port'] != 0:
+                service = pidb.upsert_service(
+                    host_address,
+                    report_item['protocol'].lower(),
+                    report_item['port'],
+                    state='open:nessus',
+                    name=report_item['svc_name'],
+                    import_time=report_item['HOST_START']
+                )
+
+            # parse vuln
+            vuln_data = {
+                'severity': SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),
+                'descr': f'## Synopsis\n\n{report_item["synopsis"]}\n\n## Description\n\n{report_item["description"]}',
+                'refs': cls._parse_refs(report_item),
+                'import_time': report_item['HOST_START'],
+            }
             if service:
-                pidb.services.upsert(service)
-            pidb.vulns.upsert(vuln)
+                vuln_data['service_proto'] = service.proto
+                vuln_data['service_port'] = service.port
+
+            if 'plugin_output' in report_item:
+                raw_data = json.dumps(report_item, cls=SnerJSONEncoder)
+                vuln_data['data'] = f'## Plugin output\n\n{report_item["plugin_output"]}\n\n## Raw data\n\n{raw_data}'
+
+            pidb.upsert_vuln(
+                host_address,
+                report_item['plugin_name'],
+                f'nessus.{report_item["pluginID"]}',
+                via_target=report_item['host-report-name'],
+                **vuln_data
+            )
 
         return pidb
-
-    @classmethod
-    def _parse_host(cls, report_item):
-        """parse host data from report item"""
-
-        host = ParsedHost(address=report_item['host-ip'])
-
-        hostnames = []
-        if 'host-fqdn' in report_item:
-            hostnames.append(report_item['host-fqdn'])
-        # host-rdns might contain address
-        if ('host-rdns' in report_item) and (not cls.is_addr(report_item['host-rdns'])):
-            hostnames.append(report_item['host-rdns'])
-        hostnames = list(set(hostnames))
-
-        if hostnames:
-            host.hostnames = hostnames
-            if not host.hostname:
-                host.hostname = host.hostnames[0]
-
-        if 'operating-system' in report_item:
-            host.os = report_item['operating-system']
-
-        return host
-
-    @staticmethod
-    def _parse_service(report_item, host_handle):
-        """parse service data from report_item"""
-
-        if report_item['port'] == 0:
-            return None
-
-        return ParsedService(
-            host_handle=host_handle,
-            proto=report_item['protocol'].lower(),
-            port=report_item['port'],
-            state='open:nessus',
-            name=report_item['svc_name'],
-            import_time=report_item['HOST_START']
-        )
-
-    @classmethod
-    def _parse_vuln(cls, report_item, host_handle, service_handle=None):
-        """parse vuln data"""
-
-        vuln = ParsedVuln(
-            host_handle=host_handle,
-            service_handle=service_handle,
-            via_target=report_item['host-report-name'],
-            name=report_item['plugin_name'],
-            xtype=f'nessus.{report_item["pluginID"]}',
-            severity=SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),
-            descr=f'## Synopsis\n\n{report_item["synopsis"]}\n\n## Description\n\n{report_item["description"]}',
-            refs=cls._parse_refs(report_item),
-            import_time=report_item['HOST_START'],
-        )
-
-        if 'plugin_output' in report_item:
-            raw_data = json.dumps(report_item, cls=SnerJSONEncoder)
-            vuln.data = f'## Plugin output\n\n{report_item["plugin_output"]}\n\n## Raw data\n\n{raw_data}'
-
-        return vuln
 
     @staticmethod
     def _parse_refs(report_item):

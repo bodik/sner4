@@ -16,7 +16,7 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.sqlafilter import FILTER_PARSER
-from sner.server.storage.core import import_parsed, vuln_export, vuln_report
+from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 from sner.server.storage.vulnsearch import sync_es_index
 
@@ -43,7 +43,10 @@ def storage_import(path, parser, **kwargs):
         if not os.path.isfile(item):
             current_app.logger.error(f'invalid path "{item}"')
             sys.exit(1)
-        import_parsed(parser_impl.parse_path(item), kwargs.get('dry'))
+        if kwargs.get('dry'):
+            StorageManager.import_parsed_dry(parser_impl.parse_path(item))
+        else:
+            StorageManager.import_parsed(parser_impl.parse_path(item))
 
     sys.exit(0)
 

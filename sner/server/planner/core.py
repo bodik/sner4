@@ -38,16 +38,16 @@ def register_stage(class_):
 def project_hosts(pidb):
     """project host list from context data"""
 
-    return [f'{host.address}' for host in pidb.hosts.values()]
+    return [f'{host.address}' for host in pidb.hosts]
 
 
 def project_services(pidb):
     """project service list from pidb"""
 
     return [
-        f'{service.proto}://{format_host_address(pidb.hosts[service.host_handle].address)}:{service.port}'
+        f'{service.proto}://{format_host_address(pidb.hosts.by.iid[service.host_iid].address)}:{service.port}'
         for service
-        in pidb.services.values()
+        in pidb.services
     ]
 
 
@@ -82,19 +82,21 @@ def filter_tarpits(pidb, threshold=200):
     """filter filter hosts with too much services detected"""
 
     host_services_count = defaultdict(int)
-    for service in pidb.services.values():
-        host_services_count[pidb.hosts[service.host_handle].address] += 1
+    for service in pidb.services:
+        host_services_count[pidb.hosts.by.iid[service.host_iid].address] += 1
     hosts_over_threshold = dict(filter(lambda x: x[1] > threshold, host_services_count.items()))
 
     if hosts_over_threshold:
-        for key, val in list(pidb.hosts.items()):
-            if val.address in hosts_over_threshold:
-                pidb.hosts.pop(key)
-
         for collection in ['services', 'vulns', 'notes']:
-            for key, val in list(getattr(pidb, collection).items()):
-                if val.host_handle.address in hosts_over_threshold:
-                    getattr(pidb, collection).pop(key)
+            # list() should provide copy for list-in-loop pruning
+            for item in list(getattr(pidb, collection)):
+                if pidb.hosts.by.iid[item.host_iid].address in hosts_over_threshold:
+                    getattr(pidb, collection).remove(item)
+
+        # list() should provide copy for list-in-loop pruning
+        for host in list(pidb.hosts):
+            if host.address in hosts_over_threshold:
+                pidb.hosts.remove(host)
 
     return pidb
 

@@ -9,7 +9,7 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -26,7 +26,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         with ZipFile(path) as fzip:
             for fname in filter(lambda x: re.match(cls.ARCHIVE_PATHS, x), fzip.namelist()):
                 for addr in file_from_zip(path, fname).decode('utf-8').splitlines():
-                    pidb.hosts.upsert(ParsedHost(address=addr))
+                    pidb.upsert_host(addr)
 
         return pidb
 

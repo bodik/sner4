@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from pprint import pprint
 
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedService, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -27,13 +27,6 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     def parse_path(path):
         """parse data from path"""
 
-        def upsert(pidb, data):
-            host = ParsedHost(address=data['address'])
-            service = ParsedService(host_handle=host.handle, proto='tcp', port=data['port'], state='open:nc')
-            pidb.hosts.upsert(host)
-            pidb.services.upsert(service)
-            return pidb
-
         pidb = ParsedItemsDb()
         rex1 = re.compile(ParserModule.REGEX)
         rex2 = re.compile(ParserModule.REGEX_OPENBSD)
@@ -43,13 +36,13 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
             match = rex1.match(line)
             if match:
                 if match.group('result') == 'open':
-                    pidb = upsert(pidb, match.groupdict())
+                    pidb.upsert_service(match.group('address'), 'tcp', match.group('port'), state='open:nc')
                 continue
 
             match = rex2.match(line)
             if match:
                 if match.group('result') == 'succeeded!':
-                    pidb = upsert(pidb, match.groupdict())
+                    pidb.upsert_service(match.group('address'), 'tcp', match.group('port'), state='open:nc')
                 continue
 
             logging.warning('skipped line: "%s"', line)

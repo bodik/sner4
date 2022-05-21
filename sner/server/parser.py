@@ -3,25 +3,22 @@
 sner parsers core objects
 
 The parser subsystem is responsible for parsing data from various scanning
-tools. Parsers should come via sner.plugin package and each parser must
+tools. Parsers should be implemented via sner.plugin package and must
 implement ParserBase interface.
 """
 
 from abc import ABC, abstractmethod
-from collections import namedtuple
 from dataclasses import dataclass
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
 
+from littletable import Table as LittleTable
+
 import sner.plugin
 
 
 REGISTERED_PARSERS = {}
-
-HostHandle = namedtuple('HostHandle', ['address'])
-ServiceHandle = namedtuple('ServiceHandle', ['host', 'proto', 'port'])
-DataHandle = namedtuple('DataHandle', ['host', 'service', 'via_target', 'xtype'])
 
 
 def load_parser_plugins():
@@ -33,36 +30,6 @@ def load_parser_plugins():
         REGISTERED_PARSERS[plugin_name] = getattr(module, 'ParserModule')
 
 
-class ParsedItemsTable(dict):
-    """parsed items dict"""
-
-    def upsert(self, item):
-        """insert or update existing object by id"""
-
-        if item.handle in self:
-            self[item.handle].update(item)
-        else:
-            self[item.handle] = item
-
-
-class ParsedItemsDb:  # pylint: disable=too-few-public-methods
-    """container for parsed items"""
-
-    def __init__(self):
-        self.hosts = ParsedItemsTable()
-        self.services = ParsedItemsTable()
-        self.vulns = ParsedItemsTable()
-        self.notes = ParsedItemsTable()
-
-    def __add__(self, obj):
-        """merge all containers from other pi"""
-
-        for key in self.__dict__:
-            for item in getattr(obj, key).values():
-                getattr(self, key).upsert(item)
-        return self
-
-
 class ParsedItemBase:  # pylint: disable=too-few-public-methods
     """parsed items base object; shared functions"""
 
@@ -70,7 +37,7 @@ class ParsedItemBase:  # pylint: disable=too-few-public-methods
         """update data from other object"""
 
         for key, value in obj.__dict__.items():
-            # do not overwrite with None
+            # do not overwrite with None value
             if value is None:
                 continue
 
@@ -89,70 +56,141 @@ class ParsedHost(ParsedItemBase):
     """parsed host"""
 
     address: str
+    iid: int = None  # primary key
     hostname: str = None
     hostnames: list = None
     os: str = None  # pylint: disable=invalid-name
 
-    @property
-    def handle(self):
-        """return item reference handle"""
-        return HostHandle(self.address)
-
 
 @dataclass
-class ParsedService(ParsedItemBase):
+class ParsedService(ParsedItemBase):  # pylint: disable=too-many-instance-attributes
     """parsed service"""
 
-    host_handle: tuple
+    host_iid: int
     proto: str
     port: int
+    iid: int = None  # primary key
     state: str = None
     name: str = None
     info: str = None
     import_time: datetime = None
-
-    @property
-    def handle(self):
-        """return item reference handle"""
-        return ServiceHandle(self.host_handle, self.proto, self.port)
 
 
 @dataclass
 class ParsedVuln(ParsedItemBase):  # pylint: disable=too-many-instance-attributes
     """parsed vuln"""
 
-    host_handle: tuple
+    host_iid: int
     name: str
     xtype: str
-    service_handle: tuple = None
+    service_iid: int = None
     via_target: str = None
+    iid: int = None  # primary key
     severity: str = None
     descr: str = None
     data: str = None
     refs: list = None
     import_time: datetime = None
 
-    @property
-    def handle(self):
-        """return item reference handle"""
-        return DataHandle(self.host_handle, self.service_handle, self.via_target, self.xtype)
-
 
 @dataclass
 class ParsedNote(ParsedItemBase):
     """parsed note"""
 
-    host_handle: tuple
+    host_iid: int
     xtype: str
-    service_handle: tuple = None
+    service_iid: tuple = None
     via_target: str = None
+    iid: int = None  # primary key
     data: str = None
     import_time: datetime = None
 
-    @property
-    def handle(self):
-        """return item reference handle"""
-        return DataHandle(self.host_handle, self.service_handle, self.via_target, self.xtype)
+
+class ParsedItemsDb:
+    """container for parsed items"""
+
+    def __init__(self):
+        self.hosts = LittleTable()
+        self.hosts.create_index('iid', unique=True)
+        self.services = LittleTable()
+        self.services.create_index('iid', unique=True)
+        self.vulns = LittleTable()
+        self.vulns.create_index('iid', unique=True)
+        self.notes = LittleTable()
+        self.notes.create_index('iid', unique=True)
+
+    @staticmethod
+    def _first(alist):
+        if alist:
+            return alist[0]
+        return None
+
+    def upsert_host(self, address, **kwargs):
+        """upsert host"""
+
+        host = ParsedHost(address, **kwargs)
+
+        pidb_host = self._first(self.hosts.where(address=host.address))
+        if pidb_host:
+            pidb_host.update(host)
+            return pidb_host
+
+        host.iid = len(self.hosts)
+        self.hosts.insert(host)
+        return host
+
+    def upsert_service(self, host_address, proto, port, **kwargs):
+        """upsert service"""
+
+        pidb_host = self.upsert_host(host_address)
+        service = ParsedService(pidb_host.iid, proto, port, **kwargs)
+
+        pidb_service = self._first(self.services.where(host_iid=service.host_iid, proto=service.proto, port=service.port))
+        if pidb_service:
+            pidb_service.update(service)
+            return pidb_service
+
+        service.iid = len(self.services)
+        self.services.insert(service)
+        return service
+
+    def upsert_vuln(self, host_address, name, xtype, service_proto=None, service_port=None, via_target=None, **kwargs):  # noqa: E501  pylint: disable=too-many-arguments
+        """upsert vuln"""
+
+        pidb_host = self.upsert_host(host_address)
+        pidb_service = self.upsert_service(host_address, service_proto, service_port) if (service_proto and service_port) else None
+        vuln = ParsedVuln(pidb_host.iid, name, xtype, service_iid=pidb_service.iid if pidb_service else None, via_target=via_target, **kwargs)
+
+        pidb_vuln = self._first(self.vulns.where(
+            host_iid=vuln.host_iid,
+            name=vuln.name,
+            xtype=vuln.xtype,
+            service_iid=vuln.service_iid,
+            via_target=vuln.via_target
+        ))
+        if pidb_vuln:
+            pidb_vuln.update(vuln)
+            return pidb_vuln
+
+        vuln.iid = len(self.vulns)
+        self.vulns.insert(vuln)
+        return vuln
+
+    def upsert_note(self, host_address, xtype, service_proto=None, service_port=None, via_target=None, **kwargs):  # noqa: E501  pylint: disable=too-many-arguments
+        """upsert vuln"""
+
+        pidb_host = self.upsert_host(host_address)
+        pidb_service = self.upsert_service(host_address, service_proto, service_port) if (service_proto and service_port) else None
+        note = ParsedNote(pidb_host.iid, xtype, service_iid=pidb_service.iid if pidb_service else None, via_target=via_target, **kwargs)
+
+        pidb_note = self._first(self.notes.where(host_iid=note.host_iid, xtype=note.xtype, service_iid=note.service_iid, via_target=note.via_target))
+        if pidb_note:
+            pidb_note.update(note)
+            return pidb_note
+
+        note.iid = len(self.notes)
+        self.notes.insert(note)
+        return note
 
 
 class ParserBase(ABC):  # pylint: disable=too-few-public-methods

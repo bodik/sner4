@@ -12,6 +12,7 @@ flask-wtf
 gunicorn
 jsonschema
 lark-parser
+littletable
 lxml
 psycopg2
 pylint

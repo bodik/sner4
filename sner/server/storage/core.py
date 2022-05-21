@@ -78,146 +78,6 @@ def tag_model_multiid(model_class):
     return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
-def existing_host(ihost, required=False):
-    """query storage for existing host"""
-
-    query = Host.query.filter(Host.address == ihost.address)
-    return query.one() if required else query.one_or_none()
-
-
-def existing_service(host, iservice, required=False):
-    """query storage for existing service"""
-
-    query = Service.query.filter(Service.host == host, Service.proto == iservice.proto, Service.port == iservice.port)
-    return query.one() if required else query.one_or_none()
-
-
-def existing_vuln(host, service, ivuln):
-    """query storage for existing vuln"""
-
-    return Vuln.query.filter(
-        Vuln.host == host,
-        Vuln.service == service,
-        Vuln.via_target == ivuln.via_target,
-        Vuln.xtype == ivuln.xtype
-    ).one_or_none()
-
-
-def existing_note(host, service, inote):
-    """query storage for existing note"""
-
-    return Note.query.filter(
-        Note.host == host,
-        Note.service == service,
-        Note.via_target == inote.via_target,
-        Note.xtype == inote.xtype
-    ).one_or_none()
-
-
-def import_parsed(pidb, dry_run=False):
-    """import parsed objects"""
-
-    if dry_run:
-        for ihost in pidb.hosts.values():
-            host = existing_host(ihost)
-            if not host:
-                print(f'new host: {ihost}')
-
-        for iservice in pidb.services.values():
-            host = existing_host(pidb.hosts[iservice.host_handle])
-            service = existing_service(host, iservice)
-            if not service:
-                print(f'new service: {iservice}')
-
-        for ivuln in pidb.vulns.values():
-            host = existing_host(pidb.hosts[ivuln.host_handle])
-            service = existing_service(host, pidb.services[ivuln.service_handle]) if ivuln.service_handle else None
-            vuln = existing_vuln(host, service, ivuln)
-            if not vuln:
-                print(f'new vuln: {ivuln}')
-
-        for inote in pidb.notes.values():
-            host = existing_host(pidb.hosts[inote.host_handle])
-            service = existing_service(host, pidb.services[inote.service_handle]) if inote.service_handle else None
-            note = existing_note(host, service, inote)
-            if not note:
-                print(f'new note: {inote}')
-        return
-
-    import_hosts(pidb)
-    import_services(pidb)
-    import_vulns(pidb)
-    import_notes(pidb)
-    return
-
-
-def import_hosts(pidb):
-    """import hosts from parsed data"""
-
-    for ihost in pidb.hosts.values():
-        host = existing_host(ihost)
-        if not host:
-            host = Host(address=ihost.address)
-            db.session.add(host)
-
-        host.update(ihost)
-        if ihost.hostnames:
-            note = Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one_or_none()
-            if not note:
-                note = Note(host=host, xtype='hostnames', data='[]')
-                db.session.add(note)
-            note.data = json.dumps(list(set(json.loads(note.data) + ihost.hostnames)))
-
-    db.session.commit()
-
-
-def import_services(pidb):
-    """import services from parsed data"""
-
-    for iservice in pidb.services.values():
-        host = existing_host(pidb.hosts[iservice.host_handle], required=True)
-        service = existing_service(host, iservice)
-        if not service:
-            service = Service(host=host, proto=iservice.proto, port=iservice.port)
-            db.session.add(service)
-
-        service.update(iservice)
-
-    db.session.commit()
-
-
-def import_vulns(pidb):
-    """import vulns from parsed data"""
-
-    for ivuln in pidb.vulns.values():
-        host = existing_host(pidb.hosts[ivuln.host_handle], required=True)
-        service = existing_service(host, pidb.services[ivuln.service_handle], required=True) if ivuln.service_handle else None
-        vuln = existing_vuln(host, service, ivuln)
-        if not vuln:
-            vuln = Vuln(host=host, service=service, via_target=ivuln.via_target, xtype=ivuln.xtype)
-            db.session.add(vuln)
-
-        vuln.update(ivuln)
-
-    db.session.commit()
-
-
-def import_notes(pidb):
-    """import vulns from parsed data"""
-
-    for inote in pidb.notes.values():
-        host = existing_host(pidb.hosts[inote.host_handle], required=True)
-        service = existing_service(host, pidb.services[inote.service_handle], required=True) if inote.service_handle else None
-        note = existing_note(host, service, inote)
-        if not note:
-            note = Note(host=host, service=service, via_target=inote.via_target, xtype=inote.xtype)
-            db.session.add(note)
-
-        note.update(inote)
-
-    db.session.commit()
-
-
 def url_for_ref(ref):
     """generate url for ref; reimplemented js function storage pagepart url_for_ref"""
 
@@ -375,15 +235,165 @@ def vuln_export(qfilter=None):
     return output_buffer.getvalue()
 
 
+def db_host(address, flag_required=False):
+    """query upsert host object"""
+
+    query = Host.query.filter(Host.address == address)
+    return query.one() if flag_required else query.one_or_none()
+
+
+def db_service(host_address, proto, port, flag_required=False):
+    """query upsert service object"""
+
+    query = Service.query.filter(Service.host.has(Host.address == host_address), Service.proto == proto, Service.port == port)
+    return query.one() if flag_required else query.one_or_none()
+
+
+def db_vuln(host_address, name, xtype, service_proto=None, service_port=None, via_target=None):  # pylint: disable=too-many-arguments
+    """query upsert vuln object"""
+
+    query = Vuln.query.filter(
+        Vuln.host.has(Host.address == host_address),
+        Vuln.name == name,
+        Vuln.xtype == xtype,
+        Vuln.service.has(Service.proto == service_proto),
+        Vuln.service.has(Service.port == service_port),
+        Vuln.via_target == via_target
+    )
+    return query.one_or_none()
+
+
+def db_note(host_address, xtype, service_proto=None, service_port=None, via_target=None):
+    """query upsert note object"""
+
+    query = Note.query.filter(
+        Note.host.has(Host.address == host_address),
+        Note.xtype == xtype,
+        Note.service.has(Service.proto == service_proto),
+        Note.service.has(Service.port == service_port),
+        Note.via_target == via_target
+    )
+    return query.one_or_none()
+
+
 class StorageManager:
     """storage app logic"""
+
+    @staticmethod
+    def import_parsed_dry(pidb):
+        """check pidb for new storage items"""
+
+        for ihost in pidb.hosts:
+            host = db_host(ihost.address)
+            if not host:
+                print(f'new host: {ihost}')
+
+        for iservice in pidb.services:
+            service = db_service(pidb.hosts.by.iid[iservice.host_iid].address, iservice.proto, iservice.port)
+            if not service:
+                print(f'new service: {iservice}')
+
+        for ivuln in pidb.vulns:
+            service = pidb.services.by.iid[ivuln.service_iid] if (ivuln.service_iid is not None) else None
+            vuln = db_vuln(
+                pidb.hosts.by.iid[ivuln.host_iid].address,
+                ivuln.name,
+                ivuln.xtype,
+                service.proto if service else None,
+                service.port if service else None,
+                ivuln.via_target
+            )
+            if not vuln:
+                print(f'new vuln: {ivuln}')
+
+        for inote in pidb.notes:
+            service = pidb.services.by.iid[inote.service_iid] if (inote.service_iid is not None) else None
+            note = db_note(
+                pidb.hosts.by.iid[inote.host_iid].address,
+                inote.xtype,
+                service.proto if service else None,
+                service.port if service else None,
+                inote.via_target
+            )
+            if not note:
+                print(f'new note: {inote}')
 
     @staticmethod
     def import_parsed(pidb):
         """import"""
 
-        # TODO: refactor this stub
-        import_parsed(pidb)
+        # import hosts
+        for ihost in pidb.hosts:
+            host = db_host(ihost.address)
+            if not host:
+                host = Host(address=ihost.address)
+                db.session.add(host)
+            host.update(ihost)
+
+            if ihost.hostnames:
+                note = db_note(ihost.address, 'hostnames')
+                if not note:
+                    note = Note(host=host, xtype='hostnames', data='[]')
+                    db.session.add(note)
+                note.data = json.dumps(list(set(json.loads(note.data) + ihost.hostnames)))
+        db.session.commit()
+
+        # import services
+        for iservice in pidb.services:
+            host = db_host(pidb.hosts.by.iid[iservice.host_iid].address, flag_required=True)
+            service = db_service(host.address, iservice.proto, iservice.port)
+            if not service:
+                service = Service(host=host, proto=iservice.proto, port=iservice.port)
+                db.session.add(service)
+            service.update(iservice)
+        db.session.commit()
+
+        # import vulns
+        for ivuln in pidb.vulns:
+            host = db_host(pidb.hosts.by.iid[ivuln.host_iid].address, flag_required=True)
+            service = (
+                db_service(
+                    host.address,
+                    pidb.services.by.iid[ivuln.service_iid].proto,
+                    pidb.services.by.iid[ivuln.service_iid].port,
+                    flag_required=True
+                )
+                if ivuln.service_iid is not None
+                else None
+            )
+            vuln = db_vuln(
+                host.address,
+                ivuln.name,
+                ivuln.xtype,
+                service.proto if service else None,
+                service.port if service else None,
+                ivuln.via_target
+            )
+            if not vuln:
+                vuln = Vuln(host=host, name=ivuln.name, xtype=ivuln.xtype, service=service, via_target=ivuln.via_target)
+                db.session.add(vuln)
+            vuln.update(ivuln)
+        db.session.commit()
+
+        # import notes
+        for inote in pidb.notes:
+            host = db_host(pidb.hosts.by.iid[inote.host_iid].address, flag_required=True)
+            service = (
+                db_service(
+                    host.address,
+                    pidb.services.by.iid[inote.service_iid].proto,
+                    pidb.services.by.iid[inote.service_iid].port,
+                    flag_required=True
+                )
+                if inote.service_iid is not None
+                else None
+            )
+            note = db_note(host.address, inote.xtype, service.proto if service else None, service.port if service else None, inote.via_target)
+            if not note:
+                note = Note(host=host, xtype=inote.xtype, service=service, via_target=inote.via_target)
+                db.session.add(note)
+            note.update(inote)
+        db.session.commit()
 
     @staticmethod
     def get_all_six_address():

@@ -8,7 +8,7 @@ import sys
 from pprint import pprint
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedNote, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -22,10 +22,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
         data = json.loads(file_from_zip(path, 'output.json'))
 
         for addr, via in data.items():
-            host = ParsedHost(address=addr)
-            note = ParsedNote(host_handle=host.handle, xtype='six_dns_discover.via', data=json.dumps(via))
-            pidb.hosts.upsert(host)
-            pidb.notes.upsert(note)
+            pidb.upsert_note(addr, 'six_dns_discover.via', data=json.dumps(via))
 
         return pidb
 

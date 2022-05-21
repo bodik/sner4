@@ -9,7 +9,7 @@ from pprint import pprint
 from zipfile import ZipFile
 
 from sner.lib import file_from_zip
-from sner.server.parser import ParsedHost, ParsedItemsDb, ParsedNote, ParsedService, ParserBase
+from sner.server.parser import ParsedItemsDb, ParserBase
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
@@ -25,20 +25,18 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
         with ZipFile(path) as fzip:
             for fname in filter(lambda x: re.match(cls.ARCHIVE_PATHS, x), fzip.namelist()):
-                pidb += cls._parse_data(file_from_zip(path, fname).decode('utf-8'))
+                pidb = cls._parse_data(file_from_zip(path, fname).decode('utf-8'), pidb)
 
         return pidb
 
     @staticmethod
-    def _parse_data(data):
+    def _parse_data(data, pidb):
         """parse raw string data"""
 
-        pidb = ParsedItemsDb()
-
-        host = None
-        service = None
         via_target = None
-        note = None
+        address = None
+        port = None
+        jarm = None
 
         for line in data.splitlines():
             if line.startswith('Domain:'):
@@ -46,21 +44,15 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
             if line.startswith('Resolved IP:'):
                 address = line.split(' ')[-1]
-                host = ParsedHost(address=address)
 
-            if host and line.startswith('Port:'):
+            if address and line.startswith('Port:'):
                 port = line.split(' ')[-1]
-                service = ParsedService(host_handle=host.handle, proto='tcp', port=port)
 
-            if service and line.startswith('JARM:'):
+            if port and line.startswith('JARM:'):
                 jarm = line.split(' ')[-1]
-                if jarm != '00000000000000000000000000000000000000000000000000000000000000':
-                    note = ParsedNote(host_handle=host.handle, service_handle=service.handle, via_target=via_target, xtype='jarm.fp', data=jarm)
+                if via_target and address and port and (jarm != '00000000000000000000000000000000000000000000000000000000000000'):
+                    pidb.upsert_note(address, 'jarm.fp', 'tcp', port, via_target, data=jarm)
 
-        if host and service and note:
-            pidb.hosts.upsert(host)
-            pidb.services.upsert(service)
-            pidb.notes.upsert(note)
         return pidb
 
 

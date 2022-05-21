@@ -7,7 +7,6 @@ import pytest
 from defusedxml.common import EntitiesForbidden
 
 from sner.plugin.nessus.parser import ParserModule
-from sner.server.parser import DataHandle, HostHandle, ServiceHandle
 
 
 def test_xxe(app):  # pylint: disable=unused-argument
@@ -20,13 +19,10 @@ def test_xxe(app):  # pylint: disable=unused-argument
 def test_parse_path():
     """check basic parse_path impl"""
 
-    expected_hosts = [HostHandle('127.128.129.130')]
-    expected_vulns = [
-        DataHandle(expected_hosts[0], ServiceHandle(expected_hosts[0], 'tcp', 443), '127.128.129.130', 'nessus.104631'),
-        DataHandle(expected_hosts[0], None, 'serveralias.localhost', 'nessus.19506')
-    ]
+    expected_hosts = ['127.128.129.130']
+    expected_vulns = ['nessus.104631', 'nessus.19506']
 
     pidb = ParserModule.parse_path('tests/server/data/parser-nessus-simple.xml')
 
-    assert [x.handle for x in pidb.hosts.values()] == expected_hosts
-    assert [x.handle for x in pidb.vulns.values()] == expected_vulns
+    assert [x.address for x in pidb.hosts] == expected_hosts
+    assert [x.xtype for x in pidb.vulns] == expected_vulns

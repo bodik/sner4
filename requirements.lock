@@ -35,6 +35,7 @@ Jinja2==3.0.3
 jsonschema==4.4.0
 lark-parser==0.12.0
 lazy-object-proxy==1.7.1
+littletable==2.0.7
 lxml==4.8.0
 MarkupSafe==2.1.0
 marshmallow==3.14.1

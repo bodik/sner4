@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from sner.server.parser import ParsedItemsDb, ParsedHost, ParsedService
+from sner.server.parser import ParsedItemsDb
 from sner.server.utils import yaml_dump
 
 
@@ -45,13 +45,11 @@ def sample_pidb():
 
     pidb = ParsedItemsDb()
 
-    host = ParsedHost(address='127.0.3.1')
-    pidb.hosts.upsert(host)
-    pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port=1))
+    host = pidb.upsert_host('127.0.3.1')
+    pidb.upsert_service(host.address, 'tcp', 1)
 
-    host = ParsedHost(address='127.0.4.1')
-    pidb.hosts.upsert(host)
+    host = pidb.upsert_host('127.0.4.1')
     for port in range(201):
-        pidb.services.upsert(ParsedService(host_handle=host.handle, proto='tcp', port=port))
+        pidb.upsert_service(host.address, 'tcp', port)
 
     return pidb
