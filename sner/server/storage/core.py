@@ -51,7 +51,8 @@ def annotate_model(model, model_id):
 def tag_add(model, tag):
     """add tag to model in sqla trackable way"""
 
-    model.tags = list(set((model.tags or []) + [tag]))
+    val = [tag] if isinstance(tag, str) else tag
+    model.tags = list(set((model.tags or []) + val))
 
 
 def tag_remove(model, tag):
@@ -319,7 +320,7 @@ class StorageManager:
                 print(f'new note: {inote}')
 
     @staticmethod
-    def import_parsed(pidb):
+    def import_parsed(pidb, addtags=None):  # pylint: disable=too-many-branches
         """import"""
 
         # import hosts
@@ -329,6 +330,8 @@ class StorageManager:
                 host = Host(address=ihost.address)
                 db.session.add(host)
             host.update(ihost)
+            if addtags:
+                tag_add(host, addtags)
 
             if ihost.hostnames:
                 note = db_note(ihost.address, 'hostnames')
@@ -346,6 +349,8 @@ class StorageManager:
                 service = Service(host=host, proto=iservice.proto, port=iservice.port)
                 db.session.add(service)
             service.update(iservice)
+            if addtags:
+                tag_add(service, addtags)
         db.session.commit()
 
         # import vulns
@@ -373,6 +378,8 @@ class StorageManager:
                 vuln = Vuln(host=host, name=ivuln.name, xtype=ivuln.xtype, service=service, via_target=ivuln.via_target)
                 db.session.add(vuln)
             vuln.update(ivuln)
+            if addtags:
+                tag_add(vuln, addtags)
         db.session.commit()
 
         # import notes
@@ -393,6 +400,8 @@ class StorageManager:
                 note = Note(host=host, xtype=inote.xtype, service=service, via_target=inote.via_target)
                 db.session.add(note)
             note.update(inote)
+            if addtags:
+                tag_add(note, addtags)
         db.session.commit()
 
     @staticmethod

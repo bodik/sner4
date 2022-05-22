@@ -29,6 +29,7 @@ def command():
 @command.command(name='import', help='import data from files')
 @with_appcontext
 @click.option('--dry', is_flag=True, help='do not update database, only print new items')
+@click.option('--addtag', multiple=True, help='add tag to all imported objects, can be used several times')
 @click.argument('parser')
 @click.argument('path', nargs=-1)
 def storage_import(path, parser, **kwargs):
@@ -46,7 +47,7 @@ def storage_import(path, parser, **kwargs):
         if kwargs.get('dry'):
             StorageManager.import_parsed_dry(parser_impl.parse_path(item))
         else:
-            StorageManager.import_parsed(parser_impl.parse_path(item))
+            StorageManager.import_parsed(parser_impl.parse_path(item), list(kwargs['addtag']))
 
     sys.exit(0)
 
