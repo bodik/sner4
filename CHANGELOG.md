@@ -3,10 +3,14 @@
 ## 0.7.0 - towards ehm-ethical scanning [BC BREAK]
 
 * bump used dependencies
-* minor internal refactorings
-* rate-limiting scheduler (nacelnik.mk1 design)
-* server/agent config loading refactoring
-* partial scheduler core refactoring to managers and services layer
+* changed: internal refactorings
+  * server/agent config loading refactoring
+  * partial scheduler core refactoring to managers and services layer
+  * parser full refactoring
+* changed: Debian Bullseye support/requirement
+* changed: rate-limiting scheduler (nacelnik.mk1 design)
+* added: scripts: url generator
+* added: add tag during storage import
 
 
 ## 0.6.2 - bump packages and updates for prod
