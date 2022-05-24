@@ -109,4 +109,9 @@ def load_user_from_request(req):
         apikey = auth_header.replace('Apikey ', '', 1)
         if apikey:
             return User.query.filter(User.active, User.apikey == PWS.hash_simple(apikey)).first()
+
+    auth_header = req.headers.get('X-API-KEY')
+    if auth_header:
+        return User.query.filter(User.active, User.apikey == PWS.hash_simple(auth_header)).first()
+
     return None

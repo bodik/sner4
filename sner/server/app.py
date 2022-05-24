@@ -14,7 +14,7 @@ from sqlalchemy import func
 
 from sner.agent.modules import load_agent_plugins
 from sner.lib import load_yaml
-from sner.server.extensions import db, jsglue, login_manager, webauthn
+from sner.server.extensions import api, db, jsglue, login_manager, webauthn
 from sner.server.parser import load_parser_plugins
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
@@ -25,6 +25,8 @@ from sner.server.auth.views import blueprint as auth_blueprint
 from sner.server.scheduler.views import blueprint as scheduler_blueprint
 from sner.server.storage.views import blueprint as storage_blueprint
 from sner.server.visuals.views import blueprint as visuals_blueprint
+
+from sner.server.apiv2 import blueprint as apiv2_blueprint
 
 from sner.server.auth.commands import command as auth_command
 from sner.server.db_command import command as db_command
@@ -60,7 +62,27 @@ DEFAULT_CONFIG = {
     # other sner subsystems
     'SNER_PLANNER': {},
     'SNER_VULNSEARCH': {},
-    'SNER_HEATMAP_HOT_LEVEL': 0
+    'SNER_HEATMAP_HOT_LEVEL': 0,
+
+    # smorest api
+    'API_TITLE': 'sner4 api',
+    'API_VERSION': 'v2',
+    'OPENAPI_VERSION': '3.0.2',
+    'OPENAPI_URL_PREFIX': '/apiv2/doc',
+    'OPENAPI_SWAGGER_UI_PATH': '/swagger',
+    'OPENAPI_SWAGGER_UI_URL': "https://cdn.jsdelivr.net/npm/swagger-ui-dist/",
+    # https://github.com/marshmallow-code/flask-smorest/issues/36
+    # https://swagger.io/docs/specification/authentication/bearer-authentication/
+    'API_SPEC_OPTIONS': {
+        'components': {
+            'securitySchemes': {
+                'ApiKeyAuth': {'type': 'apiKey', 'in': 'header', 'name': 'X-API-KEY'}
+            }
+        },
+        'security': [
+            {'ApiKeyAuth': []}
+        ]
+    }
 }
 
 
@@ -95,6 +117,10 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     # load sner.plugin components
     load_agent_plugins()
     load_parser_plugins()
+
+    # initialize api blueprint; as side-effect overrides error handler
+    api.init_app(app)
+    api.register_blueprint(apiv2_blueprint, url_prefix='/apiv2')
 
     app.register_blueprint(api_blueprint, url_prefix='/api')
     app.register_blueprint(auth_blueprint, url_prefix='/auth')

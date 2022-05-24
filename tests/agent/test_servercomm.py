@@ -46,8 +46,8 @@ class FailServer():
         self.url = self.server.url_for('/')[:-1]
         self.cnt_assign = 0
         self.cnt_output = 0
-        self.server.expect_request('/api/scheduler/job/assign').respond_with_handler(self.handler_assign)
-        self.server.expect_request('/api/scheduler/job/output').respond_with_handler(self.handler_output)
+        self.server.expect_request('/apiv2/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/apiv2/scheduler/job/output').respond_with_handler(self.handler_output)
 
     def handler_assign(self, request):
         """handle assign request"""
@@ -55,6 +55,7 @@ class FailServer():
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         if self.cnt_assign < 2:
             self.cnt_assign += 1
+            # TODO: standardize message
             return Response(json.dumps({'response': 'invalid'}))
         return Response(json.dumps({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []}))
 
@@ -64,6 +65,7 @@ class FailServer():
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         if self.cnt_output < 2:
             self.cnt_output += 1
+            # TODO: sync gui endpoints with api ?
             return Response(json.dumps({'title': 'output upload failed'}), status=HTTPStatus.UNAUTHORIZED)
         return Response('', status=HTTPStatus.OK)
 

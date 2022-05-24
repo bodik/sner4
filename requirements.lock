@@ -1,3 +1,4 @@
+apispec==5.2.2
 arrow==1.2.2
 astroid==2.9.3
 async-generator==1.10
@@ -21,6 +22,7 @@ file-magic==0.4.0
 flake8==4.0.1
 Flask==2.0.3
 Flask-Login==0.5.0
+flask-smorest==0.38.0
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==1.0.0
 greenlet==1.1.2
@@ -90,6 +92,7 @@ trio-websocket==0.9.2
 typing_extensions==4.1.1
 urllib3==1.26.8
 waitress==2.0.0
+webargs==8.1.0
 WebOb==1.8.7
 WebTest==3.0.0
 Werkzeug==2.0.3
