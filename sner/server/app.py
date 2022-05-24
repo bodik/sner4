@@ -26,8 +26,6 @@ from sner.server.scheduler.views import blueprint as scheduler_blueprint
 from sner.server.storage.views import blueprint as storage_blueprint
 from sner.server.visuals.views import blueprint as visuals_blueprint
 
-from sner.server.apiv2 import blueprint as apiv2_blueprint
-
 from sner.server.auth.commands import command as auth_command
 from sner.server.db_command import command as db_command
 from sner.server.planner.commands import command as planner_command
@@ -68,7 +66,7 @@ DEFAULT_CONFIG = {
     'API_TITLE': 'sner4 api',
     'API_VERSION': 'v2',
     'OPENAPI_VERSION': '3.0.2',
-    'OPENAPI_URL_PREFIX': '/apiv2/doc',
+    'OPENAPI_URL_PREFIX': '/api/doc',
     'OPENAPI_SWAGGER_UI_PATH': '/swagger',
     'OPENAPI_SWAGGER_UI_URL': "https://cdn.jsdelivr.net/npm/swagger-ui-dist/",
     # https://github.com/marshmallow-code/flask-smorest/issues/36
@@ -120,9 +118,8 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
 
     # initialize api blueprint; as side-effect overrides error handler
     api.init_app(app)
-    api.register_blueprint(apiv2_blueprint, url_prefix='/apiv2')
+    api.register_blueprint(api_blueprint, url_prefix='/api')
 
-    app.register_blueprint(api_blueprint, url_prefix='/api')
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(scheduler_blueprint, url_prefix='/scheduler')
     app.register_blueprint(storage_blueprint, url_prefix='/storage')

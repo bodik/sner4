@@ -18,10 +18,10 @@ from time import sleep
 from uuid import uuid4
 from zipfile import ZipFile, ZIP_DEFLATED
 
-import jsonschema
+import marshmallow
 import requests
 
-import sner.agent.protocol
+from sner.server.api.schema import JobAssignmentSchema
 from sner.lib import load_yaml, TerminateContextMixin
 from sner.agent.modules import load_agent_plugins, REGISTERED_MODULES
 from sner.version import __version__
@@ -71,7 +71,7 @@ def config_from_args(args):
 def apikey_header(apikey):
     """generate apikey header"""
 
-    return {'Authorization': f'Apikey {apikey}'}
+    return {'X-API-KEY': apikey}
 
 
 def zipdir(path, zipto):
@@ -148,8 +148,8 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         self.oneshot = config['ONESHOT']
 
         self.loop = True
-        self.get_assignment_url = f'{self.server}/apiv2/scheduler/job/assign'
-        self.upload_output_url = f'{self.server}/apiv2/scheduler/job/output'
+        self.get_assignment_url = f'{self.server}/api/scheduler/job/assign'
+        self.upload_output_url = f'{self.server}/api/scheduler/job/output'
 
         self.get_assignment_params = {}
         if self.queue:
@@ -194,9 +194,9 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                     else:  # pragma: no cover ; running over multiprocessing
                         sleep(self.backoff_time)
                         continue
-                jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+                JobAssignmentSchema().load(assignment)
                 self.log.debug('got assignment: %s', assignment)
-            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, jsonschema.exceptions.ValidationError) as exc:
+            except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, marshmallow.ValidationError) as exc:
                 assignment = None
                 self.log.warning('get_assignment error: %s', exc)
                 if self.oneshot:
@@ -250,7 +250,7 @@ class AssignableAgent(AgentBase):
 
         assignment = {'id': str(uuid4())}
         assignment.update(json.loads(kwargs['assignment']))
-        jsonschema.validate(assignment, schema=sner.agent.protocol.assignment)
+        JobAssignmentSchema().load(assignment)
         self.log.debug('start job.id: %s', assignment['id'])
 
         with self.terminate_context():

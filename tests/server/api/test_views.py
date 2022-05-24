@@ -146,6 +146,14 @@ def test_scheduler_job_output_route_invalidrequest(client, apikey):
         headers=apikey_header(apikey),
         status='*'
     )
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    response = client.post_json(
+        url_for('api.scheduler_job_output_route'),
+        {'id': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'retval': 1, 'output': 'invalid b64'},
+        headers=apikey_header(apikey),
+        status='*'
+    )
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
     response = client.post_json(

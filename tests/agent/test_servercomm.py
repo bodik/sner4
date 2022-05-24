@@ -46,12 +46,12 @@ class FailServer():
         self.url = self.server.url_for('/')[:-1]
         self.cnt_assign = 0
         self.cnt_output = 0
-        self.server.expect_request('/apiv2/scheduler/job/assign').respond_with_handler(self.handler_assign)
-        self.server.expect_request('/apiv2/scheduler/job/output').respond_with_handler(self.handler_output)
+        self.server.expect_request('/api/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/api/scheduler/job/output').respond_with_handler(self.handler_output)
 
     def handler_assign(self, request):
         """handle assign request"""
-        if request.headers.get('Authorization') != 'Apikey dummy':
+        if request.headers.get('X-API-KEY') != 'dummy':
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         if self.cnt_assign < 2:
             self.cnt_assign += 1
@@ -61,7 +61,7 @@ class FailServer():
 
     def handler_output(self, request):
         """handle output request"""
-        if request.headers.get('Authorization') != 'Apikey dummy':
+        if request.headers.get('X-API-KEY') != 'dummy':
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         if self.cnt_output < 2:
             self.cnt_output += 1

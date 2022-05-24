@@ -1,6 +1,6 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
-api controller; only a stubs for binding routes implementations to application uri space
+apiv2 controller
 """
 
 import binascii
@@ -8,11 +8,17 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
-import jsonschema
-from flask import Blueprint, jsonify, request, Response
+from flask import Response
+from flask_smorest import abort, Blueprint
 from sqlalchemy import func
 
-import sner.agent.protocol
+from sner.server.api.schema import (
+    JobAssignArgsSchema,
+    JobAssignmentSchema,
+    JobOutputSchema,
+    PublicHostQuerySchema,
+    PublicHostSchema,
+)
 from sner.server.auth.core import role_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
@@ -24,44 +30,46 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
 @blueprint.route('/scheduler/job/assign')
+@blueprint.arguments(JobAssignArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
 @role_required('agent', api=True)
-def scheduler_job_assign_route():
+def scheduler_job_assign_route(args):
     """assign job for agent"""
 
     try:
-        resp = SchedulerService.job_assign(request.args.get('queue'), request.args.getlist('caps'))
+        resp = SchedulerService.job_assign(args.get('queue'), args.get('caps', []))
     except SchedulerServiceBusyException:
         resp = {}  # nowork
-
-    return jsonify(resp)
+    return resp
 
 
 @blueprint.route('/scheduler/job/output', methods=['POST'])
+@blueprint.arguments(JobOutputSchema)
 @role_required('agent', api=True)
-def scheduler_job_output_route():
+def scheduler_job_output_route(args):
     """receive output from assigned job"""
 
     try:
-        jsonschema.validate(request.json, schema=sner.agent.protocol.output)
-        output = b64decode(request.json['output'])
-    except (jsonschema.exceptions.ValidationError, binascii.Error):
-        return jsonify({'response': 'invalid request'}), HTTPStatus.BAD_REQUEST
+        output = b64decode(args['output'])
+    except binascii.Error:
+        abort(HTTPStatus.BAD_REQUEST, message='invalid request')
 
-    job = Job.query.filter(Job.id == request.json['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
+    job = Job.query.filter(Job.id == args['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
     if not job:
         # invalid/repeated requests are silently discarded, agent would delete working data
         # on it's side as well
-        return jsonify({'response': 'invalid job'}), HTTPStatus.OK
+        return {'code': 200, 'status': 'invalid job'}
 
     try:
-        SchedulerService.job_output(job, request.json['retval'], output)
+        SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
-        return jsonify({'response': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
+        abort(HTTPStatus.TOO_MANY_REQUESTS, message='server busy')
 
-    return jsonify({'response': 'success'}), HTTPStatus.OK
+    return {'code': 200, 'status': 'success'}
 
 
 @blueprint.route('/stats/prometheus')
+@blueprint.response(HTTPStatus.OK, {'type': 'string'}, content_type='text/plain')
 def stats_prometheus_route():
     """returns internal stats; prometheus"""
 
@@ -84,3 +92,13 @@ def stats_prometheus_route():
 
     output = '\n'.join(f'{key} {val}' for key, val in stats.items())
     return Response(output, mimetype='text/plain')
+
+
+@blueprint.route('/public/storage/host', methods=['POST'])
+@blueprint.arguments(PublicHostQuerySchema)
+@blueprint.response(HTTPStatus.OK, PublicHostSchema)
+@role_required('agent', api=True)
+def get_host(args):
+    """get host data by address"""
+
+    return Host.query.filter(Host.address == str(args['address'])).one_or_none()

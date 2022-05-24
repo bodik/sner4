@@ -66,13 +66,13 @@ class SimpleServer():
     def __init__(self, server):
         self.server = server
         self.url = self.server.url_for('/')[:-1]
-        self.server.expect_request('/apiv2/scheduler/job/assign').respond_with_handler(self.handler_assign)
-        self.server.expect_request('/apiv2/scheduler/job/output').respond_with_handler(self.handler_output)
+        self.server.expect_request('/api/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/api/scheduler/job/output').respond_with_handler(self.handler_output)
 
     @staticmethod
     def handler_assign(request):
         """handle assign request"""
-        if request.headers.get('Authorization') != 'Apikey dummy':
+        if request.headers.get('X-API-KEY') != 'dummy':
             # TODO: sync with api, standardize messages
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         return Response(json.dumps({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []}))
@@ -80,7 +80,7 @@ class SimpleServer():
     @staticmethod
     def handler_output(request):
         """handle output request"""
-        if request.headers.get('Authorization') != 'Apikey dummy':
+        if request.headers.get('X-API-KEY') != 'dummy':
             return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
         return Response('', status=HTTPStatus.OK)
 
