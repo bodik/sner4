@@ -7,7 +7,7 @@ from marshmallow import fields, INCLUDE, Schema, post_dump, validate
 
 
 class JobAssignArgsSchema(Schema):
-    """/api/scheduler/job/assign request"""
+    """/api/v2/scheduler/job/assign request"""
 
     queue = fields.String()
     caps = fields.List(fields.String)
@@ -36,7 +36,7 @@ class JobAssignmentConfigSchema(Schema):
 
 
 class JobAssignmentSchema(Schema):
-    """/api/scheduler/job/assign response"""
+    """/api/v2/scheduler/job/assign response"""
 
     id = fields.String(required=True, validate=validate.Regexp(r'^[a-f0-9\-]{36}$'))
     config = fields.Nested(JobAssignmentConfigSchema, required=True)
@@ -44,21 +44,15 @@ class JobAssignmentSchema(Schema):
 
 
 class JobOutputSchema(Schema):
-    """/api/scheduler/job/output request"""
+    """/api/v2/scheduler/job/output request"""
 
     id = fields.String(required=True, validate=validate.Regexp(r'^[a-f0-9\-]{36}$'))
     retval = fields.Integer()
     output = fields.String()
 
 
-class PublicHostQuerySchema(Schema):
-    """/api/public/storage/host query"""
-
-    address = fields.IP(required=True)
-
-
 class PublicHostSchema(Schema):
-    """/api/public/storage/host response"""
+    """/api/v2/public/storage/host response"""
 
     address = fields.String(required=True)
     hostname = fields.String()

@@ -45,8 +45,8 @@ class FailServer():
         self.url = self.server.url_for('/')[:-1]
         self.cnt_assign = 0
         self.cnt_output = 0
-        self.server.expect_request('/api/scheduler/job/assign').respond_with_handler(self.handler_assign)
-        self.server.expect_request('/api/scheduler/job/output').respond_with_handler(self.handler_output)
+        self.server.expect_request('/api/v2/scheduler/job/assign').respond_with_handler(self.handler_assign)
+        self.server.expect_request('/api/v2/scheduler/job/output').respond_with_handler(self.handler_output)
 
     def handler_assign(self, request):
         """handle assign request"""

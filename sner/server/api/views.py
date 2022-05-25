@@ -16,7 +16,6 @@ from sner.server.api.schema import (
     JobAssignArgsSchema,
     JobAssignmentSchema,
     JobOutputSchema,
-    PublicHostQuerySchema,
     PublicHostSchema,
 )
 from sner.server.auth.core import role_required
@@ -29,11 +28,11 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
-@blueprint.route('/scheduler/job/assign')
+@blueprint.route('/v2/scheduler/job/assign')
 @role_required('agent', api=True)
 @blueprint.arguments(JobAssignArgsSchema, location='query')
 @blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
-def scheduler_job_assign_route(args):
+def v2_scheduler_job_assign_route(args):
     """assign job for agent"""
 
     try:
@@ -43,10 +42,10 @@ def scheduler_job_assign_route(args):
     return resp
 
 
-@blueprint.route('/scheduler/job/output', methods=['POST'])
+@blueprint.route('/v2/scheduler/job/output', methods=['POST'])
 @role_required('agent', api=True)
 @blueprint.arguments(JobOutputSchema)
-def scheduler_job_output_route(args):
+def v2_scheduler_job_output_route(args):
     """receive output from assigned job"""
 
     try:
@@ -68,9 +67,9 @@ def scheduler_job_output_route(args):
     return {'message': 'success'}
 
 
-@blueprint.route('/stats/prometheus')
+@blueprint.route('/v2/stats/prometheus')
 @blueprint.response(HTTPStatus.OK, {'type': 'string'}, content_type='text/plain')
-def stats_prometheus_route():
+def v2_stats_prometheus_route():
     """returns internal stats; prometheus"""
 
     stats = {}
@@ -94,11 +93,10 @@ def stats_prometheus_route():
     return Response(output, mimetype='text/plain')
 
 
-@blueprint.route('/public/storage/host', methods=['POST'])
+@blueprint.route('/v2/public/storage/host/<host_address>')
 @role_required('agent', api=True)
-@blueprint.arguments(PublicHostQuerySchema)
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
-def public_storage_host_route(args):
+def v2_public_storage_host_route(host_address):
     """get host data by address"""
 
-    return Host.query.filter(Host.address == str(args['address'])).one_or_none()
+    return Host.query.filter(Host.address == host_address).one_or_none()

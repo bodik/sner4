@@ -64,7 +64,7 @@ DEFAULT_CONFIG = {
 
     # smorest api
     'API_TITLE': 'sner4 api',
-    'API_VERSION': 'v2',
+    'API_VERSION': 'vX',
     'OPENAPI_VERSION': '3.0.2',
     'OPENAPI_URL_PREFIX': '/api/doc',
     'OPENAPI_SWAGGER_UI_PATH': '/swagger',
