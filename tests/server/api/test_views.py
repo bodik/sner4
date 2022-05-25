@@ -15,6 +15,7 @@ from sqlalchemy import create_engine, func, select
 
 import sner.server.api.views
 from sner.agent.core import apikey_header
+from sner.server.api.schema import PublicHostSchema
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SCHEDULER_LOCK_NUMBER
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
@@ -224,3 +225,10 @@ def test_stats_prometheus_route(client, queue):  # pylint: disable=unused-argume
 
     response = client.get(url_for('api.stats_prometheus_route'))
     assert response.status_code == HTTPStatus.OK
+
+
+def test_public_storage_host_route(client, apikey, host):
+    """test public host api"""
+
+    response = client.post_json(url_for('api.public_storage_host_route'), {'address': host.address}, headers=apikey_header(apikey))
+    assert PublicHostSchema().load(response.json)

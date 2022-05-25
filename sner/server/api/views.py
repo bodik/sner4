@@ -98,7 +98,7 @@ def stats_prometheus_route():
 @role_required('agent', api=True)
 @blueprint.arguments(PublicHostQuerySchema)
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
-def get_host(args):
+def public_storage_host_route(args):
     """get host data by address"""
 
     return Host.query.filter(Host.address == str(args['address'])).one_or_none()
