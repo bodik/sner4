@@ -11,7 +11,7 @@ from flask import flash, redirect, render_template, request, Response, url_for
 from sqlalchemy import literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.scheduler.core import ExclImportException, ExclManager
@@ -23,7 +23,7 @@ from sner.server.utils import SnerJSONEncoder
 
 
 @blueprint.route('/excl/list')
-@role_required('operator')
+@session_required('operator')
 def excl_list_route():
     """list target exclustions"""
 
@@ -31,7 +31,7 @@ def excl_list_route():
 
 
 @blueprint.route('/excl/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def excl_list_json_route():
     """list target exclusions, data endpoint"""
 
@@ -51,7 +51,7 @@ def excl_list_json_route():
 
 
 @blueprint.route('/excl/add', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def excl_add_route():
     """add exclustion"""
 
@@ -68,7 +68,7 @@ def excl_add_route():
 
 
 @blueprint.route('/excl/edit/<excl_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def excl_edit_route(excl_id):
     """edit exclustion"""
 
@@ -84,7 +84,7 @@ def excl_edit_route(excl_id):
 
 
 @blueprint.route('/excl/delete/<excl_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def excl_delete_route(excl_id):
     """delete exclusion"""
 
@@ -99,7 +99,7 @@ def excl_delete_route(excl_id):
 
 
 @blueprint.route('/excl/import', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def excl_import_route():
     """import exclustions from csv"""
 
@@ -115,7 +115,7 @@ def excl_import_route():
 
 
 @blueprint.route('/excl/export')
-@role_required('operator')
+@session_required('operator')
 def excl_export_route():
     """export excls to csv"""
 

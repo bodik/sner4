@@ -18,7 +18,7 @@ from flask import current_app, flash, jsonify, redirect, render_template, reques
 from flask_login import current_user
 from sqlalchemy import literal_column
 
-from sner.server.auth.core import role_required, TOTPImpl, UserManager, webauthn_credentials
+from sner.server.auth.core import session_required, TOTPImpl, UserManager, webauthn_credentials
 from sner.server.auth.forms import TotpCodeForm, UserChangePasswordForm, WebauthnRegisterForm, WebauthnEditForm
 from sner.server.auth.models import User, WebauthnCredential
 from sner.server.auth.views import blueprint
@@ -34,7 +34,7 @@ def random_string(length=32):
 
 
 @blueprint.route('/profile', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_route():
     """general user profile route"""
 
@@ -43,7 +43,7 @@ def profile_route():
 
 
 @blueprint.route('/profile/changepassword', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_changepassword_route():
     """user profile change password"""
 
@@ -63,7 +63,7 @@ def profile_changepassword_route():
 
 
 @blueprint.route('/profile/totp', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_totp_route():
     """user profile totp management route"""
 
@@ -123,7 +123,7 @@ def profile_totp_route():
 #   - server validates the assertion (challenge, signature) against registered user credentials and performs logon process on success
 
 @blueprint.route('/profile/webauthn/list.json', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_webauthn_list_json_route():
     """get registered credentials list for current user"""
 
@@ -141,7 +141,7 @@ def profile_webauthn_list_json_route():
 
 
 @blueprint.route('/profile/webauthn/pkcco', methods=['POST'])
-@role_required('user')
+@session_required('user')
 def profile_webauthn_pkcco_route():
     """get publicKeyCredentialCreationOptions"""
 
@@ -161,7 +161,7 @@ def profile_webauthn_pkcco_route():
 
 
 @blueprint.route('/profile/webauthn/register', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_webauthn_register_route():
     """register credential for current user"""
 
@@ -191,7 +191,7 @@ def profile_webauthn_register_route():
 
 
 @blueprint.route('/profile/webauthn/edit/<webauthn_id>', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_webauthn_edit_route(webauthn_id):
     """edit registered credential"""
 
@@ -206,7 +206,7 @@ def profile_webauthn_edit_route(webauthn_id):
 
 
 @blueprint.route('/profile/webauthn/delete/<webauthn_id>', methods=['GET', 'POST'])
-@role_required('user')
+@session_required('user')
 def profile_webauthn_delete_route(webauthn_id):
     """delete registered credential"""
 
@@ -221,7 +221,7 @@ def profile_webauthn_delete_route(webauthn_id):
 
 
 @blueprint.route('/profile/apikey/<action>', methods=['POST'])
-@role_required('user')
+@session_required('user')
 def profile_apikey_route(action):
     """user manage apikey for self"""
 

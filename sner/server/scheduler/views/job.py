@@ -12,7 +12,7 @@ from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.scheduler.core import JobManager
@@ -23,7 +23,7 @@ from sner.server.utils import SnerJSONEncoder
 
 
 @blueprint.route('/job/list')
-@role_required('operator')
+@session_required('operator')
 def job_list_route():
     """list jobs"""
 
@@ -31,7 +31,7 @@ def job_list_route():
 
 
 @blueprint.route('/job/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def job_list_json_route():
     """list jobs, data endpoint"""
 
@@ -54,7 +54,7 @@ def job_list_json_route():
 
 
 @blueprint.route('/job/delete/<job_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def job_delete_route(job_id):
     """delete job"""
 
@@ -71,7 +71,7 @@ def job_delete_route(job_id):
 
 
 @blueprint.route('/job/reconcile/<job_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def job_reconcile_route(job_id):
     """reconcile job"""
 
@@ -87,7 +87,7 @@ def job_reconcile_route(job_id):
 
 
 @blueprint.route('/job/repeat/<job_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def job_repeat_route(job_id):
     """repeat job; requeues targets into same queue, used for rescheduling of failed jobs"""
 

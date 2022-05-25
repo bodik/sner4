@@ -5,14 +5,14 @@ controller plannertree
 
 from flask import jsonify, render_template
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.planner.core import Planner, QueueHandler, Schedule, StorageLoader
 from sner.server.scheduler.models import Queue
 from sner.server.visuals.views import blueprint
 
 
 @blueprint.route('/plannertree')
-@role_required('operator')
+@session_required('operator')
 def plannertree_route():
     """planner pipelines/workflows visualization"""
 
@@ -20,7 +20,7 @@ def plannertree_route():
 
 
 @blueprint.route('/plannertree.json')
-@role_required('operator')
+@session_required('operator')
 def plannertree_json_route():
     """planner workflow visualisation"""
 

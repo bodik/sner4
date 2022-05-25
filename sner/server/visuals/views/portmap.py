@@ -9,7 +9,7 @@ from flask import render_template, request
 from sqlalchemy import desc, func
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host, Service
@@ -21,7 +21,7 @@ VIZPORTS_HIGH = 100.0
 
 
 @blueprint.route('/portmap')
-@role_required('operator')
+@session_required('operator')
 def portmap_route():
     """visualize portmap"""
 
@@ -49,7 +49,7 @@ def portmap_route():
 
 
 @blueprint.route('/portmap_portstat/<port>')
-@role_required('operator')
+@session_required('operator')
 def portmap_portstat_route(port):
     """generate port statistics fragment"""
 

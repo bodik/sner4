@@ -10,7 +10,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.scheduler.core import QueueManager
@@ -21,7 +21,7 @@ from sner.server.sqlafilter import FILTER_PARSER
 
 
 @blueprint.route('/queue/list', methods=['GET'])
-@role_required('operator')
+@session_required('operator')
 def queue_list_route():
     """list queues"""
 
@@ -29,7 +29,7 @@ def queue_list_route():
 
 
 @blueprint.route('/queue/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_list_json_route():
     """list queues, data endpoint"""
 
@@ -58,7 +58,7 @@ def queue_list_json_route():
 
 
 @blueprint.route('/queue/add', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_add_route():
     """queue add"""
 
@@ -75,7 +75,7 @@ def queue_add_route():
 
 
 @blueprint.route('/queue/edit/<queue_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_edit_route(queue_id):
     """queue edit"""
 
@@ -91,7 +91,7 @@ def queue_edit_route(queue_id):
 
 
 @blueprint.route('/queue/enqueue/<queue_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_enqueue_route(queue_id):
     """queue enqueue; put targets into queue"""
 
@@ -105,7 +105,7 @@ def queue_enqueue_route(queue_id):
 
 
 @blueprint.route('/queue/flush/<queue_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_flush_route(queue_id):
     """queue flush; flush all targets from queue"""
 
@@ -119,7 +119,7 @@ def queue_flush_route(queue_id):
 
 
 @blueprint.route('/queue/prune/<queue_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_prune_route(queue_id):
     """queue prune; delete all queue jobs"""
 
@@ -136,7 +136,7 @@ def queue_prune_route(queue_id):
 
 
 @blueprint.route('/queue/delete/<queue_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def queue_delete_route(queue_id):
     """queue delete"""
 

@@ -7,7 +7,7 @@ from flask import jsonify, render_template, request
 from sqlalchemy import desc, func
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.views.service import service_info_column
@@ -16,7 +16,7 @@ from sner.server.visuals.views import blueprint
 
 
 @blueprint.route('/portinfos')
-@role_required('operator')
+@session_required('operator')
 def portinfos_route():
     """generate word cloud for service.info"""
 
@@ -24,7 +24,7 @@ def portinfos_route():
 
 
 @blueprint.route('/portinfos.json')
-@role_required('operator')
+@session_required('operator')
 def portinfos_json_route():
     """service info visualization json data endpoint"""
 

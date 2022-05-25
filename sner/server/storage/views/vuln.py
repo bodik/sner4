@@ -12,7 +12,7 @@ from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.sqlafilter import FILTER_PARSER
@@ -24,7 +24,7 @@ from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/vuln/list')
-@role_required('operator')
+@session_required('operator')
 def vuln_list_route():
     """list vulns"""
 
@@ -32,7 +32,7 @@ def vuln_list_route():
 
 
 @blueprint.route('/vuln/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_list_json_route():
     """list vulns, data endpoint"""
 
@@ -63,7 +63,7 @@ def vuln_list_json_route():
 
 
 @blueprint.route('/vuln/add/<model_name>/<model_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_add_route(model_name, model_id):
     """add vuln to host or service"""
 
@@ -81,7 +81,7 @@ def vuln_add_route(model_name, model_id):
 
 
 @blueprint.route('/vuln/edit/<vuln_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_edit_route(vuln_id):
     """edit vuln"""
 
@@ -112,14 +112,14 @@ def vuln_delete_route(vuln_id):
 
 
 @blueprint.route('/vuln/annotate/<model_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_annotate_route(model_id):
     """annotate vuln"""
     return annotate_model(Vuln, model_id)
 
 
 @blueprint.route('/vuln/view/<vuln_id>')
-@role_required('operator')
+@session_required('operator')
 def vuln_view_route(vuln_id):
     """view vuln"""
 
@@ -128,7 +128,7 @@ def vuln_view_route(vuln_id):
 
 
 @blueprint.route('/vuln/delete_multiid', methods=['POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_delete_multiid_route():
     """delete multiple vulns route"""
 
@@ -143,14 +143,14 @@ def vuln_delete_multiid_route():
 
 
 @blueprint.route('/vuln/tag_multiid', methods=['POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_tag_multiid_route():
     """tag multiple route"""
     return tag_model_multiid(Vuln)
 
 
 @blueprint.route('/vuln/grouped')
-@role_required('operator')
+@session_required('operator')
 def vuln_grouped_route():
     """view grouped vulns"""
 
@@ -158,7 +158,7 @@ def vuln_grouped_route():
 
 
 @blueprint.route('/vuln/grouped.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def vuln_grouped_json_route():
     """view grouped vulns, data endpoint"""
 
@@ -178,7 +178,7 @@ def vuln_grouped_json_route():
 
 
 @blueprint.route('/vuln/report')
-@role_required('operator')
+@session_required('operator')
 def vuln_report_route():
     """generate vulns report"""
 
@@ -190,7 +190,7 @@ def vuln_report_route():
 
 
 @blueprint.route('/vuln/export')
-@role_required('operator')
+@session_required('operator')
 def vuln_export_route():
     """vulns export"""
 

@@ -8,7 +8,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.sqlafilter import FILTER_PARSER
@@ -20,7 +20,7 @@ from sner.server.utils import relative_referrer, valid_next_url
 
 
 @blueprint.route('/note/list')
-@role_required('operator')
+@session_required('operator')
 def note_list_route():
     """list notes"""
 
@@ -28,7 +28,7 @@ def note_list_route():
 
 
 @blueprint.route('/note/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def note_list_json_route():
     """list notes, data endpoint"""
 
@@ -57,7 +57,7 @@ def note_list_json_route():
 
 
 @blueprint.route('/note/add/<model_name>/<model_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def note_add_route(model_name, model_id):
     """add note to host"""
 
@@ -75,7 +75,7 @@ def note_add_route(model_name, model_id):
 
 
 @blueprint.route('/note/edit/<note_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def note_edit_route(note_id):
     """edit note"""
 
@@ -92,7 +92,7 @@ def note_edit_route(note_id):
 
 
 @blueprint.route('/note/delete/<note_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def note_delete_route(note_id):
     """delete note"""
 
@@ -107,14 +107,14 @@ def note_delete_route(note_id):
 
 
 @blueprint.route('/note/annotate/<model_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def note_annotate_route(model_id):
     """annotate note"""
     return annotate_model(Note, model_id)
 
 
 @blueprint.route('/note/view/<note_id>')
-@role_required('operator')
+@session_required('operator')
 def note_view_route(note_id):
     """view note"""
 

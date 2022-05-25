@@ -16,7 +16,7 @@ from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server import get_csrf_token
 
 
-def test_login(client, user_factory):
+def test_session_login(client, user_factory):
     """test login"""
 
     password = PWS.generate()
@@ -39,7 +39,7 @@ def test_login(client, user_factory):
     assert response.lxml.xpath('//a[text()="Logout"]')
 
 
-def test_logout(cl_user):
+def test_session_logout(cl_user):
     """test logout"""
 
     response = cl_user.get(url_for('auth.logout_route'))
@@ -48,7 +48,7 @@ def test_logout(cl_user):
     assert response.lxml.xpath('//a[text()="Login"]')
 
 
-def test_unauthorized(client, user_factory):
+def test_session_unauthorized(client, user_factory):
     """test for not logged in, redirect and final login"""
 
     password = PWS.generate()
@@ -66,7 +66,7 @@ def test_unauthorized(client, user_factory):
     assert url_for('auth.profile_route') in response.headers['Location']
 
 
-def test_forbidden(cl_user):
+def test_session_forbidden(cl_user):
     """access forbidden"""
 
     response = cl_user.get(url_for('auth.user_list_route'), status='*')

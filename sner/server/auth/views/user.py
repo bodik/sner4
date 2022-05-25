@@ -10,7 +10,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required, UserManager
+from sner.server.auth.core import session_required, UserManager
 from sner.server.auth.forms import UserForm
 from sner.server.auth.models import User
 from sner.server.auth.views import blueprint
@@ -21,7 +21,7 @@ from sner.server.sqlafilter import FILTER_PARSER
 
 
 @blueprint.route('/user/list')
-@role_required('admin')
+@session_required('admin')
 def user_list_route():
     """list users"""
 
@@ -29,7 +29,7 @@ def user_list_route():
 
 
 @blueprint.route('/user/list.json', methods=['GET', 'POST'])
-@role_required('admin')
+@session_required('admin')
 def user_list_json_route():
     """list users, data endpoint"""
 
@@ -51,7 +51,7 @@ def user_list_json_route():
 
 
 @blueprint.route('/user/add', methods=['GET', 'POST'])
-@role_required('admin')
+@session_required('admin')
 def user_add_route():
     """add user"""
 
@@ -70,7 +70,7 @@ def user_add_route():
 
 
 @blueprint.route('/auth/edit/<user_id>', methods=['GET', 'POST'])
-@role_required('admin')
+@session_required('admin')
 def user_edit_route(user_id):
     """edit task"""
 
@@ -88,7 +88,7 @@ def user_edit_route(user_id):
 
 
 @blueprint.route('/user/delete/<user_id>', methods=['GET', 'POST'])
-@role_required('admin')
+@session_required('admin')
 def user_delete_route(user_id):
     """delete user"""
 
@@ -103,7 +103,7 @@ def user_delete_route(user_id):
 
 
 @blueprint.route('/user/apikey/<user_id>/<action>', methods=['POST'])
-@role_required('admin')
+@session_required('admin')
 def user_apikey_route(user_id, action):
     """manage apikey for user"""
 

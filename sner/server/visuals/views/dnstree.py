@@ -6,14 +6,14 @@ controller dnstree
 from flask import jsonify, render_template, request
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host
 from sner.server.visuals.views import blueprint
 
 
 @blueprint.route('/dnstree')
-@role_required('operator')
+@session_required('operator')
 def dnstree_route():
     """dns hierarchy tree visualization"""
 
@@ -21,7 +21,7 @@ def dnstree_route():
 
 
 @blueprint.route('/dnstree.json')
-@role_required('operator')
+@session_required('operator')
 def dnstree_json_route():
     """dns hierarchy tree visualization data generator"""
 

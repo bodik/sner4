@@ -8,7 +8,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.sqlafilter import FILTER_PARSER
@@ -20,7 +20,7 @@ from sner.server.utils import relative_referrer, valid_next_url
 
 
 @blueprint.route('/host/list')
-@role_required('operator')
+@session_required('operator')
 def host_list_route():
     """list hosts"""
 
@@ -28,7 +28,7 @@ def host_list_route():
 
 
 @blueprint.route('/host/list.json', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def host_list_json_route():
     """list hosts, data endpoint"""
 
@@ -59,7 +59,7 @@ def host_list_json_route():
 
 
 @blueprint.route('/host/add', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def host_add_route():
     """add host"""
 
@@ -76,7 +76,7 @@ def host_add_route():
 
 
 @blueprint.route('/host/edit/<host_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def host_edit_route(host_id):
     """edit host"""
 
@@ -93,7 +93,7 @@ def host_edit_route(host_id):
 
 
 @blueprint.route('/host/delete/<host_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def host_delete_route(host_id):
     """delete host"""
 
@@ -108,14 +108,14 @@ def host_delete_route(host_id):
 
 
 @blueprint.route('/host/annotate/<model_id>', methods=['GET', 'POST'])
-@role_required('operator')
+@session_required('operator')
 def host_annotate_route(model_id):
     """annotate vuln"""
     return annotate_model(Host, model_id)
 
 
 @blueprint.route('/host/view/<host_id>')
-@role_required('operator')
+@session_required('operator')
 def host_view_route(host_id):
     """view host"""
 
@@ -124,7 +124,7 @@ def host_view_route(host_id):
 
 
 @blueprint.route('/host/tag_multiid', methods=['POST'])
-@role_required('operator')
+@session_required('operator')
 def host_tag_multiid_route():
     """tag multiple route"""
     return tag_model_multiid(Host)

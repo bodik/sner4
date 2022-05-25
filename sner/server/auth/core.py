@@ -40,24 +40,64 @@ def redirect_after_login():
     return redirect(url_for('index_route'))
 
 
-def role_required(role, api=False):
-    """flask view decorator implementing role based authorization; does not redirect to login for api views/routes"""
+@login_manager.user_loader
+def user_loader(user_id):
+    """flask_login user loader; user loaded from session"""
 
-    def _role_required(fnc):
+    user = User.query.filter(User.id == user_id).one_or_none()
+    if user:
+        g.auth_method = 'session'
+        return user
+    return None  # pragma: no cover  ; would require very-faked session
+
+
+@login_manager.request_loader
+def load_user_from_request(req):
+    """api authentication; load user form request"""
+
+    auth_header = req.headers.get('X-API-KEY')
+    if auth_header:
+        user = User.query.filter(User.active, User.apikey == PWS.hash_simple(auth_header)).first()
+        if user:
+            g.auth_method = 'apikey'
+            return user
+    return None
+
+
+def session_required(role):
+    """flask view decorator implementing role session-based authorization"""
+
+    def _session_required(fnc):
         @wraps(fnc)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
-                if api:
-                    return {'message': 'unauthorized'}, HTTPStatus.UNAUTHORIZED
                 return login_manager.unauthorized()
 
-            if not current_user.has_role(role):
+            if (g.auth_method != 'session') or (not current_user.has_role(role)):
+                return 'Forbidden', HTTPStatus.FORBIDDEN
+
+            return fnc(*args, **kwargs)
+
+        return decorated_view
+    return _session_required
+
+
+def apikey_required(role):
+    """flask view decorator implementing role token-based authorization"""
+
+    def _apikey_required(fnc):
+        @wraps(fnc)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return {'message': 'unauthorized'}, HTTPStatus.UNAUTHORIZED
+
+            if (g.auth_method != 'apikey') or (not current_user.has_role(role)):
                 return {'message': 'forbidden'}, HTTPStatus.FORBIDDEN
 
             return fnc(*args, **kwargs)
 
         return decorated_view
-    return _role_required
+    return _apikey_required
 
 
 def webauthn_credentials(user):
@@ -91,24 +131,6 @@ class TOTPImpl(TOTP):
         except InvalidTOTPToken:
             return False
         return True
-
-
-@login_manager.user_loader
-def user_loader(user_id):
-    """flask_login user loader"""
-
-    return User.query.filter(User.id == user_id).one_or_none()
-
-
-@login_manager.request_loader
-def load_user_from_request(req):
-    """api authentication; load user form request"""
-
-    auth_header = req.headers.get('X-API-KEY')
-    if auth_header:
-        return User.query.filter(User.active, User.apikey == PWS.hash_simple(auth_header)).first()
-
-    return None
 
 
 class UserManager:

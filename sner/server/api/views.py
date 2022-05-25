@@ -18,7 +18,7 @@ from sner.server.api.schema import (
     JobOutputSchema,
     PublicHostSchema,
 )
-from sner.server.auth.core import role_required
+from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job, Queue, Target
@@ -29,7 +29,7 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
 @blueprint.route('/v2/scheduler/job/assign')
-@role_required('agent', api=True)
+@apikey_required('agent')
 @blueprint.arguments(JobAssignArgsSchema, location='query')
 @blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
 def v2_scheduler_job_assign_route(args):
@@ -43,7 +43,7 @@ def v2_scheduler_job_assign_route(args):
 
 
 @blueprint.route('/v2/scheduler/job/output', methods=['POST'])
-@role_required('agent', api=True)
+@apikey_required('agent')
 @blueprint.arguments(JobOutputSchema)
 def v2_scheduler_job_output_route(args):
     """receive output from assigned job"""
@@ -94,7 +94,7 @@ def v2_stats_prometheus_route():
 
 
 @blueprint.route('/v2/public/storage/host/<host_address>')
-@role_required('user', api=True)
+@apikey_required('user')
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
 def v2_public_storage_host_route(host_address):
     """get host data by address"""
