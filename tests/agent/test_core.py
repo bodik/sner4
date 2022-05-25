@@ -41,12 +41,12 @@ def test_exception_in_module(tmpworkdir):  # pylint: disable=unused-argument
     assert Path(f'{test_a["id"]}.zip').exists()
 
 
-def test_run_with_liveserver(tmpworkdir, live_server, apikey, dummy_target):  # pylint: disable=unused-argument
+def test_run_with_liveserver(tmpworkdir, live_server, apikey_agent, dummy_target):  # pylint: disable=unused-argument
     """test basic agent's networking codepath; fetch, execute, pack and upload assignment"""
 
     result = agent_main([
         '--server', url_for('index_route', _external=True),
-        '--apikey', apikey,
+        '--apikey', apikey_agent,
         '--queue', Queue.query.get(dummy_target.queue_id).name,
         '--caps', 'cap1', 'cap2',
         '--oneshot',

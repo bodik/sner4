@@ -34,7 +34,7 @@ def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, longrun_a)
     assert 'MARKEDPROCESS' not in os.popen('ps -f').read()
 
 
-def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_markedprocess, longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
+def test_terminate_with_liveserver(tmpworkdir, live_server, apikey_agent, cleanup_markedprocess, longrun_target):  # noqa: ignore=E501  pylint: disable=unused-argument,redefined-outer-name
     """
     Agent external process handling test. Even thou the test uses nmap module, the point is to test sner.agent.modules.Base _terminate helper.
     """
@@ -43,7 +43,7 @@ def test_terminate_with_liveserver(tmpworkdir, live_server, apikey, cleanup_mark
         target=agent_main,
         args=([
             '--server', url_for('index_route', _external=True),
-            '--apikey', apikey,
+            '--apikey', apikey_agent,
             '--queue', Queue.query.get(longrun_target.queue_id).name,
             '--oneshot',
             '--debug',

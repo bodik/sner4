@@ -54,14 +54,27 @@ def tmpworkdir():
     shutil.rmtree(tmpdir)
 
 
-@pytest.fixture
-def apikey():
-    """yield valid apikey for user in role agent"""
+def apikey_in_roles(roles):
+    """create user apikey in role"""
 
     tmp_apikey = PWS.generate_apikey()
-    db.session.add(User(username='pytest_agent', apikey=PWS.hash_simple(tmp_apikey), active=True, roles=['agent']))
+    db.session.add(User(username='pytest_user', apikey=PWS.hash_simple(tmp_apikey), active=True, roles=roles))
     db.session.commit()
-    yield tmp_apikey
+    return tmp_apikey
+
+
+@pytest.fixture
+def apikey_agent():
+    """crete user apikey agent"""
+
+    return apikey_in_roles(['agent'])
+
+
+@pytest.fixture
+def apikey_user():
+    """crete user apikey user"""
+
+    return apikey_in_roles(['user'])
 
 
 # auth

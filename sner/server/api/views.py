@@ -94,7 +94,7 @@ def v2_stats_prometheus_route():
 
 
 @blueprint.route('/v2/public/storage/host/<host_address>')
-@role_required('agent', api=True)
+@role_required('user', api=True)
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
 def v2_public_storage_host_route(host_address):
     """get host data by address"""

@@ -87,15 +87,15 @@ def test_fail_server_communication(tmpworkdir, httpserver):  # pylint: disable=u
     assert sserver.cnt_output > 1
 
 
-def test_empty_server_communication(tmpworkdir, live_server, apikey):  # pylint: disable=unused-argument,redefined-outer-name
+def test_empty_server_communication(tmpworkdir, live_server, apikey_agent):  # pylint: disable=unused-argument,redefined-outer-name
     """tests oneshot vs wait on assignment on empty server"""
 
-    result = agent_main(['--server', url_for('index_route', _external=True), '--apikey', apikey, '--debug', '--oneshot'])
+    result = agent_main(['--server', url_for('index_route', _external=True), '--apikey', apikey_agent, '--debug', '--oneshot'])
     assert result == 0
 
     proc_agent = multiprocessing.Process(
         target=agent_main,
-        args=(['--server', url_for('index_route', _external=True), '--apikey', apikey, '--debug'],)
+        args=(['--server', url_for('index_route', _external=True), '--apikey', apikey_agent, '--debug'],)
     )
     proc_agent.start()
     sleep(2)

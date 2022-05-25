@@ -58,3 +58,37 @@ def cl_admin(client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role admin"""
 
     yield client_in_roles(client, ['user', 'operator', 'admin'])
+
+
+class TestAppApi(TestApp):
+    """autenticating webtest client/app"""
+
+    def __init__(self, app, apikey):
+        self.apikey = apikey
+        super().__init__(app)
+
+    def get(self, *args, **kwargs):
+        """authenticated get"""
+
+        kwargs['headers'] = {'X-API-KEY': self.apikey}
+        return super().get(*args, **kwargs)
+
+    def post_json(self, *args, **kwargs):
+        """authenticated post_json"""
+
+        kwargs['headers'] = {'X-API-KEY': self.apikey}
+        return super().post_json(*args, **kwargs)
+
+
+@pytest.fixture
+def api_agent(app, apikey_agent):  # pylint: disable=redefined-outer-name
+    """create webtest testapp client"""
+
+    return TestAppApi(app, apikey_agent)
+
+
+@pytest.fixture
+def api_user(app, apikey_user):  # pylint: disable=redefined-outer-name
+    """create webtest testapp client"""
+
+    return TestAppApi(app, apikey_user)
