@@ -48,11 +48,11 @@ def role_required(role, api=False):
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 if api:
-                    return 'Unauthorized', HTTPStatus.UNAUTHORIZED
+                    return {'message': 'unauthorized'}, HTTPStatus.UNAUTHORIZED
                 return login_manager.unauthorized()
 
             if not current_user.has_role(role):
-                return 'Forbidden', HTTPStatus.FORBIDDEN
+                return {'message': 'forbidden'}, HTTPStatus.FORBIDDEN
 
             return fnc(*args, **kwargs)
 

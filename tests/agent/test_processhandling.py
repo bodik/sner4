@@ -11,10 +11,10 @@ from time import sleep
 from uuid import uuid4
 
 from flask import url_for
-from werkzeug.wrappers import Response
 
 from sner.agent.core import main as agent_main
 from sner.server.scheduler.models import Queue
+from tests.agent import xjsonify
 
 
 def test_terminate_with_assignment(tmpworkdir, cleanup_markedprocess, longrun_a):  # pylint: disable=unused-argument
@@ -73,16 +73,15 @@ class SimpleServer():
     def handler_assign(request):
         """handle assign request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            # TODO: sync with api, standardize messages
-            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
-        return Response(json.dumps({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []}))
+            return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
+        return xjsonify({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []})
 
     @staticmethod
     def handler_output(request):
         """handle output request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
-        return Response('', status=HTTPStatus.OK)
+            return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
+        return xjsonify({'message': 'success'})
 
 
 def test_shutdown(tmpworkdir, httpserver):  # pylint: disable=unused-argument,redefined-outer-name

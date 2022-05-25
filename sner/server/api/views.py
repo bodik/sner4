@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from flask import Response
-from flask_smorest import abort, Blueprint
+from flask_smorest import Blueprint
 from sqlalchemy import func
 
 from sner.server.api.schema import (
@@ -30,9 +30,9 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
 @blueprint.route('/scheduler/job/assign')
+@role_required('agent', api=True)
 @blueprint.arguments(JobAssignArgsSchema, location='query')
 @blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
-@role_required('agent', api=True)
 def scheduler_job_assign_route(args):
     """assign job for agent"""
 
@@ -44,28 +44,28 @@ def scheduler_job_assign_route(args):
 
 
 @blueprint.route('/scheduler/job/output', methods=['POST'])
-@blueprint.arguments(JobOutputSchema)
 @role_required('agent', api=True)
+@blueprint.arguments(JobOutputSchema)
 def scheduler_job_output_route(args):
     """receive output from assigned job"""
 
     try:
         output = b64decode(args['output'])
     except binascii.Error:
-        abort(HTTPStatus.BAD_REQUEST, message='invalid request')
+        return {'message': 'invalid request'}, HTTPStatus.BAD_REQUEST
 
     job = Job.query.filter(Job.id == args['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
     if not job:
         # invalid/repeated requests are silently discarded, agent would delete working data
         # on it's side as well
-        return {'code': 200, 'status': 'invalid job'}
+        return {'message': 'discard job'}
 
     try:
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
-        abort(HTTPStatus.TOO_MANY_REQUESTS, message='server busy')
+        return {'message': 'server busy'}, HTTPStatus.TOO_MANY_REQUESTS
 
-    return {'code': 200, 'status': 'success'}
+    return {'message': 'success'}
 
 
 @blueprint.route('/stats/prometheus')
@@ -95,9 +95,9 @@ def stats_prometheus_route():
 
 
 @blueprint.route('/public/storage/host', methods=['POST'])
+@role_required('agent', api=True)
 @blueprint.arguments(PublicHostQuerySchema)
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
-@role_required('agent', api=True)
 def get_host(args):
     """get host data by address"""
 

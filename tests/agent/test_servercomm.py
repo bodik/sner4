@@ -3,7 +3,6 @@
 tests with various server communication test cases
 """
 
-import json
 import multiprocessing
 import os
 import signal
@@ -14,10 +13,10 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from flask import url_for
-from werkzeug.wrappers import Response
 
 import sner.agent.core
 from sner.agent.core import main as agent_main
+from tests.agent import xjsonify
 
 
 @contextmanager
@@ -52,22 +51,20 @@ class FailServer():
     def handler_assign(self, request):
         """handle assign request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
+            return xjsonify({'message': 'unauthorized'})
         if self.cnt_assign < 2:
             self.cnt_assign += 1
-            # TODO: standardize message
-            return Response(json.dumps({'response': 'invalid'}))
-        return Response(json.dumps({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []}))
+            return xjsonify({'invalid': 'assignment'})
+        return xjsonify({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []})
 
     def handler_output(self, request):
         """handle output request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            return Response('Unauthorized', status=HTTPStatus.UNAUTHORIZED)
+            return xjsonify({'message': 'unauthorized'})
         if self.cnt_output < 2:
             self.cnt_output += 1
-            # TODO: sync gui endpoints with api ?
-            return Response(json.dumps({'title': 'output upload failed'}), status=HTTPStatus.UNAUTHORIZED)
-        return Response('', status=HTTPStatus.OK)
+            return xjsonify({'message': 'invalid request'}), HTTPStatus.BAD_REQUEST
+        return xjsonify({'message': 'success'})
 
 
 def test_fail_server_communication(tmpworkdir, httpserver):  # pylint: disable=unused-argument,redefined-outer-name
