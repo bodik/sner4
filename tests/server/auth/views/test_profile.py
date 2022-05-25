@@ -183,3 +183,24 @@ def test_profile_webauthn_delete_route(cl_user, webauthn_credential_factory):
     assert response.status_code == HTTPStatus.FOUND
 
     assert not WebauthnCredential.query.get(wncred.id)
+
+
+def test_profile_apikey_route(cl_user):
+    """profile delete webauthn credentials route test"""
+
+    data = {'csrf_token': get_csrf_token(cl_user)}
+    user = User.query.filter(User.username == 'pytest_user').one()
+    assert not user.apikey
+
+    # invalid request
+    response = cl_user.post(url_for('auth.profile_apikey_route', action='generate'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert not user.apikey
+
+    response = cl_user.post(url_for('auth.profile_apikey_route', action='generate'), data)
+    assert response.status_code == HTTPStatus.OK
+    assert user.apikey
+
+    response = cl_user.post(url_for('auth.profile_apikey_route', action='revoke'), data)
+    assert response.status_code == HTTPStatus.OK
+    assert not user.apikey

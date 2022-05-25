@@ -19,8 +19,14 @@
 		'searching': false,
 	};
 
+	function action_userapikey(event) {
+		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
+			.done(function(data, textStatus, jqXHR) { Sner.modal(data.title, data.detail); });
+	}
+
 	$(document).ready(function() {
 		var dt_profile_webauthn_table = Sner.dt.init_datatable('#profile_webauthn_table', dt_profile_webauthn_table_options);
+		$('a.abutton_userapikey').on('click', action_userapikey);
 	});
 </script>
 {% endblock %}
@@ -56,6 +62,16 @@
 			<table id="profile_webauthn_table" class="table table-hover table-sm"></table>
 		</td>
 	</tr>
+
+	<tr>
+		<th>apikey</th>
+		<td>
+			{% if current_user.apikey %}present{% endif %}
+			<a class="btn btn-outline-secondary abutton_userapikey" data-url="{{ url_for('auth.profile_apikey_route', action='generate') }}" href="#">Generate</a>
+			<a class="btn btn-outline-secondary abutton_userapikey" data-url="{{ url_for('auth.profile_apikey_route', action='revoke') }}" href="#">Revoke</a>
+		</td>
+	</tr>
+
 </table>
 
 {% endblock %}

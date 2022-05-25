@@ -14,11 +14,11 @@ from datatables import ColumnDT, DataTables
 from fido2 import cbor
 from fido2.client import ClientData
 from fido2.ctap2 import AttestationObject
-from flask import current_app, flash, redirect, render_template, request, Response, session, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, Response, session, url_for
 from flask_login import current_user
 from sqlalchemy import literal_column
 
-from sner.server.auth.core import role_required, TOTPImpl, webauthn_credentials
+from sner.server.auth.core import role_required, TOTPImpl, UserManager, webauthn_credentials
 from sner.server.auth.forms import TotpCodeForm, UserChangePasswordForm, WebauthnRegisterForm, WebauthnEditForm
 from sner.server.auth.models import User, WebauthnCredential
 from sner.server.auth.views import blueprint
@@ -218,3 +218,21 @@ def profile_webauthn_delete_route(webauthn_id):
         return redirect(url_for('auth.profile_route'))
 
     return render_template('button-delete.html', form=form)
+
+
+@blueprint.route('/profile/apikey/<action>', methods=['POST'])
+@role_required('user')
+def profile_apikey_route(action):
+    """user manage apikey for self"""
+
+    form = ButtonForm()
+    if form.validate_on_submit():
+        if action == 'generate':
+            apikey = UserManager.apikey_generate(current_user)
+            return jsonify({'title': 'Apikey operation', 'detail': f'New apikey generated: {apikey}'}), HTTPStatus.OK
+
+        if action == 'revoke':
+            UserManager.apikey_revoke(current_user)
+            return jsonify({'title': 'Apikey operation', 'detail': 'Apikey revoked'}), HTTPStatus.OK
+
+    return jsonify({'title': 'Apikey operation', 'detail': 'Invalid request'}), HTTPStatus.BAD_REQUEST

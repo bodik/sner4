@@ -10,7 +10,7 @@ from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import literal_column
 from sqlalchemy_filters import apply_filters
 
-from sner.server.auth.core import role_required
+from sner.server.auth.core import role_required, UserManager
 from sner.server.auth.forms import UserForm
 from sner.server.auth.models import User
 from sner.server.auth.views import blueprint
@@ -110,16 +110,12 @@ def user_apikey_route(user_id, action):
     user = User.query.get(user_id)
     form = ButtonForm()
     if user and form.validate_on_submit():
-
         if action == 'generate':
-            apikey = PWS.generate_apikey()
-            user.apikey = PWS.hash_simple(apikey)
-            db.session.commit()
+            apikey = UserManager.apikey_generate(user)
             return jsonify({'title': 'Apikey operation', 'detail': f'New apikey generated: {apikey}'}), HTTPStatus.OK
 
         if action == 'revoke':
-            user.apikey = None
-            db.session.commit()
+            UserManager.apikey_revoke(user)
             return jsonify({'title': 'Apikey operation', 'detail': 'Apikey revoked'}), HTTPStatus.OK
 
     return jsonify({'title': 'Apikey operation', 'detail': 'Invalid request'}), HTTPStatus.BAD_REQUEST

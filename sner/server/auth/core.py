@@ -19,7 +19,7 @@ from flask import _request_ctx_stack, current_app, g, redirect, request, url_for
 from flask_login import current_user
 
 from sner.server.auth.models import User
-from sner.server.extensions import login_manager
+from sner.server.extensions import db, login_manager
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from sner.server.utils import valid_next_url
 
@@ -109,3 +109,23 @@ def load_user_from_request(req):
         return User.query.filter(User.active, User.apikey == PWS.hash_simple(auth_header)).first()
 
     return None
+
+
+class UserManager:
+    """user manager"""
+
+    @staticmethod
+    def apikey_generate(user):
+        """manage apikey for user"""
+
+        apikey = PWS.generate_apikey()
+        user.apikey = PWS.hash_simple(apikey)
+        db.session.commit()
+        return apikey
+
+    @staticmethod
+    def apikey_revoke(user):
+        """manage apikey for user"""
+
+        user.apikey = None
+        db.session.commit()

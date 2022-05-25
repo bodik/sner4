@@ -66,8 +66,11 @@
 		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
 			<ul class="navbar-nav mr-auto">
 			{% if current_user.is_authenticated %}
+				{%- set active_subsystem = request.endpoint.split('.')[0] -%}
+				{% if current_user.has_role('user') %}
+					<li class="nav-item"><a class="nav-link{% if subsystem == active_subsystem %} active{% endif %}" href="{{ url_for('api-docs.openapi_swagger_ui') }}" title="{{ subsystem|capitalize }}"><i class="fas fa-paper-plane"></i></a></li>
+				{% endif %}
 				{% if current_user.has_role('operator') %}
-					{%- set active_subsystem = request.endpoint.split('.')[0] -%}
 					{%- for subsystem, route, icon in [
 						('scheduler', 'scheduler.queue_list_route', 'fa-tasks'),
 						('storage', 'storage.host_list_route', 'fa-database'),
