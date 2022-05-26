@@ -13,7 +13,7 @@ from pytest_factoryboy import register as factoryboy_register
 from sner.server.app import create_app
 from sner.server.auth.models import User
 from sner.server.extensions import db
-from sner.server.db_command import db_remove
+from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (

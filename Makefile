@@ -18,9 +18,9 @@ install-db:
 	sh bin/install_database.sh
 
 db:
-	bin/server db remove
-	bin/server db init
-	bin/server db init-data
+	bin/server dbx remove
+	bin/server dbx init
+	bin/server dbx init-data
 
 lint:
 	flake8 bin/agent bin/server sner tests

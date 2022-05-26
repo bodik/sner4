@@ -8,21 +8,21 @@ from pathlib import Path
 from flask import current_app
 from sqlalchemy import inspect
 
-from sner.server.db_command import command
+from sner.server.dbx_command import command
 from sner.server.extensions import db
 from sner.server.scheduler.models import Target
 from sner.server.storage.models import Vuln
 
 
 def test_init_command(runner):
-    """db init test"""
+    """dbx init test"""
 
     result = runner.invoke(command, ['init'])
     assert result.exit_code == 0
 
 
 def test_initdata_command(runner):
-    """db initdata test"""
+    """dbx initdata test"""
 
     result = runner.invoke(command, ['init-data'])
     assert result.exit_code == 0
@@ -32,7 +32,7 @@ def test_initdata_command(runner):
 
 
 def test_remove_command(runner):
-    """db remove test"""
+    """dbx remove test"""
 
     test_dir = Path(f'{current_app.config["SNER_VAR"]}/dbremovetest')
     test_path = Path(f'{current_app.config["SNER_VAR"]}/dbremovetest.txt')

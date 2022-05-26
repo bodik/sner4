@@ -33,7 +33,7 @@ def db_remove():
             os.unlink(file_object_path)
 
 
-@click.group(name='db', help='sner.server db management')
+@click.group(name='dbx', help='sner.server db management')
 def command():
     """db command container"""
 

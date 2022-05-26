@@ -27,7 +27,7 @@ from sner.server.storage.views import blueprint as storage_blueprint
 from sner.server.visuals.views import blueprint as visuals_blueprint
 
 from sner.server.auth.commands import command as auth_command
-from sner.server.db_command import command as db_command
+from sner.server.dbx_command import command as dbx_command
 from sner.server.planner.commands import command as planner_command
 from sner.server.psql_command import command as psql_command
 from sner.server.scheduler.commands import command as scheduler_command
@@ -139,7 +139,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     app.register_blueprint(visuals_blueprint, url_prefix='/visuals')
 
     app.cli.add_command(auth_command)
-    app.cli.add_command(db_command)
+    app.cli.add_command(dbx_command)
     app.cli.add_command(planner_command)
     app.cli.add_command(psql_command)
     app.cli.add_command(scheduler_command)
