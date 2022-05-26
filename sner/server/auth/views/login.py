@@ -81,7 +81,7 @@ def login_totp_route():
 def login_webauthn_pkcro_route():
     """login webauthn pkcro route"""
 
-    user = User.query.filter(User.id == session.get('webauthn_login_user_id')).one_or_none()
+    user = User.query.filter(User.active, User.id == session.get('webauthn_login_user_id')).one_or_none()
     form = ButtonForm()
     if user and form.validate_on_submit():
         pkcro, state = webauthn.authenticate_begin(webauthn_credentials(user))
@@ -95,7 +95,7 @@ def login_webauthn_pkcro_route():
 def login_webauthn_route():
     """login webauthn route"""
 
-    user = User.query.filter(User.id == session.get('webauthn_login_user_id')).one_or_none()
+    user = User.query.filter(User.active, User.id == session.get('webauthn_login_user_id')).one_or_none()
     if not user:
         return login_manager.unauthorized()
 
@@ -144,7 +144,7 @@ def login_oidc_callback_route():
     token = getattr(oauth, current_app.config['OIDC_NAME']).authorize_access_token()
     userinfo = token.get('userinfo')
     if userinfo and userinfo.get('email'):
-        user = User.query.filter(User.email == userinfo.get('email')).one_or_none()
+        user = User.query.filter(User.active, User.email == userinfo.get('email')).one_or_none()
         if user:
             regenerate_session()
             login_user(user)

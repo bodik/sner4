@@ -44,7 +44,7 @@ def redirect_after_login():
 def user_loader(user_id):
     """flask_login user loader; user loaded from session"""
 
-    user = User.query.filter(User.id == user_id).one_or_none()
+    user = User.query.filter(User.active, User.id == user_id).one_or_none()
     if user:
         g.auth_method = 'session'
         return user
