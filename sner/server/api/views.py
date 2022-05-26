@@ -28,9 +28,9 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
-@blueprint.route('/v2/scheduler/job/assign')
+@blueprint.route('/v2/scheduler/job/assign', methods=['POST'])
 @apikey_required('agent')
-@blueprint.arguments(JobAssignArgsSchema, location='query')
+@blueprint.arguments(JobAssignArgsSchema)
 @blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
 def v2_scheduler_job_assign_route(args):
     """assign job for agent"""

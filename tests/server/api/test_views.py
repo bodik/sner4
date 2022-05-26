@@ -4,7 +4,6 @@ api.views tests
 """
 
 import base64
-import json
 from http import HTTPStatus
 from ipaddress import ip_network
 from pathlib import Path
@@ -20,29 +19,24 @@ from sner.server.scheduler.core import SchedulerService, SCHEDULER_LOCK_NUMBER
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
 
 
-def decode_assignment(response):
-    """decode assignment from json"""
-    return json.loads(response.body.decode('utf-8'))
-
-
 def test_v2_scheduler_job_assign_route(client, api_agent, target):
     """job assign route test"""
 
     qname = target.queue.name
 
     # assign from queue by name
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route', queue=qname))
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'queue': qname})
     assert response.status_code == HTTPStatus.OK
-    assert isinstance(decode_assignment(response), dict)
+    assert response.json
     assert len(Queue.query.filter(Queue.name == qname).one().jobs) == 1
 
     # assign from non-existent queue, should return response-nowork
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route', queue='notexist'))
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'queue': 'notexist'})
     assert response.status_code == HTTPStatus.OK
-    assert not decode_assignment(response)
+    assert not response.json
 
     # attempt without credentials
-    response = client.get(url_for('api.v2_scheduler_job_assign_route'), status='*')
+    response = client.post_json(url_for('api.v2_scheduler_job_assign_route'), status='*')
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
@@ -54,9 +48,9 @@ def test_v2_scheduler_job_assign_route_priority(api_agent, queue_factory, target
     target_factory.create(queue=queue1)
     target_factory.create(queue=queue2)
 
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'))
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))
     assert response.status_code == HTTPStatus.OK
-    assert isinstance(decode_assignment(response), dict)
+    assert response.json
 
     assert len(Queue.query.get(queue1.id).jobs) == 0
     assert len(Queue.query.get(queue2.id).jobs) == 1
@@ -67,9 +61,9 @@ def test_v2_scheduler_job_assign_route_exclusion(api_agent, queue, excl_network,
 
     target_factory.create(queue=queue, target=str(ip_network(excl_network.value).network_address))
 
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
-    assert not decode_assignment(response)
+    assert not response.json
 
 
 def test_v2_scheduler_job_assign_route_locked(api_agent, target):  # pylint: disable=unused-argument
@@ -81,12 +75,12 @@ def test_v2_scheduler_job_assign_route_locked(api_agent, target):  # pylint: dis
         conn.execute(select(func.pg_advisory_lock(SCHEDULER_LOCK_NUMBER)))
 
         with patch.object(sner.server.scheduler.core.SchedulerService, 'TIMEOUT_JOB_ASSIGN', 1):
-            response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
+            response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
 
         conn.execute(select(func.pg_advisory_unlock(SCHEDULER_LOCK_NUMBER)))
 
     assert response.status_code == HTTPStatus.OK
-    assert not decode_assignment(response)
+    assert not response.json
 
 
 def test_v2_scheduler_job_assign_route_caps(api_agent, queue_factory, target_factory):  # pylint: disable=unused-argument
@@ -103,24 +97,24 @@ def test_v2_scheduler_job_assign_route_caps(api_agent, queue_factory, target_fac
     target_factory.create(queue=queue4, target='t4')
 
     # should receive t1; priority
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'), params={'caps': ['req1']})
-    assert 't1' in decode_assignment(response)['targets']
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1']})
+    assert 't1' in response.json['targets']
 
     # should receive response-nowork; specific queue name request
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'), params={'caps': ['req1'], 'queue': 'q1'})
-    assert not decode_assignment(response)
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1'], 'queue': 'q1'})
+    assert not response.json
 
     # should receive t2; q1 empty, caps match q2 reqs
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'), params={'caps': ['req1']})
-    assert 't2' in decode_assignment(response)['targets']
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1']})
+    assert 't2' in response.json['targets']
 
     # should receive t4; priority
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'), params={'caps': ['req1', 'req2', 'req3']})
-    assert 't4' in decode_assignment(response)['targets']
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1', 'req2', 'req3']})
+    assert 't4' in response.json['targets']
 
     # should receive t3; reqs match
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'), params={'caps': ['req1', 'req2', 'req3']})
-    assert 't3' in decode_assignment(response)['targets']
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1', 'req2', 'req3']})
+    assert 't3' in response.json['targets']
 
 
 def test_v2_scheduler_job_output_route(api_agent, job):
@@ -188,10 +182,10 @@ def test_scheduler_job_lifecycle_with_heatmap(api_agent, queue, target_factory):
     assert len(Job.query.all()) == 0
     assert len(Heatmap.query.all()) == 0
 
-    response = api_agent.get(url_for('api.v2_scheduler_job_assign_route'))
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))
     assert response.status_code == HTTPStatus.OK
-    assignment = decode_assignment(response)
-    assert isinstance(assignment, dict)
+    assignment = response.json
+    assert assignment
 
     assert len(Target.query.all()) == 1
     assert len(Readynet.query.all()) == 0

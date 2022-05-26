@@ -68,12 +68,6 @@ def config_from_args(args):
     return config
 
 
-def apikey_header(apikey):
-    """generate apikey header"""
-
-    return {'X-API-KEY': apikey}
-
-
 def zipdir(path, zipto):
     """pack directory to in zipfile"""
 
@@ -173,18 +167,18 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         finally:
             signal.signal(signal.SIGUSR1, self.original_signal_handlers[signal.SIGUSR1])
 
+    def call_api(self, url, data):
+        """call api"""
+
+        return requests.post(url, json=data, headers={'X-API-KEY': self.apikey}, timeout=self.net_timeout)
+
     def get_assignment(self):
         """get assignment from server"""
 
         assignment = None
         while self.loop and not assignment:
             try:
-                response = requests.get(
-                    self.get_assignment_url,
-                    headers=apikey_header(self.apikey),
-                    params=self.get_assignment_params,
-                    timeout=self.net_timeout
-                )
+                response = self.call_api(self.get_assignment_url, self.get_assignment_params)
                 response.raise_for_status()
                 assignment = response.json()
                 if not assignment:  # response-nowork
@@ -211,7 +205,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
         uploaded = False
         while not uploaded:
             try:
-                response = requests.post(self.upload_output_url, json=output, headers=apikey_header(self.apikey), timeout=self.net_timeout)
+                response = self.call_api(self.upload_output_url, output)
                 response.raise_for_status()
                 uploaded = True
             except requests.exceptions.RequestException as exc:
