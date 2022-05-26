@@ -14,7 +14,7 @@ from datatables import ColumnDT, DataTables
 from fido2 import cbor
 from fido2.client import ClientData
 from fido2.ctap2 import AttestationObject
-from flask import current_app, flash, jsonify, redirect, render_template, request, Response, session, url_for
+from flask import current_app, flash, redirect, render_template, request, Response, session, url_for
 from flask_login import current_user
 from sqlalchemy import literal_column
 
