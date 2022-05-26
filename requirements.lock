@@ -4,6 +4,7 @@ arrow==1.2.2
 astroid==2.11.5
 async-generator==1.10
 attrs==21.4.0
+Authlib==1.0.1
 beautifulsoup4==4.11.1
 certifi==2022.5.18.1
 cffi==1.15.0
