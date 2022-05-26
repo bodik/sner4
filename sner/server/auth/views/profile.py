@@ -38,8 +38,12 @@ def random_string(length=32):
 def profile_route():
     """general user profile route"""
 
-    user = User.query.filter(User.id == current_user.id).one()
-    return render_template('auth/profile/index.html', user=user)
+    return render_template(
+        'auth/profile/index.html',
+        user=User.query.filter(User.id == current_user.id).one(),
+        button_form=ButtonForm(),
+        new_apikey=session.pop('new_apikey', None)
+    )
 
 
 @blueprint.route('/profile/changepassword', methods=['GET', 'POST'])
@@ -220,7 +224,7 @@ def profile_webauthn_delete_route(webauthn_id):
     return render_template('button-delete.html', form=form)
 
 
-@blueprint.route('/profile/apikey/<action>', methods=['POST'])
+@blueprint.route('/profile/apikey/<action>', methods=['GET', 'POST'])
 @session_required('user')
 def profile_apikey_route(action):
     """user manage apikey for self"""
@@ -228,11 +232,12 @@ def profile_apikey_route(action):
     form = ButtonForm()
     if form.validate_on_submit():
         if action == 'generate':
-            apikey = UserManager.apikey_generate(current_user)
-            return jsonify({'title': 'Apikey operation', 'detail': f'New apikey generated: {apikey}'}), HTTPStatus.OK
+            session['new_apikey'] = UserManager.apikey_generate(current_user)
+            return redirect(url_for('auth.profile_route'))
 
         if action == 'revoke':
+            session.pop('new_apikey', None)
             UserManager.apikey_revoke(current_user)
-            return jsonify({'title': 'Apikey operation', 'detail': 'Apikey revoked'}), HTTPStatus.OK
+            return redirect(url_for('auth.profile_route'))
 
-    return jsonify({'title': 'Apikey operation', 'detail': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+    return render_template('button-generic.html', form=form)

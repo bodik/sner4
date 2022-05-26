@@ -19,14 +19,8 @@
 		'searching': false,
 	};
 
-	function action_userapikey(event) {
-		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
-			.done(function(data, textStatus, jqXHR) { Sner.modal(data.title, data.detail); });
-	}
-
 	$(document).ready(function() {
 		var dt_profile_webauthn_table = Sner.dt.init_datatable('#profile_webauthn_table', dt_profile_webauthn_table_options);
-		$('a.abutton_userapikey').on('click', action_userapikey);
 	});
 </script>
 {% endblock %}
@@ -66,9 +60,13 @@
 	<tr>
 		<th>apikey</th>
 		<td>
-			{% if current_user.apikey %}present{% endif %}
-			<a class="btn btn-outline-secondary abutton_userapikey" data-url="{{ url_for('auth.profile_apikey_route', action='generate') }}" href="#">Generate</a>
-			<a class="btn btn-outline-secondary abutton_userapikey" data-url="{{ url_for('auth.profile_apikey_route', action='revoke') }}" href="#">Revoke</a>
+			{% with form=button_form, form_url=url_for('auth.profile_apikey_route', action='generate'), button_caption='Generate' %}{% include 'button-generic.html' %}{% endwith %}
+			{% if user.apikey %}
+				{% with form=button_form, form_url=url_for('auth.profile_apikey_route', action='revoke'), button_caption='Revoke' %}{% include 'button-generic.html' %}{% endwith %}
+				<span class="badge badge-info">apikey set</span>
+			{% endif %}
+			</div>
+			{% if new_apikey %}<div class="alert alert-warning">new apikey {{ new_apikey }}</div>{% endif %}
 		</td>
 	</tr>
 
