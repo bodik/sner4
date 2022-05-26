@@ -168,8 +168,8 @@ report datasheet generation (FLAB specific feature).
 
 Parsers are used to import agent output data (zip archives) produced by
 modules. See the `server storage import` for help. Parsers can also import
-default output formats of various security tools and scanners (currently: nmap,
-nessus).
+default output formats of various security tools and scanners.
+
 
 #### Server: Visuals
 
@@ -180,6 +180,7 @@ database or current configuration:
 * DNS tree
 * Portmap explorer
 * (Service) Port infos
+
 
 #### Snerlytics: Storage vulnsearch (experimental)
 
@@ -195,6 +196,14 @@ Note: python requests does not use system ca-certificates, in dev environment
 helper and mangling certifi store can be used to connect via non-globaly
 trusted CAs.
 
+
+
+#### Api: REST API interface
+
+Experimental
+
+* auth: `session_required` vs `apikey_required` vs CSRF
+* roles: admin, operator, user, agent
 
 
 ## 3 Installation
