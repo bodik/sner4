@@ -1,3 +1,4 @@
+authlib
 coverage
 cpe
 defusedxml

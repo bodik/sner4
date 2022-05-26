@@ -14,7 +14,7 @@ from sqlalchemy import func
 
 from sner.agent.modules import load_agent_plugins
 from sner.lib import load_yaml
-from sner.server.extensions import api, db, jsglue, login_manager, webauthn
+from sner.server.extensions import api, db, jsglue, login_manager, oauth, webauthn
 from sner.server.parser import load_parser_plugins
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
@@ -80,7 +80,13 @@ DEFAULT_CONFIG = {
         'security': [
             {'ApiKeyAuth': []}
         ]
-    }
+    },
+
+    # oauth oidc
+    'OIDC_NAME': None,
+    # 'OIDC_DEFAULT_METADATA': 'https://URL/.well-known/openid-configuration',
+    # 'OIDC_DEFAULT_CLIENT_ID': '',
+    # 'OIDC_DEFAULT_CLIENT_SECRET': ''
 }
 
 
@@ -110,6 +116,13 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_view = 'auth.login_route'
     login_manager.login_message = 'Not logged in'
     login_manager.login_message_category = 'warning'
+    oauth.init_app(app)
+    if app.config['OIDC_NAME']:
+        oauth.register(
+            name=app.config['OIDC_NAME'],
+            server_metadata_url=app.config[f'{app.config["OIDC_NAME"]}_METADATA'],
+            client_kwargs={'scope': 'openid email profile'}
+        )
     webauthn.init_app(app)
 
     # load sner.plugin components

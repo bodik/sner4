@@ -68,7 +68,7 @@
 			{% if current_user.is_authenticated %}
 				{%- set active_subsystem = request.endpoint.split('.')[0] -%}
 				{% if current_user.has_role('user') %}
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('api-docs.openapi_swagger_ui') }}" title="API"<i class="fas fa-paper-plane"></i></a></li>
+					<li class="nav-item"><a class="nav-link" href="{{ url_for('api-docs.openapi_swagger_ui') }}" title="API"><i class="fas fa-paper-plane"></i></a></li>
 				{% endif %}
 				{% if current_user.has_role('operator') %}
 					{%- for subsystem, route, icon in [

@@ -16,7 +16,7 @@ from sner.server.auth.core import regenerate_session, redirect_after_login, TOTP
 from sner.server.auth.forms import LoginForm, TotpCodeForm, WebauthnLoginForm
 from sner.server.auth.models import User
 from sner.server.auth.views import blueprint
-from sner.server.extensions import login_manager, webauthn
+from sner.server.extensions import login_manager, oauth, webauthn
 from sner.server.forms import ButtonForm
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
@@ -45,7 +45,7 @@ def login_route():
 
         flash('Invalid credentials.', 'error')
 
-    return render_template('auth/login.html', form=form)
+    return render_template('auth/login.html', form=form, oauth_enabled=bool(current_app.config['OIDC_NAME']))
 
 
 @blueprint.route('/logout')
@@ -119,3 +119,36 @@ def login_webauthn_route():
             flash('Login error during Webauthn authentication.', 'error')
 
     return render_template('auth/login_webauthn.html', form=form)
+
+
+@blueprint.route('/login_oidc')
+def login_oidc_route():
+    """login oidc"""
+
+    if not current_app.config['OIDC_NAME']:
+        flash('OIDC not enabled', 'error')
+        return redirect(url_for('auth.login_route'))
+
+    redirect_uri = url_for('auth.login_oidc_callback_route', _external=True)
+    return getattr(oauth, current_app.config['OIDC_NAME']).authorize_redirect(redirect_uri)
+
+
+@blueprint.route('/login_oidc_callback')
+def login_oidc_callback_route():
+    """login oidc callback"""
+
+    if not current_app.config['OIDC_NAME']:
+        flash('OIDC not enabled', 'error')
+        return redirect(url_for('auth.login_route'))
+
+    token = getattr(oauth, current_app.config['OIDC_NAME']).authorize_access_token()
+    userinfo = token.get('userinfo')
+    if userinfo and userinfo.get('email'):
+        user = User.query.filter(User.email == userinfo.get('email')).one_or_none()
+        if user:
+            regenerate_session()
+            login_user(user)
+            return redirect(url_for('index_route'))
+
+    flash('OIDC Authentication failed', 'error')
+    return redirect(url_for('auth.login_route'))

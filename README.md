@@ -85,8 +85,8 @@ tools, while *data management* part focuses on data analysis and management.
 ### 2.1 General features
 
 User web interface uses cookie based session management with username+password
-w/o OTP or FIDO2 Webauthn password-less authentication. REST API used by agents
-uses header-based apikey authentication.
+w/o OTP, FIDO2 Webauthn and/or external OpenID Connect authentication. REST API
+used by agents uses header-based apikey authentication.
 
 Role-based authorization is applied on web application request routing level.
 Default Flask session implementation has been replaced with custom session

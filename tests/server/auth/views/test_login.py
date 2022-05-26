@@ -5,13 +5,14 @@ auth.views.login tests
 
 from base64 import b64decode, b64encode
 from http import HTTPStatus
+from unittest.mock import patch
 
 from fido2 import cbor
-from flask import url_for
+from flask import current_app, redirect, url_for
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server.auth.core import TOTPImpl
-from sner.server.extensions import webauthn
+from sner.server.extensions import oauth, webauthn
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server import get_csrf_token
 
@@ -162,3 +163,49 @@ def test_login_webauthn_invalid_assertion(client, webauthn_credential):
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'Login error during Webauthn authentication.\');")]')
+
+
+def test_login_oidc_route(client, user):
+    """test_login_oidc_route"""
+
+    def authorize_redirect(_1):
+        """mock authlib oidc"""
+        return redirect('fake_redir_to_idp')
+
+    def authorize_access_token():
+        """mock authlib oidc"""
+        return {'userinfo': {'email': user.email}}
+
+    def authorize_access_token_notexist():
+        """mock authlib oidc"""
+        return {'userinfo': {'email': 'notexist'}}
+
+    patch_oauth_redirect = patch.object(oauth.OIDC_DEFAULT, 'authorize_redirect', authorize_redirect)
+    patch_oauth_token = patch.object(oauth.OIDC_DEFAULT, 'authorize_access_token', authorize_access_token)
+
+    with patch_oauth_redirect, patch_oauth_token:
+        response = client.get(url_for('auth.login_oidc_route'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.headers['Location'] == 'fake_redir_to_idp'
+
+        response = client.get(url_for('auth.login_oidc_callback_route'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.headers['Location'] == url_for('index_route')
+
+    client.cookies.clear()
+    patch_oauth_token = patch.object(oauth.OIDC_DEFAULT, 'authorize_access_token', authorize_access_token_notexist)
+    with patch_oauth_token:
+        response = client.get(url_for('auth.login_oidc_callback_route'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.headers['Location'] == url_for('auth.login_route')
+
+    client.cookies.clear()
+    current_app.config['OIDC_NAME'] = None
+
+    response = client.get(url_for('auth.login_oidc_route'))
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.headers['Location'] == url_for('auth.login_route')
+
+    response = client.get(url_for('auth.login_oidc_callback_route'))
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.headers['Location'] == url_for('auth.login_route')

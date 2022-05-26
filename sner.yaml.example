@@ -19,6 +19,11 @@
 #    esd: 'https://u:p@hostname:443/esd'
 #  sner_heatmap_hot_level: 10
 #
+#  oidc_name: 'OIDC_DEFAULT'
+#  oidc_default_metadata: 'https://URL/.well-known/openid-configuration'
+#  oidc_default_client_id: 'dummy'
+#  oidc_default_client_secret: 'dummy'
+#
 #
 #agent:
 #  server: 'http://localhost:18000'

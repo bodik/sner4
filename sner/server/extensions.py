@@ -3,6 +3,7 @@
 app extensions module
 """
 
+from authlib.integrations.flask_client import OAuth
 from flask_login import LoginManager
 from flask_smorest import Api
 from flask_sqlalchemy import SQLAlchemy
@@ -15,4 +16,5 @@ api = Api()  # pylint: disable=invalid-name
 db = SQLAlchemy()  # pylint: disable=invalid-name
 jsglue = JSGlue()  # pylint: disable=invalid-name
 login_manager = LoginManager()  # pylint: disable=invalid-name
+oauth = OAuth()  # pylint: disable=invalid-name
 webauthn = WrappedFido2Server()  # pylint: disable=invalid-name
