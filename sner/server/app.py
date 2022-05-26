@@ -14,7 +14,7 @@ from sqlalchemy import func
 
 from sner.agent.modules import load_agent_plugins
 from sner.lib import load_yaml
-from sner.server.extensions import api, db, jsglue, login_manager, oauth, webauthn
+from sner.server.extensions import api, db, jsglue, migrate, login_manager, oauth, webauthn
 from sner.server.parser import load_parser_plugins
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
@@ -116,6 +116,7 @@ def create_app(config_file=None, config_env='SNER_CONFIG'):
     login_manager.login_view = 'auth.login_route'
     login_manager.login_message = 'Not logged in'
     login_manager.login_message_category = 'warning'
+    migrate.init_app(app, db)
     oauth.init_app(app)
     if app.config['OIDC_NAME']:
         oauth.register(
