@@ -89,8 +89,10 @@ w/o OTP, FIDO2 Webauthn and/or external OpenID Connect authentication. REST API
 used by agents uses header-based apikey authentication.
 
 Role-based authorization is applied on web application request routing level.
-Default Flask session implementation has been replaced with custom session
-server-side file based storage. 
+Features/routest are grouped for roles: agent (scheduler jobs), operator
+(scheduler, storage, visuals), user (profile, api), admin (user mgmt).  Default
+Flask session implementation has been replaced with custom session server-side
+file based storage. 
 
 Various components provides limited command-line interface through `server`
 command. Flask shell can be used to access the ORM model directly for advanced
@@ -200,10 +202,13 @@ trusted CAs.
 
 #### Api: REST API interface
 
-Experimental
+In order to prevent CSRF, UI access should be available only by session
+authentication (`session_required` decorator), API only via apikey header
+(`apikey_required`). 
 
-* auth: `session_required` vs `apikey_required` vs CSRF
-* roles: admin, operator, user, agent
+External users might use public api upon request via local or OIDC
+authenticaton.
+
 
 
 ## 3 Installation
