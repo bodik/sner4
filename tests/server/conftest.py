@@ -7,8 +7,6 @@ import pytest
 from flask import url_for
 from webtest import TestApp
 
-from sner.server.auth.models import User
-from sner.server.extensions import db
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
@@ -24,14 +22,11 @@ def runner(app):  # pylint: disable=redefined-outer-name
     return app.test_cli_runner()
 
 
-def client_in_roles(clnt, roles):
+def client_in_roles(ufactory, clnt, roles):
     """create user role and login client to role(s)"""
 
     password = PWS.generate()
-    user = User(username='pytest_user', password=PWS.hash(password), active=True, roles=roles)
-    db.session.add(user)
-    db.session.commit()
-
+    user = ufactory.create(username='pytest_user', password=PWS.hash(password), roles=roles)
     form = clnt.get(url_for('auth.login_route')).form
     form['username'] = user.username
     form['password'] = password
@@ -40,24 +35,24 @@ def client_in_roles(clnt, roles):
 
 
 @pytest.fixture
-def cl_user(client):  # pylint: disable=redefined-outer-name
+def cl_user(user_factory, client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role user"""
 
-    yield client_in_roles(client, ['user'])
+    yield client_in_roles(user_factory, client, ['user'])
 
 
 @pytest.fixture
-def cl_operator(client):  # pylint: disable=redefined-outer-name
+def cl_operator(user_factory, client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role operator"""
 
-    yield client_in_roles(client, ['user', 'operator'])
+    yield client_in_roles(user_factory, client, ['user', 'operator'])
 
 
 @pytest.fixture
-def cl_admin(client):  # pylint: disable=redefined-outer-name
+def cl_admin(user_factory, client):  # pylint: disable=redefined-outer-name
     """yield client authenticated to role admin"""
 
-    yield client_in_roles(client, ['user', 'operator', 'admin'])
+    yield client_in_roles(user_factory, client, ['user', 'operator', 'admin'])
 
 
 class TestAppApi(TestApp):

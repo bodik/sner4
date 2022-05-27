@@ -11,7 +11,6 @@ import pytest
 from pytest_factoryboy import register as factoryboy_register
 
 from sner.server.app import create_app
-from sner.server.auth.models import User
 from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
@@ -54,33 +53,26 @@ def tmpworkdir():
     shutil.rmtree(tmpdir)
 
 
-def apikey_in_roles(roles):
+def apikey_in_roles(ufactory, roles):
     """create user apikey in role"""
 
     tmp_apikey = PWS.generate_apikey()
-    db.session.add(User(
-        username='pytest_user',
-        apikey=PWS.hash_simple(tmp_apikey),
-        active=True,
-        roles=roles,
-        api_networks=['127.0.0.0/8', '192.0.2.0/24', '2001:db8::/32']
-    ))
-    db.session.commit()
+    ufactory.create(username='pytest_user', apikey=PWS.hash_simple(tmp_apikey), roles=roles)
     return tmp_apikey
 
 
 @pytest.fixture
-def apikey_agent():
+def apikey_agent(user_factory):
     """crete user apikey agent"""
 
-    return apikey_in_roles(['agent'])
+    return apikey_in_roles(user_factory, ['agent'])
 
 
 @pytest.fixture
-def apikey_user():
+def apikey_user(user_factory):
     """crete user apikey user"""
 
-    return apikey_in_roles(['user'])
+    return apikey_in_roles(user_factory, ['user'])
 
 
 # auth
