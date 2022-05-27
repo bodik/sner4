@@ -71,7 +71,7 @@ def v2_scheduler_job_output_route(args):
 @blueprint.route('/v2/stats/prometheus')
 @blueprint.response(HTTPStatus.OK, {'type': 'string'}, content_type='text/plain')
 def v2_stats_prometheus_route():
-    """returns internal stats; prometheus"""
+    """returns internal stats"""
 
     stats = {}
 
