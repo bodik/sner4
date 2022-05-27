@@ -3,13 +3,15 @@
 auth forms
 """
 
+from ipaddress import ip_network
+
 from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, PasswordField, SelectMultipleField, SubmitField, ValidationError
 from wtforms.validators import EqualTo, InputRequired, Length, Optional
 from wtforms.widgets import CheckboxInput, ListWidget
 
-from sner.server.forms import StringNoneField
+from sner.server.forms import StringNoneField, TextAreaListField
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 
 
@@ -19,6 +21,16 @@ def strong_password(_, field):
     pwsr = PWS.check_strength(field.data)
     if not pwsr.is_strong:
         raise ValidationError(pwsr.message)
+
+
+def valid_api_networks(_, field):
+    """validate api_networks list config"""
+
+    try:
+        for item in field.data:
+            ip_network(item)
+    except ValueError as exc:
+        raise ValidationError(f'Invalid value: {str(exc)}') from None
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -55,6 +67,7 @@ class UserForm(FlaskForm):
     active = BooleanField('Active')
     roles = MultiCheckboxField('Roles')
     new_password = PasswordField('Password', [Optional(), strong_password])
+    api_networks = TextAreaListField('API Networks', [valid_api_networks], render_kw={'rows': '5'})
     submit = SubmitField('Save')
 
     def __init__(self, *args, **kwargs):

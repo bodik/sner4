@@ -69,7 +69,10 @@
 			{% if new_apikey %}<div class="alert alert-warning">new apikey {{ new_apikey }}</div>{% endif %}
 		</td>
 	</tr>
-
+	<tr>
+		<th>api_networks</th>
+		<td>{{ user.api_networks }}</td>
+	</tr>
 </table>
 
 {% endblock %}

@@ -24,6 +24,7 @@ class UserFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     email = 'test@email'
     active = True
     roles = ['user']
+    api_networks = ['127.0.0.0/8', '192.0.2.0/24']
 
 
 class WebauthnCredentialFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods

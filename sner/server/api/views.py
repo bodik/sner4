@@ -9,8 +9,9 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from flask import Response
+from flask_login import current_user
 from flask_smorest import Blueprint
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from sner.server.api.schema import (
     JobAssignArgsSchema,
@@ -99,4 +100,9 @@ def v2_stats_prometheus_route():
 def v2_public_storage_host_route(host_address):
     """get host data by address"""
 
-    return Host.query.filter(Host.address == host_address).one_or_none()
+    query = Host.query.filter(Host.address == host_address)
+    restrict = [Host.address.op('<<')(net) for net in current_user.api_networks]
+    if restrict:
+        query = query.filter(or_(*restrict))
+
+    return query.one_or_none()

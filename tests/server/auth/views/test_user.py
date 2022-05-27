@@ -67,6 +67,7 @@ def test_user_edit_route(cl_admin, user):
     form['username'] = f'{form["username"].value}_edited'
     form['new_password'] = password
     form['roles'] = []
+    form['api_networks'] = '127.0.0.0/23\n192.0.2.0/24\n2001:db8::/48'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
@@ -74,6 +75,13 @@ def test_user_edit_route(cl_admin, user):
     assert tuser.username == form['username'].value
     assert PWS.compare(PWS.hash(password, PWS.get_salt(tuser.password)), tuser.password)
     assert not user.roles
+    assert user.api_networks == ['127.0.0.0/23', '192.0.2.0/24', '2001:db8::/48']
+
+    form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).form
+    form['api_networks'] = 'invalid'
+    response = form.submit()
+    assert response.status_code == HTTPStatus.OK
+    assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "does not appear to be an IPv4 or IPv6 network")]')
 
 
 def test_user_delete_route(cl_admin, user):

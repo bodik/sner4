@@ -210,8 +210,23 @@ def test_v2_stats_prometheus_route(client, queue):  # pylint: disable=unused-arg
     assert response.status_code == HTTPStatus.OK
 
 
-def test_v2_public_storage_host_route(api_user, host):
+def test_v2_public_storage_host_route(api_user, host_factory):
     """test public host api"""
 
-    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address=host.address))
+    host_factory.create(address='127.0.0.1')
+    host_factory.create(address='192.168.0.1')
+    host_factory.create(address='2001:db8::11')
+
+    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='127.0.0.1'))
     assert PublicHostSchema().load(response.json)
+    assert response.json['address'] == '127.0.0.1'
+
+    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='2001:db8:0000::11'))
+    assert PublicHostSchema().load(response.json)
+    assert response.json['address'] == '2001:db8::11'
+
+    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='192.168.0.1'))
+    assert not response.json
+
+    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='::1'))
+    assert not response.json

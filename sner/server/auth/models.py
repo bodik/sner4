@@ -24,6 +24,7 @@ class User(db.Model, flask_login.UserMixin):
     roles = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
     apikey = db.Column(db.String(250))
     totp = db.Column(db.String(32))
+    api_networks = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
 
     webauthn_credentials = relationship('WebauthnCredential', back_populates='user', cascade='delete,delete-orphan', passive_deletes=True)
 

@@ -58,7 +58,13 @@ def apikey_in_roles(roles):
     """create user apikey in role"""
 
     tmp_apikey = PWS.generate_apikey()
-    db.session.add(User(username='pytest_user', apikey=PWS.hash_simple(tmp_apikey), active=True, roles=roles))
+    db.session.add(User(
+        username='pytest_user',
+        apikey=PWS.hash_simple(tmp_apikey),
+        active=True,
+        roles=roles,
+        api_networks=['127.0.0.0/8', '192.0.2.0/24', '2001:db8::/32']
+    ))
     db.session.commit()
     return tmp_apikey
 
