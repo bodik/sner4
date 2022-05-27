@@ -6,17 +6,27 @@ apiv2 schema
 from marshmallow import fields, INCLUDE, Schema, post_dump, validate
 
 
-class JobAssignArgsSchema(Schema):
+class BaseSchema(Schema):
+    """base api schema"""
+
+    @post_dump
+    def remove_none(self, data, **kwargs):  # pylint: disable=no-self-use,unused-argument
+        """Remove None fields"""
+
+        return {key: value for key, value in data.items() if (value is not None) and (value != [])}
+
+
+class JobAssignArgsSchema(BaseSchema):
     """/api/v2/scheduler/job/assign request"""
 
     queue = fields.String()
     caps = fields.List(fields.String)
 
 
-class JobAssignmentConfigSchema(Schema):
+class JobAssignmentConfigSchema(BaseSchema):
     """
     nested assignment config schema.
-    tweaked in order to serialize unknown fields (modules config attributes are of free-form
+    tweaked in order to serialize unknown fields, modules config attributes are of free-form
     """
 
     class Meta:  # pylint: disable=too-few-public-methods,missing-class-docstring
@@ -35,24 +45,39 @@ class JobAssignmentConfigSchema(Schema):
         return output
 
 
-class JobAssignmentSchema(Schema):
-    """/api/v2/scheduler/job/assign response"""
+class JobAssignmentSchema(BaseSchema):
+    """assignment schema"""
 
     id = fields.String(required=True, validate=validate.Regexp(r'^[a-f0-9\-]{36}$'))
     config = fields.Nested(JobAssignmentConfigSchema, required=True)
     targets = fields.List(fields.String, required=True)
 
 
-class JobOutputSchema(Schema):
-    """/api/v2/scheduler/job/output request"""
+class JobOutputSchema(BaseSchema):
+    """job output schema"""
 
     id = fields.String(required=True, validate=validate.Regexp(r'^[a-f0-9\-]{36}$'))
     retval = fields.Integer()
     output = fields.String()
 
 
-class PublicHostSchema(Schema):
-    """/api/v2/public/storage/host response"""
+class PublicServiceSchema(BaseSchema):
+    """service schema"""
+
+    proto = fields.String(required=True)
+    port = fields.Integer(required=True)
+    state = fields.String()
+    info = fields.String()
+    tags = fields.List(fields.String)
+    comment = fields.String()
+    created = fields.DateTime()
+    modified = fields.DateTime()
+    rescan_time = fields.DateTime()
+    import_time = fields.DateTime()
+
+
+class PublicHostSchema(BaseSchema):
+    """public host schema"""
 
     address = fields.String(required=True)
     hostname = fields.String()
@@ -62,3 +87,4 @@ class PublicHostSchema(Schema):
     created = fields.DateTime()
     modified = fields.DateTime()
     rescan_time = fields.DateTime()
+    services = fields.List(fields.Nested(PublicServiceSchema))
