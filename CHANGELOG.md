@@ -11,6 +11,11 @@
 * changed: rate-limiting scheduler (nacelnik.mk1 design)
 * added: scripts: url generator
 * added: add tag during storage import
+* added: public api accesible with apikey
+* added: user authentication simple OIDC support, user profile generate apikey
+* changed: auth, api: reject session based auth access api and apikey based to access ui (should prevent csrf attack to api)
+* security: allow login only for active users
+* added, changed: `server db` refactored to `server dbx`, added migrations support
 
 
 ## 0.6.2 - bump packages and updates for prod
