@@ -200,14 +200,11 @@ trusted CAs.
 
 
 
-#### Api: REST API interface
+#### Api: REST API interface (experimental)
 
 In order to prevent CSRF, UI access should be available only by session
 authentication (`session_required` decorator), API only via apikey header
 (`apikey_required`). 
-
-External users might use public api upon request via local or OIDC
-authenticaton.
 
 
 
