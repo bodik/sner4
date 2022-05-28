@@ -230,6 +230,17 @@ def test_v2_public_storage_host_route(api_user, host_factory, service_factory, s
     assert not response.json
 
 
+def test_v2_public_storage_host_route_morenotes(api_user, service, note_factory):
+    """test public host api with host and service notes"""
+
+    note_factory.create(host=service.host, xtype='xtest', data='host note data1')
+    note_factory.create(host=service.host, service=service, xtype='xtest', data='service note data2')
+
+    response = api_user.get(url_for('api.v2_public_storage_host_route', address=service.host.address))
+    assert len(response.json['notes']) == 1
+    assert len(response.json['services'][0]['notes']) == 1
+
+
 def test_v2_public_storage_range_route(api_user, host_factory):
     """test public range api"""
 

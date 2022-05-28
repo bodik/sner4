@@ -113,7 +113,23 @@ def v2_public_storage_host_route(args):
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     if restrict:
         query = query.filter(or_(*restrict))
-    return query.one_or_none()
+
+    host = query.one_or_none()
+    if not host:
+        return None
+
+    # host.notes relation holds all notes regardless of it's link to service
+    # filter response model in order to cope with output schema
+    # the desing breaks the normalzation, but allows to do simple queries
+    # for notes/vulns for with all parents attributes
+    # notes.filter(Service.port=="443" OR Host.address=="78.128.214.40")
+    # also https://hashrocket.com/blog/posts/modeling-polymorphic-associations-in-a-relational-database
+    host_data = {
+        **host.__dict__,
+        'services': host.services,
+        'notes': [note for note in host.notes if note.service_id is None]
+    }
+    return host_data
 
 
 @blueprint.route('/v2/public/storage/range')

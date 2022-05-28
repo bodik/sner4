@@ -108,6 +108,7 @@ class PublicHostSchema(BaseSchema):
     modified = fields.DateTime()
     rescan_time = fields.DateTime()
     services = fields.List(fields.Nested(PublicServiceSchema))
+    notes = fields.List(fields.Nested(PublicNoteSchema))
 
 
 class PublicRangeArgsSchema(BaseSchema):
