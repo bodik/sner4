@@ -67,6 +67,19 @@ class PublicHostArgsSchema(BaseSchema):
     address = fields.IP(required=True)
 
 
+class PublicNoteSchema(BaseSchema):
+    """public note schema"""
+
+    via_target = fields.String()
+    xtype = fields.String()
+    data = fields.String()
+    tags = fields.List(fields.String)
+    comment = fields.String()
+    created = fields.DateTime()
+    modified = fields.DateTime()
+    import_time = fields.DateTime()
+
+
 class PublicServiceSchema(BaseSchema):
     """service schema"""
 
@@ -80,6 +93,7 @@ class PublicServiceSchema(BaseSchema):
     modified = fields.DateTime()
     rescan_time = fields.DateTime()
     import_time = fields.DateTime()
+    notes = fields.List(fields.Nested(PublicNoteSchema))
 
 
 class PublicHostSchema(BaseSchema):
