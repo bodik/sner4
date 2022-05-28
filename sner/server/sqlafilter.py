@@ -1,6 +1,17 @@
 # This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
 """
 parsing simple boolean enabled filter expressions into sqlalchemy-filters tree
+
+## Filter examples
+
+```
+Host.address >= "10.2.1.0" AND Host.address <= "10.2.1.255" AND Host.tags not_any "reviewed"
+(Host.address <= "10.2.1.0" OR Host.address >= "10.2.1.255") AND Host.tags not_any "reviewed"
+
+Service.state ilike "open:%" AND (Host.address <= "10.0.0.0" OR Host.address >= "10.255.255.255")
+
+Vuln.tags any "report" AND Vuln.xtype == "manual"
+```
 """
 
 import json

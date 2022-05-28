@@ -8,21 +8,28 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
-from flask import Response
+from flask import jsonify, Response
 from flask_login import current_user
 from flask_smorest import Blueprint
 from sqlalchemy import func, or_
+from sqlalchemy_filters import apply_filters
 
 from sner.server.api.schema import (
     JobAssignArgsSchema,
     JobAssignmentSchema,
     JobOutputSchema,
+    PublicHostArgsSchema,
     PublicHostSchema,
+    PublicRangeArgsSchema,
+    PublicRangeSchema,
+    PublicServicelistArgsSchema,
+    PublicServicelistSchema
 )
 from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job, Queue, Target
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host, Note, Service, Vuln
 
 
@@ -52,26 +59,26 @@ def v2_scheduler_job_output_route(args):
     try:
         output = b64decode(args['output'])
     except binascii.Error:
-        return {'message': 'invalid request'}, HTTPStatus.BAD_REQUEST
+        return jsonify({'message': 'invalid request'}), HTTPStatus.BAD_REQUEST
 
     job = Job.query.filter(Job.id == args['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
     if not job:
         # invalid/repeated requests are silently discarded, agent would delete working data
         # on it's side as well
-        return {'message': 'discard job'}
+        return jsonify({'message': 'discard job'})
 
     try:
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
-        return {'message': 'server busy'}, HTTPStatus.TOO_MANY_REQUESTS
+        return jsonify({'message': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
 
-    return {'message': 'success'}
+    return jsonify({'message': 'success'})
 
 
 @blueprint.route('/v2/stats/prometheus')
 @blueprint.response(HTTPStatus.OK, {'type': 'string'}, content_type='text/plain')
 def v2_stats_prometheus_route():
-    """returns internal stats"""
+    """internal stats"""
 
     stats = {}
 
@@ -94,15 +101,55 @@ def v2_stats_prometheus_route():
     return Response(output, mimetype='text/plain')
 
 
-@blueprint.route('/v2/public/storage/host/<host_address>')
+@blueprint.route('/v2/public/storage/host')
 @apikey_required('user')
+@blueprint.arguments(PublicHostArgsSchema, location='query')
 @blueprint.response(HTTPStatus.OK, PublicHostSchema)
-def v2_public_storage_host_route(host_address):
-    """get host data by address"""
+def v2_public_storage_host_route(args):
+    """host data by address"""
 
-    query = Host.query.filter(Host.address == host_address)
-    restrict = [Host.address.op('<<')(net) for net in current_user.api_networks]
+    query = Host.query.filter(Host.address == str(args['address']))
+
+    restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     if restrict:
         query = query.filter(or_(*restrict))
-
     return query.one_or_none()
+
+
+@blueprint.route('/v2/public/storage/range')
+@apikey_required('user')
+@blueprint.arguments(PublicRangeArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, PublicRangeSchema(many=True))
+def v2_public_storage_range_route(args):
+    """list of hosts by cidr with simplified data"""
+
+    query = Host.query.filter(Host.address.op('<<=')(str(args['cidr'])))
+
+    restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
+    if restrict:
+        query = query.filter(or_(*restrict))
+    return query.all()
+
+
+@blueprint.route('/v2/public/storage/servicelist')
+@apikey_required('user')
+@blueprint.arguments(PublicServicelistArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, PublicServicelistSchema(many=True))
+def v2_public_storage_servicelist_route(args):
+    """filtered servicelist (see sner.server.sqlafilter for syntax)"""
+
+    query = db.session.query().select_from(Service).outerjoin(Host).add_columns(
+        Host.address,
+        Host.hostname,
+        Service.proto,
+        Service.port,
+        Service.state,
+        Service.info
+    )
+    if 'filter' in args:
+        query = apply_filters(query, FILTER_PARSER.parse(args['filter']), do_auto_join=False)
+
+    restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
+    if restrict:
+        query = query.filter(or_(*restrict))
+    return query.all()

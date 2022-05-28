@@ -61,6 +61,12 @@ class JobOutputSchema(BaseSchema):
     output = fields.String()
 
 
+class PublicHostArgsSchema(BaseSchema):
+    """public host args schema"""
+
+    address = fields.IP(required=True)
+
+
 class PublicServiceSchema(BaseSchema):
     """service schema"""
 
@@ -88,3 +94,44 @@ class PublicHostSchema(BaseSchema):
     modified = fields.DateTime()
     rescan_time = fields.DateTime()
     services = fields.List(fields.Nested(PublicServiceSchema))
+
+
+class PublicRangeArgsSchema(BaseSchema):
+    """public cidr schema"""
+
+    cidr = fields.IPInterface(required=True)
+
+
+class PublicRangeServiceSchema(BaseSchema):
+    """public range service schema"""
+
+    proto = fields.String(required=True)
+    port = fields.Integer(required=True)
+    state = fields.String()
+    info = fields.String()
+
+
+class PublicRangeSchema(BaseSchema):
+    """public range schema"""
+
+    address = fields.String(required=True)
+    hostname = fields.String()
+    os = fields.String()
+    services = fields.List(fields.Nested(PublicRangeServiceSchema))
+
+
+class PublicServicelistArgsSchema(BaseSchema):
+    """public service list args schema"""
+
+    filter = fields.String()
+
+
+class PublicServicelistSchema(BaseSchema):
+    """public service list schema"""
+
+    address = fields.String()
+    hostname = fields.String()
+    proto = fields.String()
+    port = fields.Integer()
+    state = fields.String()
+    info = fields.String()

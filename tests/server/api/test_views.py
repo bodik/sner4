@@ -13,7 +13,7 @@ from flask import current_app, url_for
 from sqlalchemy import create_engine, func, select
 
 import sner.server.api.views
-from sner.server.api.schema import PublicHostSchema
+from sner.server.api.schema import PublicHostSchema, PublicServicelistSchema, PublicRangeSchema
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SCHEDULER_LOCK_NUMBER
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
@@ -216,15 +216,37 @@ def test_v2_public_storage_host_route(api_user, host_factory, service_factory, s
     service_factory.create(host=host_factory.create(address='2001:db8::11'), proto='udp', port=0, state='open:test')
     host_factory.create(address='192.0.2.1')
 
-    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address=service.host.address))
+    response = api_user.get(url_for('api.v2_public_storage_host_route', address=service.host.address))
     assert PublicHostSchema().load(response.json)
     assert response.json['address'] == service.host.address
     assert len(response.json['services']) == 1
 
-    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='2001:db8:0000::11'))
+    response = api_user.get(url_for('api.v2_public_storage_host_route', address='2001:db8:0000::11'))
     assert PublicHostSchema().load(response.json)
     assert response.json['address'] == '2001:db8::11'
     assert len(response.json['services']) == 1
 
-    response = api_user.get(url_for('api.v2_public_storage_host_route', host_address='192.0.2.1'))
+    response = api_user.get(url_for('api.v2_public_storage_host_route', address='192.0.2.1'))
     assert not response.json
+
+
+def test_v2_public_storage_range_route(api_user, host_factory):
+    """test public range api"""
+
+    host_factory.create(address='127.0.1.1')
+    host_factory.create(address='127.0.2.1')
+
+    response = api_user.get(url_for('api.v2_public_storage_range_route', cidr='127.0.0.0/8'))
+    assert PublicRangeSchema(many=True).load(response.json)
+    assert len(response.json) == 2
+
+
+def test_v2_public_storage_servicelist_route(api_user, service_factory):
+    """test public servicelist api"""
+
+    service_factory.create(port=1)
+    service_factory.create(port=2)
+
+    response = api_user.get(url_for('api.v2_public_storage_servicelist_route', filter='Service.port=="1"'))
+    assert PublicServicelistSchema(many=True).load(response.json)
+    assert len(response.json) == 1
