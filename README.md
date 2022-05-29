@@ -14,27 +14,20 @@ GitHub Actions: [![Tests CI](https://github.com/bodik/sner4/workflows/Tests%20CI
 
 ## 1 Project description
 
-The main goal of this project is to create software suite for:
+Project goals:
 
 1. Distribution of network reconnaissance workload
-    * Scanning/reconnaissance is performed by set of modular agents. Each
-      agent module wraps one existing or implements new tool such as nmap,
-      nikto, sslscan.
-    * Agent architecture allows to do pivoted scans and elastic scan
-      scheduling.
+    * Scanning/reconnaissance is performed by set of agents allowing to perform
+      pivoted scans and dynamic scheduling.
+    * Support for continuous scanning (periodic rescans)
 
 2. Data analysis and management
-    * Flexible user-interface allows to analyze monitored infrastructure
-      and manage information on on-demand and continuous basis.
-    * Programmatical access to the data through ORM interface to
-      provide further analysis capabilities.
+    * User-interface and API allows to analyze monitored infrastructure.
+    * ORM interface allows detailed automatic, semi-automatic or manual
+      analysis.
 
 
 ### 1.1 Design overview
-
-The application is divided into several components according to theirs main
-functions. The *reconnaissance* part gathers standard data produced by scanning
-tools, while *data management* part focuses on data analysis and management.
 
 #### Components table
 
@@ -86,39 +79,30 @@ tools, while *data management* part focuses on data analysis and management.
 
 User web interface uses cookie based session management with username+password
 w/o OTP, FIDO2 Webauthn and/or external OpenID Connect authentication. REST API
-used by agents uses header-based apikey authentication.
+uses header-based apikey authentication.
 
-Role-based authorization is applied on web application request routing level.
-Features/routest are grouped for roles: agent (scheduler jobs), operator
-(scheduler, storage, visuals), user (profile, api), admin (user mgmt).  Default
-Flask session implementation has been replaced with custom session server-side
-file based storage. 
+Application features are grouped and authorized for roles: agent (scheduler
+jobs), operator (scheduler, storage, visuals), user (profile, api), admin (user
+mgmt). Web interface uses custom server-side file based session storage.
 
-Various components provides limited command-line interface through `server`
-command. Flask shell can be used to access the ORM model directly for advanced
-analysis or out-of-interface data management.
-
-Agent and parser features are partialy implemented via simple system of plugins
-allowing to extend toolset used within those components.
+Components provides limited command-line interface through `server` command.
+Flask shell can be used to access the ORM model directly for advanced analysis
+or data management (see `scripts` for examples). Agent and parser subsystem uses
+extendable plugin architecture.
 
 
 ### 2.2 Reconnaissance subsystem
 
 #### Agent
 
-Agent wraps an existing tools with the communication (agent) and execution
-layer (modules). Generally, the agent instance fetches assignment from server,
-performs the task and sends results back to the server (scheduler). Agent
-provides several modes of execution (default, one-time execution, handling
-specific queue) and includes functions for process management (shutdown after
-current task - on SIGUSR1, immediate termination on SIGTERM).
+Agent provides communication and execution layer for plugins implementing
+various tools wrappers. Generally, handles task query/assignment and results
+delivery. Allows to execute in default (continuous), one-time or manual
+assignment, handles process management features (gracefull shutdown - SIGUSR1,
+immediate termination - SIGTERM), supports fine-graned workload routing via
+capabilities metadata.
 
-All requests from agent must be authenticated with apikey for user account in
-role *agent*. Key can be specified in configuration file or by command-line
-switch. Agent can signal it's (special) capabilities, which can be used to
-fine-grained workload routing.
-
-For currently available modules see `sner/plugin/*/agent.py`
+For currently available plugins see `sner/plugin/*/agent.py`
 
 
 #### Server: Scheduler
@@ -149,11 +133,9 @@ management.
 
 #### Server: Planner
 
-Planner is daemon periodicaly executing defined pipelines. Pipelines defines a
-queues processing (imports data to storage, requeueing during two-phase
-scanning) as well as periodic generators (rescanning storage, rediscovery of
-netranges for IPv4 and IPv6 address space) or other generic pipelines (storage
-cleanup).
+Planner provides continuous orchestration of agents, scheduler and storage
+data. Standalone daemon executing periodic defined and interconnected tasks
+(stages).
 
 
 
@@ -162,15 +144,12 @@ cleanup).
 #### Server: Storage and Parsers
 
 Storage is a main IP-centric database model and user interface heavily inspired
-by Metasploit framework PRO UI.
+by Metasploit framework PRO UI. Web interface allow somewhat flexible data
+management including predefined aggregations and items tagging.
 
-Web interface allows for CRUD operations on all models, filtering of list
-views, grouping of vulnerabilities and services by properties, basic condensed
-report datasheet generation (FLAB specific feature).
+Parsers are used to parse agent output (zip archives) or raw files (nmap,
+nessus) and import data into storage.
 
-Parsers are used to import agent output data (zip archives) produced by
-modules. See the `server storage import` for help. Parsers can also import
-default output formats of various security tools and scanners.
 
 
 #### Server: Visuals
@@ -178,33 +157,25 @@ default output formats of various security tools and scanners.
 Visualization modules can be used to visualize various informations stored in
 database or current configuration:
 
-* Workflow tree
+* Planner tree
 * DNS tree
 * Portmap explorer
 * (Service) Port infos
 
 
+
 #### Snerlytics: Storage vulnsearch (experimental)
 
-Experimental subsystem allowing to corelate nmap detected service CPEs with
-external https://github.com/cve-search/cve-search (by circl.lu) and analyze the
-data via ELK stack.
-
-* install via https://github.com/bodik/sner-ansible playbooks/snerlytics.yml
-* configure external systems urls in config file
-* run synchronization process `bin/server storage sync-vulnsearch`
-
-Note: python requests does not use system ca-certificates, in dev environment
-helper and mangling certifi store can be used to connect via non-globaly
-trusted CAs.
+Experimental subsystem. Uses https://github.com/cve-search/cve-search (by
+circl.lu) to correlate and analyze storage CPE data via ELK stack. See
+https://github.com/bodik/sner-ansible/blob/master/playbooks/snerlytics.yml
+for install instructions.
 
 
 
 #### Api: REST API interface (experimental)
 
-In order to prevent CSRF, UI access should be available only by session
-authentication (`session_required` decorator), API only via apikey header
-(`apikey_required`). 
+Experimental subsystem. Provides basic access to managed data.
 
 
 
@@ -291,44 +262,47 @@ ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packa
 ### 4.1 Simple reconnaissance scenario
 
 1. Generate target list
-    * manualy
-    * from cidr: `bin/server scheduler enumips 127.0.0.0/24 > targets`
-    * from network range: `bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets`
-2. Setup exclusions (*scheduler > exclusions > add | edit*)
-3. Enqueue targets in queue
-    * web: *scheduler > queues > [queue] > enqueue*
-    * cli: `bin/server scheduler queue-enqueue <queue.name> --file=targets`
+  ```
+  bin/server scheduler enumips 127.0.0.0/24 > targets1
+  bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets2
+  ```
+2. Setup exclusions (web: *scheduler > exclusions*)
+3. Enqueue targets in queue (web: *scheduler > queue > enqueue*)
+  ```
+  bin/server scheduler queue-enqueue <queue.name> --file=targets
+  ```
 5. Run the agent
 6. Monitor the queue until all jobs has been finished
 7. Stop the agent `bin/agent --shutdown [PID]`
-8. Recon data can be found in queue directories (`<SNER_VAR>/scheduler/queue-<queue.id>`)
+8. Gather recon data from queue directories (`<SNER_VAR>/scheduler/queue-<queue.id>`)
 
 
 ### 4.2 Data evaluation scenario
 
-1. Import existing data with suitable parser: `bin/server storage import <parser name> <filename>`
-2. Use web interface to consult or manage the data: *storage > hosts | services | vulns | notes | ...*
-    * use CRUD, comments or tags to sort the data out
-    * use server shell for advanced analysis
-4. Generate preliminary vulnerability report: *storage > vulns > Generate report*
+1. Import existing data with suitable parser
+  ```
+  bin/server storage import <parser name> <filename>
+  ```
+2. Use web interface, flask shell or raw database to consult or manage gathered data
+4. Generate preliminary vulnerability report (web: *storage > vulns > Generate report*)
 
 
 ### 4.3 Examples
 
+#### Use-case: DNS Enum
+
+```
+nmap -sL 192.168.2.0/24 -oA scan-dnsenum
+bin/server storage import nmap scan-dnsenum.xml
+```
+
+
 #### Use-case: Basic recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'disco syn scan top10000' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner servicedisco nmap' --file=-
 bin/agent --debug
 bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
-```
-
-
-#### Use-case: Long-term scanning strategy with Planner
-
-```
-editor /etc/sner.yaml
-systemctl restart sner-planer.service
 ```
 
 
@@ -339,7 +313,7 @@ systemctl restart sner-planer.service
 nmap SCANTYPE TIMING OUTPUT TARGETS
 
 # example
-bin/server storage service-list --filter 'Service.port == 22' --iponly > targets
+bin/server storage service-list --filter 'Service.port == 22' --short > targets
 nmap \
     -sV --version-intensity 4 -Pn \
     --max-retries 3 --script-timeout 30m --max-hostgroup 1 --max-rate 1 --scan-delay 10 \
@@ -351,14 +325,6 @@ bin/server storage import nmap output.xml
 ```
 
 
-#### Use-case: Shell interface
+#### Use-case: Shell interface and scripting
 
-Flask shell (pre-loaded with sner models) is available for scripting and
-programmatic manipulation with all objects.
-
-```
-$ bin/server shell
->>> webservices = Service.query.filter(Service.proto=='tcp', Service.port.in_([80, 443, 8080, 8443])).all()
->>> for tmp in webservices:
-...   print('%s:%s' % (tmp.host.address, tmp.port))
-```
+See `scripts/`.
