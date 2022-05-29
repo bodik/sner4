@@ -3,7 +3,7 @@ Description=Sner agent
 After=network.target
 
 [Service]
-ExecStart=/opt/sner/venv/bin/python /opt/sner/bin/agent --debug
+ExecStart=/opt/sner/venv/bin/python /opt/sner/bin/agent
 WorkingDirectory=/tmp
 Type=simple
 Restart=no

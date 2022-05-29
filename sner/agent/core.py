@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from base64 import b64encode
 from contextlib import contextmanager
+from pathlib import Path
 from time import sleep
 from uuid import uuid4
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -124,6 +125,7 @@ class AgentBase(ABC, TerminateContextMixin):
         zipdir(jobdir, f'{jobdir}.zip')
         shutil.rmtree(jobdir)
 
+        self.log.info('process_assignment finished, retval=%d', retval)
         return retval
 
 
@@ -189,14 +191,14 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                         sleep(self.backoff_time)
                         continue
                 JobAssignmentSchema().load(assignment)
-                self.log.debug('got assignment: %s', assignment)
             except (requests.exceptions.RequestException, json.decoder.JSONDecodeError, marshmallow.ValidationError) as exc:
                 assignment = None
-                self.log.warning('get_assignment error: %s', exc)
+                self.log.error('get_assignment error, %s', exc)
                 if self.oneshot:
                     return assignment, 1
                 sleep(self.backoff_time)
 
+        self.log.info('get_assignment success, %s', assignment)
         return assignment, 0
 
     def upload_output(self, output):
@@ -209,8 +211,9 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                 response.raise_for_status()
                 uploaded = True
             except requests.exceptions.RequestException as exc:
-                self.log.warning('upload_output error: %s', exc)
+                self.log.error('upload_output error, %s', exc)
                 sleep(self.backoff_time)
+        self.log.info('upload_output success, %s', output['id'])
 
     def run(self, **kwargs):
         """fetch, process and upload output for assignment given by server"""
@@ -222,11 +225,13 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
 
                 if assignment:
                     retval = self.process_assignment(assignment)
-                    self.log.debug('processed, retval=%d', retval)
 
                     assignment_output_file = f'{assignment["id"]}.zip'
-                    with open(assignment_output_file, 'rb') as ftmp:
-                        output = {'id': assignment['id'], 'retval': retval, 'output': b64encode(ftmp.read()).decode('utf-8')}
+                    output = {
+                        'id': assignment['id'],
+                        'retval': retval,
+                        'output': b64encode(Path(assignment_output_file).read_bytes()).decode('utf-8')
+                    }
                     self.upload_output(output)
                     os.remove(assignment_output_file)
 
@@ -242,14 +247,11 @@ class AssignableAgent(AgentBase):
     def run(self, **kwargs):
         """process user supplied assignment"""
 
-        assignment = {'id': str(uuid4())}
-        assignment.update(json.loads(kwargs['assignment']))
+        assignment = {'id': str(uuid4()), **json.loads(kwargs['assignment'])}
         JobAssignmentSchema().load(assignment)
-        self.log.debug('start job.id: %s', assignment['id'])
 
         with self.terminate_context():
             retval = self.process_assignment(assignment)
-            self.log.debug('processed, retval=%d', retval)
 
         return retval
 
@@ -282,7 +284,7 @@ def main(argv=None):
 
     # agent process management helpers
     if args.version:
-        print(f'Sner {__version__}')
+        print(f'sner {__version__}')
         return 0
     if args.shutdown:
         return os.kill(args.shutdown, signal.SIGUSR1)
