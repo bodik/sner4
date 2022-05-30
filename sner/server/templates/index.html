@@ -1,8 +1,11 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {% extends "base.html" %}
 
-{% block title %}Main page{% endblock %}
+{% block title %}Homepage{% endblock %}
 
 {% block content %}
-Hello, World!
+<div class="jumbotron text-center">
+	<h1 class="py-5">Slow Network Recon Service</h1>
+	<img src="{{ url_for('static', filename='logo.png') }}">
+</div>
 {% endblock %}
