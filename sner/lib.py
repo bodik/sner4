@@ -6,6 +6,7 @@ shared functions
 import os
 import signal
 from contextlib import contextmanager
+from pathlib import Path
 from zipfile import ZipFile
 
 import magic
@@ -16,8 +17,8 @@ def load_yaml(filename):
     """load yaml from file, silence file not found"""
 
     if filename and os.path.exists(filename):
-        with open(filename, 'r', encoding='utf-8') as ftmp:
-            return yaml.safe_load(ftmp.read())
+        config = yaml.safe_load(Path(filename).read_text(encoding='utf-8'))
+        return config or {}
     return {}
 
 
