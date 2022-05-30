@@ -190,39 +190,23 @@ git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
 make install
 
-# prepare datastore
-apt-get install postgresql-all
-sudo -u postgres psql -c "CREATE DATABASE sner;"
-sudo -u postgres psql -c "CREATE USER sner WITH ENCRYPTED PASSWORD 'password';"
-mkdir -p /var/lib/sner
-chown www-data /var/lib/sner
-
-# configure sner and initialize database
-cp sner.yaml.example /etc/sner.yaml
+# config and datastore
+make install-db
 editor /etc/sner.yaml
 . venv/bin/activate && make db
 
-# configure gunicorn service
-cp extra/sner-web.service /etc/systemd/system/sner-web.service
-systemctl daemon-reload
-systemctl enable --now sner-web.service
-
-# configure apache2 reverse proxy
-apt-get install apache2
-a2enmod proxy proxy_http
+# run prod server
+apt-get -y install apache2 && a2enmod proxy proxy_http
 cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 systemctl restart apache2
+systemctl enable --now sner-web.service
 
-# configure agent service
+# run agent
 bin/server auth add-agent
 editor /etc/sner.yaml
-cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
-systemctl daemon-reload
-systemctl start sner-agent@1.service
+systemctl enable --now sner-agent@1.service
 
-# configure planner service
-cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
-systemctl daemon-reload
+# run planner
 systemctl enable --now sner-planner.service
 ```
 
