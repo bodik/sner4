@@ -26,7 +26,7 @@ class Queue(db.Model):
     config = db.Column(db.Text)
     group_size = db.Column(db.Integer, nullable=False)
     priority = db.Column(db.Integer, nullable=False)
-    active = db.Column(db.Boolean, nullable=False, default=False)
+    active = db.Column(db.Boolean, nullable=False, default=True)
     reqs = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=list)
 
     targets = relationship('Target', back_populates='queue', cascade='delete,delete-orphan', passive_deletes=True)
