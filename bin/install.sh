@@ -10,7 +10,7 @@ pip install -r requirements.lock
 
 cp -vn sner.yaml.example /etc/sner.yaml
 
-cp extra/sner-web.service /etc/systemd/system/sner-web.service
+cp extra/sner-server.service /etc/systemd/system/sner-server.service
 cp extra/sner-agent@.service /etc/systemd/system/sner-agent@.service
 cp extra/sner-planner.service /etc/systemd/system/sner-planner.service
 systemctl daemon-reload

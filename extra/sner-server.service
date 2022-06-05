@@ -1,5 +1,5 @@
 [Unit]
-Description=Sner web ui (gunicorn hosted flask app)
+Description=Sner web server
 After=network.target
 
 [Service]
@@ -8,7 +8,7 @@ ExecStart=/opt/sner/venv/bin/gunicorn --bind "127.0.0.1:18001" --timeout 120 "sn
 WorkingDirectory=/opt/sner
 User=www-data
 Group=www-data
-SyslogIdentifier=sner-web
+SyslogIdentifier=sner-server
 
 [Install]
 WantedBy=multi-user.target

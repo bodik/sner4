@@ -199,7 +199,7 @@ editor /etc/sner.yaml
 apt-get -y install apache2 && a2enmod proxy proxy_http
 cp extra/apache_proxy.conf /etc/apache2/conf-enabled/sner.conf
 systemctl restart apache2
-systemctl enable --now sner-web.service
+systemctl enable --now sner-server.service
 
 # run agent
 bin/server auth add-agent

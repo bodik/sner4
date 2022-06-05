@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_DATABASE_URI': 'postgresql:///sner',
     'SQLALCHEMY_ECHO': False,
 
-    # sner-web
+    # sner server/web
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['admin', 'agent', 'operator', 'user'],
     'SNER_SESSION_IDLETIME': 36000,
