@@ -129,7 +129,10 @@ def login_oidc_route():
         flash('OIDC not enabled', 'error')
         return redirect(url_for('auth.login_route'))
 
-    redirect_uri = url_for('auth.login_oidc_callback_route', _external=True)
+    redirect_uri = current_app.config.get(
+        f'{current_app.config["OIDC_NAME"]}_REDIRECT_URI',
+        url_for('auth.login_oidc_callback_route', _external=True)
+    )
     return getattr(oauth, current_app.config['OIDC_NAME']).authorize_redirect(redirect_uri)
 
 

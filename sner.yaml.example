@@ -23,6 +23,7 @@
 #  oidc_default_metadata: 'https://URL/.well-known/openid-configuration'
 #  oidc_default_client_id: 'dummy'
 #  oidc_default_client_secret: 'dummy'
+#  oidc_default_redirect_uri: 'https://external_hostname/path/auth/login_oidc_callback'
 #
 #
 #agent:
