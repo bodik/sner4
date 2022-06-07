@@ -102,12 +102,12 @@ class Service(StorageModelBase):
 class SeverityEnum(SelectableEnum):
     """severity enum"""
 
-    UNKNOWN = 'UNKNOWN'
-    INFO = 'INFO'
-    LOW = 'LOW'
-    MEDIUM = 'MEDIUM'
-    HIGH = 'HIGH'
-    CRITICAL = 'CRITICAL'
+    UNKNOWN = 'unknown'
+    INFO = 'info'
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+    CRITICAL = 'critical'
 
 
 class Vuln(StorageModelBase):
@@ -119,7 +119,7 @@ class Vuln(StorageModelBase):
     via_target = db.Column(db.String(250))
     name = db.Column(db.String(1000), nullable=False)
     xtype = db.Column(db.String(250))
-    severity = db.Column(db.Enum(SeverityEnum), nullable=False)
+    severity = db.Column(db.Enum(SeverityEnum, values_callable=lambda x: [member.value for member in SeverityEnum]), nullable=False)
     descr = db.Column(db.Text)
     data = db.Column(db.Text)
     refs = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])

@@ -12,7 +12,7 @@ class SelectableEnum(Enum):
     @classmethod
     def choices(cls):
         """from self/class generates list for SelectField"""
-        return [(choice, choice.name) for choice in cls]
+        return [(choice.value, choice.value) for choice in cls]
 
     @classmethod
     def coerce(cls, item):
@@ -20,4 +20,4 @@ class SelectableEnum(Enum):
         return cls(item) if not isinstance(item, cls) else item
 
     def __str__(self):
-        return self.name
+        return self.value

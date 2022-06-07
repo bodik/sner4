@@ -45,7 +45,7 @@ def test_vuln_add_route(cl_operator, host, service, vuln_factory):
     form = cl_operator.get(url_for('storage.vuln_add_route', model_name='service', model_id=avuln.service.id)).form
     form['name'] = avuln.name
     form['xtype'] = avuln.xtype
-    form['severity'] = str(avuln.severity)
+    form['severity'] = avuln.severity.value
     form['descr'] = avuln.descr
     form['data'] = avuln.descr
     form['refs'] = '\n'.join(avuln.refs)

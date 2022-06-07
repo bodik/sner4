@@ -113,8 +113,8 @@ class Job(db.Model):
 class ExclFamily(SelectableEnum):
     """exclusion family enum"""
 
-    NETWORK = 'NETWORK'
-    REGEX = 'REGEX'
+    NETWORK = 'network'
+    REGEX = 'regex'
 
 
 class Excl(db.Model):
@@ -125,7 +125,7 @@ class Excl(db.Model):
     """
 
     id = db.Column(db.Integer, primary_key=True)
-    family = db.Column(db.Enum(ExclFamily), nullable=False)
+    family = db.Column(db.Enum(ExclFamily, values_callable=lambda x: [member.value for member in ExclFamily]), nullable=False)
     value = db.Column(db.Text, nullable=False)
     comment = db.Column(db.Text)
 

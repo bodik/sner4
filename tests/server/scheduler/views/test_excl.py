@@ -43,7 +43,7 @@ def test_excl_add_route(cl_operator, excl_network_factory):
     aexcl_network = excl_network_factory.build()
 
     form = cl_operator.get(url_for('scheduler.excl_add_route')).form
-    form['family'] = aexcl_network.family
+    form['family'] = aexcl_network.family.value
     form['value'] = aexcl_network.value
     form['comment'] = aexcl_network.comment
     response = form.submit()
@@ -60,14 +60,14 @@ def test_excl_add_route(cl_operator, excl_network_factory):
     assert response.lxml.xpath('//ul[@class="invalid-feedback"]/li[text()="Invalid family"]')
 
     form = cl_operator.get(url_for('scheduler.excl_add_route')).form
-    form['family'] = 'NETWORK'
+    form['family'] = 'network'
     form['value'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "does not appear to be an IPv4 or IPv6 network")]')
 
     form = cl_operator.get(url_for('scheduler.excl_add_route')).form
-    form['family'] = 'REGEX'
+    form['family'] = 'regex'
     form['value'] = '('
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
