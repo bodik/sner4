@@ -186,7 +186,7 @@ class Stage(ABC):
     """planner stage base"""
 
     @abstractmethod
-    def task(self, targets):
+    def task(self, data):
         """incoming event handler"""
 
     @abstractmethod
@@ -201,8 +201,8 @@ class Schedule(Stage):
         self.schedule = schedule
         self.lastrun_path = Path(f'{current_app.config["SNER_VAR"]}/lastrun.{self.__class__.__name__}')
 
-    def task(self, targets):
-        """schedules does not implement any code for task"""
+    def task(self, data):
+        """dummy"""
 
     def run(self):
         """run only on configured schedule"""
@@ -217,7 +217,7 @@ class Schedule(Stage):
 
     @abstractmethod
     def _run(self):
-        """actual execution implementation"""
+        """stage runnable implementation"""
 
 
 class QueueHandler(Stage):
@@ -232,16 +232,20 @@ class QueueHandler(Stage):
                 raise WiringError(f'missing queue "{queue}"') from None
 
     def _drain(self):
+        """drain queues and yield PIDBs"""
+
         for queue in Queue.query.filter(Queue.name.in_(self.queues)).all():
             for aajob in Job.query.filter(Job.queue_id == queue.id, Job.retval == 0).all():
                 yield JobManager.parse(aajob)
                 JobManager.archive(aajob)
                 JobManager.delete(aajob)
 
-    def task(self, targets):
+    def task(self, data):
+        """enqueue data/targets into all configured queues"""
+
         for queue in Queue.query.filter(Queue.name.in_(self.queues)).all():
             already_queued = db.session.connection().execute(select(Target.target).filter(Target.queue == queue)).scalars().all()
-            enqueue = list(set(targets) - set(already_queued))
+            enqueue = list(set(data) - set(already_queued))
             QueueManager.enqueue(queue, enqueue)
 
 
@@ -255,9 +259,9 @@ class DummyStage(Stage):
         self.run_count = 0
         self.run_args = None
 
-    def task(self, targets):
+    def task(self, data):
         self.task_count += 1
-        self.task_args = targets
+        self.task_args = data
 
     def run(self):
         self.task('dummy')
@@ -268,10 +272,10 @@ class DummyStage(Stage):
 class StorageLoader(Stage):
     """final stage, imports data to storage"""
 
-    def task(self, targets):
+    def task(self, data):
         """imports data to storage"""
 
-        StorageManager.import_parsed(targets)
+        StorageManager.import_parsed(data)
 
     def run(self):
         """dummy"""
@@ -281,7 +285,7 @@ class StorageLoader(Stage):
 class StorageCleanup(Stage):
     """cleanup storage"""
 
-    def task(self, targets):
+    def task(self, data):
         """dummy"""
 
     def run(self):
@@ -293,7 +297,7 @@ class StorageCleanup(Stage):
 
 @register_stage
 class DummySchedule(Schedule):
-    """dummy testing schedulee"""
+    """dummy testing schedule"""
 
     def _run(self):
         """dummy"""
