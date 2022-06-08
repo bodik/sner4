@@ -165,6 +165,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     # globaly enable flask_wtf csrf token helper
     # least intrusive way to pass token into every view without enforcing csrf on all routes
     app.add_template_global(name='csrf_token', f=generate_csrf)
+    app.add_template_global(name='sner_version', f=__version__)
 
     @app.shell_context_processor
     def make_shell_context():  # pylint: disable=unused-variable

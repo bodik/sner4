@@ -57,7 +57,7 @@ $(document).ready(function() {
 </table>
 
 <div>
-{% if note.xtype and (note.xtype.startswith('nessus.') or note.xtype.startswith('nmap.'))  %}
+{% if note.xtype and note.xtype.startswith(('nessus.', 'nmap.')) %}
 	<pre>{{ note.data|json_indent }}</pre>
 {% else %}
 	{{ note.data }}

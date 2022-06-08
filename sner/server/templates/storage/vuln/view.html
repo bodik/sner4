@@ -75,7 +75,13 @@ $(document).ready(function() {
 
 <h2>Description</h2>
 <div>
-{% if vuln.descr %}{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}{% endif %}
+{% if vuln.descr %}
+	{% if vuln.xtype.startswith(('nessus.')) %}
+		{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}
+	{% else %}
+		<pre>{{ vuln.descr }}</pre>
+	{% endif %}
+{% endif %}
 </div>
 
 <h2>Data</h2>
