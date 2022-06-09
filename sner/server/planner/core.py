@@ -169,6 +169,7 @@ class Planner(TerminateContextMixin):
             while self.loop:
                 for name, stage in self.stages.items():
                     try:
+                        current_app.logger.debug(f'stage run {name} {stage}')
                         stage.run()
                     except Exception as exc:  # pylint: disable=broad-except  ; any exception can be raised during stage processing
                         current_app.logger.error(f'stage failed, {name} {stage}, {exc}', exc_info=True)
