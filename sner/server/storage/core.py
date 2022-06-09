@@ -246,19 +246,19 @@ def db_host(address, flag_required=False):
 def db_service(host_address, proto, port, flag_required=False):
     """query upsert service object"""
 
-    query = Service.query.filter(Service.host.has(Host.address == host_address), Service.proto == proto, Service.port == port)
+    query = Service.query.outerjoin(Host).filter(Host.address == host_address, Service.proto == proto, Service.port == port)
     return query.one() if flag_required else query.one_or_none()
 
 
 def db_vuln(host_address, name, xtype, service_proto=None, service_port=None, via_target=None):  # pylint: disable=too-many-arguments
     """query upsert vuln object"""
 
-    query = Vuln.query.filter(
-        Vuln.host.has(Host.address == host_address),
+    query = Vuln.query.outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id).filter(
+        Host.address == host_address,
         Vuln.name == name,
         Vuln.xtype == xtype,
-        Vuln.service.has(Service.proto == service_proto),
-        Vuln.service.has(Service.port == service_port),
+        Service.proto == service_proto,
+        Service.port == service_port,
         Vuln.via_target == via_target
     )
     return query.one_or_none()
@@ -267,11 +267,11 @@ def db_vuln(host_address, name, xtype, service_proto=None, service_port=None, vi
 def db_note(host_address, xtype, service_proto=None, service_port=None, via_target=None):
     """query upsert note object"""
 
-    query = Note.query.filter(
-        Note.host.has(Host.address == host_address),
+    query = Note.query.outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id).filter(
+        Host.address == host_address,
         Note.xtype == xtype,
-        Note.service.has(Service.proto == service_proto),
-        Note.service.has(Service.port == service_port),
+        Service.proto == service_proto,
+        Service.port == service_port,
         Note.via_target == via_target
     )
     return query.one_or_none()

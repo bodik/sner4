@@ -33,11 +33,16 @@ def test_import_command_nmap_rawdata(runner):
     assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
     tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one()
     assert 'PIPELINING' in json.loads(tmpnote.data)['output']
+    assert Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one()
 
 
 def test_import_command_nessus(runner):
     """test nessus parser"""
 
+    result = runner.invoke(command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
+    assert result.exit_code == 0
+
+    # run twice to check update scheme of the import algorithms
     result = runner.invoke(command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
 
