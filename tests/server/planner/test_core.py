@@ -18,12 +18,12 @@ from sner.server.planner.core import (
     project_services,
     project_six_enums,
     ServiceDisco,
-    SixDiscoQueueHandler,
+    SixDisco,
     StorageSixEnum,
     Stage,
     StorageCleanup,
+    StorageImport,
     StorageLoader,
-    StorageLoaderQueueHandler,
     StorageRescan,
     WiringError
 )
@@ -95,11 +95,11 @@ def test_planner_stageexception(app, queue_factory, job_completed_factory):  # p
 
     current_app.config['SNER_PLANNER'] = yaml.safe_load("""
 stages:
-  stage_storageloader:
-    _class: StorageLoader
+  stage_storageimport:
+    _class: StorageImport
 
   stage_broken:
-    _class: StorageLoaderQueueHandler
+    _class: StorageLoader
     queues:
       - aqueue
 """)
@@ -131,15 +131,15 @@ common:
 
 stages:
   # queue processors
-  stage_storageloader:
-    _class: StorageLoader
+  stage_storageimport:
+    _class: StorageImport
 
   stage_standalonequeues:
-    _class: StorageLoaderQueueHandler
+    _class: StorageLoader
     queues:
       - 'sner nmap script'
   stage_servicescan:
-    _class: StorageLoaderQueueHandler
+    _class: StorageLoader
     queues:
       - 'sner servicescan nmap version'
       - 'sner servicescan jarm'
@@ -150,12 +150,12 @@ stages:
       - 'sner servicedisco nmap'
 
   stage_sixenumdisco:
-    _class: SixDiscoQueueHandler
+    _class: SixDisco
     queues:
       - 'sner six_enum_discover'
 
   stage_sixdnsdisco:
-    _class: SixDiscoQueueHandler
+    _class: SixDisco
     queues:
       - 'sner six_dns_discover'
     filter_nets: *home_netranges_ipv6
@@ -196,8 +196,8 @@ def test_planner_getwiring(app, queue):  # pylint: disable=unused-argument
     """dummy run"""
 
     planner = Planner(oneshot=True)
-    planner.autowire('stage_storageloader', StorageLoader)
-    planner.autowire('stage_finalqueue', StorageLoaderQueueHandler, queues=[queue.name])
+    planner.autowire('stage_storageimport', StorageImport)
+    planner.autowire('stage_finalqueue', StorageLoader, queues=[queue.name])
 
     wiring = planner.get_wiring()
     assert len(wiring) == 2
@@ -252,7 +252,7 @@ def test_sixdiscoqueuehandler(app, job_completed_sixenumdiscover):  # pylint: di
 
     stage_servicedisco = DummyStage()
 
-    SixDiscoQueueHandler([job_completed_sixenumdiscover.queue.name], stage_servicedisco, filter_nets=['127.0.0.0/24', '::1/128']).run()
+    SixDisco([job_completed_sixenumdiscover.queue.name], stage_servicedisco, filter_nets=['127.0.0.0/24', '::1/128']).run()
 
     assert stage_servicedisco.task_count == 1
     assert '::1' in stage_servicedisco.task_args
@@ -270,30 +270,30 @@ def test_servicedisco(app, job_completed_nmap):  # pylint: disable=unused-argume
 
 
 def test_storageloaderqueuehandler_task(app, queue, job_completed_nmap, target_factory):  # pylint: disable=unused-argument
-    """test StorageLoaderQueueHandler base class"""
+    """test StorageLoader base class"""
 
-    stage_storageloader = DummyStage()
+    stage_storageimport = DummyStage()
 
     # test QueueHandler init
     with pytest.raises(WiringError):
-        StorageLoaderQueueHandler(['notexist'], stage_storageloader)
+        StorageLoader(['notexist'], stage_storageimport)
 
     # test QueueHandler task
     target_factory.create(queue=queue, target='target1')
-    StorageLoaderQueueHandler([queue.name], stage_storageloader).task(['target1', 'target2'])
+    StorageLoader([queue.name], stage_storageimport).task(['target1', 'target2'])
     assert Target.query.filter(Target.queue == queue).count() == 2
 
     # test QueueHandler run
-    stage_storageloader = DummyStage()
-    StorageLoaderQueueHandler([job_completed_nmap.queue.name], stage_storageloader).run()
-    assert stage_storageloader.task_count == 1
-    assert isinstance(stage_storageloader.task_args, ParsedItemsDb)
+    stage_storageimport = DummyStage()
+    StorageLoader([job_completed_nmap.queue.name], stage_storageimport).run()
+    assert stage_storageimport.task_count == 1
+    assert isinstance(stage_storageimport.task_args, ParsedItemsDb)
 
 
 def test_storageloader(app, job_completed_nmap):  # pylint: disable=unused-argument
     """test test_stage_StandaloneQueues"""
 
-    StorageLoader().task(JobManager.parse(job_completed_nmap))
+    StorageImport().task(JobManager.parse(job_completed_nmap))
 
     assert Host.query.count() == 1
     assert Service.query.count() == 5

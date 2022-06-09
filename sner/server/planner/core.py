@@ -236,6 +236,7 @@ class QueueHandler(Stage):
 
         for queue in Queue.query.filter(Queue.name.in_(self.queues)).all():
             for aajob in Job.query.filter(Job.queue_id == queue.id, Job.retval == 0).all():
+                current_app.logger.info(f'{self.__class__.__name__} drain {aajob.id} ({aajob.queue.name})')
                 yield JobManager.parse(aajob)
                 JobManager.archive(aajob)
                 JobManager.delete(aajob)
@@ -247,6 +248,7 @@ class QueueHandler(Stage):
             already_queued = db.session.connection().execute(select(Target.target).filter(Target.queue == queue)).scalars().all()
             enqueue = list(set(data) - set(already_queued))
             QueueManager.enqueue(queue, enqueue)
+            current_app.logger.info(f'{self.__class__.__name__} enqueued {len(enqueue)} targets to "{queue.name}"')
 
 
 @register_stage
@@ -269,7 +271,7 @@ class DummyStage(Stage):
 
 
 @register_stage
-class StorageLoader(Stage):
+class StorageImport(Stage):
     """final stage, imports data to storage"""
 
     def task(self, data):
@@ -292,7 +294,7 @@ class StorageCleanup(Stage):
         """cleanup storage"""
 
         StorageManager.cleanup_storage()
-        current_app.logger.debug(f'{self.__class__} finished')
+        current_app.logger.debug(f'{self.__class__.__name__} finished')
 
 
 @register_stage
@@ -305,7 +307,7 @@ class DummySchedule(Schedule):
 
 @register_stage
 class NetlistEnum(Schedule):
-    """periodic host discovery starting from list of networks"""
+    """periodic host discovery via list of ipv4 networks"""
 
     def __init__(self, schedule, netlist, stage_servicedisco, stage_sixdnsdisco):
         super().__init__(schedule)
@@ -319,6 +321,7 @@ class NetlistEnum(Schedule):
         hosts = []
         for net in self.netlist:
             hosts += enumerate_network(net)
+        current_app.logger.info(f'{self.__class__.__name__} enumerated {len(hosts)} hosts')
         self.stage_servicedisco.task(hosts)
         self.stage_sixdnsdisco.task(hosts)
 
@@ -335,7 +338,7 @@ class StorageSixEnum(Schedule):
         """run"""
 
         targets = project_six_enums(StorageManager.get_all_six_address())
-        current_app.logger.info(f'{self.__class__} projected {len(targets)} targets')
+        current_app.logger.info(f'{self.__class__.__name__} projected {len(targets)} targets')
         self.stage_sixenumdisco.task(targets)
 
 
@@ -354,15 +357,15 @@ class StorageRescan(Schedule):
         """run"""
 
         hosts = StorageManager.get_rescan_hosts(self.host_interval)
-        self.stage_servicedisco.task(hosts)
         services = StorageManager.get_rescan_services(self.service_interval)
+        current_app.logger.info(f'{self.__class__.__name__} rescaning {len(hosts)} hosts {len(services)} services')
+        self.stage_servicedisco.task(hosts)
         self.stage_servicescan.task(services)
-        current_app.logger.info(f'{self.__class__} hosts {len(hosts)} services {len(services)}')
 
 
 @register_stage
-class SixDiscoQueueHandler(QueueHandler):
-    """cleans up hostv6 disco results and start service discovery"""
+class SixDisco(QueueHandler):
+    """cleanup list host ipv6 hosts (drop any outside scope) and pass it to service discovery"""
 
     def __init__(self, queues, stage_servicedisco, filter_nets=None):
         super().__init__(queues)
@@ -372,16 +375,17 @@ class SixDiscoQueueHandler(QueueHandler):
     def run(self):
         """run"""
 
-        for parsed_data in self._drain():
-            hosts = project_hosts(parsed_data)
+        for pidb in self._drain():
+            hosts = project_hosts(pidb)
             if self.filter_nets:
                 hosts = filter_external_hosts(hosts, self.filter_nets)
+            current_app.logger.info(f'{self.__class__.__name__} projected {len(hosts)} hosts')
             self.stage_servicedisco.task(hosts)
 
 
 @register_stage
 class ServiceDisco(QueueHandler):
-    """run service discovery on targets"""
+    """do service discovery on targets"""
 
     def __init__(self, queues, stage_servicescan):
         super().__init__(queues)
@@ -390,21 +394,26 @@ class ServiceDisco(QueueHandler):
     def run(self):
         """run"""
 
-        for parsed_data in self._drain():
-            services = project_services(filter_tarpits(parsed_data))
+        for pidb in self._drain():
+            services = project_services(filter_tarpits(pidb))
+            current_app.logger.info(f'{self.__class__.__name__} projected {len(services)} services')
             self.stage_servicescan.task(services)
 
 
 @register_stage
-class StorageLoaderQueueHandler(QueueHandler):
+class StorageLoader(QueueHandler):
     """load queues to storage"""
 
-    def __init__(self, queues, stage_storageloader):
+    def __init__(self, queues, stage_storageimport):
         super().__init__(queues)
-        self.stage_storageloader = stage_storageloader
+        self.stage_storageimport = stage_storageimport
 
     def run(self):
         """run"""
 
-        for parsed_data in self._drain():
-            self.stage_storageloader.task(parsed_data)
+        for pidb in self._drain():
+            current_app.logger.info(
+                f'{self.__class__.__name__} loading {len(pidb.hosts)} '
+                f'hosts {len(pidb.services)} services {len(pidb.vulns)} vulns {len(pidb.notes)} notes'
+            )
+            self.stage_storageimport.task(pidb)

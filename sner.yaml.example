@@ -44,16 +44,16 @@
 #
 #  stages:
 #    # queue processors
-#    stage_storageloader:
-#      _class: StorageLoader
+#    stage_storageimport:
+#      _class: StorageImport
 #
 #    stage_standalonequeues:
-#      _class: StorageLoaderQueueHandler
+#      _class: StorageLoader
 #      queues:
 #        - 'sner nmap script'
 #
 #    stage_servicescan:
-#      _class: StorageLoaderQueueHandler
+#      _class: StorageLoader
 #      queues:
 #        - 'sner servicescan nmap version'
 #        - 'sner servicescan jarm'
@@ -64,12 +64,12 @@
 #        - 'sner servicedisco nmap'
 #
 #    stage_sixenumdisco:
-#      _class: SixDiscoQueueHandler
+#      _class: SixDisco
 #      queues:
 #        - 'sner six_enum_discover'
 #
 #    stage_sixdnsdisco:
-#      _class: SixDiscoQueueHandler
+#      _class: SixDisco
 #      queues:
 #        - 'sner six_dns_discover'
 #      filter_nets: *home_netranges_ipv6

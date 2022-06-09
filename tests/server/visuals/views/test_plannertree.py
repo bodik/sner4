@@ -26,15 +26,15 @@ def test_plannertree_json_route(cl_operator, queue_factory):
 
     current_app.config['SNER_PLANNER'] = yaml.safe_load("""
 stages:
-  stage_storageloader:
-    _class: StorageLoader
+  stage_storageimport:
+    _class: StorageImport
 
   stage_dummyschedule:
     _class: DummySchedule
     schedule: '0s'
 
   stage_standalonequeues:
-    _class: StorageLoaderQueueHandler
+    _class: StorageLoader
     queues:
       - queue1
       - queue2
@@ -45,4 +45,4 @@ stages:
 
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data
-    assert 'stage_storageloader' in [x['name'] for x in response_data['nodes']]
+    assert 'stage_storageimport' in [x['name'] for x in response_data['nodes']]
