@@ -19,6 +19,6 @@ def test_quickjump_route_autocomplete(live_server, sl_operator, host):  # pylint
     elem_xpath = f'//ul[contains(@class, "ui-autocomplete")]/li/div[contains(., "{host.address}")]'
     webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
 
-    elem = sl_operator.find_element(By.XPATH, elem_xpath).click()
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
     sl_operator.find_element(By.XPATH, '//form[@id="storage_quickjump_form"]').submit()
     webdriver_waituntil(sl_operator, EC.url_to_be(url_for('storage.host_view_route', host_id=host.id, _external=True)))
