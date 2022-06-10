@@ -48,7 +48,7 @@ def test_service_add_route(cl_operator, host, service_factory):
 
     aservice = service_factory.build(host=host)
 
-    form = cl_operator.get(url_for('storage.service_add_route', host_id=aservice.host.id)).form
+    form = cl_operator.get(url_for('storage.service_add_route', host_id=aservice.host.id)).forms['service_form']
     form['proto'] = aservice.proto
     form['port'] = aservice.port
     form['state'] = aservice.state
@@ -68,7 +68,7 @@ def test_service_add_route(cl_operator, host, service_factory):
 def test_service_edit_route(cl_operator, service):
     """service edit route test"""
 
-    form = cl_operator.get(url_for('storage.service_edit_route', service_id=service.id)).form
+    form = cl_operator.get(url_for('storage.service_edit_route', service_id=service.id)).forms['service_form']
     form['state'] = 'down'
     form['info'] = 'edited ' + form['info'].value
     form['return_url'] = url_for('storage.service_list_route')

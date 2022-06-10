@@ -6,7 +6,7 @@
 {% block content %}
 {% call cm.heading(['Login']) %}{% endcall %}
 
-<form method="post">
+<form id="login_form" method="post">
 	{{ form.csrf_token }}
 	{{ bwtf.bootstrap_field(form.username, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.password, horizontal=True) }}

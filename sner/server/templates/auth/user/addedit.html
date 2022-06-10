@@ -18,7 +18,7 @@ ul.multiple_checkbox_field li { list-style-type: none; }
 {% block content %}
 {% call cm.heading(['Users', 'Add or edit']) %}{% endcall %}
 
-<form method="post">
+<form id="user_form" method="post">
 	{{ form.csrf_token }}
 	{{ bwtf.bootstrap_field(form.username, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.email, horizontal=True) }}

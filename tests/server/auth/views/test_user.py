@@ -43,7 +43,7 @@ def test_user_add_route(cl_admin, user_factory):
     password = PWS.generate()
     auser = user_factory.build()
 
-    form = cl_admin.get(url_for('auth.user_add_route')).form
+    form = cl_admin.get(url_for('auth.user_add_route')).forms['user_form']
     form['username'] = auser.username
     form['roles'] = auser.roles
     form['active'] = auser.active
@@ -63,7 +63,7 @@ def test_user_edit_route(cl_admin, user):
 
     password = PWS.generate()
 
-    form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).form
+    form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).forms['user_form']
     form['username'] = f'{form["username"].value}_edited'
     form['new_password'] = password
     form['roles'] = []
@@ -77,7 +77,7 @@ def test_user_edit_route(cl_admin, user):
     assert not user.roles
     assert user.api_networks == ['127.0.0.0/23', '192.0.2.0/24', '2001:db8::/48']
 
-    form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).form
+    form = cl_admin.get(url_for('auth.user_edit_route', user_id=user.id)).forms['user_form']
     form['api_networks'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK

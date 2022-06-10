@@ -34,7 +34,7 @@ def test_profile_changepassword_route(cl_user):
     user.password = PWS.hash(cur_password)
     db.session.commit()
 
-    form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form = cl_user.get(url_for('auth.profile_changepassword_route')).forms['user_change_password_form']
     form['current_password'] = cur_password
     form['password1'] = 'AlongPassword1'
     form['password2'] = 'AlongPassword2'
@@ -42,7 +42,7 @@ def test_profile_changepassword_route(cl_user):
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Passwords does not match."]')
 
-    form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form = cl_user.get(url_for('auth.profile_changepassword_route')).forms['user_change_password_form']
     form['current_password'] = cur_password
     form['password1'] = 'weak'
     form['password2'] = 'weak'
@@ -50,7 +50,7 @@ def test_profile_changepassword_route(cl_user):
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Password too short.")]')
 
-    form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form = cl_user.get(url_for('auth.profile_changepassword_route')).forms['user_change_password_form']
     form['current_password'] = '1'
     form['password1'] = new_password
     form['password2'] = new_password
@@ -58,7 +58,7 @@ def test_profile_changepassword_route(cl_user):
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'Invalid current password.\');")]')
 
-    form = cl_user.get(url_for('auth.profile_changepassword_route')).form
+    form = cl_user.get(url_for('auth.profile_changepassword_route')).forms['user_change_password_form']
     form['current_password'] = cur_password
     form['password1'] = new_password
     form['password2'] = new_password
@@ -71,7 +71,7 @@ def test_profile_changepassword_route(cl_user):
 def test_profile_totp_route_enable(cl_user):
     """user profile enable totp"""
 
-    form = cl_user.get(url_for('auth.profile_totp_route')).form
+    form = cl_user.get(url_for('auth.profile_totp_route')).forms['totp_code_form']
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
@@ -79,7 +79,7 @@ def test_profile_totp_route_enable(cl_user):
 
     response = cl_user.get(url_for('auth.profile_totp_route'))
     secret = cl_user.app.session_interface.open_session(cl_user.app, response.request)['totp_new_secret']
-    form = response.form
+    form = response.forms['totp_code_form']
     form['code'] = TOTPImpl(secret).current_code()
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -95,13 +95,13 @@ def test_profile_totp_route_disable(cl_user):
     user.totp = tmp_secret
     db.session.commit()
 
-    form = cl_user.get(url_for('auth.profile_totp_route')).form
+    form = cl_user.get(url_for('auth.profile_totp_route')).forms['totp_code_form']
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code (disable)"]')
 
-    form = cl_user.get(url_for('auth.profile_totp_route')).form
+    form = cl_user.get(url_for('auth.profile_totp_route')).forms['totp_code_form']
     form['code'] = TOTPImpl(tmp_secret).current_code()
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -132,7 +132,7 @@ def test_profile_webauthn_register_route(cl_user):
     attestation_data = {
         'clientDataJSON': attestation['response']['clientDataJSON'],
         'attestationObject': attestation['response']['attestationObject']}
-    form = response.form
+    form = response.forms['webauthn_register_form']
     form['attestation'] = b64encode(cbor.encode(attestation_data))
     # and back to standard test codeflow
     form['name'] = 'pytest token'
@@ -153,7 +153,7 @@ def test_profile_webauthn_pkcco_route_invalid_request(cl_user):
 def test_profile_webauthn_register_route_invalid_attestation(cl_user):
     """register new credential for user; error handling"""
 
-    form = cl_user.get(url_for('auth.profile_webauthn_register_route')).form
+    form = cl_user.get(url_for('auth.profile_webauthn_register_route')).forms['webauthn_register_form']
     form['attestation'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
@@ -165,7 +165,7 @@ def test_profile_webauthn_edit_route(cl_user, webauthn_credential_factory):
 
     wncred = webauthn_credential_factory.create(user=User.query.filter(User.username == 'pytest_user').one())
 
-    form = cl_user.post(url_for('auth.profile_webauthn_edit_route', webauthn_id=wncred.id)).form
+    form = cl_user.post(url_for('auth.profile_webauthn_edit_route', webauthn_id=wncred.id)).forms['webauthn_edit_form']
     form['name'] = f'{form["name"].value}  edited'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND

@@ -42,7 +42,7 @@ def test_excl_add_route(cl_operator, excl_network_factory):
 
     aexcl_network = excl_network_factory.build()
 
-    form = cl_operator.get(url_for('scheduler.excl_add_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_add_route')).forms['excl_form']
     form['family'] = aexcl_network.family.value
     form['value'] = aexcl_network.value
     form['comment'] = aexcl_network.comment
@@ -53,20 +53,20 @@ def test_excl_add_route(cl_operator, excl_network_factory):
     assert texcl.family == aexcl_network.family
     assert texcl.value == aexcl_network.value
 
-    form = cl_operator.get(url_for('scheduler.excl_add_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_add_route')).forms['excl_form']
     form['family'].force_value('invalid')
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//ul[@class="invalid-feedback"]/li[text()="Invalid family"]')
 
-    form = cl_operator.get(url_for('scheduler.excl_add_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_add_route')).forms['excl_form']
     form['family'] = 'network'
     form['value'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "does not appear to be an IPv4 or IPv6 network")]')
 
-    form = cl_operator.get(url_for('scheduler.excl_add_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_add_route')).forms['excl_form']
     form['family'] = 'regex'
     form['value'] = '('
     response = form.submit()
@@ -77,7 +77,7 @@ def test_excl_add_route(cl_operator, excl_network_factory):
 def test_excl_edit_route(cl_operator, excl_network):
     """exclusion edit route test"""
 
-    form = cl_operator.get(url_for('scheduler.excl_edit_route', excl_id=excl_network.id)).form
+    form = cl_operator.get(url_for('scheduler.excl_edit_route', excl_id=excl_network.id)).forms['excl_form']
     form['comment'] = form['comment'].value + ' added comment'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -107,14 +107,14 @@ def test_excl_export_route(cl_operator, excl_network):
 def test_excl_import_route(cl_operator, excl_network):
     """exclusion import route test"""
 
-    form = cl_operator.get(url_for('scheduler.excl_import_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_import_route')).forms['excl_import_form']
     form['data'] = f'"{excl_network.family}","{excl_network.value}","{excl_network.comment}"\n'
     form['replace'] = 1
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
     assert len(Excl.query.all()) == 1
 
-    form = cl_operator.get(url_for('scheduler.excl_import_route')).form
+    form = cl_operator.get(url_for('scheduler.excl_import_route')).forms['excl_import_form']
     form['data'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK

@@ -42,7 +42,7 @@ def test_vuln_add_route(cl_operator, host, service, vuln_factory):
 
     avuln = vuln_factory.build(host=host, service=service)
 
-    form = cl_operator.get(url_for('storage.vuln_add_route', model_name='service', model_id=avuln.service.id)).form
+    form = cl_operator.get(url_for('storage.vuln_add_route', model_name='service', model_id=avuln.service.id)).forms['vuln_form']
     form['name'] = avuln.name
     form['xtype'] = avuln.xtype
     form['severity'] = avuln.severity.value
@@ -63,7 +63,7 @@ def test_vuln_add_route(cl_operator, host, service, vuln_factory):
 def test_vuln_edit_route(cl_operator, vuln):
     """vuln edit route test"""
 
-    form = cl_operator.get(url_for('storage.vuln_edit_route', vuln_id=vuln.id)).form
+    form = cl_operator.get(url_for('storage.vuln_edit_route', vuln_id=vuln.id)).forms['vuln_form']
     form['name'] = 'edited ' + form['name'].value
     form['tags'] = form['tags'].value + '\nedited'
     form['return_url'] = url_for('storage.vuln_list_route')

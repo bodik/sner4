@@ -44,7 +44,7 @@ def test_queue_add_route(cl_operator, queue_factory):
 
     aqueue = queue_factory.build()
 
-    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
+    form = cl_operator.get(url_for('scheduler.queue_add_route')).forms['queue_form']
     form['name'] = aqueue.name
     form['config'] = aqueue.config
     form['group_size'] = aqueue.group_size
@@ -61,7 +61,7 @@ def test_queue_add_route_config_validation(cl_operator, queue_factory):
 
     aqueue = queue_factory.build()
 
-    form = cl_operator.get(url_for('scheduler.queue_add_route')).form
+    form = cl_operator.get(url_for('scheduler.queue_add_route')).forms['queue_form']
     form['name'] = aqueue.name
     form['config'] = ''
     form['group_size'] = aqueue.group_size
@@ -70,13 +70,13 @@ def test_queue_add_route_config_validation(cl_operator, queue_factory):
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and contains(text(), "Invalid YAML")]')
 
-    form = response.form
+    form = response.forms['queue_form']
     form['config'] = "module: 'notexist'"
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid module specified"]')
 
-    form = response.form
+    form = response.forms['queue_form']
     form['config'] = "module: 'dummy'\nadditionalKey: 'value'\n"
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
@@ -86,7 +86,7 @@ def test_queue_add_route_config_validation(cl_operator, queue_factory):
 def test_queue_edit_route(cl_operator, queue):
     """queue edit route test"""
 
-    form = cl_operator.get(url_for('scheduler.queue_edit_route', queue_id=queue.id)).form
+    form = cl_operator.get(url_for('scheduler.queue_edit_route', queue_id=queue.id)).forms['queue_form']
     form['name'] = f'{form["name"].value} edited'
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -99,7 +99,7 @@ def test_queue_enqueue_route(cl_operator, queue, target_factory):
 
     atarget = target_factory.build(queue=queue)
 
-    form = cl_operator.get(url_for('scheduler.queue_enqueue_route', queue_id=queue.id)).form
+    form = cl_operator.get(url_for('scheduler.queue_enqueue_route', queue_id=queue.id)).forms['queue_enqueue_form']
     form['targets'] = f'{atarget.target}\n \n '
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND

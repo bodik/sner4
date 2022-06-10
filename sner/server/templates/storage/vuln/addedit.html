@@ -6,7 +6,7 @@
 {% block content %}
 {% call cm.heading(['Vulns', 'Add or edit']) %}{% endcall %}
 
-<form method="post">
+<form id="vuln_form" method="post">
 	{{ form.csrf_token }}
 	{{ form.return_url }}
 	<div class="form-group row">

@@ -41,7 +41,7 @@ def test_note_add_route(cl_operator, host, service, note_factory):
 
     anote = note_factory.build(host=host, service=service)
 
-    form = cl_operator.get(url_for('storage.note_add_route', model_name='service', model_id=anote.service.id)).form
+    form = cl_operator.get(url_for('storage.note_add_route', model_name='service', model_id=anote.service.id)).forms['note_form']
     form['xtype'] = anote.xtype
     form['data'] = anote.data
     form['comment'] = anote.comment
@@ -57,7 +57,7 @@ def test_note_add_route(cl_operator, host, service, note_factory):
 def test_note_edit_route(cl_operator, note):
     """note edit route test"""
 
-    form = cl_operator.get(url_for('storage.note_edit_route', note_id=note.id)).form
+    form = cl_operator.get(url_for('storage.note_edit_route', note_id=note.id)).forms['note_form']
     form['data'] = 'edited ' + form['data'].value
     form['return_url'] = url_for('storage.note_list_route')
     response = form.submit()

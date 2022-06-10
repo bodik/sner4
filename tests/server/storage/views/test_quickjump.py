@@ -27,3 +27,10 @@ def test_quickjump(cl_operator, host, service):
     response = cl_operator.post(url_for('storage.quickjump_route'), data)
     assert response.status_code == HTTPStatus.OK
     assert response.json['url'].startswith(f"{url_for('storage.service_list_route')}?filter=")
+
+    data = {'quickjump': 'notfound', 'csrf_token': get_csrf_token(cl_operator)}
+    response = cl_operator.post(url_for('storage.quickjump_route'), data, status='*')
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+    response = cl_operator.post(url_for('storage.quickjump_route'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST

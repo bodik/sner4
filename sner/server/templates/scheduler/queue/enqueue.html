@@ -6,7 +6,7 @@
 {% block content %}
 {% call cm.heading(['Queues', 'Enqueue']) %}{% endcall %}
 
-<form method="post">
+<form id="queue_enqueue_form" method="post">
 	{{ form.csrf_token }}
 	{{ bwtf.bootstrap_field(form.targets, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}

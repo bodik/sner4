@@ -23,14 +23,14 @@ def test_session_login(client, user_factory):
     password = PWS.generate()
     user = user_factory.create(password=PWS.hash(password))
 
-    form = client.get(url_for('auth.login_route')).form
+    form = client.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = user.username
     form['password'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'Invalid credentials.\');")]')
 
-    form = client.get(url_for('auth.login_route')).form
+    form = client.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = user.username
     form['password'] = password
     response = form.submit()
@@ -59,7 +59,7 @@ def test_session_unauthorized(client, user_factory):
     assert response.status_code == HTTPStatus.FOUND
     assert '/auth/login?next=' in response.headers['Location']
 
-    form = response.follow().form
+    form = response.follow().forms['login_form']
     form['username'] = user.username
     form['password'] = password
     response = form.submit()
@@ -85,19 +85,19 @@ def test_login_totp(client, user_factory):
     assert response.status_code == HTTPStatus.FOUND
     assert url_for('auth.login_route') in response.headers['Location']
 
-    form = client.get(url_for('auth.login_route')).form
+    form = client.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = user.username
     form['password'] = password
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
-    form = response.follow().form
+    form = response.follow().forms['totp_code_form']
     form['code'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK
     assert response.lxml.xpath('//div[@class="invalid-feedback" and text()="Invalid code"]')
 
-    form = response.form
+    form = response.forms['totp_code_form']
     form['code'] = TOTPImpl(secret).current_code()
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -113,7 +113,7 @@ def test_login_webauthn(client, webauthn_credential_factory):
     device.cred_init(webauthn.rp.id, b'randomhandle')
     wncred = webauthn_credential_factory.create(initialized_device=device)
 
-    form = client.get(url_for('auth.login_route')).form
+    form = client.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = wncred.user.username
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
@@ -128,7 +128,7 @@ def test_login_webauthn(client, webauthn_credential_factory):
         'clientDataJSON': assertion['response']['clientDataJSON'],
         'signature': assertion['response']['signature'],
         'userHandle': assertion['response']['userHandle']}
-    form = response.form
+    form = response.forms['webauthn_login_form']
     form['assertion'] = b64encode(cbor.encode(assertion_data))
     response = form.submit()
     # and back to standard test codeflow
@@ -152,13 +152,13 @@ def test_login_webauthn_invalid_assertion(client, webauthn_credential):
     assert response.status_code == HTTPStatus.FOUND
     assert url_for('auth.login_route') in response.headers['Location']
 
-    form = client.get(url_for('auth.login_route')).form
+    form = client.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = webauthn_credential.user.username
     response = form.submit()
     assert response.status_code == HTTPStatus.FOUND
 
     response = response.follow()
-    form = response.form
+    form = response.forms['webauthn_login_form']
     form['assertion'] = 'invalid'
     response = form.submit()
     assert response.status_code == HTTPStatus.OK

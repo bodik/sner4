@@ -41,7 +41,7 @@ def test_host_add_route(cl_operator, host_factory):
 
     ahost = host_factory.build()
 
-    form = cl_operator.get(url_for('storage.host_add_route')).form
+    form = cl_operator.get(url_for('storage.host_add_route')).forms['host_form']
     form['address'] = ahost.address
     form['hostname'] = ahost.hostname
     form['os'] = ahost.os
@@ -58,7 +58,7 @@ def test_host_add_route(cl_operator, host_factory):
 def test_host_edit_route(cl_operator, host):
     """host edit route test"""
 
-    form = cl_operator.get(url_for('storage.host_edit_route', host_id=host.id)).form
+    form = cl_operator.get(url_for('storage.host_edit_route', host_id=host.id)).forms['host_form']
     form['hostname'] = 'edited-'+form['hostname'].value
     form['comment'] = ''
     form['return_url'] = url_for('storage.host_list_route')

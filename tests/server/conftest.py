@@ -27,7 +27,7 @@ def client_in_roles(ufactory, clnt, roles):
 
     password = PWS.generate()
     user = ufactory.create(username='pytest_user', password=PWS.hash(password), roles=roles)
-    form = clnt.get(url_for('auth.login_route')).form
+    form = clnt.get(url_for('auth.login_route')).forms['login_form']
     form['username'] = user.username
     form['password'] = password
     form.submit()

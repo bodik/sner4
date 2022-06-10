@@ -6,7 +6,7 @@
 {% block content %}
 {% call cm.heading(['Queues', 'Add or edit']) %}{% endcall %}
 
-<form method="post">
+<form id="queue_form" method="post">
 	{{ form.csrf_token }}
 	{{ bwtf.bootstrap_field(form.name, horizontal=True) }}
 	{{ bwtf.bootstrap_field(form.config, horizontal=True) }}
