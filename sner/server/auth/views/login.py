@@ -6,11 +6,13 @@ auth login/authentication views
 from base64 import b64decode, b64encode
 from http import HTTPStatus
 
+from authlib.common.errors import AuthlibBaseError
 from fido2 import cbor
 from fido2.client import ClientData
 from fido2.ctap2 import AuthenticatorData
 from flask import current_app, flash, redirect, request, render_template, Response, session, url_for
 from flask_login import login_user, logout_user
+from requests.exceptions import HTTPError
 
 from sner.server.auth.core import regenerate_session, redirect_after_login, TOTPImpl, webauthn_credentials
 from sner.server.auth.forms import LoginForm, TotpCodeForm, WebauthnLoginForm
@@ -133,7 +135,12 @@ def login_oidc_route():
         f'{current_app.config["OIDC_NAME"]}_REDIRECT_URI',
         url_for('auth.login_oidc_callback_route', _external=True)
     )
-    return getattr(oauth, current_app.config['OIDC_NAME']).authorize_redirect(redirect_uri)
+    try:
+        return getattr(oauth, current_app.config['OIDC_NAME']).authorize_redirect(redirect_uri)
+    except (HTTPError, AuthlibBaseError) as exc:
+        current_app.logger.exception(exc)
+        flash('OIDC Authentication error', 'error')
+    return redirect(url_for('auth.login_route'))
 
 
 @blueprint.route('/login_oidc_callback')
@@ -144,8 +151,14 @@ def login_oidc_callback_route():
         flash('OIDC not enabled', 'error')
         return redirect(url_for('auth.login_route'))
 
-    token = getattr(oauth, current_app.config['OIDC_NAME']).authorize_access_token()
-    userinfo = token.get('userinfo')
+    try:
+        token = getattr(oauth, current_app.config['OIDC_NAME']).authorize_access_token()
+        userinfo = token.get('userinfo')
+    except (HTTPError, AuthlibBaseError) as exc:
+        current_app.logger.exception(exc)
+        flash('OIDC Authentication error', 'error')
+        return redirect(url_for('auth.login_route'))
+
     if userinfo and userinfo.get('email'):
         user = User.query.filter(User.active, User.email == userinfo.get('email')).one_or_none()
         if user:

@@ -7,6 +7,7 @@ from base64 import b64decode, b64encode
 from http import HTTPStatus
 from unittest.mock import patch
 
+from authlib.common.errors import AuthlibBaseError
 from fido2 import cbor
 from flask import current_app, redirect, url_for
 from soft_webauthn import SoftWebauthnDevice
@@ -176,10 +177,6 @@ def test_login_oidc_route(client, user):
         """mock authlib oidc"""
         return {'userinfo': {'email': user.email}}
 
-    def authorize_access_token_notexist():
-        """mock authlib oidc"""
-        return {'userinfo': {'email': 'notexist'}}
-
     patch_oauth_redirect = patch.object(oauth.OIDC_DEFAULT, 'authorize_redirect', authorize_redirect)
     patch_oauth_token = patch.object(oauth.OIDC_DEFAULT, 'authorize_access_token', authorize_access_token)
 
@@ -192,14 +189,24 @@ def test_login_oidc_route(client, user):
         assert response.status_code == HTTPStatus.FOUND
         assert response.headers['Location'] == url_for('index_route')
 
-    client.cookies.clear()
+
+def test_login_oidc_route_noexist_user(client):
+    """test non-existing user"""
+
+    def authorize_access_token_notexist():
+        """mock authlib oidc"""
+        return {'userinfo': {'email': 'notexist'}}
+
     patch_oauth_token = patch.object(oauth.OIDC_DEFAULT, 'authorize_access_token', authorize_access_token_notexist)
     with patch_oauth_token:
         response = client.get(url_for('auth.login_oidc_callback_route'))
         assert response.status_code == HTTPStatus.FOUND
         assert response.headers['Location'] == url_for('auth.login_route')
 
-    client.cookies.clear()
+
+def test_login_oidc_route_disabled_oidc(client):
+    """test disabled oidc redirects"""
+
     current_app.config['OIDC_NAME'] = None
 
     response = client.get(url_for('auth.login_oidc_route'))
@@ -209,3 +216,33 @@ def test_login_oidc_route(client, user):
     response = client.get(url_for('auth.login_oidc_callback_route'))
     assert response.status_code == HTTPStatus.FOUND
     assert response.headers['Location'] == url_for('auth.login_route')
+
+
+def test_login_oidc_route_handle_oidc_errors(client):
+    """test_login_oidc_route"""
+
+    def authorize_redirect(_1):
+        """mock authlib oidc"""
+        raise AuthlibBaseError('dummy')
+
+    def authorize_access_token():
+        """mock authlib oidc"""
+        raise AuthlibBaseError('dummy')
+
+    patch_oauth_redirect = patch.object(oauth.OIDC_DEFAULT, 'authorize_redirect', authorize_redirect)
+    patch_oauth_token = patch.object(oauth.OIDC_DEFAULT, 'authorize_access_token', authorize_access_token)
+
+    with patch_oauth_redirect, patch_oauth_token:
+        response = client.get(url_for('auth.login_oidc_route'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.headers['Location'] == url_for('auth.login_route')
+        response = response.follow()
+        assert response.status_code == HTTPStatus.OK
+        assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'OIDC Authentication error\');")]')
+
+        response = client.get(url_for('auth.login_oidc_callback_route'))
+        assert response.status_code == HTTPStatus.FOUND
+        assert response.headers['Location'] == url_for('auth.login_route')
+        response = response.follow()
+        assert response.status_code == HTTPStatus.OK
+        assert response.lxml.xpath('//script[contains(text(), "toastr[\'error\'](\'OIDC Authentication error\');")]')
