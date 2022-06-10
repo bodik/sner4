@@ -105,3 +105,10 @@ class AnnotateForm(FlaskForm):
     tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor'})
     comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
+
+
+class QuickjumpForm(FlaskForm):
+    """quickjump form"""
+
+    quickjump = StringNoneField('quickjump', [InputRequired()])
+    submit = SubmitField('Jump')

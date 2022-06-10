@@ -229,6 +229,16 @@ class SnerModule {
 
 			$('.tageditor').tagEditor({'delimiter': '\n'});
 			$('.render_hbs').each(function(index, elem) { Sner.render_hbs(elem); });
+
+			$('#storage_quickjump_form').on('submit', (event) => {
+				event.preventDefault();
+				var formdata = {};
+				$.each($('#'+event.target.id).serializeArray(), (idx, val) => { formdata[val.name] = val.value; });
+				Sner.submit_form(Flask.url_for('storage.quickjump_route'), formdata)
+					.done(function(data, textStatus, jqXHR) {
+						location.href = data['url'];
+					});
+			});
 		});
 	}
 
