@@ -230,6 +230,9 @@ class SnerModule {
 			$('.tageditor').tagEditor({'delimiter': '\n'});
 			$('.render_hbs').each(function(index, elem) { Sner.render_hbs(elem); });
 
+			$('#storage_quickjump_form input[name="quickjump"]').autocomplete({
+				'source': Flask.url_for('storage.quickjump_autocomplete_route')
+			});
 			$('#storage_quickjump_form').on('submit', (event) => {
 				event.preventDefault();
 				var formdata = {};

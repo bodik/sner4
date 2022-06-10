@@ -6,13 +6,17 @@ storage jumper
 from http import HTTPStatus
 from ipaddress import ip_address
 
-from flask import jsonify, url_for
-from sqlalchemy import or_
+from flask import jsonify, request, url_for
+from sqlalchemy import cast, or_
 
 from sner.server.auth.core import session_required
+from sner.server.extensions import db
 from sner.server.storage.forms import QuickjumpForm
 from sner.server.storage.models import Host
 from sner.server.storage.views import blueprint
+
+
+AUTOCOMPLETE_LIMIT = 10
 
 
 @blueprint.route('/quickjump', methods=['POST'])
@@ -38,3 +42,23 @@ def quickjump_route():
         return jsonify({'message': 'Not found'}), HTTPStatus.NOT_FOUND
 
     return jsonify({'message': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+
+
+@blueprint.route('/quickjump_autocomplete')
+@session_required('operator')
+def quickjump_autocomplete_route():
+    """quickjump autocomplete suggestions"""
+
+    term = request.args.get('term', '')
+    if not term:
+        return jsonify([])
+
+    data = []
+    hosts = Host.query.filter(or_(cast(Host.address, db.String).ilike(f"%{term}%"), Host.hostname.ilike(f"%{term}%"))).limit(AUTOCOMPLETE_LIMIT).all()
+    for host in hosts:
+        if term in host.address:
+            data.append(host.address)
+        if term in host.hostname:
+            data.append(host.hostname)
+
+    return jsonify(data)
