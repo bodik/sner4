@@ -309,7 +309,7 @@ class SnerModule {
 		data['csrf_token'] = $('meta[name="csrf-token"]').attr('content');
 		return $.ajax({"url": url,"type": "POST", "data": data})
 			.fail(function(xhr, status, exception) {
-				toastr.error(xhr.hasOwnProperty('responseJSON') ? xhr.responseJSON['title'] : 'Request failed'); 
+				toastr.error(xhr.hasOwnProperty('responseJSON') ? xhr.responseJSON['message'] : 'Request failed');
 			});
 	}
 

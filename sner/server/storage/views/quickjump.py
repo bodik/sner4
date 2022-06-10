@@ -30,12 +30,11 @@ def quickjump_route():
             address = None
         host = Host.query.filter(or_(Host.address == address, Host.hostname.ilike(f"{form.quickjump.data}%"))).first()
         if host:
-            return jsonify({'title': 'success', 'url': url_for('storage.host_view_route', host_id=host.id)})
+            return jsonify({'message': 'success', 'url': url_for('storage.host_view_route', host_id=host.id)})
 
         if form.quickjump.data.isnumeric():
-            return jsonify({'title': 'success', 'url': url_for('storage.service_list_route', filter=f"Service.port==\"{form.quickjump.data}\"")})
+            return jsonify({'message': 'success', 'url': url_for('storage.service_list_route', filter=f"Service.port==\"{form.quickjump.data}\"")})
 
-        # TODO: refactor title to message field name
-        return jsonify({'title': 'Not found'}), HTTPStatus.NOT_FOUND
+        return jsonify({'message': 'Not found'}), HTTPStatus.NOT_FOUND
 
-    return jsonify({'title': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+    return jsonify({'message': 'Invalid request'}), HTTPStatus.BAD_REQUEST

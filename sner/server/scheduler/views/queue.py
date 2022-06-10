@@ -130,7 +130,7 @@ def queue_prune_route(queue_id):
             QueueManager.prune(Queue.query.get(queue_id))
             return redirect(url_for('scheduler.queue_list_route'))
         except RuntimeError as exc:
-            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-generic.html', form=form, button_caption='Prune')
 
@@ -147,6 +147,6 @@ def queue_delete_route(queue_id):
             QueueManager.delete(Queue.query.get(queue_id))
             return redirect(url_for('scheduler.queue_list_route'))
         except RuntimeError as exc:
-            return jsonify({'title': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-delete.html', form=form)

@@ -139,7 +139,7 @@ def vuln_delete_multiid_route():
         db.session.expire_all()
         return '', HTTPStatus.OK
 
-    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/vuln/tag_multiid', methods=['POST'])

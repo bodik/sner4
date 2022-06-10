@@ -76,7 +76,7 @@ def tag_model_multiid(model_class):
         db.session.commit()
         return '', HTTPStatus.OK
 
-    return jsonify({'title': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 def url_for_ref(ref):
