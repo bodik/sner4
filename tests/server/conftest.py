@@ -87,3 +87,12 @@ def api_user(app, apikey_user):  # pylint: disable=redefined-outer-name
     """create webtest testapp client"""
 
     return TestAppApi(app, apikey_user)
+
+
+@pytest.fixture
+def api_user_nonetworks(app, user_factory):
+    """create webtest testappclient without any api networks configures"""
+
+    tmp_apikey = PWS.generate_apikey()
+    user_factory.create(username='pytest_user', apikey=PWS.hash_simple(tmp_apikey), roles=['user'], api_networks=[])
+    return TestAppApi(app, tmp_apikey)

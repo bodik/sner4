@@ -170,7 +170,7 @@ def test_v2_scheduler_job_output_route_locked(api_agent, job):
     assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
 
 
-def test_scheduler_job_lifecycle_with_heatmap(api_agent, queue, target_factory):
+def test_v2_scheduler_job_lifecycle_with_heatmap(api_agent, queue, target_factory):
     """job assign route test"""
 
     current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 1
@@ -216,16 +216,19 @@ def test_v2_public_storage_host_route(api_user, host_factory, service_factory, s
     service_factory.create(host=host_factory.create(address='2001:db8::11'), proto='udp', port=0, state='open:test')
     host_factory.create(address='192.0.2.1')
 
+    # ipv4
     response = api_user.get(url_for('api.v2_public_storage_host_route', address=service.host.address))
     assert PublicHostSchema().load(response.json)
     assert response.json['address'] == service.host.address
     assert len(response.json['services']) == 1
 
+    # ipv6
     response = api_user.get(url_for('api.v2_public_storage_host_route', address='2001:db8:0000::11'))
     assert PublicHostSchema().load(response.json)
     assert response.json['address'] == '2001:db8::11'
     assert len(response.json['services']) == 1
 
+    # query not-allowed ip
     response = api_user.get(url_for('api.v2_public_storage_host_route', address='192.0.2.1'))
     assert not response.json
 
@@ -261,3 +264,16 @@ def test_v2_public_storage_servicelist_route(api_user, service_factory):
     response = api_user.get(url_for('api.v2_public_storage_servicelist_route', filter='Service.port=="1"'))
     assert PublicServicelistSchema(many=True).load(response.json)
     assert len(response.json) == 1
+
+
+def test_v2_public_storage_host_route_nonetworks(api_user_nonetworks, host, service):
+    """test queries with user without any configured networks"""
+
+    response = api_user_nonetworks.get(url_for('api.v2_public_storage_host_route', address=host.address))
+    assert not response.json
+
+    response = api_user_nonetworks.get(url_for('api.v2_public_storage_range_route', cidr=f'{host.address}/32'))
+    assert not response.json
+
+    response = api_user_nonetworks.get(url_for('api.v2_public_storage_servicelist_route', filter=f'Service.port=="{service.port}"'))
+    assert not response.json

@@ -108,20 +108,18 @@ def v2_stats_prometheus_route():
 def v2_public_storage_host_route(args):
     """host data by address"""
 
-    query = Host.query.filter(Host.address == str(args['address']))
+    if not current_user.api_networks:
+        return None
 
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
-    if restrict:
-        query = query.filter(or_(*restrict))
+    query = Host.query.filter(Host.address == str(args['address'])).filter(or_(*restrict))
 
     host = query.one_or_none()
     if not host:
         return None
 
-    # host.notes relation holds all notes regardless of it's link to service
-    # filter response model in order to cope with output schema
-    # the desing breaks the normalzation, but allows to do simple queries
-    # for notes/vulns for with all parents attributes
+    # host.notes relation holds all notes regardless of it's link to service filter response model in order to cope with output schema
+    # the desing breaks the normalzation, but allows to do simple queries for notes/vulns for with all parents attributes
     # notes.filter(Service.port=="443" OR Host.address=="78.128.214.40")
     # also https://hashrocket.com/blog/posts/modeling-polymorphic-associations-in-a-relational-database
     host_data = {
@@ -139,11 +137,11 @@ def v2_public_storage_host_route(args):
 def v2_public_storage_range_route(args):
     """list of hosts by cidr with simplified data"""
 
-    query = Host.query.filter(Host.address.op('<<=')(str(args['cidr'])))
+    if not current_user.api_networks:
+        return None
 
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
-    if restrict:
-        query = query.filter(or_(*restrict))
+    query = Host.query.filter(Host.address.op('<<=')(str(args['cidr']))).filter(or_(*restrict))
     return query.all()
 
 
@@ -154,6 +152,10 @@ def v2_public_storage_range_route(args):
 def v2_public_storage_servicelist_route(args):
     """filtered servicelist (see sner.server.sqlafilter for syntax)"""
 
+    if not current_user.api_networks:
+        return None
+
+    restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     query = db.session.query().select_from(Service).outerjoin(Host).add_columns(
         Host.address,
         Host.hostname,
@@ -161,11 +163,9 @@ def v2_public_storage_servicelist_route(args):
         Service.port,
         Service.state,
         Service.info
-    )
+    ).filter(or_(*restrict))
+
     if 'filter' in args:
         query = apply_filters(query, FILTER_PARSER.parse(args['filter']), do_auto_join=False)
 
-    restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
-    if restrict:
-        query = query.filter(or_(*restrict))
     return query.all()
