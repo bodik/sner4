@@ -12,6 +12,7 @@ from io import StringIO
 from flask import current_app, jsonify, render_template
 from pytimeparse import parse as timeparse
 from sqlalchemy import case, delete, func, or_, not_, select, update
+from sqlalchemy.sql.functions import coalesce
 from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
@@ -123,7 +124,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
     """generate report from storage data"""
 
     host_address_format = case([(func.family(Host.address) == 6, func.concat('[', func.host(Host.address), ']'))], else_=func.host(Host.address))
-    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=host_address_format)
+    host_ident = coalesce(Vuln.via_target, Host.hostname, host_address_format)
     endpoint_address = func.concat_ws(':', host_address_format, Service.port)
     endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
 
@@ -191,7 +192,7 @@ def vuln_export(qfilter=None):
     """export all vulns in storage without aggregation"""
 
     host_address_format = case([(func.family(Host.address) == 6, func.concat('[', func.host(Host.address), ']'))], else_=func.host(Host.address))
-    host_ident = case([(func.char_length(Host.hostname) > 0, Host.hostname)], else_=host_address_format)
+    host_ident = coalesce(Vuln.via_target, Host.hostname, host_address_format)
     endpoint_address = func.concat_ws(':', host_address_format, Service.port)
     endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
 

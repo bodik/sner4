@@ -60,6 +60,7 @@ class VulnForm(FlaskForm):
 
     host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
     service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
+    via_target = StringNoneField('Via_target', [Length(max=250)])
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
     xtype = StringNoneField('xType', [Length(max=250)])
     severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
@@ -77,6 +78,7 @@ class NoteForm(FlaskForm):
 
     host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
     service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
+    via_target = StringNoneField('Via_target', [Length(max=250)])
     xtype = StringNoneField('xType', [Length(max=250)])
     data = TextAreaNoneField('Data', render_kw={'rows': '10'})
     tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor'})
