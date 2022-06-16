@@ -7,6 +7,7 @@ from flask import url_for
 from selenium.webdriver.common.by import By
 
 from sner.server.extensions import db
+from sner.lib import format_host_address
 from sner.server.storage.models import Note
 from tests.selenium import dt_inrow_delete, dt_rendered
 from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
@@ -69,5 +70,5 @@ def test_note_view_route_service_endpoint_dropdown(live_server, sl_operator, not
     check_service_endpoint_dropdown(
         sl_operator,
         sl_operator.find_element(By.XPATH, '//td[contains(@class, "service_endpoint_dropdown")]'),
-        f'<Service {test_note.service.id}: {test_note.service.proto}.{test_note.service.port}>'
+        f'<Service {test_note.service.id}: {format_host_address(test_note.host.address)} {test_note.service.proto}.{test_note.service.port}>'
     )

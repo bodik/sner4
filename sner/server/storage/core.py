@@ -288,12 +288,12 @@ class StorageManager:
         for ihost in pidb.hosts:
             host = db_host(ihost.address)
             if not host:
-                print(f'new host: {ihost}')
+                print(f'storage new host: {ihost}')
 
         for iservice in pidb.services:
             service = db_service(pidb.hosts.by.iid[iservice.host_iid].address, iservice.proto, iservice.port)
             if not service:
-                print(f'new service: {iservice}')
+                print(f'storage new service: {iservice}')
 
         for ivuln in pidb.vulns:
             service = pidb.services.by.iid[ivuln.service_iid] if (ivuln.service_iid is not None) else None
@@ -306,7 +306,7 @@ class StorageManager:
                 ivuln.via_target
             )
             if not vuln:
-                print(f'new vuln: {ivuln}')
+                print(f'storage new vuln: {ivuln}')
 
         for inote in pidb.notes:
             service = pidb.services.by.iid[inote.service_iid] if (inote.service_iid is not None) else None
@@ -318,7 +318,7 @@ class StorageManager:
                 inote.via_target
             )
             if not note:
-                print(f'new note: {inote}')
+                print(f'storage new note: {inote}')
 
     @staticmethod
     def import_parsed(pidb, addtags=None):  # pylint: disable=too-many-branches
@@ -330,6 +330,7 @@ class StorageManager:
             if not host:
                 host = Host(address=ihost.address)
                 db.session.add(host)
+                current_app.logger.info(f'storage new host {host}')
             host.update(ihost)
             if addtags:
                 tag_add(host, addtags)
@@ -349,6 +350,7 @@ class StorageManager:
             if not service:
                 service = Service(host=host, proto=iservice.proto, port=iservice.port)
                 db.session.add(service)
+                current_app.logger.info(f'storage new service {service}')
             service.update(iservice)
             if addtags:
                 tag_add(service, addtags)
@@ -378,6 +380,7 @@ class StorageManager:
             if not vuln:
                 vuln = Vuln(host=host, name=ivuln.name, xtype=ivuln.xtype, service=service, via_target=ivuln.via_target)
                 db.session.add(vuln)
+                current_app.logger.info(f'storage new vuln {vuln}')
             vuln.update(ivuln)
             if addtags:
                 tag_add(vuln, addtags)
@@ -400,6 +403,7 @@ class StorageManager:
             if not note:
                 note = Note(host=host, xtype=inote.xtype, service=service, via_target=inote.via_target)
                 db.session.add(note)
+                current_app.logger.info(f'storage new vuln {note}')
             note.update(inote)
             if addtags:
                 tag_add(note, addtags)
@@ -459,7 +463,18 @@ class StorageManager:
         conn = db.session.connection()
 
         # remove any but open:* state services
-        conn.execute(delete(Service).filter(not_(Service.state.ilike('open:%'))))
+        services_to_delete = conn.execute(select(
+            Service.id,
+            Service.proto,
+            Service.port,
+            Host.address.label('host_address')
+        ).join(Host).filter(not_(Service.state.ilike('open:%')))).all()
+        for service in services_to_delete:
+            current_app.logger.info(
+                    'storage delete service '
+                    f'<Service {service.id}: {format_host_address(service.host_address)} {service.proto}.{service.port}>'
+            )
+        conn.execute(delete(Service).filter(Service.id.in_([x[0] for x in services_to_delete])))
 
         # remove hosts without any data attribute, service, vuln or note
         hosts_noinfo = conn.execute(
@@ -472,6 +487,8 @@ class StorageManager:
         hosts_nonotes = conn.execute(select(Host.id).outerjoin(Note).having(func.count(Note.id) == 0).group_by(Host.id)).scalars().all()
 
         hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_nonotes))
+        for host in conn.execute(select(Host.id, Host.address, Host.hostname).filter(Host.id.in_(hosts_to_delete))).all():
+            current_app.logger.info(f'storage delete host <Host {host.id}: {host.address} {host.hostname}>')
         conn.execute(delete(Host).filter(Host.id.in_(hosts_to_delete)))
 
         # also remove all hosts not having any info but one note xtype hostnames
@@ -481,6 +498,8 @@ class StorageManager:
         ).scalars().all()
 
         hosts_to_delete = list(set(hosts_noinfo) & set(hosts_noservices) & set(hosts_novulns) & set(hosts_only_note_hostnames))
+        for host in conn.execute(select(Host.id, Host.address, Host.hostname).filter(Host.id.in_(hosts_to_delete))).all():
+            current_app.logger.info(f'storage delete host <Host {host.id}: {host.address} {host.hostname}>')
         conn.execute(delete(Host).filter(Host.id.in_(hosts_to_delete)))
 
         db.session.commit()

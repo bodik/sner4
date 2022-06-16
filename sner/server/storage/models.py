@@ -35,6 +35,7 @@ from datetime import datetime
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 
+from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.models import SelectableEnum
 
@@ -71,7 +72,7 @@ class Host(StorageModelBase):
     notes = relationship('Note', back_populates='host', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return f'<Host {self.id}: {self.address} ({self.hostname or ""})>'
+        return f'<Host {self.id}: {self.address} {self.hostname}>'
 
 
 class Service(StorageModelBase):
@@ -96,7 +97,8 @@ class Service(StorageModelBase):
     notes = relationship('Note', back_populates='service', cascade='delete,delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return f'<Service {self.id}: {self.proto}.{self.port}>'
+        host = format_host_address(self.host.address) if self.host else None
+        return f'<Service {self.id}: {host} {self.proto}.{self.port}>'
 
 
 class SeverityEnum(SelectableEnum):
@@ -134,7 +136,9 @@ class Vuln(StorageModelBase):
     service = relationship('Service', back_populates='vulns')
 
     def __repr__(self):
-        return f'<Vuln {self.id}: {self.xtype}>'
+        host = format_host_address(self.host.address) if self.host else None
+        service = f'{self.service.proto}.{self.service.port}' if self.service else None
+        return f'<Vuln {self.id}: {host} {service} {self.xtype}>'
 
 
 class Note(StorageModelBase):
@@ -156,4 +160,6 @@ class Note(StorageModelBase):
     service = relationship('Service', back_populates='notes')
 
     def __repr__(self):
-        return f'<Note {self.id}: {self.xtype}>'
+        host = format_host_address(self.host.address) if self.host else None
+        service = f'{self.service.proto}.{self.service.port}' if self.service else None
+        return f'<Note {self.id}: {host} {service} {self.xtype}>'

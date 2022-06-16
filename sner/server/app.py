@@ -4,6 +4,7 @@ main application package module
 """
 
 import json
+import logging
 import os
 import sys
 
@@ -107,6 +108,8 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.config.update(DEFAULT_CONFIG)  # default config
     app.config.update(config_from_yaml(config_file))  # service configuration
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
+    if not app.logger.level:  # pylint: disable=no-member
+        app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
 
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 
