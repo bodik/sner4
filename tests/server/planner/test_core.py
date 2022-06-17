@@ -3,10 +3,15 @@
 planner core tests
 """
 
+import logging
+import os
+from ipaddress import ip_address
+
 import pytest
 import yaml
 from flask import current_app
 
+from sner.server.extensions import db
 from sner.server.parser import ParsedItemsDb
 from sner.server.planner.core import (
     DummyStage,
@@ -27,9 +32,10 @@ from sner.server.planner.core import (
     StorageRescan,
     WiringError
 )
-from sner.server.scheduler.core import JobManager
+from sner.server.scheduler.core import JobManager, SchedulerService
 from sner.server.scheduler.models import Target
 from sner.server.storage.models import Host, Note, Service
+from sner.server.utils import yaml_dump
 
 
 def test_project_hosts(sample_pidb):
@@ -308,3 +314,39 @@ def test_storagecleanup(app, host_factory, service_factory):  # pylint: disable=
     StorageCleanup().run()
     assert Service.query.count() == 0
     assert Host.query.count() == 1
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='large dataset test is slow')
+def test_storagerescan_largedataset(runner, queue_factory, host_factory):  # pylint: disable=unused-argument
+    """test StorageRescan with large dataset"""
+
+    logger = logging.getLogger(__name__)
+
+    logger.info('lot_of_targets prepare start')
+    queue = queue_factory.create(name='queue1', config=yaml_dump({'module': 'nmap', 'args': 'arg1'}))
+    existing_targets_count = 10**6
+    existings_targets_vals = [
+        str((queue.id, str(ip_address(idx)), SchedulerService.hashval(str(ip_address(idx)))))
+        for idx in range(existing_targets_count)
+    ]
+    # bypass all db layers for performance
+    query = 'INSERT INTO target (queue_id, target, hashval) VALUES ' + ','.join(existings_targets_vals)
+    db.session.execute(query)
+    logger.info('lot_of_targets prepare end')
+
+    logger.info('lot_of_services prepare start')
+    for addr in range(10):
+        host = host_factory.create(address=str(ip_address(addr)))
+        # bypass all db layers for performance
+        query = 'INSERT INTO service (host_id, proto, port, tags) VALUES ' + ','.join([str((host.id, 'tcp', str(idx), '{}')) for idx in range(64000)])
+        db.session.execute(query)
+        logging.info('prepared %s', host)
+    logger.info('lot_of_services prepare end')
+
+    db.session.expire_all()
+
+    stage_servicescan = ServiceDisco(['queue1'], DummyStage())
+    stage_servicedisco = ServiceDisco(['queue1'], DummyStage())
+    StorageRescan('0s', '0s', '0s', stage_servicescan, stage_servicedisco).run()
+
+    assert Target.query.count() == existing_targets_count + Service.query.count()
