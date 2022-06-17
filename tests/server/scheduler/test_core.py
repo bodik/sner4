@@ -9,7 +9,7 @@ import pytest
 
 from sner.server.extensions import db
 from sner.server.scheduler.core import ExclMatcher, SchedulerService
-from sner.server.scheduler.models import Excl, ExclFamily, Readynet
+from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Readynet
 
 
 def test_model_excl_validation():
@@ -65,6 +65,8 @@ def test_schedulerservice_hashval():
     assert SchedulerService.hashval('127.0.0.1') == '127.0.0.0/24'
     assert SchedulerService.hashval('2001:db8:aa::1:2:3:4') == '2001:db8:aa::/48'
     assert SchedulerService.hashval('url') == 'url'
+    assert SchedulerService.hashval('tcp://127.0.0.3:11') == '127.0.0.0/24'
+    assert SchedulerService.hashval('tcp://[::1]:11') == '::/48'
 
 
 def test_schedulerservice_readynetupdates(app, queue, target_factory):  # pylint: disable=unused-argument
@@ -80,3 +82,15 @@ def test_schedulerservice_readynetupdates(app, queue, target_factory):  # pylint
 
     assert len(assignment['targets']) == 2
     assert Readynet.query.count() == 1
+
+
+def test_schedulerservice_hashvalprocessing(app, queue, target_factory):  # pylint: disable=unused-argument
+    """test scheduler service hashvalsreadynet manipulation"""
+
+    target_factory.create(queue=queue, target='tcp://127.0.0.1:22', hashval=SchedulerService.hashval('tcp://127.0.0.1:22'))
+    db.session.commit()
+
+    assignment = SchedulerService.job_assign(None, [])
+
+    assert assignment
+    assert Heatmap.query.one().hashval == '127.0.0.0/24'

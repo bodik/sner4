@@ -374,6 +374,11 @@ class SchedulerService:
     def hashval(value):
         """computes rate-limit heatmap hash value"""
 
+        if mtmp := re.match(SERVICE_TARGET_REGEXP, value):
+            value = mtmp.group('host')
+            if (value[0] == '[') and (value[-1] == ']'):
+                value = value[1:-1]
+
         try:
             addr = ip_address(value)
             if isinstance(addr, IPv4Address):
