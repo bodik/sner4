@@ -30,7 +30,7 @@ def test_import_command_nmap_rawdata(runner):
 
     host = Host.query.one()
     assert host.os == 'Linux 3.8 - 4.6'
-    assert sorted([x.port for x in host.services]) == [22, 25, 139, 445, 5432]
+    assert sorted([x.port for x in host.services]) == [22, 25, 113, 139, 445, 5432]
     tmpnote = Note.query.join(Service).filter(Note.host == host, Service.port == 25, Note.xtype == 'nmap.smtp-commands').one()
     assert 'PIPELINING' in json.loads(tmpnote.data)['output']
     assert Note.query.filter(Note.host == host, Note.xtype == 'hostnames').one()

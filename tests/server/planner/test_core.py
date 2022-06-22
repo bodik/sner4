@@ -272,6 +272,7 @@ def test_servicedisco(app, job_completed_nmap):  # pylint: disable=unused-argume
     ServiceDisco([job_completed_nmap.queue.name], stage_servicescan).run()
 
     assert stage_servicescan.task_count == 1
+    assert len(stage_servicescan.task_args) == 5
     assert 'tcp://127.0.0.1:139' in stage_servicescan.task_args
 
 
@@ -302,7 +303,7 @@ def test_storageloader(app, job_completed_nmap):  # pylint: disable=unused-argum
     StorageImport().task(JobManager.parse(job_completed_nmap))
 
     assert Host.query.count() == 1
-    assert Service.query.count() == 5
+    assert Service.query.count() == 6
     assert Note.query.count() == 17
 
 

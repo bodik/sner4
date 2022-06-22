@@ -396,7 +396,12 @@ class ServiceDisco(QueueHandler):
         """run"""
 
         for pidb in self._drain():
-            services = project_services(filter_tarpits(pidb))
+            tmpdb = filter_tarpits(pidb)
+            # list() should provide copy for list-in-loop pruning
+            for service in list(tmpdb.services):
+                if not service.state.startswith('open:'):
+                    tmpdb.services.remove(service)
+            services = project_services(tmpdb)
             current_app.logger.info(f'{self.__class__.__name__} projected {len(services)} services')
             self.stage_servicescan.task(services)
 

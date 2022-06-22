@@ -22,7 +22,7 @@ def test_parse_path():
     """check basic parse_path impl"""
 
     expected_hosts = ['127.0.0.1']
-    expected_services = [22, 25, 139, 445, 5432]
+    expected_services = [22, 25, 113, 139, 445, 5432]
 
     pidb = ParserModule.parse_path('tests/server/data/parser-nmap-output.xml')
 
