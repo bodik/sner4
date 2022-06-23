@@ -1,6 +1,6 @@
 # sner4 changelog
 
-## 0.7.0 - towards ehm-ethical scanning [BC BREAK]
+## 0.7.0 - towards ethical scanning [BC BREAK]
 
 * bump used dependencies
 * changed: internal refactorings

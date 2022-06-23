@@ -29,34 +29,33 @@ Project goals:
 
 ### 1.1 Design overview
 
-#### Components table
+#### Components
 
-| Function            | Component     | Description |
-| ------------------- | ------------- | ----------- |
-| **reconnaissance**  |||
-|                     | agent         | modular wrapper for scanning tools | 
-|                     | scheduler     | job distribution |
-|                     | planner       | management and scheduling for continuous recon |
-| **data management** |||
-|                     | parser        | agent module output data parsing |
-|                     | storage       | long term ip-centric storage |
-|                     | visuals       | read-only analytics and visualization user-interface |
+* **reconnaissance**
+    * agent -- modular wrapper for scanning tools
+    * scheduler -- job distribution
+    * planner -- management and scheduling for continuous scanning
 
-#### Components interconnection graph
+* **data management**
+    * parser -- agent outputs data parsing
+    * storage -- long term ip-centric storage
+    * visuals -- read-only analytics and visualization user-interface
+    * api -- REST-like api
+
 
 ```
                                                     +---+  (raw) files
               agent  +--+--+  server                |
                         |                           |
      +-------------+    |      +--------------+     |     +-----------------+
-     |             |    |      |              |     |     |                 |  plugin1
-     |  agent      |<--------->|  scheduler   |---------->|  parser         |  plugin2
-     |             |    |      |              |     |     |                 |  pluginX
+     |             |    |      |              |     |     |                 |  plugin1..N
+     |  agent      |<--------->|  scheduler   |---------->|  parser         |
+     |             |    |      |              |     |     |                 |
      +-------------+    |      +--------------+     |     +-----------------+
-                        |            ^              |              |
-      plugin1           |            |              +              |
-      plugin2           |            |                            \|/
-      pluginX           |      +--------------+           +-----------------+
+                        |            ^   queue1..N  |              |
+      plugin1..N        |            |              +              |
+                        |            |                            \|/
+                        |      +--------------+           +-----------------+
                         |      |              |           |                 |
                         |      |   planner    |---------->|  db/storage     |
                         |      |              |           |                 |
@@ -77,18 +76,11 @@ Project goals:
 
 ### 2.1 General features
 
-User web interface uses cookie based session management with username+password
-w/o OTP, FIDO2 Webauthn and/or external OpenID Connect authentication. REST API
-uses header-based apikey authentication.
-
-Application features are grouped and authorized for roles: agent (scheduler
-jobs), operator (scheduler, storage, visuals), user (profile, api), admin (user
-mgmt). Web interface uses custom server-side file based session storage.
-
-Components provides limited command-line interface through `server` command.
-Flask shell can be used to access the ORM model directly for advanced analysis
-or data management (see `scripts` for examples). Agent and parser subsystem uses
-extendable plugin architecture.
+Flask-based web interface with plain login, OTP, FIDO2 or external OIDC
+support. Role-based authorization: agent (scheduler, jobs), operator
+(scheduler, storage, visuals), user (profile, api), admin (user mgmt).
+Server-side session storage. CLI interface and automation scripts. Agent and
+parser subsystem uses extendable plugin architecture.
 
 
 ### 2.2 Reconnaissance subsystem
@@ -96,33 +88,26 @@ extendable plugin architecture.
 #### Agent
 
 Agent provides communication and execution layer for plugins implementing
-various tools wrappers. Generally, handles task query/assignment and results
-delivery. Allows to execute in default (continuous), one-time or manual
-assignment, handles process management features (gracefull shutdown - SIGUSR1,
-immediate termination - SIGTERM), supports fine-graned workload routing via
-capabilities metadata.
+various tools wrappers and supports fine-graned workload routing via
+capabilities metadata (DEPRECATED).
 
 For currently available plugins see `sner/plugin/*/agent.py`
 
 
 #### Server: Scheduler
 
-Scheduler provides workload configuration container, distribution mechanism
-and rate-limiting scheduling.
+Scheduler provides workload configuration management and distribution with
+heatmap based rate-limiting scheduling.
 
 * **Queue** -- a list of targets and coresponding agent module and scheduling
   attributes container.  Each module has a different config and target
   specification, see corresponding module implementation for details.
 
-* **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. During
-  continuous recons, some parts of monitored networks must be avoided for
-  policy, operations or security reasons. Exclusions are used during the
-  assignment phase (not enqueue phase) because exclusion list might change
-  between time of queue setup and target selection, scheduler silently discards
-  all targets matching any configured exclusion during assignment creation
-  process.
+* **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. Used
+  during job assignment phase when scheduler silently discards targets 
+  according to the list.
 
-* **Job** -- workload unit object, eg. assignment and agent output tuple.
+* **Job** -- workload unit object, eg. assignment and output tuple.
 
 * **Heatmap**, **Readynet** -- internal structures for rate-limited target
   selection.
@@ -133,9 +118,9 @@ management.
 
 #### Server: Planner
 
-Planner provides continuous orchestration of agents, scheduler and storage
-data. Standalone daemon executing periodic defined and interconnected tasks
-(stages).
+Long-running daemon providing continuous orchestration of agents and output
+data processing in order to keep storage up-to-date with monitored networks
+reconnaissance data.
 
 
 
@@ -144,38 +129,25 @@ data. Standalone daemon executing periodic defined and interconnected tasks
 #### Server: Storage and Parsers
 
 Storage is a main IP-centric database model and user interface heavily inspired
-by Metasploit framework PRO UI. Web interface allow somewhat flexible data
-management including predefined aggregations and items tagging.
+by Metasploit framework PRO UI. Allows somewhat flexible data management
+including predefined aggregations and items tagging.
 
-Parsers are used to parse agent output (zip archives) or raw files (nmap,
-nessus) and import data into storage.
-
-
+Parsers are used to parse and ingest agent output data or raw files to storage.
 
 #### Server: Visuals
 
-Visualization modules can be used to visualize various informations stored in
-database or current configuration:
-
-* Planner tree
-* DNS tree
-* Portmap explorer
-* (Service) Port infos
+Visualization modules for configuration and storage data.
 
 
+#### Api: REST API interface
 
-#### Snerlytics: Storage vulnsearch (experimental)
-
-Experimental subsystem. Uses https://github.com/cve-search/cve-search (by
-circl.lu) to correlate and analyze storage CPE data via ELK stack. See
-https://github.com/bodik/sner-ansible/blob/master/playbooks/snerlytics.yml
-for install instructions.
+(EXPERIMENTAL) Provides basic access to managed data.
 
 
+#### Snerlytics: Storage vulnsearch
 
-#### Api: REST API interface (experimental)
-
-Experimental subsystem. Provides basic access to managed data.
+(EXPERIMENTAL) Uses https://github.com/cve-search/cve-search (by circl.lu) to
+correlate and analyze storage CPE data via ELK stack.
 
 
 
@@ -231,12 +203,6 @@ make coverage
 
 # run dev server
 bin/server run
-
-# pin certificate for snerlytics in devcloud
-echo "ip dev-snerlytics" >> /etc/hosts
-get_peer_certificate.py dev-snerlytics > /usr/local/share/ca-certificates/dev-snerlytics.crt
-update-ca-certificates
-ln -sf --backup /etc/ssl/certs/ca-certificates.crt venv/lib/python3.7/site-packages/certifi/cacert.pem
 ```
 
 
