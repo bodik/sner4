@@ -83,3 +83,10 @@ def test_queue_prune_command(runner, job_completed):
 
     assert not Job.query.filter(Job.queue_id == job_completed.queue_id).all()
     assert not Path(job_completed.output_abspath).exists()
+
+
+def test_readynet_recount_command(runner):
+    """test readynet_recount command"""
+
+    result = runner.invoke(command, ['readynet-recount'])
+    assert result.exit_code == 0

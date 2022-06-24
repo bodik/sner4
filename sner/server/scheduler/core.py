@@ -564,3 +564,35 @@ class SchedulerService:
             cls.heatmap_pop(cls.hashval(target))
 
         cls.release_lock()
+
+    @classmethod
+    def readynet_recount(cls):
+        """
+        rescan targets and update readynets table for new heatmap hot level
+        """
+
+        cls.get_lock()
+        conn = db.session.connection()
+
+        if current_app.config['SNER_HEATMAP_HOT_LEVEL']:
+            hot_hashvals = set(conn.execute(
+                select(Heatmap.hashval).filter(Heatmap.count >= current_app.config['SNER_HEATMAP_HOT_LEVEL'])
+            ).scalars().all())
+
+            # all heatmap hashvals over limit remove from readynet
+            conn.execute(delete(Readynet).filter(Readynet.hashval.in_(hot_hashvals)))
+        else:
+            hot_hashvals = set()
+
+        # for all target hashvals except over limit insert as readynet for all queues
+        all_hashvals = set(conn.execute(select(func.distinct(Target.hashval))).scalars().all())
+        for thashval in (all_hashvals - hot_hashvals):
+            for queue_id in conn.execute(select(func.distinct(Target.queue_id)).filter(Target.hashval == thashval)).scalars().all():
+                conn.execute(
+                    pg_insert(Readynet)
+                    .values(queue_id=queue_id, hashval=thashval)
+                    .on_conflict_do_nothing(constraint='readynet_pkey')
+                )
+
+        db.session.commit()
+        cls.release_lock()

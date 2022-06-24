@@ -10,7 +10,7 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 
-from sner.server.scheduler.core import enumerate_network, QueueManager
+from sner.server.scheduler.core import enumerate_network, QueueManager, SchedulerService
 from sner.server.scheduler.models import Queue
 
 
@@ -89,4 +89,13 @@ def queue_prune_command(queue_name):
         sys.exit(1)
 
     QueueManager.prune(queue)
+    sys.exit(0)
+
+
+@command.command(name='readynet-recount', help='refresh readynets for current heatmap_hot_level')
+@with_appcontext
+def readynet_recount_command():
+    """refresh readynets for current heatmap_hot_level"""
+
+    SchedulerService.readynet_recount()
     sys.exit(0)

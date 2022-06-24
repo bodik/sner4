@@ -3,13 +3,14 @@
 scheduler core tests
 """
 
-from ipaddress import ip_network
+from ipaddress import ip_address, ip_network
 
 import pytest
+from flask import current_app
 
 from sner.server.extensions import db
 from sner.server.scheduler.core import ExclMatcher, SchedulerService
-from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Readynet
+from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Readynet
 
 
 def test_model_excl_validation():
@@ -84,6 +85,39 @@ def test_schedulerservice_readynetupdates(app, queue, target_factory):  # pylint
     assert Readynet.query.count() == 1
 
 
+def test_schedulerservice_morereadynetupdates(app, queue, target_factory):  # pylint: disable=unused-argument
+    """
+    test scheduler service readynet manipulation
+
+    used to analyze and reason about heatmap_pop readynet sql queries for update readynet lists.
+    using readynet updates `if heat < level` provides automatic updates for readynets when hot_level changes
+    in runtime, but produces extra queries for every returning job. result: on hot_level change
+    readynets map must be manually recounted.
+    """
+
+    current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 5
+    queue.group_size = 2
+
+    for addr in range(10):
+        tmp = str(ip_address(addr))
+        target_factory.create(queue=queue, target=tmp, hashval=SchedulerService.hashval(tmp))
+    db.session.commit()
+
+    assignment1 = SchedulerService.job_assign(None, [])
+    assignment2 = SchedulerService.job_assign(None, [])
+    assignment3 = SchedulerService.job_assign(None, [])
+
+    assert len(assignment3['targets']) == 1
+    assert Readynet.query.count() == 0
+
+    SchedulerService.job_output(Job.query.get(assignment3['id']), 0, b'')
+    assert Readynet.query.count() == 1
+
+    SchedulerService.job_output(Job.query.get(assignment2['id']), 0, b'')
+    SchedulerService.job_output(Job.query.get(assignment1['id']), 0, b'')
+    assert Readynet.query.count() == 1
+
+
 def test_schedulerservice_hashvalprocessing(app, queue, target_factory):  # pylint: disable=unused-argument
     """test scheduler service hashvalsreadynet manipulation"""
 
@@ -94,3 +128,33 @@ def test_schedulerservice_hashvalprocessing(app, queue, target_factory):  # pyli
 
     assert assignment
     assert Heatmap.query.one().hashval == '127.0.0.0/24'
+
+
+def test_schedulerservice_readynetrecount(app, queue, target_factory):  # pylint: disable=unused-argument
+    """test scheduler service readynet_recount"""
+
+    current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 5
+    queue.group_size = 2
+
+    for addr in range(10):
+        tmp = str(ip_address(addr))
+        target_factory.create(queue=queue, target=tmp, hashval=SchedulerService.hashval(tmp))
+    db.session.commit()
+
+    SchedulerService.job_assign(None, [])
+    SchedulerService.job_assign(None, [])
+
+    assignment3 = SchedulerService.job_assign(None, [])
+    assert len(assignment3['targets']) == 1
+    assert Readynet.query.count() == 0
+
+    current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 7
+    SchedulerService.readynet_recount()
+    assert Readynet.query.count() == 1
+
+    assignment4 = SchedulerService.job_assign(None, [])
+    assert len(assignment4['targets']) == 2
+
+    current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 3
+    SchedulerService.readynet_recount()
+    assert Readynet.query.count() == 0
