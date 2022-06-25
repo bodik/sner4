@@ -163,6 +163,7 @@ class Planner(TerminateContextMixin):
     def run(self):
         """run planner loop"""
 
+        self.log.info('startup')
         self.loop = True
 
         with self.terminate_context():
