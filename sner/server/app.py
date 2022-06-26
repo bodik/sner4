@@ -135,6 +135,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
 
     # initialize api blueprint; as side-effect overrides error handler
     app.config['API_SPEC_OPTIONS']['servers'] = [{'url': app.config['APPLICATION_ROOT']}]
+    app.config['OPENAPI_SWAGGER_UI_URL'] = f'{app.config["APPLICATION_ROOT"] if app.config["APPLICATION_ROOT"] != "/" else ""}/static/swagger/'
     api.init_app(app)
     api.register_blueprint(api_blueprint, url_prefix='/api')
 
