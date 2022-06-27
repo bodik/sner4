@@ -18,6 +18,7 @@ littletable
 lxml
 psycopg2
 pylint
+pyroute2
 pytenable
 pytest
 pytest-factoryboy

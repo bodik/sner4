@@ -3,6 +3,9 @@
 sner agent six enum from storage discover
 """
 
+from ipaddress import ip_address, ip_network
+
+from pyroute2 import NDB  # pylint: disable=no-name-in-module
 from schema import Schema
 
 from sner.agent.modules import ModuleBase
@@ -31,6 +34,21 @@ class AgentModule(ModuleBase):
         super().__init__()
         self.loop = True
 
+    @staticmethod
+    def _is_localnet(addr):
+        """semidetect if target is on localnet"""
+
+        # loopback addres is not considered link-local, used by pytest
+        if addr == '::1':
+            return False, None
+
+        addr = ip_address(addr)
+        for record in NDB().addresses.summary():
+            if addr in ip_network(f'{record.address}/{record.prefixlen}', strict=False):
+                return True, record.ifname  # pragma: no cover  ; no IPv6 in CI (GH Actions)
+
+        return False, None
+
     def run(self, assignment):
         """run the agent"""
 
@@ -38,7 +56,11 @@ class AgentModule(ModuleBase):
         ret = 0
 
         for idx, target in enumerate(assignment['targets']):
-            ret |= self._execute(['scan6', '--rate-limit', f'{assignment["config"]["rate"]}pps', '--dst-addr', target], f'output-{idx}.txt')
+            # detect if scan has to be performed with --dst-addr or --local-scan
+            is_localnet, iface = self._is_localnet(target.split('-')[0])
+            args = ['--local-scan', '--print-type', 'global', '-i', iface] if is_localnet else ['--dst-addr', target]
+
+            ret |= self._execute(['scan6', '--rate-limit', f'{assignment["config"]["rate"]}pps'] + args, f'output-{idx}.txt')
             if not self.loop:  # pragma: no cover  ; not tested
                 break
 
