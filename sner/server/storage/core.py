@@ -403,7 +403,7 @@ class StorageManager:
             if not note:
                 note = Note(host=host, xtype=inote.xtype, service=service, via_target=inote.via_target)
                 db.session.add(note)
-                current_app.logger.info(f'storage update new vuln {note}')
+                current_app.logger.info(f'storage update new note {note}')
             note.update(inote)
             if addtags:
                 tag_add(note, addtags)
