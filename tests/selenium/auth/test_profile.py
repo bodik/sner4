@@ -8,12 +8,22 @@ from base64 import b64decode, b64encode
 from fido2 import cbor
 from flask import url_for
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from soft_webauthn import SoftWebauthnDevice
 
 from sner.server.auth.models import User
 from sner.server.extensions import webauthn
 from tests.selenium import webdriver_waituntil
 from tests.selenium.auth import js_variable_ready
+
+
+def test_profile_route(live_server, sl_user, webauthn_credential_factory):  # pylint: disable=unused-argument
+    """check profile page rendering"""
+
+    wac = webauthn_credential_factory.create(user=User.query.filter_by(username='pytest_user').one())
+
+    sl_user.get(url_for('auth.profile_route', _external=True))
+    webdriver_waituntil(sl_user, EC.visibility_of_element_located((By.XPATH, f'//td[contains(text(), "{wac.name}")]')))
 
 
 def test_profile_webauthn_register_route(live_server, sl_user):  # pylint: disable=unused-argument
