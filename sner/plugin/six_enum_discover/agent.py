@@ -45,9 +45,9 @@ class AgentModule(ModuleBase):
         addr = ip_address(addr)
         for record in NDB().addresses.summary():
             if addr in ip_network(f'{record.address}/{record.prefixlen}', strict=False):
-                return True, record.ifname  # pragma: no cover  ; no IPv6 in CI (GH Actions)
+                return True, record.ifname
 
-        return False, None
+        return False, None  # pragma: no cover  ; no IPv6 in CI (GH Actions)
 
     def run(self, assignment):
         """run the agent"""
