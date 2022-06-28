@@ -22,7 +22,7 @@ class SnerAuthComponent extends SnerComponentBase {
 			'profile_webauthn_controls': `
 				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> auth.profile_webauthn_edit_route webauthn_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary abutton_sbumit_dataurl_delete" data-url="{{> auth.profile_webauthn_delete_route webauthn_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> auth.profile_webauthn_delete_route webauthn_id=id}}"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 		};
 
