@@ -24,7 +24,7 @@ def test_basic(tmpworkdir):  # pylint: disable=unused-argument
             'module': 'six_enum_discover',
             'rate': 100
         },
-        'targets': ['::1-2', 'fc00::1']
+        'targets': ['::1-2', '::01']
     }
 
     result = agent_main(['--assignment', json.dumps(test_a), '--debug'])
