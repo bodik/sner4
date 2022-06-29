@@ -8,7 +8,7 @@ ExecStart=/opt/sner/venv/bin/gunicorn \
 	--bind "127.0.0.1:18001" \
 	--timeout 120 \
 	--access-logfile - \
-	--access-logformat 'gunicorn %({x-forwarded-for}i)s %(h)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"' \
+	--access-logformat 'gunicorn.access_log %({x-forwarded-for}i)s %(h)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"' \
 	'sner.server.app:create_app()'
 WorkingDirectory=/opt/sner
 User=www-data
