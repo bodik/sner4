@@ -9,7 +9,9 @@ import os
 import sys
 
 import flask.cli
-from flask import Flask, render_template
+from flask import Flask, has_request_context, render_template, request
+from flask.logging import default_handler
+from flask_login import current_user
 from flask_wtf.csrf import generate_csrf
 from sqlalchemy import func
 
@@ -101,6 +103,19 @@ def config_from_yaml(filename):
     return config
 
 
+class LogFormatter(logging.Formatter):
+    """custom log formatter, adds remote_addr, user"""
+
+    def format(self, record):
+        record.remote_addr = '-'
+        record.user = '-'
+        if has_request_context():
+            record.remote_addr = request.remote_addr
+            if current_user.is_authenticated:
+                record.user = current_user.username
+        return super().format(record)
+
+
 def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     """flask application factory"""
 
@@ -110,6 +125,8 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
     if not app.logger.level:  # pylint: disable=no-member
         app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
+
+    default_handler.setFormatter(LogFormatter('[%(asctime)s] %(levelname)s %(module)s %(remote_addr)s %(user)s %(message)s'))
 
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 

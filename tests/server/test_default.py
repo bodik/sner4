@@ -11,9 +11,10 @@ from io import StringIO
 from unittest.mock import patch
 
 import pytest
-from flask import url_for
+from flask import current_app, url_for
+from flask.logging import default_handler
 
-from sner.server.app import cli
+from sner.server.app import cli, create_app
 from sner.version import __version__
 
 
@@ -82,3 +83,20 @@ def test_version():
 
     assert pytest_wrapped_e.value.code == 0
     assert f'Sner {__version__}' in buf_stdout.getvalue()
+
+
+def test_logformatter(caplog):
+    """test log formatter"""
+
+    app = create_app(config_file='tests/sner.yaml')
+    caplog.handler.setFormatter(default_handler.formatter)
+
+    with app.app_context():
+        current_app.logger.info('test1')
+        assert ' - - test1' in caplog.text
+    caplog.clear()
+
+    with app.test_request_context():
+        current_app.logger.info('test2')
+        assert 'None - test2' in caplog.text
+    caplog.clear()
