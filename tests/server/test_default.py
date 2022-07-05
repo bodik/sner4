@@ -93,10 +93,10 @@ def test_logformatter(caplog):
 
     with app.app_context():
         current_app.logger.info('test1')
-        assert ' - - test1' in caplog.text
+        assert '- - test1' in caplog.text
     caplog.clear()
 
-    with app.test_request_context():
+    with app.test_request_context(environ_base={'REMOTE_ADDR': '127.0.0.2'}):
         current_app.logger.info('test2')
-        assert 'None - test2' in caplog.text
+        assert '127.0.0.2 - test2' in caplog.text
     caplog.clear()
