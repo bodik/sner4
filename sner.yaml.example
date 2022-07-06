@@ -1,6 +1,7 @@
 #server:
 #  secret_key: 'changeit'
 #  application_root: '/sner'
+#  xflask_proxyfix: true,
 #  sqlalchemy_database_uri: 'postgresql://user:password@localhost/sner'
 #  sner_var: '/var/lib/sner'
 #  sner_session_idletime: 3600

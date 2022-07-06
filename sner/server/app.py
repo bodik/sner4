@@ -14,6 +14,7 @@ from flask.logging import default_handler
 from flask_login import current_user
 from flask_wtf.csrf import generate_csrf
 from sqlalchemy import func
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from sner.agent.modules import load_agent_plugins
 from sner.lib import load_yaml
@@ -45,6 +46,7 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 DEFAULT_CONFIG = {
     # flask
     'SECRET_KEY': os.urandom(32),
+    'XFLASK_PROXYFIX': False,
 
     # sqlalchemy
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
@@ -123,10 +125,13 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.config.update(DEFAULT_CONFIG)  # default config
     app.config.update(config_from_yaml(config_file))  # service configuration
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
+
     if not app.logger.level:  # pylint: disable=no-member
         app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
-
     default_handler.setFormatter(LogFormatter('[%(asctime)s] %(levelname)s %(module)s %(remote_addr)s %(user)s %(message)s'))
+
+    if app.config['XFLASK_PROXYFIX']:
+        app.wsgi_app = ProxyFix(app.wsgi_app)
 
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 

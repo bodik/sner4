@@ -1,6 +1,7 @@
 server:
-  application_root: '/'
   secret_key: 'changeit'
+  application_root: '/'
+  xflask_proxyfix: true
   sqlalchemy_database_uri: 'postgresql:///sner_test'
   sner_var: '/tmp/sner_test_var'
   sner_trim_report_cells: 1000
