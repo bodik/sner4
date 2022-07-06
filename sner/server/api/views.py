@@ -8,7 +8,7 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
-from flask import jsonify, Response
+from flask import current_app, jsonify, Response
 from flask_login import current_user
 from flask_smorest import Blueprint
 from sqlalchemy import func, or_
@@ -45,6 +45,8 @@ def v2_scheduler_job_assign_route(args):
 
     try:
         resp = SchedulerService.job_assign(args.get('queue'), args.get('caps', []))
+        if 'id' in resp:
+            current_app.logger.info(f'api.scheduler job assign {resp.get("id")}')
     except SchedulerServiceBusyException:
         resp = {}  # nowork
     return resp
@@ -72,6 +74,7 @@ def v2_scheduler_job_output_route(args):
     except SchedulerServiceBusyException:
         return jsonify({'message': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
 
+    current_app.logger.info(f'api.scheduler job output {job.id}')
     return jsonify({'message': 'success'})
 
 
@@ -127,6 +130,7 @@ def v2_public_storage_host_route(args):
         'services': host.services,
         'notes': [note for note in host.notes if note.service_id is None]
     }
+    current_app.logger.info(f'api.public storage host {args}')
     return host_data
 
 
@@ -142,6 +146,7 @@ def v2_public_storage_range_route(args):
 
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     query = Host.query.filter(Host.address.op('<<=')(str(args['cidr']))).filter(or_(*restrict))
+    current_app.logger.info(f'api.public storage range {args}')
     return query.all()
 
 
@@ -168,4 +173,5 @@ def v2_public_storage_servicelist_route(args):
     if 'filter' in args:
         query = apply_filters(query, FILTER_PARSER.parse(args['filter']), do_auto_join=False)
 
+    current_app.logger.info(f'api.public storage servicelist {args}')
     return query.all()

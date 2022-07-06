@@ -61,6 +61,7 @@ def profile_changepassword_route():
             user.password = PWS.hash(form.password1.data)
             db.session.commit()
             flash('Password changed.', 'info')
+            current_app.logger.info('auth.profile password changed')
             return redirect(url_for('auth.profile_route'))
 
     return render_template('auth/profile/changepassword.html', form=form)
@@ -80,6 +81,7 @@ def profile_totp_route():
                 user.totp = session['totp_new_secret']
                 db.session.commit()
                 session.pop('totp_new_secret', None)
+                current_app.logger.info('auth.profile totp enabled')
                 return redirect(url_for('auth.profile_route'))
             form.code.errors.append('Invalid code (enable)')
 
@@ -89,6 +91,7 @@ def profile_totp_route():
                 user.totp = None
                 db.session.commit()
                 session.pop('totp_new_secret', None)
+                current_app.logger.info('auth.profile totp disabled')
                 return redirect(url_for('auth.profile_route'))
             form.code.errors.append('Invalid code (disable)')
 
@@ -97,7 +100,8 @@ def profile_totp_route():
         if 'totp_new_secret' not in session:
             session['totp_new_secret'] = TOTPImpl.random_base32()
         provisioning_url = TOTPImpl(session.get('totp_new_secret')).get_provisioning_uri(
-            user.username, current_app.config['SERVER_NAME'] or getfqdn())
+            user.username, current_app.config['SERVER_NAME'] or getfqdn()
+        )
 
     return render_template('auth/profile/totp.html', form=form, secret=session.get('totp_new_secret'), provisioning_url=provisioning_url)
 
@@ -186,6 +190,7 @@ def profile_webauthn_register_route():
                 name=form.name.data))
             db.session.commit()
 
+            current_app.logger.info('auth.profile webauthn registered new credential')
             return redirect(url_for('auth.profile_route'))
         except (KeyError, ValueError) as exc:
             current_app.logger.exception(exc)
@@ -204,6 +209,7 @@ def profile_webauthn_edit_route(webauthn_id):
     if form.validate_on_submit():
         form.populate_obj(cred)
         db.session.commit()
+        current_app.logger.info('auth.profile webauthn credential edited')
         return redirect(url_for('auth.profile_route'))
 
     return render_template('auth/profile/webauthn_edit.html', form=form)
@@ -219,6 +225,7 @@ def profile_webauthn_delete_route(webauthn_id):
         db.session.delete(
             WebauthnCredential.query.filter(WebauthnCredential.user_id == current_user.id, WebauthnCredential.id == webauthn_id).one())
         db.session.commit()
+        current_app.logger.info('auth.profile webauthn credential deleted')
         return redirect(url_for('auth.profile_route'))
 
     return render_template('button-delete.html', form=form)
@@ -233,11 +240,13 @@ def profile_apikey_route(action):
     if form.validate_on_submit():
         if action == 'generate':
             session['new_apikey'] = UserManager.apikey_generate(current_user)
+            current_app.logger.info('auth.profile apikey generate')
             return redirect(url_for('auth.profile_route'))
 
         if action == 'revoke':
             session.pop('new_apikey', None)
             UserManager.apikey_revoke(current_user)
+            current_app.logger.info('auth.profile apikey revoke')
             return redirect(url_for('auth.profile_route'))
 
     return render_template('button-generic.html', form=form)

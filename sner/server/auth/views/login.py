@@ -39,6 +39,7 @@ def login_route():
 
                     regenerate_session()
                     login_user(user)
+                    current_app.logger.info('auth.login password')
                     return redirect_after_login()
             else:
                 if user.webauthn_credentials:
@@ -56,6 +57,7 @@ def logout_route():
 
     logout_user()
     session.clear()
+    current_app.logger.info('auth.logout')
     return redirect(url_for('index_route'))
 
 
@@ -72,6 +74,7 @@ def login_totp_route():
         if TOTPImpl(user.totp).verify_code(form.code.data):
             regenerate_session()
             login_user(user)
+            current_app.logger.info('auth.login totp')
             return redirect_after_login()
 
         form.code.errors.append('Invalid code')
@@ -114,6 +117,7 @@ def login_webauthn_route():
                 assertion['signature'])
             regenerate_session()
             login_user(user)
+            current_app.logger.info('auth.login webauthn')
             return redirect_after_login()
 
         except (KeyError, ValueError) as exc:
@@ -164,6 +168,7 @@ def login_oidc_callback_route():
         if user:
             regenerate_session()
             login_user(user)
+            current_app.logger.info('auth.login oidc')
             return redirect(url_for('index_route'))
 
     flash('OIDC Authentication failed', 'error')
