@@ -1,5 +1,15 @@
 # sner4 changelog
 
+## 0.7.1 - wrk and fix
+
+* changed: enhance logging in various components
+* changed: local swagger assets
+* changed: gunicorn service add access log to output
+* added: add ip and user for logs
+* fixed: six_enum_discover usr local scanning if necessary
+* fixed: webauthn credential management javascripts
+
+
 ## 0.7.0 - towards ethical scanning [BC BREAK]
 
 * bump used dependencies
@@ -22,6 +32,7 @@
 * added: public api accesible with apikey (reject session auth to api; prevent csrf)
 * added: user authentication simple OIDC support, user profile generate apikey
 * added: basic quickjump via address or hostname
+* added: readynet_recount command, update readynets for current heatmap_hot_level
 * security: allow login only for active users
 
 
