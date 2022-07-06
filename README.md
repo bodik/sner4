@@ -8,7 +8,7 @@ GitHub Actions: [![Tests CI](https://github.com/bodik/sner4/workflows/Tests%20CI
 * [Features](#2-features)
 * [Installation](#3-installation)
 * [Usage](#4-usage)
-* [Development](#5-development)
+* [Known issues](#5-known-issues)
 
 
 
@@ -278,3 +278,11 @@ bin/server storage import nmap output.xml
 #### Use-case: Shell interface and scripting
 
 See `scripts/`.
+
+
+
+## 5 Known issues
+
+* Swagger UI does not work well for session authenticated users. In order to
+  prevent CSRF for API endpoints only apikey must be used in the request. Use
+  private-browser window.
