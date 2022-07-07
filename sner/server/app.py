@@ -128,7 +128,10 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
 
     if not app.logger.level:  # pylint: disable=no-member
         app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
-    default_handler.setFormatter(LogFormatter('[%(asctime)s] %(levelname)s %(module)s %(remote_addr)s %(user)s %(message)s'))
+    default_handler.setFormatter(LogFormatter(
+        '[%(asctime)s] %(levelname)s %(module)s %(remote_addr)s %(user)s %(message)s',
+        '%d/%b/%Y:%H:%M:%S %z'
+    ))
 
     if app.config['XFLASK_PROXYFIX']:
         app.wsgi_app = ProxyFix(app.wsgi_app)
