@@ -59,7 +59,7 @@ class ModuleBase(ABC):
         self.process = None
 
     @abstractmethod
-    def run(self, assignment):  # pylint: disable=no-self-use
+    def run(self, assignment):
         """run module for assignment"""
 
         Path('assignment.json').write_text(json.dumps(assignment), encoding='utf-8')

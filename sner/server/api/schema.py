@@ -10,7 +10,7 @@ class BaseSchema(Schema):
     """base api schema"""
 
     @post_dump
-    def remove_none(self, data, **kwargs):  # pylint: disable=no-self-use,unused-argument
+    def remove_none(self, data, **kwargs):  # pylint: disable=unused-argument
         """Remove None fields"""
 
         return {key: value for key, value in data.items() if (value is not None) and (value != [])}
@@ -36,7 +36,7 @@ class JobAssignmentConfigSchema(BaseSchema):
     # allow uknown fields to be dumped
     # https://github.com/marshmallow-code/marshmallow/issues/1545
     @post_dump(pass_original=True)
-    def keep_unknowns(self, output, orig, **kwargs):  # pylint: disable=no-self-use,unused-argument
+    def keep_unknowns(self, output, orig, **kwargs):  # pylint: disable=unused-argument
         """postprocess during serialize"""
 
         for key in orig:

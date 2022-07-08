@@ -51,27 +51,27 @@ SEARCH_GRAMMAR = r"""
 class TreeToSAFilter(Transformer):
     """grammar tree to filters transformer"""
 
-    def expression(self, args):  # pylint: disable=no-self-use
+    def expression(self, args):
         """transform disjunction"""
         return {'or': args} if len(args) > 1 else args[0]
 
-    def term(self, args):  # pylint: disable=no-self-use
+    def term(self, args):
         """transform conjunction"""
         return {'and': args} if len(args) > 1 else args[0]
 
-    def criteria(self, args):  # pylint: disable=no-self-use
+    def criteria(self, args):
         """transform criteria"""
         return dict(zip(['model', 'field', 'op', 'value'], args[0].value.split('.')+[args[1].value, args[2]]))
 
-    def array(self, args):  # pylint: disable=no-self-use
+    def array(self, args):
         """transform array; return plain list, discarding the object"""
         return args
 
-    def string(self, args):  # pylint: disable=no-self-use
+    def string(self, args):
         """unquote string"""
         return json.loads(args[0])
 
-    def number(self, args):  # pylint: disable=no-self-use
+    def number(self, args):
         """cast to actual number type"""
         return float(args[0])
 
