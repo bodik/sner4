@@ -54,9 +54,9 @@ def login_route():
 def logout_route():
     """logout route"""
 
+    current_app.logger.info('auth.logout')
     logout_user()
     session.clear()
-    current_app.logger.info('auth.logout')
     return redirect(url_for('index_route'))
 
 
