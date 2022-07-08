@@ -14,9 +14,9 @@ class WrappedFido2Server(Fido2Server):
 
     def __init__(self):
         """initialize with default rp name"""
-        super().__init__(PublicKeyCredentialRpEntity(getfqdn(), f'{getfqdn()} RP'))
+        super().__init__(PublicKeyCredentialRpEntity(name=f'{getfqdn()} RP', id=getfqdn()))
 
     def init_app(self, app):
         """reinitialize on factory pattern config request"""
         ident = app.config['SERVER_NAME'] or getfqdn()
-        super().__init__(PublicKeyCredentialRpEntity(ident, f'{ident} RP'))
+        super().__init__(PublicKeyCredentialRpEntity(name=f'{ident} RP', id=ident))

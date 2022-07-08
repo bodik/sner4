@@ -8,8 +8,7 @@ from http import HTTPStatus
 
 from authlib.common.errors import AuthlibBaseError
 from fido2 import cbor
-from fido2.client import ClientData
-from fido2.ctap2 import AuthenticatorData
+from fido2.webauthn import AuthenticatorData, CollectedClientData
 from flask import current_app, flash, redirect, request, render_template, Response, session, url_for
 from flask_login import login_user, logout_user
 from requests.exceptions import HTTPError
@@ -112,7 +111,7 @@ def login_webauthn_route():
                 session.pop('webauthn_login_state'),
                 webauthn_credentials(user),
                 assertion['credentialRawId'],
-                ClientData(assertion['clientDataJSON']),
+                CollectedClientData(assertion['clientDataJSON']),
                 AuthenticatorData(assertion['authenticatorData']),
                 assertion['signature'])
             regenerate_session()

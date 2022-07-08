@@ -12,8 +12,7 @@ from socket import getfqdn
 
 from datatables import ColumnDT, DataTables
 from fido2 import cbor
-from fido2.client import ClientData
-from fido2.ctap2 import AttestationObject
+from fido2.webauthn import AttestationObject, CollectedClientData
 from flask import current_app, flash, redirect, render_template, request, Response, session, url_for
 from flask_login import current_user
 from sqlalchemy import literal_column
@@ -180,7 +179,7 @@ def profile_webauthn_register_route():
             attestation = cbor.decode(b64decode(form.attestation.data))
             auth_data = webauthn.register_complete(
                 session.pop('webauthn_register_state'),
-                ClientData(attestation['clientDataJSON']),
+                CollectedClientData(attestation['clientDataJSON']),
                 AttestationObject(attestation['attestationObject']))
 
             db.session.add(WebauthnCredential(

@@ -19,7 +19,7 @@ elastic-transport==8.1.2
 elasticsearch==8.3.1
 factory-boy==3.2.1
 Faker==13.15.0
-fido2==0.9.3
+fido2==1.0.0
 file-magic==0.4.0
 flake8==4.0.1
 Flask==2.1.2
@@ -84,7 +84,7 @@ schema==0.7.5
 selenium==3.141.0
 semver==2.13.0
 six==1.16.0
-soft-webauthn==0.1.2
+soft-webauthn==0.1.4
 soupsieve==2.3.2.post1
 SQLAlchemy==1.4.39
 sqlalchemy-datatables==2.0.1
