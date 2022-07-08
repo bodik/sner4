@@ -2,10 +2,12 @@
 
 ## 0.7.1 - wrk and fix
 
-* changed: enhance logging in various components
+* changed: bump packages
+* changed: enhance logging in various components, use apache time format
 * changed: local swagger assets
 * changed: gunicorn service add access log to output
 * added: add ip and user for logs
+* added: optional werkzeug proxyfix for proper remote_addr handling if server runs behing reverse proxy
 * fixed: six_enum_discover usr local scanning if necessary
 * fixed: webauthn credential management javascripts
 
