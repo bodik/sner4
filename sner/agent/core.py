@@ -6,10 +6,10 @@ sner agent
 import copy
 import json
 import logging
+import logging.config
 import os
 import shutil
 import signal
-import sys
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from base64 import b64encode
@@ -40,17 +40,31 @@ DEFAULT_CONFIG = {
 }
 
 
-def setup_logger():
-    """configure logger"""
+def configure_logging():
+    """configure logging"""
 
-    logger = logging.getLogger(LOGGER_NAME)
-    logger.setLevel(logging.INFO)
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter('%(levelname)s %(message)s'))
-    logger.addHandler(handler)
-
-    return logger
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'simple': {
+                'format': f'{LOGGER_NAME} %(levelname)s %(message)s',
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'simple'
+            }
+        },
+        'loggers': {
+            LOGGER_NAME: {
+                'level': 'INFO',
+                'handlers': ['console']
+            }
+        }
+    })
 
 
 def config_from_yaml(filename):
@@ -259,7 +273,8 @@ class AssignableAgent(AgentBase):
 def main(argv=None):
     """sner agent main"""
 
-    logger = setup_logger()
+    configure_logging()
+    logger = logging.getLogger(LOGGER_NAME)
 
     parser = ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='show debug output')

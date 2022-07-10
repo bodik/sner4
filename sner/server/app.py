@@ -5,12 +5,12 @@ main application package module
 
 import json
 import logging
+import logging.config
 import os
 import sys
 
 import flask.cli
 from flask import Flask, has_request_context, render_template, request
-from flask.logging import default_handler
 from flask_login import current_user
 from flask_wtf.csrf import generate_csrf
 from sqlalchemy import func
@@ -43,6 +43,7 @@ from sner.server.scheduler.models import Excl, ExclFamily, Job, Heatmap, Queue, 
 from sner.server.storage.models import Host, Note, Service, Vuln
 
 
+APP_NAME = 'sner.server'
 DEFAULT_CONFIG = {
     # flask
     'SECRET_KEY': os.urandom(32),
@@ -118,24 +119,58 @@ class LogFormatter(logging.Formatter):
         return super().format(record)
 
 
+def configure_logging():
+    """configure server/app logging"""
+
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'sner_server': {
+                'class': 'sner.server.app.LogFormatter',
+                'format': f'{APP_NAME} %(remote_addr)s - %(user)s [%(asctime)s] %(levelname)s %(message)s',
+                'datefmt': '%d/%b/%Y:%H:%M:%S %z'
+            },
+            'sner_werkzeug': {
+                'format': 'werkzeug %(message)s'
+            }
+        },
+        'handlers': {
+            'console_default': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'sner_server'
+            },
+            'console_werkzeug': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'sner_werkzeug'
+            }
+        },
+        'loggers': {
+            APP_NAME: {
+                'level': 'INFO',
+                'handlers': ['console_default']
+            },
+            'werkzeug': {
+                'handlers': ['console_werkzeug']
+            }
+        }
+    })
+
+
 def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     """flask application factory"""
 
-    app = Flask('sner.server')
+    configure_logging()
+
+    app = Flask(APP_NAME)
     app.config.update(DEFAULT_CONFIG)  # default config
     app.config.update(config_from_yaml(config_file))  # service configuration
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
 
-    if not app.logger.level:  # pylint: disable=no-member
-        app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
-    default_handler.setFormatter(LogFormatter(
-        '[%(asctime)s] %(remote_addr)s %(user)s %(levelname)s %(message)s',
-        '%d/%b/%Y:%H:%M:%S %z'
-    ))
-
     if app.config['XFLASK_PROXYFIX']:
         app.wsgi_app = ProxyFix(app.wsgi_app)
-
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
 
     db.init_app(app)

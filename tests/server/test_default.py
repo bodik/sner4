@@ -4,6 +4,7 @@ server functions tests
 """
 
 import os
+import re
 import sys
 from datetime import datetime
 from http import HTTPStatus
@@ -12,9 +13,8 @@ from unittest.mock import patch
 
 import pytest
 from flask import current_app, url_for
-from flask.logging import default_handler
 
-from sner.server.app import cli, create_app
+from sner.server.app import APP_NAME, cli, create_app
 from sner.version import __version__
 
 
@@ -89,14 +89,14 @@ def test_logformatter(caplog):
     """test log formatter"""
 
     app = create_app(config_file='tests/sner.yaml')
-    caplog.handler.setFormatter(default_handler.formatter)
+    caplog.handler.setFormatter(app.logger.handlers[0].formatter)  # pylint: disable=no-member
 
     with app.app_context():
         current_app.logger.info('test1')
-        assert '- - INFO test1' in caplog.text
+        assert re.match(fr'^{APP_NAME} - - - \[.*\] INFO test1', caplog.text)
     caplog.clear()
 
     with app.test_request_context(environ_base={'REMOTE_ADDR': '127.0.0.2'}):
         current_app.logger.info('test2')
-        assert '127.0.0.2 - INFO test2' in caplog.text
+        assert re.match(fr'^{APP_NAME} 127.0.0.2 - - \[.*\] INFO test2', caplog.text)
     caplog.clear()
