@@ -6,10 +6,4 @@ if [ -z "$1" ]; then
         exit 1
 fi
 
-pg_restore \
-	--dbname sner \
-	--no-owner \
-	--no-privileges \
-	--if-exists \
-	--clean \
-	$1
+bin/server psql < $1

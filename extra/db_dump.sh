@@ -6,10 +6,11 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-pg_dump sner \
+pg_dump \
+	--clean \
 	--exclude-table=user \
 	--exclude-table=user_id_seq \
 	--exclude-table=webauthn_credential \
 	--exclude-table=webauthn_credential_id_seq \
-	--format=custom \
+	sner \
 	> $1
