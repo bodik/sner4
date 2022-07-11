@@ -27,7 +27,7 @@
 
 {% block content %}
 {% call cm.heading(['Host', '%s %s' % (host.address, host.hostname)]) %}
-	<div class="pl-2">
+	<div class="breadcrumb-buttons pl-2">
 		<div class="btn-group">
 			<a class="btn btn-light disabled"><i class="fas fa-external-link-alt text-link"></i></a>
 			<a class="btn btn-light" rel="noreferrer" href="https://apps.db.ripe.net/db-web-ui/#/query?searchtext={{ host.address }}">ripe</a>
@@ -41,12 +41,20 @@
 			{{ cm.view_tag_abuttons(config['SNER_TAGS_HOST'], 'storage.host_tag_multiid_route', host.id) }}
 		</div>
 		<div class="btn-group">
-			<a class="btn btn-outline-primary disabled"><i class="fas fa-plus text-primary"></i></a>
-			<a class="btn btn-outline-primary" href="{{ url_for('storage.service_add_route', host_id=host.id) }}">Service</a>
-			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}">Vuln</a>
-			<a class="btn btn-outline-primary" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}">Note</a>
+			<div class="btn-group dropdown dropleft">
+				<a class="btn btn-outline-primary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+				<div class="dropdown-menu">
+					<h6 class="dropdown-header">More data</h6>
+					<a class="dropdown-item disabled">created: {{ host.created }}</a>
+					<a class="dropdown-item disabled">modified: {{ host.modified }}</a>
+					<a class="dropdown-item disabled">rescan_time: {{ host.rescan_time|default('', true) }}</a>
+				</div>
+			</div>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.service_add_route', host_id=host.id) }}" title="Add service">+S</a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_add_route', model_name='host', model_id=host.id) }}" title="Add vuln">+V</a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.note_add_route', model_name='host', model_id=host.id) }}" title="Add note">+N</a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}" title="Edit"><i class="fas fa-edit"></i></a>
 		</div>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.host_edit_route', host_id=host.id) }}"><i class="fas fa-edit"></i></a>
 		{% with form=button_form, form_url=url_for('storage.host_delete_route', host_id=host.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
 {% endcall %}
@@ -56,10 +64,6 @@
 		<tr>
 			<th>os</th>
 			<td>{{ host.os }}</td>
-		</tr>
-		<tr>
-			<th>ctime / mtime</th>
-			<td>{{ host.created|datetime }} / {{ host.modified|datetime }}</td>
 		</tr>
 		<tr>
 			<th>tags</th>

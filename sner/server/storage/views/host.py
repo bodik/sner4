@@ -3,8 +3,9 @@
 storage hosts views
 """
 
+import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
@@ -16,7 +17,7 @@ from sner.server.storage.core import annotate_model, tag_model_multiid
 from sner.server.storage.forms import HostForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, valid_next_url
+from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/host/list')
@@ -45,6 +46,9 @@ def host_list_json_route():
         ColumnDT(func.coalesce(query_cnt_notes.c.cnt, 0), mData='cnt_n', global_search=False),
         ColumnDT(Host.tags, mData='tags'),
         ColumnDT(Host.comment, mData='comment'),
+        ColumnDT(Host.created, mData='created'),
+        ColumnDT(Host.modified, mData='modified'),
+        ColumnDT(Host.rescan_time, mData='rescan_time'),
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Host) \
@@ -55,7 +59,7 @@ def host_list_json_route():
         query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     hosts = DataTables(request.values.to_dict(), query, columns).output_result()
-    return jsonify(hosts)
+    return Response(json.dumps(hosts, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 @blueprint.route('/host/add', methods=['GET', 'POST'])

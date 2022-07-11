@@ -13,8 +13,19 @@ $(document).ready(function() {
 
 {% block content %}
 {% call cm.heading(['Note', '%s %s' % (note.host.address, note.host.hostname), note.xtype]) %}
-	<div class="pl-2">
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}"><i class="fas fa-edit"></i></a>
+	<div class="breadcrumb-buttons pl-2">
+		<div class="btn-group">
+			<div class="btn-group dropdown dropleft">
+				<a class="btn btn-outline-primary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+				<div class="dropdown-menu">
+					<h6 class="dropdown-header">More data</h6>
+					<a class="dropdown-item disabled">created: {{ note.created }}</a>
+					<a class="dropdown-item disabled">modified: {{ note.modified }}</a>
+					<a class="dropdown-item disabled">import_time: {{ note.import_time|default('', true) }}</a>
+				</div>
+			</div>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.note_edit_route', note_id=note.id) }}" title="Edit"><i class="fas fa-edit"></i></a>
+		</div>
 		{% with form=button_form, form_url=url_for('storage.note_delete_route', note_id=note.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
 {% endcall %}

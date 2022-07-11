@@ -93,25 +93,38 @@ class SnerStorageComponent extends SnerComponentBase {
 			'host_link': `<a href="{{> storage.host_view_route host_id=host_id}}">{{host_address}}</a>`,
 			'host_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> storage.service_add_route host_id=id}}">Service</a>
-					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='host' model_id=id}}">Vuln</a>
-					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='host' model_id=id}}">Note</a>
-				</div>
-				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" href="{{> storage.host_edit_route host_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.host_delete_route host_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+					<div class="btn-group btn-group-sm dropdown dropleft">
+						<a class="btn btn-outline-secondary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+						<div class="dropdown-menu">
+							<h6 class="dropdown-header">More data</h6>
+							<a class="dropdown-item disabled">created: {{this.created}}</a>
+							<a class="dropdown-item disabled">modified: {{this.modified}}</a>
+							<a class="dropdown-item disabled">rescan_time: {{this.rescan_time}}</a>
+						</div>
+					</div>
+					<a class="btn btn-outline-secondary font-weight-bold" href="{{> storage.service_add_route host_id=id}}" title="Add service">+S</a>
+					<a class="btn btn-outline-secondary font-weight-bold" href="{{> storage.vuln_add_route model_name='host' model_id=id}}" title="Add vuln">+V</a>
+					<a class="btn btn-outline-secondary font-weight-bold" href="{{> storage.note_add_route model_name='host' model_id=id}}" title="Add note">+N</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.host_edit_route host_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.host_delete_route host_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 
 			'service_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary disabled"><i class="fas fa-plus"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> storage.vuln_add_route model_name='service' model_id=id}}">Vuln</a>
-					<a class="btn btn-outline-secondary" href="{{> storage.note_add_route model_name='service' model_id=id}}">Note</a>
-				</div>
-				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+					<div class="btn-group btn-group-sm dropdown dropleft">
+						<a class="btn btn-outline-secondary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+						<div class="dropdown-menu">
+							<h6 class="dropdown-header">More data</h6>
+							<a class="dropdown-item disabled">created: {{this.created}}</a>
+							<a class="dropdown-item disabled">modified: {{this.modified}}</a>
+							<a class="dropdown-item disabled">rescan_time: {{this.rescan_time}}</a>
+							<a class="dropdown-item disabled">import_time: {{this.import_time}}</a>
+						</div>
+					</div>
+					<a class="btn btn-outline-secondary font-weight-bold" href="{{> storage.vuln_add_route model_name='service' model_id=id}}" title="Add vuln">+V</a>
+					<a class="btn btn-outline-secondary font-weight-bold" href="{{> storage.note_add_route model_name='service' model_id=id}}" title="Add note">+N</a>
+					<a class="btn btn-outline-secondary" href="{{> storage.service_edit_route service_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 			'service_list_filter_info_link': `
 				{{#if info}}
@@ -137,16 +150,35 @@ class SnerStorageComponent extends SnerComponentBase {
 			'vuln_refs': `{{#each refs}}<a rel="noreferrer" href="{{url_for_ref this}}">{{text_for_ref this}}</a> {{/each}}`,
 			'vuln_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+					<div class="btn-group btn-group-sm dropdown dropleft">
+						<a class="btn btn-outline-secondary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+						<div class="dropdown-menu">
+							<h6 class="dropdown-header">More data</h6>
+							<a class="dropdown-item disabled">created: {{this.created}}</a>
+							<a class="dropdown-item disabled">modified: {{this.modified}}</a>
+							<a class="dropdown-item disabled">rescan_time: {{this.rescan_time}}</a>
+							<a class="dropdown-item disabled">import_time: {{this.import_time}}</a>
+						</div>
+					</div>
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 			'vuln_list_filter_name_link': `<a href='{{> storage.vuln_list_route_filter_name filter_value=name_encoded}}'>{{name}}</a>`,
 
 			'note_controls': `
 				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}"><i class="fas fa-eye"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}"><i class="fas fa-trash text-danger"></i></a>
+					<div class="btn-group btn-group-sm dropdown dropleft">
+						<a class="btn btn-outline-secondary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+						<div class="dropdown-menu">
+							<h6 class="dropdown-header">More data</h6>
+							<a class="dropdown-item disabled">created: {{this.created}}</a>
+							<a class="dropdown-item disabled">modified: {{this.modified}}</a>
+							<a class="dropdown-item disabled">import_time: {{this.import_time}}</a>
+						</div>
+					</div>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_view_route note_id=id}}" title="View"><i class="fas fa-eye"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
+					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 		};
 

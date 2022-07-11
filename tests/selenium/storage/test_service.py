@@ -5,10 +5,11 @@ selenium ui tests for storage.service component
 
 from flask import url_for
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.extensions import db
 from sner.server.storage.models import Service
-from tests.selenium import dt_inrow_delete, dt_rendered
+from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
 
 
@@ -45,3 +46,18 @@ def test_service_list_route_service_endpoint_dropdown(live_server, sl_operator, 
     sl_operator.get(url_for('storage.service_list_route', _external=True))
     dt_rendered(sl_operator, 'service_list_table', service.comment)
     check_service_endpoint_dropdown(sl_operator, sl_operator.find_element(By.ID, 'service_list_table'), service.port)
+
+
+def test_service_list_route_moredata_dropdown(live_server, sl_operator, service):  # pylint: disable=unused-argument
+    """test moredata dropdown"""
+
+    sl_operator.get(url_for('storage.service_list_route', _external=True))
+    dt_rendered(sl_operator, 'service_list_table', service.comment)
+    sl_operator.find_element(By.ID, 'service_list_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="service_list_table"]//h6[text()="More data"]'
+    )))

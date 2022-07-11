@@ -3,8 +3,9 @@
 storage service views
 """
 
+import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_filters import apply_filters
@@ -17,7 +18,7 @@ from sner.server.storage.core import annotate_model
 from sner.server.storage.forms import ServiceForm
 from sner.server.storage.models import Host, Service
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, valid_next_url
+from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 def service_info_column(crop):
@@ -53,6 +54,10 @@ def service_list_json_route():
         ColumnDT(Service.info, mData='info'),
         ColumnDT(Service.tags, mData='tags'),
         ColumnDT(Service.comment, mData='comment'),
+        ColumnDT(Service.created, mData='created'),
+        ColumnDT(Service.modified, mData='modified'),
+        ColumnDT(Service.rescan_time, mData='rescan_time'),
+        ColumnDT(Service.import_time, mData='import_time'),
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Service).outerjoin(Host)
@@ -60,7 +65,7 @@ def service_list_json_route():
         query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
-    return jsonify(services)
+    return Response(json.dumps(services, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 @blueprint.route('/service/add/<host_id>', methods=['GET', 'POST'])

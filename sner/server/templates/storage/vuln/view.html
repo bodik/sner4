@@ -14,13 +14,25 @@ $(document).ready(function() {
 
 {% block content %}
 {% call cm.heading(['Vuln', '%s %s' % (vuln.host.address, vuln.host.hostname), '%s (%s)' % (vuln.name, vuln.xtype)]) %}
-	<div class="pl-2">
-		<a class="btn btn-outline-primary" title="Jump to same name vuln listing" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}"><i class="fas fa-list"></i></a>
+	<div class="breadcrumb-buttons pl-2">
 		<div class="btn-group">
 			<a class="btn btn-outline-primary disabled"><i class="fas fa-tag text-primary"></i></a>
 			{{ cm.view_tag_abuttons(config['SNER_TAGS_VULN'], 'storage.vuln_tag_multiid_route', vuln.id) }}
 		</div>
-		<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}"><i class="fas fa-edit"></i></a>
+		<div class="btn-group">
+			<div class="btn-group dropdown dropleft">
+				<a class="btn btn-outline-primary font-weight-bold" data-toggle="dropdown" href="#" title="Show more data"><i class="fa fa-binoculars"></i></a>
+				<div class="dropdown-menu">
+					<h6 class="dropdown-header">More data</h6>
+					<a class="dropdown-item disabled">created: {{ vuln.created }}</a>
+					<a class="dropdown-item disabled">modified: {{ vuln.modified }}</a>
+					<a class="dropdown-item disabled">rescan_time: {{ vuln.rescan_time|default('', true) }}</a>
+					<a class="dropdown-item disabled">import_time: {{ vuln.import_time|default('', true) }}</a>
+				</div>
+			</div>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}" title="Jump to same name vuln listing"><i class="fas fa-list"></i></a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}" title="Edit"><i class="fas fa-edit"></i></a>
+		</div>
 		{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
 {% endcall %}

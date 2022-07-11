@@ -48,6 +48,21 @@ def test_host_list_route_annotate(live_server, sl_operator, host):  # pylint: di
     check_annotate(sl_operator, 'abutton_annotate_dt', host)
 
 
+def test_host_list_route_moredata_dropdown(live_server, sl_operator, host):  # pylint: disable=unused-argument
+    """test moredata dropdown"""
+
+    sl_operator.get(url_for('storage.host_list_route', _external=True))
+    dt_rendered(sl_operator, 'host_list_table', host.comment)
+    sl_operator.find_element(By.ID, 'host_list_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="host_list_table"]//h6[text()="More data"]'
+    )))
+
+
 def test_host_edit_route_addtag(live_server, sl_operator, host):  # pylint: disable=unused-argument
     """addtag buttons test"""
 
@@ -66,6 +81,20 @@ def test_host_view_route_annotate(live_server, sl_operator, host):  # pylint: di
 
     sl_operator.get(url_for('storage.host_view_route', host_id=host.id, _external=True))
     check_annotate(sl_operator, 'abutton_annotate_view', host)
+
+
+def test_host_view_route_moredata_dropdown(live_server, sl_operator, host):  # pylint: disable=unused-argument
+    """test host view breadcrumb ribbon moredata dropdown"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=host.id, _external=True))
+    sl_operator.find_element(By.XPATH, '//div[contains(@class, "breadcrumb-buttons")]').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//div[contains(@class, "breadcrumb-buttons")]//h6[text()="More data"]'
+    )))
 
 
 def test_host_view_route_services_list_inrow_delete(live_server, sl_operator, service):  # pylint: disable=unused-argument
@@ -87,6 +116,21 @@ def test_host_view_route_services_list_service_endpoint_dropdown(live_server, sl
     sl_operator.get(url_for('storage.host_view_route', host_id=service.host_id, _external=True))
     switch_tab(sl_operator, 'services', 'host_view_service_table', service.comment)
     check_service_endpoint_dropdown(sl_operator, sl_operator.find_element(By.ID, 'host_view_service_table'), service.port)
+
+
+def test_host_view_route_services_list_moredata_dropdown(live_server, sl_operator, service):  # pylint: disable=unused-argument
+    """host view tabbed services; moredata dropdown"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=service.host_id, _external=True))
+    switch_tab(sl_operator, 'services', 'host_view_service_table', service.comment)
+    sl_operator.find_element(By.ID, 'host_view_service_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="host_view_service_table"]//h6[text()="More data"]'
+    )))
 
 
 def test_host_view_route_vulns_list_inrow_delete(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
@@ -114,6 +158,21 @@ def test_host_view_route_vulns_list_service_endpoint_dropdown(live_server, sl_op
         sl_operator.find_element(By.ID, 'host_view_vuln_table'),
         f'{test_vuln.service.port}/{test_vuln.service.proto}'
     )
+
+
+def test_host_view_route_vulns_list_moredata_dropdown(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
+    """host view tabbed vulns; moredata dropdown"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=vuln.host_id, _external=True))
+    switch_tab(sl_operator, 'vulns', 'host_view_vuln_table', vuln.comment)
+    sl_operator.find_element(By.ID, 'host_view_vuln_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="host_view_vuln_table"]//h6[text()="More data"]'
+    )))
 
 
 def test_host_view_route_vulns_list_selectrows(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
@@ -157,3 +216,18 @@ def test_host_view_route_notes_list_service_endpoint_dropdown(live_server, sl_op
         sl_operator.find_element(By.ID, 'host_view_note_table'),
         f'{test_note.service.port}/{test_note.service.proto}'
     )
+
+
+def test_host_view_route_notes_list_moredata_dropdown(live_server, sl_operator, note):  # pylint: disable=unused-argument
+    """host view tabbed notes; moredata dropdown"""
+
+    sl_operator.get(url_for('storage.host_view_route', host_id=note.host_id, _external=True))
+    switch_tab(sl_operator, 'notes', 'host_view_note_table', note.comment)
+    sl_operator.find_element(By.ID, 'host_view_note_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="host_view_note_table"]//h6[text()="More data"]'
+    )))

@@ -3,8 +3,9 @@
 storage note views
 """
 
+import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 from sqlalchemy_filters import apply_filters
 
@@ -16,7 +17,7 @@ from sner.server.storage.core import annotate_model, get_related_models
 from sner.server.storage.forms import NoteForm
 from sner.server.storage.models import Host, Note, Service
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, valid_next_url
+from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/note/list')
@@ -46,6 +47,9 @@ def note_list_json_route():
         ColumnDT(Note.data, mData='data'),
         ColumnDT(Note.tags, mData='tags'),
         ColumnDT(Note.comment, mData='comment'),
+        ColumnDT(Note.created, mData='created'),
+        ColumnDT(Note.modified, mData='modified'),
+        ColumnDT(Note.import_time, mData='import_time'),
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
@@ -53,7 +57,7 @@ def note_list_json_route():
         query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
 
     notes = DataTables(request.values.to_dict(), query, columns).output_result()
-    return jsonify(notes)
+    return Response(json.dumps(notes, cls=SnerJSONEncoder), mimetype='application/json')
 
 
 @blueprint.route('/note/add/<model_name>/<model_id>', methods=['GET', 'POST'])

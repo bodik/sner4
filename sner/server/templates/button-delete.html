@@ -2,5 +2,5 @@
 {% import "bootstrap_wtf.html" as bwtf %}
 <form class="form-inline" style="display: inline;" {% if form_url %}action="{{ form_url }}"{% endif %} method="post">
 	{{ bwtf.bootstrap_form(form) }}
-	<button class="btn btn-outline-primary" type="submit" onClick="return confirm('Really delete?')"><i class="fas fa-trash text-danger"></i></button>
+	<button class="btn btn-outline-primary" type="submit" onClick="return confirm('Really delete?')" title="Delete"><i class="fas fa-trash text-danger"></i></button>
 </form>

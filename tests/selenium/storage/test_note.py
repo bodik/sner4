@@ -5,11 +5,12 @@ selenium ui tests for storage.note component
 
 from flask import url_for
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.extensions import db
 from sner.lib import format_host_address
 from sner.server.storage.models import Note
-from tests.selenium import dt_inrow_delete, dt_rendered
+from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
 
 
@@ -54,6 +55,21 @@ def test_note_list_route_service_endpoint_dropdown(live_server, sl_operator, not
     )
 
 
+def test_note_list_route_moredata_dropdown(live_server, sl_operator, note):  # pylint: disable=unused-argument
+    """moredata dropdown test"""
+
+    sl_operator.get(url_for('storage.note_list_route', _external=True))
+    dt_rendered(sl_operator, 'note_list_table', note.comment)
+    sl_operator.find_element(By.ID, 'note_list_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="note_list_table"]//h6[text()="More data"]'
+    )))
+
+
 def test_note_view_route_annotate(live_server, sl_operator, note):  # pylint: disable=unused-argument
     """test note annotation from view route"""
 
@@ -72,3 +88,17 @@ def test_note_view_route_service_endpoint_dropdown(live_server, sl_operator, not
         sl_operator.find_element(By.XPATH, '//td[contains(@class, "service_endpoint_dropdown")]'),
         f'<Service {test_note.service.id}: {format_host_address(test_note.host.address)} {test_note.service.proto}.{test_note.service.port}>'
     )
+
+
+def test_note_view_route_moredata_dropdown(live_server, sl_operator, note):  # pylint: disable=unused-argument
+    """test note view breadcrumb ribbon moredata dropdown"""
+
+    sl_operator.get(url_for('storage.note_view_route', note_id=note.id, _external=True))
+    sl_operator.find_element(By.XPATH, '//div[contains(@class, "breadcrumb-buttons")]').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//div[contains(@class, "breadcrumb-buttons")]//h6[text()="More data"]'
+    )))

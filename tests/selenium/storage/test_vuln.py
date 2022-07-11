@@ -116,6 +116,21 @@ def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vul
     )
 
 
+def test_vuln_list_route_moredata_dropdown(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
+    """moredata dropdown test"""
+
+    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
+    dt_rendered(sl_operator, 'vuln_list_table', vuln.comment)
+    sl_operator.find_element(By.ID, 'vuln_list_table').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//table[@id="vuln_list_table"]//h6[text()="More data"]'
+    )))
+
+
 def test_vuln_list_route_viatarget_visibility_toggle(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """viatarget visibility toggle"""
 
@@ -175,6 +190,20 @@ def test_vuln_view_route_service_endpoint_dropdown(live_server, sl_operator, vul
         sl_operator.find_element(By.XPATH, '//td[contains(@class, "service_endpoint_dropdown")]'),
         f'<Service {test_vuln.service.id}: {format_host_address(test_vuln.host.address)} {test_vuln.service.proto}.{test_vuln.service.port}>'
     )
+
+
+def test_vuln_view_route_moredata_dropdown(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
+    """test vuln view breadcrumb ribbon moredata dropdown"""
+
+    sl_operator.get(url_for('storage.vuln_view_route', vuln_id=vuln.id, _external=True))
+    sl_operator.find_element(By.XPATH, '//div[contains(@class, "breadcrumb-buttons")]').find_element(
+        By.XPATH,
+        './/div[contains(@class, "dropdown")]/a[@title="Show more data"]'
+    ).click()
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((
+        By.XPATH,
+        '//div[contains(@class, "breadcrumb-buttons")]//h6[text()="More data"]'
+    )))
 
 
 def test_vuln_grouped_route(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
