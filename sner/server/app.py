@@ -43,7 +43,6 @@ from sner.server.scheduler.models import Excl, ExclFamily, Job, Heatmap, Queue, 
 from sner.server.storage.models import Host, Note, Service, Vuln
 
 
-APP_NAME = 'sner.server'
 DEFAULT_CONFIG = {
     # flask
     'SECRET_KEY': os.urandom(32),
@@ -126,31 +125,31 @@ def configure_logging():
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'sner_server': {
+            'formatter_server': {
                 'class': 'sner.server.app.LogFormatter',
-                'format': f'{APP_NAME} %(remote_addr)s - %(user)s [%(asctime)s] %(levelname)s %(message)s',
+                'format': 'sner.server %(remote_addr)s - %(user)s [%(asctime)s] %(levelname)s %(message)s',
                 'datefmt': '%d/%b/%Y:%H:%M:%S %z'
             },
-            'sner_werkzeug': {
+            'formatter_werkzeug': {
                 'format': 'werkzeug %(message)s'
             }
         },
         'handlers': {
-            'console_default': {
+            'console_server': {
                 'class': 'logging.StreamHandler',
                 'stream': 'ext://sys.stdout',
-                'formatter': 'sner_server'
+                'formatter': 'formatter_server'
             },
             'console_werkzeug': {
                 'class': 'logging.StreamHandler',
                 'stream': 'ext://sys.stdout',
-                'formatter': 'sner_werkzeug'
+                'formatter': 'formatter_werkzeug'
             }
         },
         'loggers': {
-            APP_NAME: {
+            'sner.server': {
                 'level': 'INFO',
-                'handlers': ['console_default']
+                'handlers': ['console_server']
             },
             'werkzeug': {
                 'handlers': ['console_werkzeug']
@@ -164,7 +163,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
 
     configure_logging()
 
-    app = Flask(APP_NAME)
+    app = Flask('sner.server')
     app.config.update(DEFAULT_CONFIG)  # default config
     app.config.update(config_from_yaml(config_file))  # service configuration
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config

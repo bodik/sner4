@@ -14,7 +14,7 @@ from unittest.mock import patch
 import pytest
 from flask import current_app, url_for
 
-from sner.server.app import APP_NAME, cli, create_app
+from sner.server.app import cli, create_app
 from sner.version import __version__
 
 
@@ -93,10 +93,10 @@ def test_logformatter(caplog):
 
     with app.app_context():
         current_app.logger.info('test1')
-        assert re.match(fr'^{APP_NAME} - - - \[.*\] INFO test1', caplog.text)
+        assert re.match(r'^sner.server - - - \[.*\] INFO test1', caplog.text)
     caplog.clear()
 
     with app.test_request_context(environ_base={'REMOTE_ADDR': '127.0.0.2'}):
         current_app.logger.info('test2')
-        assert re.match(fr'^{APP_NAME} 127.0.0.2 - - \[.*\] INFO test2', caplog.text)
+        assert re.match(r'^sner.server 127.0.0.2 - - \[.*\] INFO test2', caplog.text)
     caplog.clear()

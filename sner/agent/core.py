@@ -47,21 +47,22 @@ def configure_logging():
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'simple': {
-                'format': f'{LOGGER_NAME} %(levelname)s %(message)s',
+            'formatter_agent': {
+                'format': f'{LOGGER_NAME} [%(asctime)s] %(levelname)s %(message)s',
+                'datefmt': '%d/%b/%Y:%H:%M:%S %z'
             }
         },
         'handlers': {
-            'console': {
+            'console_agent': {
                 'class': 'logging.StreamHandler',
                 'stream': 'ext://sys.stdout',
-                'formatter': 'simple'
+                'formatter': 'formatter_agent'
             }
         },
         'loggers': {
             LOGGER_NAME: {
                 'level': 'INFO',
-                'handlers': ['console']
+                'handlers': ['console_agent']
             }
         }
     })

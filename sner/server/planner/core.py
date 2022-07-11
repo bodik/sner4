@@ -28,6 +28,34 @@ from sner.server.storage.core import StorageManager
 REGISTERED_STAGES = {}
 
 
+def configure_logging():
+    """configure server/app logging"""
+
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'formatter_planner': {
+                'format': 'sner.planner [%(asctime)s] %(levelname)s %(message)s',
+                'datefmt': '%d/%b/%Y:%H:%M:%S %z'
+            }
+        },
+        'handlers': {
+            'console_planner': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'formatter_planner'
+            }
+        },
+        'loggers': {
+            'sner.server': {
+                'level': 'INFO',
+                'handlers': ['console_planner']
+            }
+        }
+    })
+
+
 def register_stage(class_):
     """register stage class by name"""
     if class_.__name__ not in REGISTERED_STAGES:
@@ -111,6 +139,7 @@ class Planner(TerminateContextMixin):
     LOOPSLEEP = 60
 
     def __init__(self, oneshot=False):
+        configure_logging()
         self.log = current_app.logger
         self.log.setLevel(logging.DEBUG if current_app.config['DEBUG'] else logging.INFO)
         self.original_signal_handlers = {}
