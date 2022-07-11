@@ -58,7 +58,7 @@ def quickjump_autocomplete_route():
     for host in hosts:
         if term in host.address:
             data.append(host.address)
-        if term in host.hostname:
+        if host.hostname and (term in host.hostname):
             data.append(host.hostname)
 
     return jsonify(data)
