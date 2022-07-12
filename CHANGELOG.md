@@ -3,13 +3,16 @@
 ## 0.7.1 - wrk and fix
 
 * changed: bump packages
-* changed: enhance logging in various components, use apache time format
-* changed: local swagger assets
-* changed: gunicorn service add access log to output
-* added: add ip and user for logs
-* added: optional werkzeug proxyfix for proper remote_addr handling if server runs behing reverse proxy
-* fixed: six_enum_discover usr local scanning if necessary
-* fixed: webauthn credential management javascripts
+* changed: enhance logging in various components, use apache time format, refactor configuration and setup
+* changed: server: local swagger assets
+* changed: extra: gunicorn service add access log to output
+* changed: extra: tune db_dump/restore scripts
+* fixed: plugin: six_enum_discover usr local scanning if necessary
+* fixed: server: webauthn credential management javascripts
+* fixed: server: quickjump when host.hostname is None
+* added: server: add ip and user for logs
+* added: server: optional werkzeug proxyfix for proper remote_addr handling if server runs behing reverse proxy
+* added: server: webui add moredata dropdowns for all storage objects (lists and views)
 
 
 ## 0.7.0 - towards ethical scanning [BC BREAK]
