@@ -102,11 +102,11 @@ class BulkIndexer:
 def update_managed_indices(esclient, current_index):  # pragma: nocover  ; mocked
     """update alias, pune old indices"""
 
-    esclient.indices.put_alias(current_index, ES_INDEX)
-    for index in esclient.indices.get(f'{ES_INDEX}-*'):
-        if index != current_index:
-            esclient.indices.delete(index)
-    esclient.indices.refresh(current_index)
+    esclient.indices.put_alias(index=current_index, name=ES_INDEX)
+    for item in esclient.indices.get(index=f'{ES_INDEX}-*'):
+        if item != current_index:
+            esclient.indices.delete(index=item)
+    esclient.indices.refresh(index=current_index)
 
 
 def sync_es_index(cvesearch_url, esd_url, namelen):
