@@ -1,5 +1,10 @@
 # sner4 changelog
 
+## 0.7.2 - finefixing [unreleased]
+
+* changed: nessus parser pull solution data
+
+
 ## 0.7.1 - wrk and fix
 
 * changed: bump packages
