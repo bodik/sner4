@@ -70,11 +70,12 @@ def v2_scheduler_job_output_route(args):
         return jsonify({'message': 'discard job'})
 
     try:
+        job_id = job.id
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
         return jsonify({'message': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
 
-    current_app.logger.info(f'api.scheduler job output {job.id}')
+    current_app.logger.info(f'api.scheduler job output {job_id}')
     return jsonify({'message': 'success'})
 
 
