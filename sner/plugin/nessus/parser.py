@@ -67,7 +67,9 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
             # parse vuln
             vuln_data = {
                 'severity': SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),
-                'descr': f'## Synopsis\n\n{report_item["synopsis"]}\n\n## Description\n\n{report_item["description"]}\n\n## Solution\n\n{report_item["solution"]}',
+                'descr': f'## Synopsis\n\n{report_item["synopsis"]}\n\n'
+                         + '## Description\n\n{report_item["description"]}\n\n'
+                         + '## Solution\n\n{report_item["solution"]}',
                 'refs': cls._parse_refs(report_item),
                 'import_time': report_item['HOST_START'],
             }
