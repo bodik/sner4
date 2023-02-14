@@ -13,6 +13,7 @@ from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
 from time import sleep
 
+import psycopg2
 from flask import current_app
 from pytimeparse import parse as timeparse
 from sqlalchemy import select
@@ -201,6 +202,9 @@ class Planner(TerminateContextMixin):
                     try:
                         current_app.logger.debug(f'stage run {name} {stage}')
                         stage.run()
+                    except psycopg2.OperationalError as exc:  # pragma: no cover  ; won't test
+                        current_app.logger.error(f'stage failed, {name} {stage}, {exc}', exc_info=True)
+                        db.session.rollback()
                     except Exception as exc:  # pylint: disable=broad-except  ; any exception can be raised during stage processing
                         current_app.logger.error(f'stage failed, {name} {stage}, {exc}', exc_info=True)
 
