@@ -88,7 +88,7 @@ $(document).ready(function() {
 <h2>Description</h2>
 <div>
 {% if vuln.descr %}
-	{% if vuln.xtype.startswith(('nessus.')) %}
+	{% if vuln.xtype and vuln.xtype.startswith(('nessus.')) %}
 		{% for tmp in vuln.descr.splitlines() %}<p>{{ tmp }}</p>{% endfor %}
 	{% else %}
 		<pre>{{ vuln.descr }}</pre>
