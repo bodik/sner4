@@ -189,7 +189,7 @@ systemctl enable --now sner-planner.service
 apt-get -y install git sudo make
 git clone https://github.com/bodik/sner4 /opt/sner
 cd /opt/sner
-ln -s ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
+make githook
 make install
 make install-extra
 make install-db
@@ -197,9 +197,9 @@ make install-db
 make db
 
 # run tests
-make test
-make test-extra
+make lint
 make coverage
+make test-extra
 
 # run dev server
 bin/server run

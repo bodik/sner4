@@ -1,6 +1,6 @@
 #!/bin/sh
 
-apt-get -y install postgresql-all
+apt-get -y install postgresql postgresql-contrib
 systemctl start postgresql
 
 sudo -u postgres psql -c "CREATE USER ${USER}" | true

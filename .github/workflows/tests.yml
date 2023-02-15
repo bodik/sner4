@@ -13,10 +13,11 @@ jobs:
       - run: sudo make install
       - run: sudo make install-extra
       - run: |
-          sudo apt-get -y install postgresql-all
+          sudo apt-get -y install postgresql postgresql-contrib
           sudo systemctl start postgresql
           sudo -u postgres psql -c "CREATE DATABASE sner_test"
           sudo -u postgres psql -c "CREATE USER ${USER}"
           mkdir -p /tmp/sner_test_var
-      - run: . venv/bin/activate && make
+      - run: . venv/bin/activate && make lint
+      - run: . venv/bin/activate && make coverage
       - run: . venv/bin/activate && make test-extra
