@@ -13,6 +13,7 @@ install:
 	sh bin/install_nmap.sh
 	sh bin/install_ipv6toolkit.sh
 	sh bin/install_jarm.sh
+	sh bin/install_firefox.sh
 
 install-db:
 	sh bin/install_db.sh

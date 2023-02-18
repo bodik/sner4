@@ -70,6 +70,13 @@ $(document).ready(function() {
 <div>
 {% if note.xtype and note.xtype.startswith(('nessus.', 'nmap.')) %}
 	<pre>{{ note.data|json_indent }}</pre>
+{% elif note.xtype == 'screenshot_web' %}
+	{% set data = note.data | from_json %}
+	<h2>URL</h2>
+	{{ data['url'] }}
+
+	<h2>Screenshot<h2>
+	<img src="data:image/png;base64,{{ data['img'] }}" style="border: 1px solid black;">
 {% else %}
 	{{ note.data }}
 {% endif %}
