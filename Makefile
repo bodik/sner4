@@ -1,4 +1,4 @@
-.PHONY: all install install-extra install-db db lint test test-extra coverage freeze
+.PHONY: all freeze githook install install-db db lint test coverage install-extra test-extra
 
 all: lint coverage
 
@@ -13,9 +13,6 @@ install:
 	sh bin/install_nmap.sh
 	sh bin/install_ipv6toolkit.sh
 	sh bin/install_jarm.sh
-
-install-extra:
-	sh bin/install_selenium.sh
 
 install-db:
 	sh bin/install_db.sh
@@ -32,9 +29,12 @@ lint:
 test:
 	pytest -v tests/agent tests/plugin tests/server
 
-test-extra:
-	pytest -x -vv tests/selenium
-
 coverage:
 	coverage run --source sner -m pytest tests/agent tests/plugin tests/server -x -vv
 	coverage report --show-missing --fail-under 100
+
+install-extra:
+	sh bin/install_selenium.sh
+
+test-extra:
+	pytest -x -vv tests/selenium
