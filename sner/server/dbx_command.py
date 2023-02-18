@@ -97,21 +97,21 @@ def initdata():  # pylint: disable=too-many-statements
 
     db.session.add(Queue(
         name='sner servicedisco nmap',
-        config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn', 'timing_perhost': 4}),
+        config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn --scanflags ECESYN', 'timing_perhost': 2}),
         group_size=1000,
         priority=10,
     ))
 
     db.session.add(Queue(
         name='sner servicescan nmap version',
-        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 5}),
+        config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 1}),
         group_size=50,
         priority=15,
     ))
 
     db.session.add(Queue(
         name='sner servicescan jarm',
-        config=yaml_dump({'module': 'jarm', 'delay': 5}),
+        config=yaml_dump({'module': 'jarm', 'delay': 1}),
         group_size=50,
         priority=15,
     ))

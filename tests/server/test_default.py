@@ -32,6 +32,12 @@ def test_json_indent_filter(app):
     assert app.jinja_env.filters['json_indent']('xxx') == 'xxx'
 
 
+def test_from_json__filter(app):
+    """test indenting filter"""
+
+    assert app.jinja_env.filters['from_json']('"xxx"') == 'xxx'
+
+
 def test_shell():
     """test shell context imports"""
 

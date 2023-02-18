@@ -211,19 +211,24 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.cli.add_command(storage_command)
 
     @app.template_filter('datetime')
-    def format_datetime(value, fmt='%Y-%m-%dT%H:%M:%S'):  # pylint: disable=unused-variable
+    def format_datetime(value, fmt='%Y-%m-%dT%H:%M:%S'):
         """Format a datetime"""
         if value is None:
             return ''
         return value.strftime(fmt)
 
     @app.template_filter('json_indent')
-    def json_indent(data):  # pylint: disable=unused-variable
+    def json_indent(data):
         """parse and format json"""
         try:
             return json.dumps(json.loads(data), sort_keys=True, indent=4)
         except ValueError:
             return data
+
+    @app.template_filter('from_json')
+    def from_json(data):
+        """parse json"""
+        return json.loads(data)
 
     # globaly enable flask_wtf csrf token helper
     # least intrusive way to pass token into every view without enforcing csrf on all routes
@@ -231,7 +236,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.add_template_global(name='sner_version', f=__version__)
 
     @app.shell_context_processor
-    def make_shell_context():  # pylint: disable=unused-variable
+    def make_shell_context():
         return {
             'app': app, 'db': db, 'func': func,
             'Excl': Excl, 'ExclFamily': ExclFamily, 'Heatmap': Heatmap, 'Job': Job, 'Queue': Queue, 'Readynet': Readynet, 'Target': Target,
@@ -240,7 +245,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
         }
 
     @app.route('/')
-    def index_route():  # pylint: disable=unused-variable
+    def index_route():
         return render_template('index.html')
 
     return app
