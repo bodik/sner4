@@ -44,10 +44,14 @@ def storage_import(path, parser, **kwargs):
         if not os.path.isfile(item):
             current_app.logger.error(f'invalid path "{item}"')
             sys.exit(1)
-        if kwargs.get('dry'):
-            StorageManager.import_parsed_dry(parser_impl.parse_path(item))
-        else:
-            StorageManager.import_parsed(parser_impl.parse_path(item), list(kwargs['addtag']))
+        try:
+            if kwargs.get('dry'):
+                StorageManager.import_parsed_dry(parser_impl.parse_path(item))
+            else:
+                StorageManager.import_parsed(parser_impl.parse_path(item), list(kwargs['addtag']))
+        except Exception as e:
+            current_app.exception(e)
+            current_app.logger.error('failed to parse %s', item)
 
     sys.exit(0)
 
