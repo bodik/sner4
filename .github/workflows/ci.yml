@@ -1,7 +1,18 @@
-name: Tests CI
+name: General CI
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - run: sudo apt-get update
+      - run: sudo sh bin/install.sh
+      - run: . venv/bin/activate && make lint
+
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -18,6 +29,5 @@ jobs:
           sudo -u postgres psql -c "CREATE DATABASE sner_test"
           sudo -u postgres psql -c "CREATE USER ${USER}"
           mkdir -p /tmp/sner_test_var
-      - run: . venv/bin/activate && make lint
       - run: . venv/bin/activate && make coverage
       - run: . venv/bin/activate && make test-extra
