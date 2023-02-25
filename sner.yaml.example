@@ -44,52 +44,28 @@
 #    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
 #
 #  stages:
-#    # queue processors
-#    stage_storageimport:
-#      _class: StorageImport
-#
-#    stage_standalonequeues:
-#      _class: StorageLoader
+#    service_scan:
 #      queues:
-#        - 'sner nmap script'
+#        - 'sner nmap serviceversion'
 #
-#    stage_servicescan:
-#      _class: StorageLoader
-#      queues:
-#        - 'sner servicescan nmap version'
-#        - 'sner servicescan jarm'
+#    service_disco:
+#      queue: 'sner nmap servicedisco'
 #
-#    stage_servicedisco:
-#      _class: ServiceDisco
-#      queues:
-#        - 'sner servicedisco nmap'
+#    six_dns_disco:
+#      queue: 'sner six_dns_discover'
+#      filternets: *home_netranges_ipv6
 #
-#    stage_sixenumdisco:
-#      _class: SixDisco
-#      queues:
-#        - 'sner six_enum_discover'
+#    six_enum_disco:
+#      queue: 'sner six_enum_discover'
 #
-#    stage_sixdnsdisco:
-#      _class: SixDisco
-#      queues:
-#        - 'sner six_dns_discover'
-#      filter_nets: *home_netranges_ipv6
-#
-#    # schedules
-#    stage_storagecleanup:
-#      _class: StorageCleanup
-#
-#    stage_netlistenum:
-#      _class: NetlistEnum
+#    netlist_enum:
 #      schedule: 120days
 #      netlist: *home_netranges_ipv4
 #
-#    stage_storagesixenum:
-#      _class: StorageSixEnum
+#    storage_six_enum:
 #      schedule: 90days
 #
-#    stage_storagerescan:
-#      _class: StorageRescan
+#    storage_rescan:
 #      schedule: 1hour
-#      service_interval: 20days
 #      host_interval: 60days
+#      service_interval: 20days

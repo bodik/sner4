@@ -4,6 +4,7 @@ planner commands
 """
 
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 
 from sner.server.planner.core import Planner
@@ -20,4 +21,4 @@ def command():
 def run(**kwargs):
     """run planner daemon"""
 
-    Planner(**kwargs).run()
+    Planner(current_app.config['SNER_PLANNER'].get('stages'), kwargs['oneshot']).run()

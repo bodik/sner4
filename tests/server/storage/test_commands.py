@@ -16,18 +16,16 @@ from sner.server.storage.commands import command
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 
 
-def test_import_command_invalidparser(runner):
+def test_import_command_errorhandling(runner):
     """test invalid parser"""
 
-    result = runner.invoke(command, ['import', 'invalid', '/nonexistent'])
+    # invalid parser
+    result = runner.invoke(command, ['import', 'invalid', 'dummy'])
     assert result.exit_code == 1
 
-
-def test_import_command_invalidpath(runner):
-    """test invalid input path"""
-
-    result = runner.invoke(command, ['import', 'nmap', '/nonexistent'])
-    assert result.exit_code == 1
+    # parse exception handling
+    result = runner.invoke(command, ['import', 'nmap', 'sner.yaml.example', 'notexist'])
+    assert result.exit_code == 0
 
 
 def test_import_command_dryrun(runner):

@@ -72,7 +72,7 @@ def initdata():  # pylint: disable=too-many-statements
     QueueManager.enqueue(queue, ['1', '2', '3'])
 
     db.session.add(Queue(
-        name='pentest full syn scan',
+        name='pentest nmap fullsynscan',
         config=yaml_dump({
             'module': 'nmap',
             'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
@@ -96,22 +96,15 @@ def initdata():  # pylint: disable=too-many-statements
     ))
 
     db.session.add(Queue(
-        name='sner servicedisco nmap',
+        name='sner nmap servicedisco',
         config=yaml_dump({'module': 'nmap', 'args': '-sS --top-ports 10000 -Pn --scanflags ECESYN', 'timing_perhost': 2}),
         group_size=1000,
         priority=10,
     ))
 
     db.session.add(Queue(
-        name='sner servicescan nmap version',
+        name='sner nmap serviceversion',
         config=yaml_dump({'module': 'manymap', 'args': '-sV --version-intensity 4 -Pn', 'delay': 1}),
-        group_size=50,
-        priority=15,
-    ))
-
-    db.session.add(Queue(
-        name='sner servicescan jarm',
-        config=yaml_dump({'module': 'jarm', 'delay': 1}),
         group_size=50,
         priority=15,
     ))
@@ -123,6 +116,13 @@ def initdata():  # pylint: disable=too-many-statements
             'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',
             'delay': 5
         }),
+        group_size=50,
+        priority=15,
+    ))
+
+    db.session.add(Queue(
+        name='sner jarm',
+        config=yaml_dump({'module': 'jarm', 'delay': 1}),
         group_size=50,
         priority=15,
     ))

@@ -4,8 +4,8 @@ storage commands
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 
 import click
 from flask import current_app
@@ -41,17 +41,17 @@ def storage_import(path, parser, **kwargs):
 
     parser_impl = REGISTERED_PARSERS[parser]
     for item in path:
-        if not os.path.isfile(item):
-            current_app.logger.error(f'invalid path "{item}"')
-            sys.exit(1)
+        if not Path(item).is_file():
+            current_app.logger.warning(f'invalid path "{item}"')
+            continue
+
         try:
             if kwargs.get('dry'):
                 StorageManager.import_parsed_dry(parser_impl.parse_path(item))
             else:
                 StorageManager.import_parsed(parser_impl.parse_path(item), list(kwargs['addtag']))
-        except Exception as e:
-            current_app.exception(e)
-            current_app.logger.error('failed to parse %s', item)
+        except Exception as exc:  # pylint: disable=broad-except
+            current_app.logger.warning(f'failed to parse {item}, {exc}')
 
     sys.exit(0)
 
