@@ -21,4 +21,4 @@ def command():
 def run(**kwargs):
     """run planner daemon"""
 
-    Planner(current_app.config['SNER_PLANNER'].get('stages'), kwargs['oneshot']).run()
+    Planner(current_app.config['SNER_PLANNER'], kwargs['oneshot']).run()

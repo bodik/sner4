@@ -347,40 +347,40 @@ class Planner(TerminateContextMixin):
         self.stages['storage_cleanup'] = StorageCleanup()
 
         sscan_stages = []
-        for sscan_qname in self.config['service_scan']['queues']:
+        for sscan_qname in self.config['stage']['service_scan']['queues']:
             self.stages[sscan_qname] = StorageLoader(sscan_qname)
             sscan_stages.append(self.stages[sscan_qname])
 
         self.stages['service_disco'] = ServiceDisco(
-            self.config['service_disco']['queue'],
+            self.config['stage']['service_disco']['queue'],
             sscan_stages
         )
 
         self.stages['six_dns_disco'] = SixDisco(
-            self.config['six_dns_disco']['queue'],
+            self.config['stage']['six_dns_disco']['queue'],
             self.stages['service_disco'],
-            self.config['six_dns_disco']['filternets']
+            self.config['home_netranges_ipv6']
         )
         self.stages['six_enum_disco'] = SixDisco(
-            self.config['six_enum_disco']['queue'],
+            self.config['stage']['six_enum_disco']['queue'],
             self.stages['service_disco']
         )
 
         self.stages['netlist_enum'] = NetlistEnum(
-            self.config['netlist_enum']['schedule'],
-            self.config['netlist_enum']['netlist'],
+            self.config['stage']['netlist_enum']['schedule'],
+            self.config['home_netranges_ipv4'],
             [self.stages['service_disco'], self.stages['six_dns_disco']]
         )
 
         self.stages['storage_six_enum'] = StorageSixEnum(
-            self.config['storage_six_enum']['schedule'],
+            self.config['stage']['storage_six_enum']['schedule'],
             self.stages['six_enum_disco']
         )
         self.stages['storage_rescan'] = StorageRescan(
-            self.config['storage_rescan']['schedule'],
-            self.config['storage_rescan']['host_interval'],
+            self.config['stage']['storage_rescan']['schedule'],
+            self.config['stage']['storage_rescan']['host_interval'],
             self.stages['service_disco'],
-            self.config['storage_rescan']['service_interval'],
+            self.config['stage']['storage_rescan']['service_interval'],
             sscan_stages
         )
 

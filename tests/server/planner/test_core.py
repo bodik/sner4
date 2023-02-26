@@ -164,11 +164,10 @@ def test_planner_simple(app, queue_factory):  # pylint: disable=unused-argument
     queue_factory.create(name='sner six_enum_discover')
 
     config = yaml.safe_load("""
-common:
-  home_netranges_ipv4: &home_netranges_ipv4 []
-  home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
+home_netranges_ipv4: []
+home_netranges_ipv6: ['::1/128']
 
-stages:
+stage:
   service_scan:
     queues:
       - 'sner nmap serviceversion'
@@ -178,14 +177,12 @@ stages:
 
   six_dns_disco:
     queue: 'sner six_dns_discover'
-    filternets: *home_netranges_ipv6
 
   six_enum_disco:
     queue: 'sner six_enum_discover'
 
   netlist_enum:
     schedule: 120days
-    netlist: *home_netranges_ipv4
 
   storage_six_enum:
     schedule: 90days
@@ -196,7 +193,7 @@ stages:
     service_interval: 20days
 """)
 
-    planner = Planner(config['stages'], oneshot=True)
+    planner = Planner(config, oneshot=True)
     planner.run()
 
 

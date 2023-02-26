@@ -39,11 +39,10 @@
 #  oneshot: False
 #
 #planner:
-#  common:
-#    home_netranges_ipv4: &home_netranges_ipv4 []
-#    home_netranges_ipv6: &home_netranges_ipv6 ['::1/128']
+#  home_netranges_ipv4: []
+#  home_netranges_ipv6: ['::1/128']
 #
-#  stages:
+#  stage:
 #    service_scan:
 #      queues:
 #        - 'sner nmap serviceversion'
@@ -53,14 +52,12 @@
 #
 #    six_dns_disco:
 #      queue: 'sner six_dns_discover'
-#      filternets: *home_netranges_ipv6
 #
 #    six_enum_disco:
 #      queue: 'sner six_enum_discover'
 #
 #    netlist_enum:
 #      schedule: 120days
-#      netlist: *home_netranges_ipv4
 #
 #    storage_six_enum:
 #      schedule: 90days
