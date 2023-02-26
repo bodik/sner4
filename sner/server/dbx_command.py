@@ -35,51 +35,8 @@ def db_remove():
             os.unlink(file_object_path)
 
 
-@click.group(name='dbx', help='sner.server db management')
-def command():
-    """db command container"""
-
-
-@command.command(name='init', help='initialize database schema')
-@with_appcontext
-def init():  # pragma: no cover
-    """initialize database schema"""
-
-    db.create_all()
-
-
-@command.command(name='init-data', help='put initial data to database')
-@with_appcontext
-def initdata():  # pylint: disable=too-many-statements
-    """put initial data to database"""
-
-    # auth test data
-    db.session.add(User(username='user1', active=True, roles=['user', 'operator', 'admin']))
-
-    # scheduler test data
-    db.session.add(Excl(family=ExclFamily.NETWORK, value='127.66.66.0/26', comment='blacklist 1'))
-    db.session.add(Excl(family=ExclFamily.REGEX, value=r'^tcp://.*:22$', comment='avoid ssh'))
-
-    queue = Queue(
-        name='dev dummy',
-        config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
-        group_size=2,
-        priority=10,
-        active=True
-    )
-    db.session.add(queue)
-    db.session.commit()  # required to obtain queue.id
-    QueueManager.enqueue(queue, ['1', '2', '3'])
-
-    db.session.add(Queue(
-        name='pentest nmap fullsynscan',
-        config=yaml_dump({
-            'module': 'nmap',
-            'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
-        }),
-        group_size=20,
-        priority=10,
-    ))
+def initdata_sner():
+    """initialize sner queues"""
 
     db.session.add(Queue(
         name='sner six_dns_discover',
@@ -126,6 +83,37 @@ def initdata():  # pylint: disable=too-many-statements
         group_size=50,
         priority=15,
     ))
+
+
+def initdata_pentest():
+    """initialize pentest data"""
+
+    db.session.add(Queue(
+        name='pentest nmap fullsynscan',
+        config=yaml_dump({
+            'module': 'nmap',
+            'args': '-sS -A -p1-65535 -Pn  --max-retries 3 --script-timeout 10m --min-hostgroup 20 --min-rate 900 --max-rate 1500'
+        }),
+        group_size=20,
+        priority=10,
+    ))
+
+
+def initdata_dev():
+    """initialize development data"""
+
+    db.session.add(Excl(family=ExclFamily.NETWORK, value='127.66.66.0/26', comment='blacklist 1'))
+
+    queue = Queue(
+        name='dev dummy',
+        config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
+        group_size=2,
+        priority=10,
+        active=True
+    )
+    db.session.add(queue)
+    db.session.commit()  # required to obtain queue.id
+    QueueManager.enqueue(queue, ['1', '2', '3'])
 
     # storage test data host1
     aggregable_vuln = {'name': 'aggregable vuln', 'xtype': 'x.agg', 'severity': SeverityEnum.MEDIUM}
@@ -228,6 +216,30 @@ def initdata():  # pylint: disable=too-many-statements
         comment='test note comment'
     ))
 
+
+@click.group(name='dbx', help='sner.server db management')
+def command():
+    """db command container"""
+
+
+@command.command(name='init', help='initialize database schema')
+@with_appcontext
+def init():  # pragma: no cover
+    """initialize database schema"""
+
+    db.create_all()
+
+
+@command.command(name='init-data', help='put initial data to database')
+@with_appcontext
+def initdata():  # pylint: disable=too-many-statements
+    """put initial data to database"""
+
+    db.session.add(User(username='user1', active=True, roles=['user', 'operator', 'admin']))
+    db.session.add(Excl(family=ExclFamily.REGEX, value=r'^tcp://.*:22$', comment='avoid ssh'))
+    initdata_dev()
+    initdata_sner()
+    initdata_pentest()
     db.session.commit()
 
 
