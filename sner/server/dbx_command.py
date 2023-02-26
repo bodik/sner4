@@ -84,6 +84,13 @@ def initdata_sner():
         priority=15,
     ))
 
+    db.session.add(Queue(
+        name='sner testssl',
+        config=yaml_dump({'module': 'testssl', 'delay': 1}),
+        group_size=10,
+        priority=15,
+    ))
+
 
 def initdata_pentest():
     """initialize pentest data"""

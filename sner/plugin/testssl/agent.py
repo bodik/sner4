@@ -38,7 +38,7 @@ class AgentModule(ModuleBase):
                 continue
 
             target_args = ['--jsonfile-pretty', f'output-{idx}.json', f'{host}:{port}']
-            cmd = ['testssl.sh', '--quiet', '--full', '--connect-timeout', '5', '--openssl-timeout', '5'] + target_args
+            cmd = ['testssl.sh', '--quiet', '--full', '-6', '--connect-timeout', '5', '--openssl-timeout', '5'] + target_args
             self._execute(cmd, f'output-{idx}')
 
             sleep(assignment['config']['delay'])

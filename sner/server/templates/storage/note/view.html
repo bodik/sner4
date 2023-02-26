@@ -77,6 +77,41 @@ $(document).ready(function() {
 
 	<h2>Screenshot<h2>
 	<img src="data:image/png;base64,{{ data['img'] }}" style="border: 1px solid black;">
+{% elif note.xtype == 'testssl' %}
+	{% set data = note.data | from_json %}
+
+	<h2>Findings</h2>
+	{% if data.findings %}
+	<table class="table table-sm table-hover">
+		<tr>
+			<th>section</th>
+			<th>severity</th>
+			<th>id</th>
+			<th>finding</th>
+			<th>cve</th>
+			<th>data</th>
+		</tr>
+		{% for section, section_data in data.findings.items() %}{% for item in section_data %}
+		<tr>
+			<td>{{ section }}</td>
+			<td>{{ item.severity }}</td>
+			<td>{{ item.id }}</td>
+			<td>{{ item.finding }}</td>
+			<td>{{ item.cve }}</td>
+			<td>{{ item }}</td>
+		</tr>
+		{% endfor %}{% endfor %}
+	</table>
+	{% endif %}
+
+	<h2>Certificate information</h2>
+	<pre>{{ data.cert_txt }}</pre>
+
+	<h2>Data</h2>
+	<pre>{{ note.data | json_indent }}</pre>
+
+	<h2>Full output</h2>
+	<pre>{{data.output}}</pre>
 {% else %}
 	{{ note.data }}
 {% endif %}
