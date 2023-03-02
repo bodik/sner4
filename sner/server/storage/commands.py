@@ -10,15 +10,14 @@ from pathlib import Path
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 from sner.server.storage.vulnsearch import sync_es_index
+from sner.server.utils import filter_query
 
 
 @click.group(name='storage', help='sner.server storage management')
@@ -109,9 +108,9 @@ def storage_service_list(**kwargs):
         current_app.logger.error('--short and --long are mutualy exclusive options')
         sys.exit(1)
 
-    query = Service.query
-    if kwargs['filter']:
-        query = apply_filters(query, FILTER_PARSER.parse(kwargs['filter']), do_auto_join=False)
+    if not (query := filter_query(Service.query, kwargs.get('filter'))):
+        current_app.logger.error('failed to filter query')
+        sys.exit(1)
 
     fmt = '{proto}://{host}:{port}'
     if kwargs['short']:

@@ -36,6 +36,9 @@ def test_user_list_json_route(cl_admin, user):
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['username'] == user.username
 
+    response = cl_admin.post(url_for('auth.user_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_user_add_route(cl_admin, user_factory):
     """user add route test"""

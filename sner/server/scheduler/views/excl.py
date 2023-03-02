@@ -5,11 +5,11 @@ scheduler excl views
 
 import json
 from datetime import datetime
+from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
-from flask import flash, redirect, render_template, request, Response, url_for
+from flask import flash, jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
@@ -18,8 +18,7 @@ from sner.server.scheduler.core import ExclImportException, ExclManager
 from sner.server.scheduler.forms import ExclForm, ExclImportForm
 from sner.server.scheduler.models import Excl
 from sner.server.scheduler.views import blueprint
-from sner.server.sqlafilter import FILTER_PARSER
-from sner.server.utils import SnerJSONEncoder
+from sner.server.utils import filter_query, SnerJSONEncoder
 
 
 @blueprint.route('/excl/list')
@@ -43,8 +42,8 @@ def excl_list_json_route():
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Excl)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     excls = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(excls, cls=SnerJSONEncoder), mimetype='application/json')

@@ -36,6 +36,9 @@ def test_excl_list_json_route(cl_operator, excl_network):
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['comment'] == excl_network.comment
 
+    response = cl_operator.post(url_for('scheduler.excl_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_excl_add_route(cl_operator, excl_network_factory):
     """exclusion add route test"""

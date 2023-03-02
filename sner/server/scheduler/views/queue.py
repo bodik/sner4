@@ -8,7 +8,6 @@ from http import HTTPStatus
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import func, literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
@@ -17,7 +16,7 @@ from sner.server.scheduler.core import QueueManager
 from sner.server.scheduler.forms import QueueEnqueueForm, QueueForm
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.scheduler.views import blueprint
-from sner.server.sqlafilter import FILTER_PARSER
+from sner.server.utils import filter_query
 
 
 @blueprint.route('/queue/list', methods=['GET'])
@@ -50,8 +49,8 @@ def queue_list_json_route():
     query = db.session.query().select_from(Queue) \
         .outerjoin(query_nr_targets, Queue.id == query_nr_targets.c.queue_id) \
         .outerjoin(query_nr_jobs, Queue.id == query_nr_jobs.c.queue_id)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     queues = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(queues)

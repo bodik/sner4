@@ -3,21 +3,21 @@
 storage note views
 """
 
+from http import HTTPStatus
+
 import json
 from datatables import ColumnDT, DataTables
-from flask import redirect, render_template, request, Response, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, get_related_models
 from sner.server.storage.forms import NoteForm
 from sner.server.storage.models import Host, Note, Service
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/note/list')
@@ -53,8 +53,8 @@ def note_list_json_route():
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     notes = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(notes, cls=SnerJSONEncoder), mimetype='application/json')

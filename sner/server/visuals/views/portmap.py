@@ -3,17 +3,18 @@
 controller portmap
 """
 
+from http import HTTPStatus
+
 from socket import getservbyport
 
 from flask import render_template, request
 from sqlalchemy import desc, func
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host, Service
 from sner.server.visuals.views import blueprint
+from sner.server.utils import filter_query
 
 
 VIZPORTS_LOW = 10.0
@@ -28,14 +29,14 @@ def portmap_route():
     # join allows filter over host attrs
     query = db.session.query(Service.state, func.count(Service.id).label('state_count')).join(Host) \
         .group_by(Service.state).order_by(desc('state_count'))
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return 'Failed to filter query', HTTPStatus.BAD_REQUEST
     portstates = query.all()
 
     # join allows filter over host attrs
     query = db.session.query(Service.port, func.count(Service.id)).join(Host).order_by(Service.port).group_by(Service.port)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):  # pragma: no cover  ; cannot test, failed by filter processing above
+        return 'Failed to filter query', HTTPStatus.BAD_REQUEST
     portmap = [{'port': port, 'count': count} for port, count in query.all()]
 
     # compute sizing for rendered element
@@ -68,12 +69,12 @@ def portmap_portstat_route(port):
     hosts = db.session.query(Host.address, Host.hostname, Host.id).select_from(Service).outerjoin(Host) \
         .filter(Service.port == port).order_by(Host.address)
 
-    if 'filter' in request.values:
-        parsed_filter = FILTER_PARSER.parse(request.values.get('filter'))
-        stats = apply_filters(stats, parsed_filter, do_auto_join=False)
-        infos = apply_filters(infos, parsed_filter, do_auto_join=False)
-        comments = apply_filters(comments, parsed_filter, do_auto_join=False)
-        hosts = apply_filters(hosts, parsed_filter, do_auto_join=False)
+    stats = filter_query(stats, request.values.get('filter'))
+    infos = filter_query(infos, request.values.get('filter'))
+    comments = filter_query(comments, request.values.get('filter'))
+    hosts = filter_query(hosts, request.values.get('filter'))
+    if not all([stats, infos, comments, hosts]):
+        return 'Failed to parse filter', HTTPStatus.BAD_REQUEST
 
     try:
         portname = getservbyport(int(port))

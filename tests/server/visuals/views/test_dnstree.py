@@ -23,3 +23,6 @@ def test_dnstree_json_route(cl_operator, host):
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert host.hostname.split('.')[0] in [tmp["name"] for tmp in response_data["nodes"]]
+
+    response = cl_operator.get(url_for('visuals.dnstree_json_route', filter='invalid'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST

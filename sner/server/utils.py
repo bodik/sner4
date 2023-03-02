@@ -9,9 +9,12 @@ from urllib.parse import urlunparse, urlparse
 
 import yaml
 from flask import current_app, request
+from lark.exceptions import LarkError
+from sqlalchemy_filters import apply_filters
 from werkzeug.exceptions import HTTPException
 
 from sner.server.scheduler.models import ExclFamily
+from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import SeverityEnum
 
 
@@ -86,3 +89,20 @@ def windowed_query(query, column, windowsize=5000):
                 yield row[0]
             else:
                 yield row[0:-1]
+
+
+def filter_query(query, qfilter):
+    """filter sqla query"""
+
+    if not qfilter:
+        return query
+
+    try:
+        query = apply_filters(query, FILTER_PARSER.parse(qfilter), do_auto_join=False)
+    except LarkError as exc:
+        if current_app.config['DEBUG']:  # pragma: no cover  ; wont debug logging coverage
+            raise
+        current_app.logger.error('failed to parse filer: %s', str(exc).split('\n', maxsplit=1)[0])
+        return None
+
+    return query

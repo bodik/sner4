@@ -38,6 +38,9 @@ def test_job_list_json_route(cl_operator, job):
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['id'] == job.id
 
+    response = cl_operator.post(url_for('scheduler.job_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_job_delete_route(cl_operator, job_completed):
     """delete route test"""

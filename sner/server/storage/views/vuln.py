@@ -10,17 +10,15 @@ from http import HTTPStatus
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, get_related_models, tag_model_multiid, vuln_export, vuln_report
 from sner.server.storage.forms import MultiidForm, VulnForm
 from sner.server.storage.models import Host, Service, Vuln
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/vuln/list')
@@ -59,8 +57,8 @@ def vuln_list_json_route():
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Vuln).outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')
@@ -174,8 +172,8 @@ def vuln_grouped_json_route():
     ]
     # join allows filter over host attrs
     query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, Vuln.tags)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')

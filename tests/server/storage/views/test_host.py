@@ -35,6 +35,9 @@ def test_host_list_json_route(cl_operator, host):
     response_data = json.loads(response.body.decode('utf-8'))
     assert response_data['data'][0]['hostname'] == host.hostname
 
+    response = cl_operator.post(url_for('storage.host_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_host_add_route(cl_operator, host_factory):
     """host add route test"""

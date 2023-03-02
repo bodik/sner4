@@ -3,12 +3,13 @@
 controller dnstree
 """
 
+from http import HTTPStatus
+
 from flask import jsonify, render_template, request
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host
+from sner.server.utils import filter_query
 from sner.server.visuals.views import blueprint
 
 
@@ -45,8 +46,8 @@ def dnstree_json_route():
         return (nodes, links)
 
     query = Host.query
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
     crop = request.values.get('crop', 0, type=int)
 
     hostnames_tree = {}

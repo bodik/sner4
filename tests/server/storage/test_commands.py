@@ -78,6 +78,9 @@ def test_vuln_report_command(runner, host_factory, vuln_factory):
     result = runner.invoke(command, ['vuln-report', '--group_by_host', '--filter', 'Host.address == "127.3.3.1"'])
     assert result.exit_code == 0
 
+    result = runner.invoke(command, ['vuln-report', '--filter', 'invalid'])
+    assert result.exit_code == 1
+
 
 def test_vuln_export_command(runner, host_factory, vuln_factory):
     """test vuln-export command"""
@@ -96,6 +99,9 @@ def test_vuln_export_command(runner, host_factory, vuln_factory):
 
     result = runner.invoke(command, ['vuln-export', '--filter', 'Host.address == "127.3.3.1"'])
     assert result.exit_code == 0
+
+    result = runner.invoke(command, ['vuln-export', '--filter', 'invalid'])
+    assert result.exit_code == 1
 
 
 def test_service_list_command(runner, service):
@@ -129,6 +135,9 @@ def test_service_list_command(runner, service):
     result = runner.invoke(command, ['service-list', '--filter', f'Service.port=="{service.port}"'])
     assert result.exit_code == 0
     assert result.output.strip() == f'{service.proto}://{host.address}:{service.port}'
+
+    result = runner.invoke(command, ['service-list', '--filter', 'invalid'])
+    assert result.exit_code == 1
 
 
 def test_syncvulnsearch_command(runner, note_factory):

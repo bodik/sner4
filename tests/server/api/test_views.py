@@ -265,6 +265,9 @@ def test_v2_public_storage_servicelist_route(api_user, service_factory):
     assert PublicServicelistSchema(many=True).load(response.json)
     assert len(response.json) == 1
 
+    response = api_user.get(url_for('api.v2_public_storage_servicelist_route', filter='invalid'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_v2_public_storage_host_route_nonetworks(api_user_nonetworks, host, service):
     """test queries with user without any configured networks"""

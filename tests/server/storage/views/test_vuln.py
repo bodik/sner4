@@ -36,6 +36,9 @@ def test_vuln_list_json_route(cl_operator, vuln):
     response_data = json.loads(response.body.decode('utf-8'))
     assert vuln.name in response_data['data'][0]['name']
 
+    response = cl_operator.post(url_for('storage.vuln_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_vuln_add_route(cl_operator, host, service, vuln_factory):
     """vuln add route test"""
@@ -142,6 +145,9 @@ def test_vuln_grouped_json_route(cl_operator, vuln):
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert vuln.name in response_data['data'][0]['name']
+
+    response = cl_operator.post(url_for('storage.vuln_grouped_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_vuln_report_route(cl_operator, vuln):

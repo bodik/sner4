@@ -3,21 +3,21 @@
 storage hosts views
 """
 
+from http import HTTPStatus
+
 import json
 from datatables import ColumnDT, DataTables
-from flask import redirect, render_template, request, Response, url_for
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.core import annotate_model, tag_model_multiid
 from sner.server.storage.forms import HostForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
-from sner.server.utils import relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
 
 
 @blueprint.route('/host/list')
@@ -55,8 +55,8 @@ def host_list_json_route():
         .outerjoin(query_cnt_services, Host.id == query_cnt_services.c.host_id) \
         .outerjoin(query_cnt_vulns, Host.id == query_cnt_vulns.c.host_id) \
         .outerjoin(query_cnt_notes, Host.id == query_cnt_notes.c.host_id)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     hosts = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(hosts, cls=SnerJSONEncoder), mimetype='application/json')

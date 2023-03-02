@@ -42,6 +42,9 @@ def test_service_list_json_route(cl_operator, service):
     )
     assert response.status_code == HTTPStatus.OK
 
+    response = cl_operator.post(url_for('storage.service_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_service_add_route(cl_operator, host, service_factory):
     """service add route test"""
@@ -121,6 +124,9 @@ def test_service_grouped_json_route(cl_operator, service):
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert service.info in response_data['data'][0]['info']
+
+    response = cl_operator.post(url_for('storage.service_grouped_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
     response = cl_operator.post(
         url_for('storage.service_grouped_json_route', crop=2),

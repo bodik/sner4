@@ -13,14 +13,12 @@ from flask import current_app, jsonify, render_template
 from pytimeparse import parse as timeparse
 from sqlalchemy import case, delete, func, or_, not_, select, update
 from sqlalchemy.sql.functions import coalesce
-from sqlalchemy_filters import apply_filters
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.forms import AnnotateForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service, Vuln
-from sner.server.utils import windowed_query
+from sner.server.utils import filter_query, windowed_query
 
 
 def get_related_models(model_name, model_id):
@@ -155,8 +153,8 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
     if group_by_host:
         query = query.group_by(host_ident)
 
-    if qfilter:
-        query = apply_filters(query, FILTER_PARSER.parse(qfilter), do_auto_join=False)
+    if not (query := filter_query(query, qfilter)):
+        raise ValueError('failed to filter query')
 
     content_trimmed = False
     fieldnames = [
@@ -211,8 +209,8 @@ def vuln_export(qfilter=None):
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id)
 
-    if qfilter:
-        query = apply_filters(query, FILTER_PARSER.parse(qfilter), do_auto_join=False)
+    if not (query := filter_query(query, qfilter)):
+        raise ValueError('failed to filter query')
 
     content_trimmed = False
     fieldnames = [

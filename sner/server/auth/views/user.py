@@ -8,7 +8,6 @@ from http import HTTPStatus
 from datatables import ColumnDT, DataTables
 from flask import jsonify, redirect, render_template, request, url_for
 from sqlalchemy import literal_column
-from sqlalchemy_filters import apply_filters
 
 from sner.server.auth.core import session_required, UserManager
 from sner.server.auth.forms import UserForm
@@ -17,7 +16,7 @@ from sner.server.auth.views import blueprint
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from sner.server.sqlafilter import FILTER_PARSER
+from sner.server.utils import filter_query
 
 
 @blueprint.route('/user/list')
@@ -43,8 +42,8 @@ def user_list_json_route():
         ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(User)
-    if 'filter' in request.values:
-        query = apply_filters(query, FILTER_PARSER.parse(request.values.get('filter')), do_auto_join=False)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     users = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(users)

@@ -12,7 +12,6 @@ from flask import current_app, jsonify, Response
 from flask_login import current_user
 from flask_smorest import Blueprint
 from sqlalchemy import func, or_
-from sqlalchemy_filters import apply_filters
 
 from sner.server.api.schema import (
     JobAssignArgsSchema,
@@ -29,8 +28,8 @@ from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job, Queue, Target
-from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import Host, Note, Service, Vuln
+from sner.server.utils import filter_query
 
 
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
@@ -171,8 +170,8 @@ def v2_public_storage_servicelist_route(args):
         Service.info
     ).filter(or_(*restrict))
 
-    if 'filter' in args:
-        query = apply_filters(query, FILTER_PARSER.parse(args['filter']), do_auto_join=False)
+    if not (query := filter_query(query, args.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     current_app.logger.info(f'api.public storage servicelist {args}')
     return query.all()
