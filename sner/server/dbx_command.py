@@ -123,7 +123,14 @@ def initdata_dev():
     QueueManager.enqueue(queue, ['1', '2', '3'])
 
     # storage test data host1
-    aggregable_vuln = {'name': 'aggregable vuln', 'xtype': 'x.agg', 'severity': SeverityEnum.MEDIUM}
+    aggregable_vuln = {
+        'name': 'aggregable vuln',
+        'xtype': 'x.agg',
+        'severity': SeverityEnum.MEDIUM,
+        'descr': 'aggregable vuln description',
+        'data': 'agg vuln data',
+        'tags': ['reportdata']
+    }
 
     host = Host(
         address='127.4.4.4',
@@ -214,7 +221,7 @@ def initdata_dev():
         tags=['report']
     ))
 
-    db.session.add(Vuln(host=host, **aggregable_vuln))
+    db.session.add(Vuln(host=host, service=Service.query.first(), **aggregable_vuln))
 
     db.session.add(Note(
         host=host,

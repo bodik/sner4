@@ -58,7 +58,7 @@ DEFAULT_CONFIG = {
     'SNER_AUTH_ROLES': ['admin', 'agent', 'operator', 'user'],
     'SNER_SESSION_IDLETIME': 36000,
     'SNER_TAGS_HOST': ['reviewed'],
-    'SNER_TAGS_VULN': ['info', 'report', 'todo', 'falsepositive'],
+    'SNER_TAGS_VULN': ['info', 'report', 'reportdata', 'todo', 'falsepositive'],
     'SNER_TAGS_ANNOTATE': ['sslhell'],
     'SNER_TRIM_REPORT_CELLS': 65000,
 

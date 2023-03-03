@@ -143,7 +143,9 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
             func.array_agg(func.distinct(host_ident)).label('host_ident'),
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references')
+            func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references'),
+            func.array_agg(Vuln.id).label('vuln_ids'),
+            func.array_agg(func.distinct(Vuln.xtype)).label('xtype')
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id) \
@@ -159,7 +161,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
     content_trimmed = False
     fieldnames = [
         'id', 'asset', 'vulnerability', 'severity', 'advisory', 'state',
-        'endpoint_address', 'description', 'tags', 'endpoint_hostname', 'references'
+        'endpoint_address', 'description', 'endpoint_hostname', 'references', 'tags', 'xtype'
     ]
     output_buffer = StringIO()
     output = DictWriter(output_buffer, fieldnames, restval='', extrasaction='ignore', quoting=QUOTE_ALL)
@@ -173,7 +175,19 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
             rdata['asset'] = rdata['host_ident'][0]
         else:
             rdata['asset'] = rdata['host_ident'][0] if len(rdata['endpoint_address']) == 1 else 'misc'
-        for col in ['endpoint_address', 'endpoint_hostname', 'tags']:
+
+        if 'reportdata' in rdata['tags']:
+            query = Vuln.query.filter(Vuln.id.in_(rdata['vuln_ids']))
+            for vdata in query.all():
+                data_ident = ', '.join(filter(lambda x: x is not None, [
+                    f'IP: {vdata.host.address}',
+                    f'Proto: {vdata.service.proto}, Port: {vdata.service.port}' if vdata.service else None,
+                    f'Hostname: {vdata.host.hostname}' if vdata.host.hostname else None,
+                    f'Via-target: {vdata.via_target}' if vdata.via_target else None
+                ]))
+                rdata['description'] += f'\n\n## Data {data_ident}\n{vdata.data}'
+
+        for col in ['endpoint_address', 'endpoint_hostname', 'tags', 'xtype']:
             rdata[col] = list_to_lines(rdata[col])
         rdata['references'] = list_to_lines(map(url_for_ref, rdata['references']))
 
