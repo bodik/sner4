@@ -145,7 +145,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
             func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references'),
             func.array_agg(Vuln.id).label('vuln_ids'),
-            func.array_agg(func.distinct(Vuln.xtype)).label('xtype')
+            func.array_remove(func.array_agg(func.distinct(Vuln.xtype), None)).label('xtype')
         ) \
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id) \
