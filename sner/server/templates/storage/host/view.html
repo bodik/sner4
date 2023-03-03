@@ -140,10 +140,12 @@
 				{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
 			</div>
 			<div class="btn-group">
-				<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
-				{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'striked btn btn-outline-secondary abutton_untag_multiid') }}
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+					{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_VULN'], 'striked abutton_untag_multiid') }}
+				</div>
+				<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 			</div>
-			<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 		</div>
 		<table id="host_view_vuln_table" class="table table-hover table-sm" width="100%"></table>
 		<script type="text/javascript">

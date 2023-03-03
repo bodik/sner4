@@ -61,18 +61,20 @@
 <div id="vuln_list_table_toolbar" class="dt_toolbar">
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
-		<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
-		<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
+		<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+		<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
 		{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
 	</div>
 	<div class="btn-group">
-		<a class="btn btn-outline-secondary disabled"><i class="fas fa-remove-format"></i></a>
-		{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'striked btn btn-outline-secondary abutton_untag_multiid') }}
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+			{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_VULN'], 'striked abutton_untag_multiid') }}
+		</div>
+		<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 	</div>
-	<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
 	<div class="btn-group">
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>

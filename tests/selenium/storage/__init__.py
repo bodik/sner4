@@ -59,6 +59,14 @@ def check_vulns_multiactions(sclnt, dt_id):
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert Vuln.query.filter(Vuln.tags.any('todo')).count() == 2
 
+    # test untagging
+    toolbar_elem.find_element(By.XPATH, '//a[text()="All"]').click()
+    toolbar_elem.find_element(By.XPATH, '//a[contains(@class, "dropdown-toggle") and @title="remove tag dropdown"]').click()
+    webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.XPATH, '//a[text()="Todo" and @title="remove tag todo"]')))
+    toolbar_elem.find_element(By.XPATH, '//a[contains(@class, "abutton_untag_multiid") and text()="Todo"]').click()
+    dt_elem = dt_wait_processing(sclnt, dt_id)
+    assert Vuln.query.filter(Vuln.tags.any('todo')).count() == 0
+
     # or deleted
     toolbar_elem.find_element(By.XPATH, '//a[text()="All"]').click()
     toolbar_elem.find_element(By.XPATH, '//a[contains(@class, "abutton_delete_multiid")]').click()

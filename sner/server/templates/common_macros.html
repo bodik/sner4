@@ -61,6 +61,14 @@
 
 {%- macro multiid_tagging_abuttons(tags, elem_class) -%}
 {% for tag in tags %}
-	<a class="{{ elem_class }}" href="#" title="{{ tag }}" data-tag="{{ tag }}">{{ tag|capitalize|truncate(6, True) }}</a>
+	<a class="{{ elem_class }}" href="#" title="add tag {{ tag }}" data-tag="{{ tag }}">{{ tag|capitalize|truncate(6, True) }}</a>
 {% endfor %}
+{%- endmacro -%}
+
+{%- macro multiid_tagging_abuttons_dropdown(tags, elem_class) -%}
+<div class="dropdown-menu">
+{% for tag in tags %}
+	<a class="dropdown-item {{ elem_class }}" href="#" title="remove tag {{ tag }}" data-tag="{{ tag }}">{{ tag|capitalize|truncate(6, True) }}</a>
+{% endfor %}
+</div>
 {%- endmacro -%}
