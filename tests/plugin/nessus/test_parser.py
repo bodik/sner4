@@ -26,3 +26,4 @@ def test_parse_path():
 
     assert [x.address for x in pidb.hosts] == expected_hosts
     assert [x.xtype for x in pidb.vulns] == expected_vulns
+    assert 'Upgrade to PHP version 5.6.32 or later.' in pidb.vulns.where(xtype='nessus.104631')[0].descr
