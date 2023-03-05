@@ -19,6 +19,9 @@
 #    cvesearch: 'https://u:p@hostname:15443'
 #    esd: 'https://u:p@hostname:443/esd'
 #  sner_heatmap_hot_level: 10
+#  sner_exclusions:
+#    - [regex, '^tcp://.*:22$']
+#    - [network, '127.66.66.0/26']
 #
 #  oidc_name: 'OIDC_DEFAULT'
 #  oidc_default_metadata: 'https://URL/.well-known/openid-configuration'

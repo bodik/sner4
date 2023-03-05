@@ -109,8 +109,6 @@ def initdata_pentest():
 def initdata_dev():
     """initialize development data"""
 
-    db.session.add(Excl(family=ExclFamily.NETWORK, value='127.66.66.0/26', comment='blacklist 1'))
-
     queue = Queue(
         name='dev dummy',
         config=yaml_dump({'module': 'dummy', 'args': '--dummyparam 1'}),
@@ -250,7 +248,6 @@ def initdata():  # pylint: disable=too-many-statements
     """put initial data to database"""
 
     db.session.add(User(username='user1', active=True, roles=['user', 'operator', 'admin']))
-    db.session.add(Excl(family=ExclFamily.REGEX, value=r'^tcp://.*:22$', comment='avoid ssh'))
     initdata_dev()
     initdata_sner()
     initdata_pentest()

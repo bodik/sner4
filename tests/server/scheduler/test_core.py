@@ -6,6 +6,7 @@ scheduler core tests
 from ipaddress import ip_address, ip_network
 
 import pytest
+import yaml
 from flask import current_app
 
 from sner.server.extensions import db
@@ -42,11 +43,17 @@ def test_model_excl_validation():
         test_excl.value = 'invalid('
 
 
-def test_excl_matcher(app, excl_network, excl_regex):  # pylint: disable=unused-argument
+def test_excl_matcher(app):  # pylint: disable=unused-argument
     """test matcher"""
 
-    matcher = ExclMatcher()
-    tnetwork = ip_network(excl_network.value)
+    test_regex = 'notarget[012]'
+    test_network = '127.66.66.0/26'
+
+    matcher = ExclMatcher(yaml.safe_load(f"""
+        - [regex, '{test_regex}']
+        - [network, '{test_network}']
+    """))
+    tnetwork = ip_network(test_network)
 
     assert matcher.match(str(tnetwork.network_address))
     assert matcher.match(str(tnetwork.broadcast_address))
@@ -121,7 +128,7 @@ def test_schedulerservice_morereadynetupdates(app, queue, target_factory):  # py
 def test_schedulerservice_hashvalprocessing(app, queue, target_factory):  # pylint: disable=unused-argument
     """test scheduler service hashvalsreadynet manipulation"""
 
-    target_factory.create(queue=queue, target='tcp://127.0.0.1:22', hashval=SchedulerService.hashval('tcp://127.0.0.1:22'))
+    target_factory.create(queue=queue, target='tcp://127.0.0.1:23', hashval=SchedulerService.hashval('tcp://127.0.0.1:23'))
     db.session.commit()
 
     assignment = SchedulerService.job_assign(None, [])

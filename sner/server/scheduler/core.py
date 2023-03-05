@@ -68,10 +68,11 @@ class ExclMatcher():
             return cls
         return register_real
 
-    def __init__(self):
-        self.excls = []
-        for excl in Excl.query.all():
-            self.excls.append(ExclMatcher.MATCHERS[excl.family](excl.value))
+    def __init__(self, config):
+        self.excls = [
+            ExclMatcher.MATCHERS[ExclFamily(family)](value)
+            for family, value in config
+        ]
 
     def match(self, value):
         """match value against all exclusions/matchers"""
@@ -82,7 +83,7 @@ class ExclMatcher():
         return False
 
 
-class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
+class ExclMatcherImplBase(ABC):  # pylint: disable=too-few-public-methods
     """base interface which must  be implemented by all available matchers"""
 
     @abstractmethod
@@ -93,9 +94,12 @@ class ExclMatcherImplInterface(ABC):  # pylint: disable=too-few-public-methods
     def match(self, value):
         """returns bool if value matches the initialized match_to"""
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {self.match_to}>'
+
 
 @ExclMatcher.register(ExclFamily.NETWORK)
-class ExclNetworkMatcher(ExclMatcherImplInterface):  # pylint: disable=too-few-public-methods
+class NetworkExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public-methods
     """network matcher"""
 
     def __init__(self, match_to):  # pylint: disable=super-init-not-called
@@ -118,7 +122,7 @@ class ExclNetworkMatcher(ExclMatcherImplInterface):  # pylint: disable=too-few-p
 
 
 @ExclMatcher.register(ExclFamily.REGEX)
-class ExclRegexMatcher(ExclMatcherImplInterface):  # pylint: disable=too-few-public-methods
+class RegexExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public-methods
     """regex matcher"""
 
     def __init__(self, match_to):  # pylint: disable=super-init-not-called
@@ -526,7 +530,7 @@ class SchedulerService:
 
         assignment = {}  # nowork
         assigned_targets = []
-        blacklist = ExclMatcher()
+        blacklist = ExclMatcher(current_app.config['SNER_EXCLUSIONS'])
 
         queue = cls._get_assignment_queue(queue_name, client_caps)
         if not queue:

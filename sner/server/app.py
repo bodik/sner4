@@ -20,6 +20,7 @@ from sner.agent.modules import load_agent_plugins
 from sner.lib import load_yaml
 from sner.server.extensions import api, db, jsglue, migrate, login_manager, oauth, webauthn
 from sner.server.parser import load_parser_plugins
+from sner.server.scheduler.core import ExclMatcher
 from sner.server.sessions import FilesystemSessionInterface
 from sner.version import __version__
 
@@ -53,7 +54,7 @@ DEFAULT_CONFIG = {
     'SQLALCHEMY_DATABASE_URI': 'postgresql:///sner',
     'SQLALCHEMY_ECHO': False,
 
-    # sner server/web
+    # sner web server
     'SNER_VAR': '/var/lib/sner',
     'SNER_AUTH_ROLES': ['admin', 'agent', 'operator', 'user'],
     'SNER_SESSION_IDLETIME': 36000,
@@ -62,10 +63,16 @@ DEFAULT_CONFIG = {
     'SNER_TAGS_ANNOTATE': ['sslhell'],
     'SNER_TRIM_REPORT_CELLS': 65000,
 
+    # sner server scheduler
+    'SNER_HEATMAP_HOT_LEVEL': 0,
+    'SNER_EXCLUSIONS': [
+        ['regex', r'^tcp://.*:22$'],
+        ['network', '127.66.66.0/26']
+    ],
+
     # other sner subsystems
     'SNER_PLANNER': {},
     'SNER_VULNSEARCH': {},
-    'SNER_HEATMAP_HOT_LEVEL': 0,
 
     # smorest api
     'API_TITLE': 'sner4 api',
@@ -191,6 +198,8 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     # load sner.plugin components
     load_agent_plugins()
     load_parser_plugins()
+    # check exclusion matcher config
+    ExclMatcher(app.config['SNER_EXCLUSIONS'])
 
     # initialize api blueprint; as side-effect overrides error handler
     app.config['API_SPEC_OPTIONS']['servers'] = [{'url': app.config['APPLICATION_ROOT']}]
