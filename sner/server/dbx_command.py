@@ -13,7 +13,7 @@ from flask.cli import with_appcontext
 from sner.server.auth.models import User
 from sner.server.extensions import db
 from sner.server.scheduler.core import QueueManager
-from sner.server.scheduler.models import Excl, ExclFamily, Queue
+from sner.server.scheduler.models import Queue
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 from sner.server.utils import yaml_dump
 

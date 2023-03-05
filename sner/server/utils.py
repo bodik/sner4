@@ -13,7 +13,7 @@ from lark.exceptions import LarkError
 from sqlalchemy_filters import apply_filters
 from werkzeug.exceptions import HTTPException
 
-from sner.server.scheduler.models import ExclFamily
+from sner.server.scheduler.core import ExclFamily
 from sner.server.sqlafilter import FILTER_PARSER
 from sner.server.storage.models import SeverityEnum
 

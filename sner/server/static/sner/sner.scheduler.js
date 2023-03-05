@@ -6,12 +6,6 @@ class SnerSchedulerComponent extends SnerComponentBase {
 		super();
 
 		this.hbs_source = {
-			'excl_controls': `
-				<div class="btn-group btn-group-sm">
-					<a class="btn btn-outline-secondary" href="{{> scheduler.excl_edit_route excl_id=id}}"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-danger abutton_submit_dataurl_delete" data-url="{{> scheduler.excl_delete_route excl_id=id}}"><i class="fas fa-trash text-danger"></i></a>
-				</div>`,
-
 			'queue_controls': `
 				<div class="btn-group btn-group-sm">
 					<a class="btn btn-outline-secondary" href="{{> scheduler.queue_enqueue_route queue_id=id}}" title="Put targets to queue">Enqueue</a>

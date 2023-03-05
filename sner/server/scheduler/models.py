@@ -5,17 +5,14 @@ sqlalchemy models
 # pylint: disable=too-few-public-methods,abstract-method
 
 import os
-import re
 from datetime import datetime
-from ipaddress import ip_network
 
 from flask import current_app
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Index, PrimaryKeyConstraint
 
 from sner.server.extensions import db
-from sner.server.models import SelectableEnum
 
 
 class Queue(db.Model):
@@ -108,58 +105,3 @@ class Job(db.Model):
     def output_abspath(self):
         """return absolute path to the output data file acording to current app config"""
         return os.path.join(self.queue.data_abspath, self.id)
-
-
-class ExclFamily(SelectableEnum):
-    """exclusion family enum"""
-
-    NETWORK = 'network'
-    REGEX = 'regex'
-
-
-class Excl(db.Model):
-    """exclusion model, used for target blacklisting by network ranges or
-    regex; typicaly values for the model would be enforced by apropriate forms,
-    but since exclusions allows to import from user data, model should ensure
-    corect values itself
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    family = db.Column(db.Enum(ExclFamily, values_callable=lambda x: [member.value for member in ExclFamily]), nullable=False)
-    value = db.Column(db.Text, nullable=False)
-    comment = db.Column(db.Text)
-
-    def __repr__(self):
-        return f'<Excl {self.id}>'
-
-    @validates('family')
-    def validate_family(self, key, new_family):  # pylint: disable=unused-argument
-        """validate family and subsequently value for the family"""
-
-        if new_family not in ExclFamily.__members__.values():
-            raise ValueError('Invalid family')
-
-        if self.value:
-            if new_family == ExclFamily.NETWORK:
-                ip_network(self.value)
-            if new_family == ExclFamily.REGEX:
-                try:
-                    re.compile(self.value)
-                except re.error:
-                    raise ValueError('Invalid regex') from None
-
-        return new_family
-
-    @validates('value')
-    def validate_value(self, key, new_value):  # pylint: disable=unused-argument
-        """validate value acording to the current family"""
-
-        if self.family == ExclFamily.NETWORK:
-            ip_network(new_value)
-        if self.family == ExclFamily.REGEX:
-            try:
-                re.compile(new_value)
-            except re.error:
-                raise ValueError('Invalid regex') from None
-
-        return new_value

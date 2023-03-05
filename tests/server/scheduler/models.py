@@ -13,7 +13,7 @@ from factory import LazyAttribute, post_generation, SubFactory
 
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService
-from sner.server.scheduler.models import Excl, ExclFamily, Job, Queue, Readynet, Target
+from sner.server.scheduler.models import Job, Queue, Readynet, Target
 from sner.server.utils import yaml_dump
 from tests import BaseModelFactory
 
@@ -109,25 +109,3 @@ class JobCompletedFactory(JobFactory):  # pylint: disable=too-few-public-methods
         """override JobFactory heatmap accounting"""
 
         return
-
-
-class ExclNetworkFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
-    """test excl network model factory"""
-    class Meta:  # pylint: disable=too-few-public-methods
-        """test excl network model factory"""
-        model = Excl
-
-    family = ExclFamily.NETWORK
-    value = '127.66.66.0/26'
-    comment = 'blocked test netrange, no traffic should go there'
-
-
-class ExclRegexFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
-    """test excl regex model factory"""
-    class Meta:  # pylint: disable=too-few-public-methods
-        """test excl regex model factory"""
-        model = Excl
-
-    family = ExclFamily.REGEX
-    value = 'notarget[012]'
-    comment = 'targets blocked by regex'

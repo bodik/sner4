@@ -83,7 +83,6 @@
 						<li class="nav-item"><a class="nav-link{% if subsystem == active_subsystem %} active{% endif %}" href="{{ url_for(route) }}" title="{{ subsystem|capitalize }}"><i class="fas {{ icon }}"></i></a></li>
 					{%- endfor -%}
 					{%- if active_subsystem == 'scheduler' -%}
-						{{ cm.main_menu_link('Exclusions', 'scheduler.excl_list_route') }}
 						{{ cm.main_menu_link('Queues', 'scheduler.queue_list_route') }}
 						{{ cm.main_menu_link('Jobs', 'scheduler.job_list_route') }}
 					{%- elif active_subsystem == 'storage' -%}

@@ -56,10 +56,11 @@ def test_v2_scheduler_job_assign_route_priority(api_agent, queue_factory, target
     assert len(Queue.query.get(queue2.id).jobs) == 1
 
 
-def test_v2_scheduler_job_assign_route_exclusion(api_agent, queue, excl_network, target_factory):
+def test_v2_scheduler_job_assign_route_exclusion(api_agent, queue, target_factory):
     """job assign route test cleaning up excluded hosts"""
 
-    target_factory.create(queue=queue, target=str(ip_network(excl_network.value).network_address))
+    current_app.config['SNER_EXCLUSIONS'] = [['network', '127.66.66.0/24']]
+    target_factory.create(queue=queue, target=str(ip_network(current_app.config['SNER_EXCLUSIONS'][0][1]).network_address))
 
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK

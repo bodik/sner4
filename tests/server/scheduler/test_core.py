@@ -5,42 +5,12 @@ scheduler core tests
 
 from ipaddress import ip_address, ip_network
 
-import pytest
 import yaml
 from flask import current_app
 
 from sner.server.extensions import db
 from sner.server.scheduler.core import ExclMatcher, SchedulerService
-from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Readynet
-
-
-def test_model_excl_validation():
-    """test excl model validation"""
-
-    with pytest.raises(ValueError) as pytest_wrapped_e:
-        Excl(family='invalid')
-    assert str(pytest_wrapped_e.value) == 'Invalid family'
-
-    with pytest.raises(ValueError) as pytest_wrapped_e:
-        Excl(family=ExclFamily.NETWORK, value='invalid')
-    assert str(pytest_wrapped_e.value) == "'invalid' does not appear to be an IPv4 or IPv6 network"
-
-    with pytest.raises(ValueError) as pytest_wrapped_e:
-        Excl(family=ExclFamily.REGEX, value='invalid(')
-    assert str(pytest_wrapped_e.value) == 'Invalid regex'
-
-    test_excl = Excl(value='invalid(')
-    with pytest.raises(ValueError):
-        test_excl.family = ExclFamily.NETWORK
-    with pytest.raises(ValueError):
-        test_excl.family = ExclFamily.REGEX
-
-    test_excl = Excl(family=ExclFamily.NETWORK)
-    with pytest.raises(ValueError):
-        test_excl.value = 'invalid('
-    test_excl = Excl(family=ExclFamily.REGEX)
-    with pytest.raises(ValueError):
-        test_excl.value = 'invalid('
+from sner.server.scheduler.models import Heatmap, Job, Readynet
 
 
 def test_excl_matcher(app):  # pylint: disable=unused-argument
@@ -65,6 +35,9 @@ def test_excl_matcher(app):  # pylint: disable=unused-argument
 
     assert matcher.match('notarget1')
     assert not matcher.match('notarget3')
+
+    for item in matcher.excls:
+        repr(item)
 
 
 def test_schedulerservice_hashval():

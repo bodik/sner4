@@ -16,8 +16,6 @@ from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
-    ExclNetworkFactory,
-    ExclRegexFactory,
     JobFactory,
     JobCompletedFactory,
     QueueFactory,
@@ -80,8 +78,6 @@ factoryboy_register(UserFactory)
 factoryboy_register(WebauthnCredentialFactory)
 
 # scheduler
-factoryboy_register(ExclNetworkFactory, 'excl_network')
-factoryboy_register(ExclRegexFactory, 'excl_regex')
 factoryboy_register(JobFactory)
 factoryboy_register(JobCompletedFactory, 'job_completed')
 factoryboy_register(QueueFactory)

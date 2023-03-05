@@ -3,20 +3,18 @@
 scheduler shared functions
 """
 
-import csv
 import json
 import re
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from datetime import datetime
-from io import StringIO
+from enum import Enum
 from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
 from pathlib import Path
 from random import random
 from shutil import copy2
 from uuid import uuid4
 
-import psycopg2
 import yaml
 from flask import current_app
 from sqlalchemy import cast, delete, distinct, func, select
@@ -26,7 +24,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sner.agent.modules import SERVICE_TARGET_REGEXP
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
-from sner.server.scheduler.models import Excl, ExclFamily, Heatmap, Job, Queue, Readynet, Target
+from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
 
 
 SCHEDULER_LOCK_NUMBER = 1
@@ -51,6 +49,13 @@ def enumerate_network(arg):
             data.append(str(network.broadcast_address))
 
     return data
+
+
+class ExclFamily(Enum):
+    """exclusion family enum"""
+
+    NETWORK = 'network'
+    REGEX = 'regex'
 
 
 class ExclMatcher():
@@ -86,9 +91,12 @@ class ExclMatcher():
 class ExclMatcherImplBase(ABC):  # pylint: disable=too-few-public-methods
     """base interface which must  be implemented by all available matchers"""
 
-    @abstractmethod
     def __init__(self, match_to):
-        """constructor"""
+        self.match_to = self._initialize(match_to)
+
+    @abstractmethod
+    def _initialize(self, match_to):
+        """initialize matcher impl"""
 
     @abstractmethod
     def match(self, value):
@@ -102,8 +110,8 @@ class ExclMatcherImplBase(ABC):  # pylint: disable=too-few-public-methods
 class NetworkExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public-methods
     """network matcher"""
 
-    def __init__(self, match_to):  # pylint: disable=super-init-not-called
-        self.match_to = ip_network(match_to)
+    def _initialize(self, match_to):
+        return ip_network(match_to)
 
     def match(self, value):
         try:
@@ -125,50 +133,11 @@ class NetworkExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public
 class RegexExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public-methods
     """regex matcher"""
 
-    def __init__(self, match_to):  # pylint: disable=super-init-not-called
-        self.match_to = re.compile(match_to)
+    def _initialize(self, match_to):
+        return re.compile(match_to)
 
     def match(self, value):
         return bool(self.match_to.search(value))
-
-
-class ExclImportException(Exception):
-    """exclusion import error"""
-
-
-class ExclManager:
-    """exclustion manager"""
-
-    EXPORT_FIELDNAMES = ['family', 'value', 'comment']
-
-    @classmethod
-    def import_data(cls, data, replace):
-        """import from excl export csv"""
-        try:
-            imported = []
-            for row in csv.DictReader(StringIO(data), cls.EXPORT_FIELDNAMES, quoting=csv.QUOTE_MINIMAL):
-                imported.append(Excl(family=ExclFamily(row['family']), value=row['value'], comment=row['comment']))
-
-            if imported:
-                if replace:
-                    db.session.query(Excl).delete()
-                db.session.add_all(imported)
-                db.session.commit()
-        except (csv.Error, ValueError, SQLAlchemyError, psycopg2.Error) as exc:
-            db.session.rollback()
-            current_app.logger.exception(exc)
-            raise ExclImportException() from None
-
-    @classmethod
-    def export(cls):
-        """export excls to csv"""
-
-        output_buffer = StringIO()
-        output = csv.DictWriter(output_buffer, cls.EXPORT_FIELDNAMES, restval='', quoting=csv.QUOTE_ALL)
-        for row in db.session.query(Excl.family, Excl.value, Excl.comment).all():
-            output.writerow(row._asdict())
-
-        return output_buffer.getvalue()
 
 
 class QueueManager:

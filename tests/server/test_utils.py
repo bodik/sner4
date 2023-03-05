@@ -6,7 +6,7 @@ misc server components tests
 from flask import url_for
 
 from sner.server.extensions import db
-from sner.server.scheduler.models import Excl
+from sner.server.storage.models import Host
 from sner.server.utils import valid_next_url, windowed_query
 
 
@@ -18,8 +18,8 @@ def test_valid_next_url(app):  # pylint: disable=unused-argument
     assert not valid_next_url('invalid_route')
 
 
-def test_windowed_query(app, excl_network):  # pylint: disable=unused-argument
+def test_windowed_query(app, host):  # pylint: disable=unused-argument
     """test windowed query"""
 
-    assert list(windowed_query(Excl.query, Excl.id, 1))
-    assert list(windowed_query(db.session.query(Excl.id, Excl.id).select_from(Excl), Excl.id, 1))
+    assert list(windowed_query(Host.query, Host.id, 1))
+    assert list(windowed_query(db.session.query(Host.id, Host.id).select_from(Host), Host.id, 1))
