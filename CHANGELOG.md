@@ -1,6 +1,6 @@
 # sner4 changelog
 
-## 0.8.0 - refining planner [BC BREAK] unreleased
+## 0.8.0 - refining planner [BC BREAK]
 
 * changed: nessus parser pull solution data
 * changed: split CI jobs and update makefile targets
