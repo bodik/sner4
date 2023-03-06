@@ -103,11 +103,9 @@ heatmap based rate-limiting scheduling.
   attributes container.  Each module has a different config and target
   specification, see corresponding module implementation for details.
 
-* **Excl** (exclusion) -- CIDR or regex targets exclusion specifications. Used
-  during job assignment phase when scheduler silently discards targets 
-  according to the list.
-
 * **Job** -- workload unit object, eg. assignment and output tuple.
+  Job assignment features CIDR or regex targets exclusions based
+  on configuration values.
 
 * **Heatmap**, **Readynet** -- internal structures for rate-limited target
   selection.
@@ -216,15 +214,14 @@ bin/server run
   bin/server scheduler enumips 127.0.0.0/24 > targets1
   bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets2
   ```
-2. Setup exclusions (web: *scheduler > exclusions*)
-3. Enqueue targets in queue (web: *scheduler > queue > enqueue*)
+2. Enqueue targets in queue (web: *scheduler > queue > enqueue*)
   ```
   bin/server scheduler queue-enqueue <queue.name> --file=targets
   ```
-5. Run the agent
-6. Monitor the queue until all jobs has been finished
-7. Stop the agent `bin/agent --shutdown [PID]`
-8. Gather recon data from queue directories (`<SNER_VAR>/scheduler/queue-<queue.id>`)
+3. Run the agent
+4. Monitor the queue until all jobs has been finished
+5. Stop the agent `bin/agent --shutdown [PID]`
+6. Gather recon data from queue directories (`<SNER_VAR>/scheduler/queue-<queue.id>`)
 
 
 ### 4.2 Data evaluation scenario
@@ -234,7 +231,7 @@ bin/server run
   bin/server storage import <parser name> <filename>
   ```
 2. Use web interface, flask shell or raw database to consult or manage gathered data
-4. Generate preliminary vulnerability report (web: *storage > vulns > Generate report*)
+3. Generate preliminary vulnerability report (web: *storage > vulns > Generate report*)
 
 
 ### 4.3 Examples
