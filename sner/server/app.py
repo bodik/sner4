@@ -22,6 +22,7 @@ from sner.server.extensions import api, db, jsglue, migrate, login_manager, oaut
 from sner.server.parser import load_parser_plugins
 from sner.server.scheduler.core import ExclMatcher
 from sner.server.sessions import FilesystemSessionInterface
+from sner.server.utils import yaml_dump
 from sner.version import __version__
 
 # blueprints and commands
@@ -238,6 +239,11 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     def from_json(data):
         """parse json"""
         return json.loads(data)
+
+    @app.template_filter('yaml_dump')
+    def yamldump(data):
+        """parse json"""
+        return yaml_dump(data)
 
     # globaly enable flask_wtf csrf token helper
     # least intrusive way to pass token into every view without enforcing csrf on all routes

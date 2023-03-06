@@ -1,0 +1,16 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Visuals / Internals{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Visuals', 'Internals']) %}{% endcall %}
+
+<h2>Exclusions</h2>
+<pre><code class="hljs language-yaml">{{ config['SNER_EXCLUSIONS'] | yaml_dump }}</code></pre>
+
+<h2>Planner</h2>
+<pre><code class="hljs language-yaml">{{ config['SNER_PLANNER'] | yaml_dump }}</code></pre>
+
+<script>hljs.initHighlighting();</script>
+{% endblock %}
