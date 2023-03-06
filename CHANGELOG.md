@@ -3,6 +3,18 @@
 ## 0.8.0 - refining planner [BC BREAK] unreleased
 
 * changed: nessus parser pull solution data
+* changed: split CI jobs and update makefile targets
+* changed: heavy planner refactoring
+* changed: untagging ux
+* changed: exclusion config from config, drop excl db storage
+* fix: vulnsearch elasticapi 8.x
+* fix: nessus pull solution element from xml
+* fix: api logging
+* fix: npe in vuln view
+* fix: gracefull filter parser exception handling
+* added: experimental screenshot_web plugin
+* added: experimental testssl plugin
+* added: add reportdata tag report generation workflow
 
 
 ## 0.7.1 - wrk and fix
