@@ -70,7 +70,7 @@ def initdata_sner():
         name='sner nmap script',
         config=yaml_dump({
             'module': 'manymap',
-            'args': '-sS --script default,http-headers,ldap-rootdse,ssl-cert,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',
+            'args': '-sS --script default,http-headers,ldap-rootdse,ssl-enum-ciphers,ssh-auth-methods --script-timeout 10m -Pn',
             'delay': 5
         }),
         group_size=50,
