@@ -16,8 +16,10 @@
 #    - sslhell
 #  sner_trim_report_cells: 65000
 #  sner_vulnsearch:
-#    cvesearch: 'https://u:p@hostname:15443'
-#    esd: 'https://u:p@hostname:443/esd'
+#    cvesearch: 'https://hostname:18200/cvesearch/cvesearch'
+#    esd: 'https://hostname:18200/esd'
+#    tlsauth_key: 'filename'
+#    tlsauth_cert: 'filename'
 #  sner_heatmap_hot_level: 10
 #  sner_exclusions:
 #    - [regex, '^tcp://.*:22$']

@@ -16,7 +16,7 @@ from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
-from sner.server.storage.vulnsearch import sync_es_index
+from sner.server.storage.vulnsearch import sync_vulnsearch
 from sner.server.utils import filter_query
 
 
@@ -129,17 +129,18 @@ def storage_service_list(**kwargs):
 @click.option('--namelen', default=100, help='emited name length')
 @click.option('--cvesearch', help='cvesearch base url')
 @click.option('--esd', help='elasticsearch url')
+@click.option('--tlsauth_key', help='tlsauth key path')
+@click.option('--tlsauth_cert', help='tlsauth cert path')
 def storage_sync_vulnsearch(**kwargs):
     """synchronize vulnsearch elk index"""
 
     cvesearch = kwargs.get('cvesearch') or current_app.config['SNER_VULNSEARCH'].get('cvesearch')
-    if not cvesearch:
-        current_app.logger.error('cvesearch url required (config or cmdline)')
-        sys.exit(1)
-
     esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
-    if not esd:
-        current_app.logger.error('esd url required (config or cmdline)')
+    tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
+    tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+
+    if not all([cvesearch, esd]):
+        current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    sync_es_index(cvesearch, esd, kwargs['namelen'])
+    sync_vulnsearch(cvesearch, esd, kwargs['namelen'], tlsauth_key, tlsauth_cert)

@@ -3,6 +3,7 @@
 sner.server db command module
 """
 
+import json
 import os
 import shutil
 
@@ -138,7 +139,7 @@ def initdata_dev():
     )
     db.session.add(host)
 
-    db.session.add(Service(
+    service = Service(
         host=host,
         proto='tcp',
         port=12345,
@@ -146,9 +147,12 @@ def initdata_dev():
         name='svcx',
         info='testservice banner',
         comment='manual testservice comment'
-    ))
+    )
+    db.session.add(service)
 
     db.session.add(Vuln(host=host, **aggregable_vuln))
+
+    db.session.add(Note(host=host, service=service, xtype='cpe', data=json.dumps(["cpe:/o:microsoft:windows_nt:3.5.1"])))
 
     # storage test data host2
     host = Host(

@@ -5,6 +5,7 @@ storage vulnsearch core impl
 
 import functools
 import json
+import ssl
 from hashlib import md5
 from http import HTTPStatus
 from time import time
@@ -22,10 +23,10 @@ ES_INDEX = 'vulnsearch'
 
 
 @functools.lru_cache(maxsize=256)
-def cvefor(cpe, cvesearch_url):  # pragma: nocover  ; mocked
+def cvefor(cpe, cvesearch_url, tlsauth_key, tlsauth_cert):  # pragma: nocover  ; mocked
     """query cvesearch and filter out response"""
 
-    res = requests.get(f'{cvesearch_url}/api/cvefor/{cpe}')
+    res = requests.get(f'{cvesearch_url}/api/cvefor/{cpe}', cert=(tlsauth_cert, tlsauth_key))
     if res.status_code != HTTPStatus.OK:
         return []
 
@@ -109,12 +110,27 @@ def update_managed_indices(esclient, current_index):  # pragma: nocover  ; mocke
     esclient.indices.refresh(index=current_index)
 
 
-def sync_es_index(cvesearch_url, esd_url, namelen):
+def get_elastic_client(esd_url, tlsauth_key, tlsauth_cert):
+    """create esclient"""
+
+    esclient_options = {}
+    if tlsauth_key and tlsauth_cert:
+        ctx = ssl.create_default_context()
+        ctx.load_cert_chain(tlsauth_cert, tlsauth_key)
+        # either fix tls version or use post auth handshake
+        # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+        ctx.post_handshake_auth = True
+        esclient_options['ssl_context'] = ctx
+
+    return Elasticsearch([esd_url], **esclient_options)
+
+
+def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
     """
     synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
     """
 
-    esclient = Elasticsearch([esd_url])
+    esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
     indexer = BulkIndexer(esclient)
 
     # create new index. there can be new or updated services or cpe notes of
@@ -134,7 +150,7 @@ def sync_es_index(cvesearch_url, esd_url, namelen):
             if not parsed_cpe.get_version()[0]:
                 continue
 
-            for cve in cvefor(icpe, cvesearch_url):
+            for cve in cvefor(icpe, cvesearch_url, tlsauth_key, tlsauth_cert):
                 data_id, data = vulndata(note, parsed_cpe, cve, namelen)
                 indexer.index(current_index, data_id, data)
 

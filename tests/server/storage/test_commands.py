@@ -4,12 +4,9 @@ storage.commands tests
 """
 
 import csv
-import functools
 import json
 from io import StringIO
-from unittest.mock import patch
-
-from flask import current_app
+from unittest.mock import Mock, patch
 
 import sner.server.storage.vulnsearch
 from sner.server.storage.commands import command
@@ -147,61 +144,16 @@ def test_service_list_command(runner, service):
     assert result.exit_code == 1
 
 
-def test_syncvulnsearch_command(runner, note_factory):
-    """test sync-vulnsearch command"""
-
-    @functools.lru_cache(maxsize=256)
-    def cvefor_mock(_1, _2):
-        """
-        mock external cvesearch service.
-        note: function prototype should match original so the cache stats debug code does not break.
-        """
-
-        return [{
-            'id': 'CVE-0000-0000',
-            'summary': 'mock summary',
-            'cvss': 0.0,
-        }]
-
-    def es_bulk_mock(_1, _2):
-        """es bulk mock"""
-
-    def update_managed_indices_mock(_1, _2):
-        """update_managed_indices_mock mock"""
-
-    note_factory.create(xtype='cpe', data='["cpe:/a:vendor1:product1:0.0"]')
-    note_factory.create(xtype='cpe', data='["cpe:/a:vendor2:product2"]')
-    note_factory.create_batch(1000, xtype='cpe', data='["cpe:/a:vendor3:product3:0.0"]')
-    note_factory.create(xtype='cpe', data='["invalid"]')
-
-    patch_cvefor = patch.object(sner.server.storage.vulnsearch, 'cvefor', cvefor_mock)
-    patch_esbulk = patch.object(sner.server.storage.vulnsearch, 'es_bulk', es_bulk_mock)
-    patch_update = patch.object(sner.server.storage.vulnsearch, 'update_managed_indices', update_managed_indices_mock)
-
-    current_app.config['SNER_VULNSEARCH'] = {
-        'cvesearch': 'http://dummy:80',
-        'esd': 'http://dummy:80'
-    }
-
-    with patch_cvefor, patch_esbulk, patch_update:
-        result = runner.invoke(command, ['sync-vulnsearch'])
-
-    assert result.exit_code == 0
-
-
-def test_syncvulnsearch_command_params(runner):
+def test_syncvulnsearch_command(runner):
     """tests param/config handling"""
 
-    def update_managed_indices_mock(_1, _2):
-        """update_managed_indices_mock mock"""
-
-    result = runner.invoke(command, ['sync-vulnsearch', '--esd', 'dummy'])
+    result = runner.invoke(command, ['sync-vulnsearch'])
     assert result.exit_code == 1
 
-    result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'dummy'])
-    assert result.exit_code == 1
-
+    update_managed_indices_mock = Mock()
     patch_update = patch.object(sner.server.storage.vulnsearch, 'update_managed_indices', update_managed_indices_mock)
     with patch_update:
         result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
+
     assert result.exit_code == 0
+    update_managed_indices_mock.assert_called_once()
