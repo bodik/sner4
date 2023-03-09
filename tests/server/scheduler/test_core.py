@@ -4,12 +4,14 @@ scheduler core tests
 """
 
 from ipaddress import ip_address, ip_network
+from pathlib import Path
 
+import pytest
 import yaml
 from flask import current_app
 
 from sner.server.extensions import db
-from sner.server.scheduler.core import ExclMatcher, SchedulerService
+from sner.server.scheduler.core import ExclMatcher, QueueManager, SchedulerService
 from sner.server.scheduler.models import Heatmap, Job, Readynet
 
 
@@ -38,6 +40,17 @@ def test_excl_matcher(app):  # pylint: disable=unused-argument
 
     for item in matcher.excls:
         repr(item)
+
+
+def test_queuemanager_errorhandling(app, queue):  # pylint: disable=unused-argument
+    """test QueuemaManger error handling"""
+
+    Path(f'{queue.data_abspath}').mkdir(parents=True)
+    Path(f'{queue.data_abspath}/extra').touch()
+    with pytest.raises(RuntimeError) as pytest_wrapped_e:
+        QueueManager.delete(queue)
+
+    assert 'failed to remove queue directory' in str(pytest_wrapped_e)
 
 
 def test_schedulerservice_hashval():

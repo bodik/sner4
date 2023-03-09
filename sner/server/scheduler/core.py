@@ -197,9 +197,12 @@ class QueueManager:
         for job in queue.jobs:
             JobManager.delete(job)
 
-        qpath = Path(queue.data_abspath)
-        if qpath.exists():
-            qpath.rmdir()
+        try:
+            qpath = Path(queue.data_abspath)
+            if qpath.exists():
+                qpath.rmdir()
+        except OSError as exc:  # pragma: no cover  ; wont test
+            raise RuntimeError(f'failed to remove queue directory: {exc.strerror}') from None
 
         SchedulerService.get_lock()
         db.session.delete(queue)
