@@ -173,7 +173,14 @@ class QueueHandler(Stage):  # pylint: disable=too-few-public-methods
 
         for aajob in Job.query.filter(Job.queue_id == self.queue.id, Job.retval == 0).all():
             current_app.logger.info(f'{self.__class__.__name__} drain {aajob.id} ({aajob.queue.name})')
-            yield JobManager.parse(aajob)
+            try:
+                parsed = JobManager.parse(aajob)
+            except Exception as exc:  # pylint: disable=broad-except
+                current_app.logger.error(f'{self.__class__.__name__} failed to drain {aajob.id} ({aajob.queue.name}), {exc}', exc_info=True)
+                aajob.retval += 1000
+                db.session.commit()
+                continue
+            yield parsed
             JobManager.archive(aajob)
             JobManager.delete(aajob)
 

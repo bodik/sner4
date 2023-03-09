@@ -6,6 +6,7 @@ planner core tests
 import logging
 import os
 from ipaddress import ip_address
+from pathlib import Path
 
 import pytest
 import yaml
@@ -28,7 +29,7 @@ from sner.server.planner.core import (
     StorageRescan
 )
 from sner.server.scheduler.core import SchedulerService
-from sner.server.scheduler.models import Target
+from sner.server.scheduler.models import Job, Target
 from sner.server.storage.models import Host, Note, Service
 from sner.server.utils import yaml_dump
 
@@ -135,6 +136,21 @@ def test_storageloader(app, job_completed_nmap):  # pylint: disable=unused-argum
     assert Host.query.count() == 1
     assert Service.query.count() == 6
     assert Note.query.count() == 17
+
+
+def test_storageloader_invalidjobs(app, queue_factory, job_completed_factory):  # pylint: disable=unused-argument
+    """test StorageLoader planner stage"""
+
+    queue = queue_factory.create(name='test queue', config=yaml_dump({'module': 'dummy'}))
+    job = job_completed_factory.create(queue=queue, make_output=Path('tests/server/data/parser-dummy-job-invalidjson.zip').read_bytes())
+    job_completed_factory.create(queue=queue, make_output=Path('tests/server/data/parser-dummy-job.zip').read_bytes())
+    assert Job.query.count() == 2
+
+    dummy = DummyStage()
+    ServiceDisco(queue.name, [dummy]).run()
+
+    assert job.retval == 1000
+    assert Job.query.count() == 1
 
 
 def test_queuehandler_nxqueue(app, job_completed_nmap):  # pylint: disable=unused-argument
