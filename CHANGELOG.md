@@ -1,5 +1,15 @@
 # sner4 changelog
 
+## 0.9.0 - deploying snerlytics [BC BREAK]
+
+* changed: runtime queue cosmetics
+* changed: tests use Mock instead of local functions where possible
+* changed: six_enum_discover target format vs heatmap hasvals
+* added: vulnsearch use optional client tls authentication
+* fixed: planner QueueHandler handle exception during draining/job parsing
+* fixed: handle delete queue OSerror for UI/UX
+
+
 ## 0.8.0 - refining planner [BC BREAK]
 
 * changed: nessus parser pull solution data
