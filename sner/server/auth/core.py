@@ -3,9 +3,9 @@
 auth module functions
 """
 
+import functools
 import os
 from base64 import b32decode, b32encode
-from functools import wraps
 from http import HTTPStatus
 from time import time
 
@@ -68,7 +68,7 @@ def session_required(role):
     """flask view decorator implementing role session-based authorization"""
 
     def _session_required(fnc):
-        @wraps(fnc)
+        @functools.wraps(fnc)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 return login_manager.unauthorized()
@@ -86,7 +86,7 @@ def apikey_required(role):
     """flask view decorator implementing role token-based authorization"""
 
     def _apikey_required(fnc):
-        @wraps(fnc)
+        @functools.wraps(fnc)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 return {'message': 'unauthorized'}, HTTPStatus.UNAUTHORIZED
