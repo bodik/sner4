@@ -68,8 +68,8 @@ def project_services(pidb):
     ]
 
 
-def project_six_address_enums(hosts):
-    """project v6 enum patterns for agent"""
+def project_sixenum_targets(hosts):
+    """project targets for six_enum_discover agent from list of ipv6 addresses"""
 
     targets = set()
     for host in hosts:
@@ -83,7 +83,7 @@ def project_six_address_enums(hosts):
         exploded[-1] = '0-ffff'
         target = ':'.join(exploded)
 
-        targets.add(target)
+        targets.add(f'sixenum://{target}')
 
     return list(targets)
 
@@ -241,7 +241,7 @@ class StorageSixEnum(Schedule):  # pylint: disable=too-few-public-methods
     def _run(self):
         """run"""
 
-        targets = project_six_address_enums(StorageManager.get_all_six_address())
+        targets = project_sixenum_targets(StorageManager.get_all_six_address())
         current_app.logger.info(f'{self.__class__.__name__} projected {len(targets)} targets')
         self.next_stage.task(targets)
 

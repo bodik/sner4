@@ -22,6 +22,7 @@ from sqlalchemy.dialects.postgresql import ARRAY as pg_ARRAY, insert as pg_inser
 from sqlalchemy.exc import SQLAlchemyError
 
 from sner.agent.modules import SERVICE_TARGET_REGEXP
+from sner.plugin.six_enum_discover.agent import SIXENUM_TARGET_REGEXP
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
@@ -354,6 +355,9 @@ class SchedulerService:
             value = mtmp.group('host')
             if (value[0] == '[') and (value[-1] == ']'):
                 value = value[1:-1]
+
+        if mtmp := re.match(SIXENUM_TARGET_REGEXP, value):
+            value = mtmp.group('scan6dst').split('-')[0]
 
         try:
             addr = ip_address(value)

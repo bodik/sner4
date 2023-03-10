@@ -61,6 +61,8 @@ def test_schedulerservice_hashval():
     assert SchedulerService.hashval('url') == 'url'
     assert SchedulerService.hashval('tcp://127.0.0.3:11') == '127.0.0.0/24'
     assert SchedulerService.hashval('tcp://[::1]:11') == '::/48'
+    assert SchedulerService.hashval('sixenum://2001:db8:aa::1:2:3:11') == '2001:db8:aa::/48'
+    assert SchedulerService.hashval('sixenum://2001:db8:bb::1:2:3:0-ffff') == '2001:db8:bb::/48'
 
 
 def test_schedulerservice_readynetupdates(app, queue, target_factory):  # pylint: disable=unused-argument

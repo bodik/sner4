@@ -20,7 +20,7 @@ from sner.server.planner.core import (
     Planner,
     project_hosts,
     project_services,
-    project_six_address_enums,
+    project_sixenum_targets,
     ServiceDisco,
     SixDisco,
     StorageSixEnum,
@@ -48,11 +48,11 @@ def test_project_services(sample_pidb):
     assert len(services) == 202
 
 
-def test_project_six_enums():
+def test_project_sixenum_targets():
     """test project_v6_enums"""
 
-    enums = project_six_address_enums(['::1', '2001:db8:0:0:0:00ff:fe00:0'])
-    assert enums == ['0000:0000:0000:0000:0000:0000:0000:0-ffff']
+    enums = project_sixenum_targets(['::1', '2001:db8:0:0:0:00ff:fe00:0'])
+    assert enums == ['sixenum://0000:0000:0000:0000:0000:0000:0000:0-ffff']
 
 
 def test_filter_external_hosts():
@@ -90,7 +90,7 @@ def test_storagesixenum(app, host_factory):  # pylint: disable=unused-argument
     dummy = DummyStage()
     StorageSixEnum('0s', dummy).run()
 
-    expected = ['2001:0db8:00aa:0000:0000:0000:0000:0-ffff', '2001:0db8:00bb:0000:0000:0000:0000:0-ffff']
+    expected = ['sixenum://2001:0db8:00aa:0000:0000:0000:0000:0-ffff', 'sixenum://2001:0db8:00bb:0000:0000:0000:0000:0-ffff']
     assert sorted(dummy.task_args) == sorted(expected)
 
 
