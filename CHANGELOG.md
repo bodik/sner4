@@ -5,7 +5,9 @@
 * changed: runtime queue cosmetics
 * changed: tests use Mock instead of local functions where possible
 * changed: six_enum_discover target format vs heatmap hasvals [BC BREAK]
+* changed: view note list table truncate data column with ellipsis to 4k chars
 * added: vulnsearch use optional client tls authentication
+* added: add storage sync-storage command
 * fixed: planner QueueHandler handle exception during draining/job parsing
 * fixed: handle delete queue OSerror for UI/UX
 
