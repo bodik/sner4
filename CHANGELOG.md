@@ -4,7 +4,7 @@
 
 * changed: runtime queue cosmetics
 * changed: tests use Mock instead of local functions where possible
-* changed: six_enum_discover target format vs heatmap hasvals
+* changed: six_enum_discover target format vs heatmap hasvals [BC BREAK]
 * added: vulnsearch use optional client tls authentication
 * fixed: planner QueueHandler handle exception during draining/job parsing
 * fixed: handle delete queue OSerror for UI/UX
@@ -16,7 +16,7 @@
 * changed: split CI jobs and update makefile targets
 * changed: heavy planner refactoring
 * changed: untagging ux
-* changed: exclusion config from config, drop excl db storage
+* changed: exclusion config from config, drop excl db storage [BC BREAK]
 * fix: vulnsearch elasticapi 8.x
 * fix: nessus pull solution element from xml
 * fix: api logging
