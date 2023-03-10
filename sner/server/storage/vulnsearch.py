@@ -6,6 +6,7 @@ storage vulnsearch core impl
 import functools
 import json
 import ssl
+import warnings
 from hashlib import md5
 from http import HTTPStatus
 from time import time
@@ -13,13 +14,27 @@ from time import time
 import requests
 from cpe import CPE
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import ElasticsearchWarning
 from elasticsearch.helpers import bulk as es_bulk
 from flask import current_app
 
 from sner.server.storage.models import Note
 from sner.server.utils import windowed_query
 
-ES_INDEX = 'vulnsearch'
+ES_ALIAS = 'vulnsearch'
+
+
+def ignore_warning(category):
+    """ignore warning decorator"""
+    def _ignore_warning(function):
+        @functools.wraps(function)
+        def __ignore_warning(*args, **kwargs):
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', category=category)
+                result = function(*args, **kwargs)
+            return result
+        return __ignore_warning
+    return _ignore_warning
 
 
 @functools.lru_cache(maxsize=256)
@@ -92,6 +107,7 @@ class BulkIndexer:
             return self.flush()
         return ()
 
+    @ignore_warning(ElasticsearchWarning)
     def flush(self):
         """flush buffer"""
 
@@ -100,11 +116,12 @@ class BulkIndexer:
         return res
 
 
-def update_managed_indices(esclient, current_index):  # pragma: nocover  ; mocked
+@ignore_warning(ElasticsearchWarning)
+def update_managed_indices(esclient, current_index, alias):  # pragma: nocover  ; mocked
     """update alias, pune old indices"""
 
-    esclient.indices.put_alias(index=current_index, name=ES_INDEX)
-    for item in esclient.indices.get(index=f'{ES_INDEX}-*'):
+    esclient.indices.put_alias(index=current_index, name=alias)
+    for item in esclient.indices.get(index=f'{alias}-*'):
         if item != current_index:
             esclient.indices.delete(index=item)
     esclient.indices.refresh(index=current_index)
@@ -132,12 +149,7 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
 
     esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
     indexer = BulkIndexer(esclient)
-
-    # create new index. there can be new or updated services or cpe notes of
-    # existing services, also there might be new or updated cves for cpes the
-    # easiest way to handle such complex situation is to create new index and
-    # update alias used by the vulnsearch elk ui objects
-    current_index = f'{ES_INDEX}-{time()}'
+    current_index = f'{ES_ALIAS}-{time()}'
 
     for note in windowed_query(Note.query.filter(Note.xtype == 'cpe'), Note.id):
         for icpe in json.loads(note.data):
@@ -155,9 +167,6 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
                 indexer.index(current_index, data_id, data)
 
     indexer.flush()
-
-    # update alias and prune old indexes
-    update_managed_indices(esclient, current_index)
-
+    update_managed_indices(esclient, current_index, ES_ALIAS)
     # print cache stats
     current_app.logger.debug(f'cvefor cache: {cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect

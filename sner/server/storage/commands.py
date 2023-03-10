@@ -17,6 +17,7 @@ from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 from sner.server.storage.vulnsearch import sync_vulnsearch
+from sner.server.storage.syncstorage import sync_storage
 from sner.server.utils import filter_query
 
 
@@ -144,3 +145,22 @@ def storage_sync_vulnsearch(**kwargs):
         sys.exit(1)
 
     sync_vulnsearch(cvesearch, esd, kwargs['namelen'], tlsauth_key, tlsauth_cert)
+
+
+@command.command(name='sync-storage', help='synchronize storage elk index')
+@with_appcontext
+@click.option('--esd', help='elasticsearch url')
+@click.option('--tlsauth_key', help='tlsauth key path')
+@click.option('--tlsauth_cert', help='tlsauth cert path')
+def storage_sync_storage(**kwargs):
+    """synchronize storage elk index"""
+
+    esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
+    tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
+    tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+
+    if not esd:
+        current_app.logger.error('configuration required (config or cmdline)')
+        sys.exit(1)
+
+    sync_storage(esd, tlsauth_key, tlsauth_cert)
