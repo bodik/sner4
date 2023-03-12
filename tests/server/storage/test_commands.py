@@ -172,4 +172,4 @@ def test_syncstorage_command(runner):
         result = runner.invoke(command, ['sync-storage', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
-    update_managed_indices_mock.assert_called_once()
+    update_managed_indices_mock.assert_called()

@@ -150,3 +150,19 @@ class PublicServicelistSchema(BaseSchema):
     port = fields.Integer()
     state = fields.String()
     info = fields.String()
+
+
+class ElasticServiceSchema(PublicServiceSchema):
+    """elastic storage_service schema"""
+
+    host_address = fields.String(required=True)
+    host_hostname = fields.String()
+
+
+class ElasticNoteSchema(PublicNoteSchema):
+    """elastic storage_note schema"""
+
+    host_address = fields.String(required=True)
+    host_hostname = fields.String()
+    service_proto = fields.String()
+    service_port = fields.Integer()

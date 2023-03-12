@@ -11,7 +11,7 @@ import sner.server.storage.syncstorage
 from sner.server.storage.syncstorage import sync_storage
 
 
-def test_syncvulnsearch(app, tmpworkdir, note):  # pylint: disable=unused-argument
+def test_syncvulnsearch(app, tmpworkdir, service, note):  # pylint: disable=unused-argument
     """test sync-storage command"""
 
     es_bulk_mock = Mock()
@@ -23,5 +23,5 @@ def test_syncvulnsearch(app, tmpworkdir, note):  # pylint: disable=unused-argume
     with patch_esbulk, patch_update:
         sync_storage('https://dummy:80', key, cert)
 
-    assert es_bulk_mock.call_count == 1
-    update_managed_indices_mock.assert_called_once()
+    es_bulk_mock.assert_called()
+    update_managed_indices_mock.assert_called()
