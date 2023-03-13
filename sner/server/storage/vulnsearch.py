@@ -7,9 +7,9 @@ import functools
 import json
 import ssl
 import warnings
+from datetime import datetime
 from hashlib import md5
 from http import HTTPStatus
-from time import time
 
 import requests
 from cpe import CPE
@@ -20,8 +20,6 @@ from flask import current_app
 
 from sner.server.storage.models import Note
 from sner.server.utils import windowed_query
-
-ES_ALIAS = 'vulnsearch'
 
 
 def ignore_warning(category):
@@ -149,7 +147,8 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
 
     esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
     indexer = BulkIndexer(esclient)
-    current_index = f'{ES_ALIAS}-{time()}'
+    alias = 'vulnsearch'
+    index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
 
     for note in windowed_query(Note.query.filter(Note.xtype == 'cpe'), Note.id):
         for icpe in json.loads(note.data):
@@ -164,9 +163,9 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
 
             for cve in cvefor(icpe, cvesearch_url, tlsauth_key, tlsauth_cert):
                 data_id, data = vulndata(note, parsed_cpe, cve, namelen)
-                indexer.index(current_index, data_id, data)
+                indexer.index(index, data_id, data)
 
     indexer.flush()
-    update_managed_indices(esclient, current_index, ES_ALIAS)
+    update_managed_indices(esclient, index, alias)
     # print cache stats
     current_app.logger.debug(f'cvefor cache: {cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect

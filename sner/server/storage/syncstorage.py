@@ -3,8 +3,8 @@
 storage sync_storage core impl
 """
 
+from datetime import datetime
 from hashlib import md5
-from time import time
 
 from sner.server.api.schema import ElasticNoteSchema, ElasticServiceSchema, PublicHostSchema
 from sner.server.utils import windowed_query
@@ -19,10 +19,11 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
 
     esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
     indexer = BulkIndexer(esclient)
+    index_time = datetime.now().strftime('%Y%m%d%H%M%S')
 
     # storage_host
     alias = 'storage_host'
-    current_index = f'{alias}-{time()}'
+    index = f'{alias}-{index_time}'
     schema = PublicHostSchema()
 
     for host in windowed_query(Host.query, Host.id):
@@ -33,14 +34,14 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
             'services': host.services,
             'notes': [note for note in host.notes if note.service_id is None]
         }
-        indexer.index(current_index, data_id, schema.dump(data))
+        indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, current_index, alias)
+    update_managed_indices(esclient, index, alias)
 
     # storage_service
     alias = 'storage_service'
-    current_index = f'{alias}-{time()}'
+    index = f'{alias}-{index_time}'
     schema = ElasticServiceSchema()
 
     for service in windowed_query(Service.query, Service.id):
@@ -50,14 +51,14 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
             'host_hostname': service.host.hostname,
             **service.__dict__
         }
-        indexer.index(current_index, data_id, schema.dump(data))
+        indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, current_index, alias)
+    update_managed_indices(esclient, index, alias)
 
     # storage_note
     alias = 'storage_note'
-    current_index = f'{alias}-{time()}'
+    index = f'{alias}-{index_time}'
     schema = ElasticNoteSchema()
 
     for note in windowed_query(Note.query, Note.id):
@@ -75,7 +76,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
             'service_port': note.service.port if note.service else None,
             **note.__dict__
         }
-        indexer.index(current_index, data_id, schema.dump(data))
+        indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, current_index, alias)
+    update_managed_indices(esclient, index, alias)
