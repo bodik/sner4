@@ -148,6 +148,11 @@ Visualization modules for configuration and storage data.
 correlate and analyze storage CPE data via ELK stack.
 
 
+#### Snerlytics: Storage sync
+
+(EXPERIMENTAL) Synchronizes storage data to ELK stack
+
+
 
 ## 3 Installation
 
