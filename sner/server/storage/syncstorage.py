@@ -8,8 +8,8 @@ from hashlib import md5
 
 from sner.server.api.schema import ElasticNoteSchema, ElasticServiceSchema, PublicHostSchema
 from sner.server.utils import windowed_query
+from sner.server.storage.elastic import BulkIndexer
 from sner.server.storage.models import Host, Note, Service
-from sner.server.storage.vulnsearch import BulkIndexer, get_elastic_client, update_managed_indices
 
 
 def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
@@ -17,8 +17,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
     sychronize storage do esd
     """
 
-    esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
-    indexer = BulkIndexer(esclient)
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert)
     index_time = datetime.now().strftime('%Y%m%d%H%M%S')
 
     # storage_host
@@ -37,7 +36,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
         indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, index, alias)
+    indexer.update_alias(alias, index)
 
     # storage_service
     alias = 'storage_service'
@@ -54,7 +53,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
         indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, index, alias)
+    indexer.update_alias(alias, index)
 
     # storage_note
     alias = 'storage_note'
@@ -79,4 +78,4 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
         indexer.index(index, data_id, schema.dump(data))
 
     indexer.flush()
-    update_managed_indices(esclient, index, alias)
+    indexer.update_alias(alias, index)

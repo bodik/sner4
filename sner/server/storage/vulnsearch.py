@@ -5,34 +5,17 @@ storage vulnsearch core impl
 
 import functools
 import json
-import ssl
-import warnings
 from datetime import datetime
 from hashlib import md5
 from http import HTTPStatus
 
 import requests
 from cpe import CPE
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ElasticsearchWarning
-from elasticsearch.helpers import bulk as es_bulk
 from flask import current_app
 
+from sner.server.storage.elastic import BulkIndexer
 from sner.server.storage.models import Note
 from sner.server.utils import windowed_query
-
-
-def ignore_warning(category):
-    """ignore warning decorator"""
-    def _ignore_warning(function):
-        @functools.wraps(function)
-        def __ignore_warning(*args, **kwargs):
-            with warnings.catch_warnings():
-                warnings.filterwarnings('ignore', category=category)
-                result = function(*args, **kwargs)
-            return result
-        return __ignore_warning
-    return _ignore_warning
 
 
 @functools.lru_cache(maxsize=256)
@@ -89,64 +72,12 @@ def vulndata(note, parsed_cpe, cve, namelen):
     return data_id, data
 
 
-class BulkIndexer:
-    """elasticsearch bulk indexing buffer"""
-
-    def __init__(self, esclient, buflen=1000):
-        self.esclient = esclient
-        self.buf = []
-        self.buflen = buflen
-
-    def index(self, index, doc_id, doc):
-        """index item in buffered way"""
-
-        self.buf.append({'_index': index, '_id': doc_id, '_source': doc})
-        if len(self.buf) > self.buflen:
-            return self.flush()
-        return ()
-
-    @ignore_warning(ElasticsearchWarning)
-    def flush(self):
-        """flush buffer"""
-
-        res = es_bulk(self.esclient, self.buf)
-        self.buf = []
-        return res
-
-
-@ignore_warning(ElasticsearchWarning)
-def update_managed_indices(esclient, current_index, alias):  # pragma: nocover  ; mocked
-    """update alias, pune old indices"""
-
-    esclient.indices.put_alias(index=current_index, name=alias)
-    for item in esclient.indices.get(index=f'{alias}-*'):
-        if item != current_index:
-            esclient.indices.delete(index=item)
-    esclient.indices.refresh(index=current_index)
-
-
-def get_elastic_client(esd_url, tlsauth_key, tlsauth_cert):
-    """create esclient"""
-
-    esclient_options = {}
-    if tlsauth_key and tlsauth_cert:
-        ctx = ssl.create_default_context()
-        ctx.load_cert_chain(tlsauth_cert, tlsauth_key)
-        # either fix tls version or use post auth handshake
-        # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
-        ctx.post_handshake_auth = True
-        esclient_options['ssl_context'] = ctx
-
-    return Elasticsearch([esd_url], **esclient_options)
-
-
 def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
     """
     synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
     """
 
-    esclient = get_elastic_client(esd_url, tlsauth_key, tlsauth_cert)
-    indexer = BulkIndexer(esclient)
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert)
     alias = 'vulnsearch'
     index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
 
@@ -166,6 +97,6 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
                 indexer.index(index, data_id, data)
 
     indexer.flush()
-    update_managed_indices(esclient, index, alias)
+    indexer.update_alias(alias, index)
     # print cache stats
     current_app.logger.debug(f'cvefor cache: {cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect

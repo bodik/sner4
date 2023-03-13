@@ -8,8 +8,7 @@ import json
 from io import StringIO
 from unittest.mock import Mock, patch
 
-import sner.server.storage.syncstorage
-import sner.server.storage.vulnsearch
+import sner.server.storage.elastic
 from sner.server.storage.commands import command
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
 
@@ -151,13 +150,13 @@ def test_syncvulnsearch_command(runner):
     result = runner.invoke(command, ['sync-vulnsearch'])
     assert result.exit_code == 1
 
-    update_managed_indices_mock = Mock()
-    patch_update = patch.object(sner.server.storage.vulnsearch, 'update_managed_indices', update_managed_indices_mock)
+    update_alias_mock = Mock()
+    patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
     with patch_update:
         result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
-    update_managed_indices_mock.assert_called_once()
+    update_alias_mock.assert_called_once()
 
 
 def test_syncstorage_command(runner):
@@ -166,10 +165,10 @@ def test_syncstorage_command(runner):
     result = runner.invoke(command, ['sync-storage'])
     assert result.exit_code == 1
 
-    update_managed_indices_mock = Mock()
-    patch_update = patch.object(sner.server.storage.syncstorage, 'update_managed_indices', update_managed_indices_mock)
+    update_alias_mock = Mock()
+    patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
     with patch_update:
         result = runner.invoke(command, ['sync-storage', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
-    update_managed_indices_mock.assert_called()
+    update_alias_mock.assert_called()
