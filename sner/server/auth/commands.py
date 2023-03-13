@@ -53,6 +53,7 @@ def add_agent():
     db.session.commit()
     print(f'new agent {agent.username} apikey {apikey}')
 
+
 @command.command(name='add-user', help='add user')
 @click.argument('username')
 @click.argument('email')
