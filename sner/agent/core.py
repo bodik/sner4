@@ -114,7 +114,7 @@ class AgentBase(ABC, TerminateContextMixin):
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""
 
-        self.log.info('terminate')
+        self.log.info('received terminate')
         self.loop = False
         if self.module_instance:
             self.module_instance.terminate()
@@ -171,7 +171,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
     def shutdown(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """wait for current assignment to finish"""
 
-        self.log.info('shutdown')
+        self.log.info('received shutdown')
         self.loop = False
 
     @contextmanager
@@ -253,6 +253,7 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
                 if self.oneshot:
                     self.loop = False
 
+        self.log.info('exit')
         return retval
 
 
@@ -268,6 +269,7 @@ class AssignableAgent(AgentBase):
         with self.terminate_context():
             retval = self.process_assignment(assignment)
 
+        self.log.info('exit')
         return retval
 
 
