@@ -30,3 +30,11 @@ def test_addagent_command(runner):
     assert result.exit_code == 0
     new_apikey = result.output.strip().split(' ')[-1]
     assert User.query.first().apikey == PWS.hash_simple(new_apikey)
+
+
+def test_adduser_command(runner):
+    """add user command test"""
+
+    result = runner.invoke(command, ['add-user', 'userx', 'test@email'])
+    assert result.exit_code == 0
+    assert User.query.first().email == 'test@email'

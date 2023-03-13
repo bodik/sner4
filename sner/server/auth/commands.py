@@ -52,3 +52,21 @@ def add_agent():
     db.session.add(agent)
     db.session.commit()
     print(f'new agent {agent.username} apikey {apikey}')
+
+@command.command(name='add-user', help='add user')
+@click.argument('username')
+@click.argument('email')
+@click.option('--roles', help='roles separated by coma')
+@with_appcontext
+def add_user(username, email, **kwargs):
+    """add new user"""
+
+    user = User(
+        username=username,
+        email=email,
+        active=True,
+        roles=kwargs['roles'].split(',') if kwargs['roles'] else []
+    )
+    db.session.add(user)
+    db.session.commit()
+    print(f'new user {user.username}')
