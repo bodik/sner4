@@ -17,7 +17,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
     sychronize storage do esd
     """
 
-    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert)
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=100)
     index_time = datetime.now().strftime('%Y%m%d%H%M%S')
 
     # storage_host
