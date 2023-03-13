@@ -193,7 +193,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
         oauth.register(
             name=app.config['OIDC_NAME'],
             server_metadata_url=app.config[f'{app.config["OIDC_NAME"]}_METADATA'],
-            client_kwargs={'scope': 'openid email profile'}
+            client_kwargs={'scope': 'openid email'}
         )
     webauthn.init_app(app)
 
