@@ -400,7 +400,7 @@ class Planner(TerminateContextMixin):
     def run(self):
         """run planner loop"""
 
-        self.log.info(f'startup, {len(self.stages)} configured')
+        self.log.info(f'startup, {len(self.stages)} configured stages')
         self.loop = True
 
         with self.terminate_context():
