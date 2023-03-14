@@ -1,5 +1,13 @@
 # sner4 changelog
 
+## 0.9.1 - finetuning lytics
+
+* changed: agent, planner, tiny better logging
+* changed: storage sync features configurable elastic indexer buffers
+* changes: oidc scope omit profile
+* added: auth add-user command
+
+
 ## 0.9.0 - deploying snerlytics [BC BREAK]
 
 * changed: runtime queue cosmetics
