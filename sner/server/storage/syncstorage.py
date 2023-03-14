@@ -6,6 +6,8 @@ storage sync_storage core impl
 from datetime import datetime
 from hashlib import md5
 
+from flask import current_app
+
 from sner.server.api.schema import ElasticNoteSchema, ElasticServiceSchema, PublicHostSchema
 from sner.server.utils import windowed_query
 from sner.server.storage.elastic import BulkIndexer
@@ -17,7 +19,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
     sychronize storage do esd
     """
 
-    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=100)
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=current_app.config['SNER_SYNCSTORAGE_ELASTIC_BUFLEN'])
     index_time = datetime.now().strftime('%Y%m%d%H%M%S')
 
     # storage_host

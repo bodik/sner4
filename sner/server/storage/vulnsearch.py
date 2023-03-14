@@ -77,7 +77,7 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
     synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
     """
 
-    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert)
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=current_app.config['SNER_SYNCVULNSEARCH_ELASTIC_BUFLEN'])
     alias = 'vulnsearch'
     index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
 
