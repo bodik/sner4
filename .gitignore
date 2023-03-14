@@ -2,4 +2,4 @@ venv/
 __pycache__/
 *.swp
 .coverage
-.sner-ansible.*
+.sner-infra.*
