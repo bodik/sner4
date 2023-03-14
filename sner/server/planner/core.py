@@ -394,13 +394,13 @@ class Planner(TerminateContextMixin):
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""
 
-        self.log.info('terminate')
+        self.log.info('received terminate')
         self.loop = False
 
     def run(self):
         """run planner loop"""
 
-        self.log.info('startup')
+        self.log.info(f'startup, {len(self.stages)} configured')
         self.loop = True
 
         with self.terminate_context():
@@ -422,3 +422,6 @@ class Planner(TerminateContextMixin):
                     for _ in range(self.LOOPSLEEP):
                         if self.loop:
                             sleep(1)
+
+        self.log.info('exit')
+        return 0
