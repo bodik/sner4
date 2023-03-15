@@ -152,6 +152,14 @@ class PublicServicelistSchema(BaseSchema):
     info = fields.String()
 
 
+class ElasticHostSchema(PublicHostSchema):
+    """elastic storage_host schema"""
+
+    services_count = fields.Integer()
+    vulns_count = fields.Integer()
+    notes_count = fields.Integer()
+
+
 class ElasticServiceSchema(PublicServiceSchema):
     """elastic storage_service schema"""
 

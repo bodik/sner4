@@ -8,7 +8,7 @@ from hashlib import md5
 
 from flask import current_app
 
-from sner.server.api.schema import ElasticNoteSchema, ElasticServiceSchema, PublicHostSchema
+from sner.server.api.schema import ElasticHostSchema, ElasticNoteSchema, ElasticServiceSchema
 from sner.server.utils import windowed_query
 from sner.server.storage.elastic import BulkIndexer
 from sner.server.storage.models import Host, Note, Service
@@ -25,7 +25,7 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
     # storage_host
     alias = 'storage_host'
     index = f'{alias}-{index_time}'
-    schema = PublicHostSchema()
+    schema = ElasticHostSchema()
 
     for host in windowed_query(Host.query, Host.id):
         data_id = md5(f'{host.address}'.encode()).hexdigest()
@@ -33,7 +33,10 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
         data = {
             **host.__dict__,
             'services': host.services,
-            'notes': [note for note in host.notes if note.service_id is None]
+            'notes': [note for note in host.notes if note.service_id is None],
+            'services_count': len(host.services),
+            'vulns_count': len(host.vulns),
+            'notes_count': len(host.notes)
         }
         indexer.index(index, data_id, schema.dump(data))
 
