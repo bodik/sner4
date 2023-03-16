@@ -34,6 +34,8 @@ def sync_storage(esd_url, tlsauth_key, tlsauth_cert):
             **host.__dict__,
             'services': host.services,
             'notes': [note for note in host.notes if note.service_id is None],
+            'host_address': host.address,
+            'host_hostname': host.hostname,
             'services_count': len(host.services),
             'vulns_count': len(host.vulns),
             'notes_count': len(host.notes)

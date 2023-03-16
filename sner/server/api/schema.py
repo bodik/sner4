@@ -155,6 +155,8 @@ class PublicServicelistSchema(BaseSchema):
 class ElasticHostSchema(PublicHostSchema):
     """elastic storage_host schema"""
 
+    host_address = fields.String(required=True)
+    host_hostname = fields.String()
     services_count = fields.Integer()
     vulns_count = fields.Integer()
     notes_count = fields.Integer()
