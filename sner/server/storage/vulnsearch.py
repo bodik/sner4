@@ -35,6 +35,20 @@ def cvefor(cpe, cvesearch_url, tlsauth_key, tlsauth_cert):  # pragma: nocover  ;
     return data
 
 
+def get_attack_vector(cve):
+    """get access vector from cve; handle different available data with grace"""
+
+    # cvss3
+    if 'exploitability3' in cve:
+        return cve['exploitability3']['attackvector']
+
+    # cvss
+    if 'access' in cve:
+        return cve['access']['vector']
+
+    return None
+
+
 def vulndata(note, parsed_cpe, cve, namelen):
     """project vulndata object"""
 
@@ -58,6 +72,7 @@ def vulndata(note, parsed_cpe, cve, namelen):
         'description': cve['summary'],
         'cvss': cve.get('cvss'),
         'cvss3': cve.get('cvss3'),
+        'attack_vector': get_attack_vector(cve),
         'data': json.dumps(cve),
 
         'cpe': {

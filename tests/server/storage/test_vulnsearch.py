@@ -9,7 +9,15 @@ from unittest.mock import Mock, patch
 from werkzeug.serving import make_ssl_devcert
 
 import sner.server.storage.elastic
-from sner.server.storage.vulnsearch import sync_vulnsearch
+from sner.server.storage.vulnsearch import sync_vulnsearch, get_attack_vector
+
+
+def test_get_attack_vector():
+    """test get_attack_vector helper"""
+
+    assert get_attack_vector({'exploitability3': {'attackvector': 'DUMMY'}}) == 'DUMMY'
+    assert get_attack_vector({'access': {'vector': 'DUMMY'}}) == 'DUMMY'
+    assert get_attack_vector({}) is None
 
 
 def test_syncvulnsearch(app, tmpworkdir, note_factory):  # pylint: disable=unused-argument
@@ -27,6 +35,7 @@ def test_syncvulnsearch(app, tmpworkdir, note_factory):  # pylint: disable=unuse
             'id': 'CVE-0000-0000',
             'summary': 'mock summary',
             'cvss': 0.0,
+            'exploitability3': {'attackvector': 'NETWORK'}
         }]
 
     es_bulk_mock = Mock()
