@@ -91,7 +91,7 @@ Agent provides communication and execution layer for plugins implementing
 various tools wrappers and supports fine-graned workload routing via
 capabilities metadata (DEPRECATED).
 
-For currently available plugins see `sner/plugin/*/agent.py`
+For list of currently available agent plugins see `sner/plugin/*/agent.py`
 
 
 #### Server: Scheduler
@@ -131,6 +131,9 @@ by Metasploit framework PRO UI. Allows somewhat flexible data management
 including predefined aggregations and items tagging.
 
 Parsers are used to parse and ingest agent output data or raw files to storage.
+
+For list of currently available parser plugins see `sner/plugin/*/parser.py`
+
 
 #### Server: Visuals
 
