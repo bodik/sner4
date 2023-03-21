@@ -12,9 +12,11 @@ from http import HTTPStatus
 import requests
 from cpe import CPE
 from flask import current_app
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import ARRAY, CIDR
 
 from sner.server.storage.elastic import BulkIndexer
-from sner.server.storage.models import Note
+from sner.server.storage.models import Host, Note
 from sner.server.utils import windowed_query
 
 
@@ -87,16 +89,15 @@ def vulndata(note, parsed_cpe, cve, namelen):
     return data_id, data
 
 
-def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
-    """
-    synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
-    """
+def cpe_notes(host_filter=None):
+    """cpe notes iterator"""
 
-    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=current_app.config['SNER_SYNCVULNSEARCH_ELASTIC_BUFLEN'])
-    alias = 'vulnsearch'
-    index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+    query = Note.query.filter(Note.xtype == 'cpe').outerjoin(Host)
+    if host_filter:
+        host_filter_expr = Host.address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR)))) if host_filter else None
+        query = query.filter(host_filter_expr)
 
-    for note in windowed_query(Note.query.filter(Note.xtype == 'cpe'), Note.id):
+    for note in windowed_query(query, Note.id):
         for icpe in json.loads(note.data):
             try:
                 parsed_cpe = CPE(icpe)
@@ -107,9 +108,22 @@ def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key, tlsauth_cert):
             if not parsed_cpe.get_version()[0]:
                 continue
 
-            for cve in cvefor(icpe, cvesearch_url, tlsauth_key, tlsauth_cert):
-                data_id, data = vulndata(note, parsed_cpe, cve, namelen)
-                indexer.index(index, data_id, data)
+            yield note, icpe, parsed_cpe
+
+
+def sync_vulnsearch(cvesearch_url, esd_url, namelen, tlsauth_key=None, tlsauth_cert=None, host_filter=None):  # noqa: E501  pylint: disable=too-many-arguments
+    """
+    synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
+    """
+
+    indexer = BulkIndexer(esd_url, tlsauth_key, tlsauth_cert, buflen=current_app.config['SNER_SYNCVULNSEARCH_ELASTIC_BUFLEN'])
+    alias = 'vulnsearch'
+    index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+
+    for note, icpe, parsed_cpe in cpe_notes(host_filter):
+        for cve in cvefor(icpe, cvesearch_url, tlsauth_key, tlsauth_cert):
+            data_id, data = vulndata(note, parsed_cpe, cve, namelen)
+            indexer.index(index, data_id, data)
 
     indexer.flush()
     indexer.update_alias(alias, index)

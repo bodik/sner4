@@ -132,6 +132,7 @@ def storage_service_list(**kwargs):
 @click.option('--esd', help='elasticsearch url')
 @click.option('--tlsauth_key', help='tlsauth key path')
 @click.option('--tlsauth_cert', help='tlsauth cert path')
+@click.option('--host_filter',  type=click.Path(exists=True), help='path to host filter file')
 def storage_sync_vulnsearch(**kwargs):
     """synchronize vulnsearch elk index"""
 
@@ -139,12 +140,13 @@ def storage_sync_vulnsearch(**kwargs):
     esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
     tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
     tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+    host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not all([cvesearch, esd]):
         current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    sync_vulnsearch(cvesearch, esd, kwargs['namelen'], tlsauth_key, tlsauth_cert)
+    sync_vulnsearch(cvesearch, esd, kwargs.get('namelen'), tlsauth_key, tlsauth_cert, host_filter)
 
 
 @command.command(name='sync-storage', help='synchronize storage elk index')
@@ -152,15 +154,17 @@ def storage_sync_vulnsearch(**kwargs):
 @click.option('--esd', help='elasticsearch url')
 @click.option('--tlsauth_key', help='tlsauth key path')
 @click.option('--tlsauth_cert', help='tlsauth cert path')
+@click.option('--host_filter',  type=click.Path(exists=True), help='path to host filter file')
 def storage_sync_storage(**kwargs):
     """synchronize storage elk index"""
 
     esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
     tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
     tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+    host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not esd:
         current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    sync_storage(esd, tlsauth_key, tlsauth_cert)
+    sync_storage(esd, tlsauth_key, tlsauth_cert, host_filter)
