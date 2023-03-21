@@ -1,5 +1,12 @@
 # sner4 changelog
 
+## 0.9.2 - deploying snerlytics
+
+* changed: various snerlytics indexes updates
+* changed: elastic sync features add file based filter
+* fixed: network exclusion matcher fix sixenum:// matching
+
+
 ## 0.9.1 - finetuning lytics
 
 * changed: agent, planner, tiny better logging
