@@ -52,6 +52,24 @@ def enumerate_network(arg):
     return data
 
 
+def sixenum_target_boundaries(value):
+    """returns tuple(first, last)"""
+
+    if not (mtmp := re.match(SIXENUM_TARGET_REGEXP, value)):
+        raise ValueError('not valid sixenum target')
+
+    addr = mtmp.group('scan6dst')
+
+    if '-' in addr:
+        first, last = addr.split('-')
+        tmp = first.split(':')
+        tmp[-1] = last
+        last = ':'.join(tmp)
+        return first, last
+
+    return addr, addr
+
+
 class ExclFamily(Enum):
     """exclusion family enum"""
 
@@ -114,18 +132,35 @@ class NetworkExclMatcher(ExclMatcherImplBase):  # pylint: disable=too-few-public
     def _initialize(self, match_to):
         return ip_network(match_to)
 
-    def match(self, value):
+    def _test_addr(self, value):
         try:
             return ip_address(value) in self.match_to
         except ValueError:
-            pass
+            return False
 
-        try:
-            mtmp = re.match(SERVICE_TARGET_REGEXP, value)
-            if mtmp:
-                return ip_address(mtmp.group('host').replace('[', '').replace(']', '')) in self.match_to
-        except ValueError:
-            pass
+    def match(self, value):
+        # test value as plain address
+        if self._test_addr(value):
+            return True
+
+        # test value as service target
+        if mtmp := re.match(SERVICE_TARGET_REGEXP, value):
+            return self._test_addr(mtmp.group('host').replace('[', '').replace(']', ''))
+
+        # test value as sixenum target
+        if mtmp := re.match(SIXENUM_TARGET_REGEXP, value):
+            first, last = map(ip_address, sixenum_target_boundaries(value))
+
+            # first or last enum addr is in excluded range
+            if self._test_addr(first) or self._test_addr(last):
+                return True
+
+            # excluded range could be smaller than enum, check if excluded range does not belong into enum itself
+            if (
+                (first.version == self.match_to.version)
+                and ((first <= self.match_to.network_address <= last) or (first <= self.match_to.broadcast_address <= last))
+            ):
+                return True
 
         return False
 

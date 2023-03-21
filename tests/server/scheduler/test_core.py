@@ -11,8 +11,17 @@ import yaml
 from flask import current_app
 
 from sner.server.extensions import db
-from sner.server.scheduler.core import ExclMatcher, QueueManager, SchedulerService
+from sner.server.scheduler.core import ExclMatcher, QueueManager, SchedulerService, sixenum_target_boundaries
 from sner.server.scheduler.models import Heatmap, Job, Readynet
+
+
+def test_sixenum_target_boundaries():
+    """check sixenum_target_boundaries"""
+
+    assert sixenum_target_boundaries('sixenum://::1') == ('::1', '::1')
+    assert sixenum_target_boundaries('sixenum://::1-ffff') == ('::1', '::ffff')
+    with pytest.raises(ValueError):
+        sixenum_target_boundaries('dummy')
 
 
 def test_excl_matcher(app):  # pylint: disable=unused-argument
@@ -20,10 +29,14 @@ def test_excl_matcher(app):  # pylint: disable=unused-argument
 
     test_regex = 'notarget[012]'
     test_network = '127.66.66.0/26'
+    test_sixenum1 = '2001:db8:aa:200::/56'
+    test_sixenum2 = '2001:db8:aa:400::1/128'
 
     matcher = ExclMatcher(yaml.safe_load(f"""
         - [regex, '{test_regex}']
         - [network, '{test_network}']
+        - [network, '{test_sixenum1}']
+        - [network, '{test_sixenum2}']
     """))
     tnetwork = ip_network(test_network)
 
@@ -37,6 +50,14 @@ def test_excl_matcher(app):  # pylint: disable=unused-argument
 
     assert matcher.match('notarget1')
     assert not matcher.match('notarget3')
+
+    # first and last enums for test_sixenum1
+    assert matcher.match('sixenum://2001:db8:aa:200::0-ffff')
+    assert matcher.match('sixenum://2001:db8:aa:2ff:ffff:ffff:ffff:0-ffff')
+    # test very small sixenum excl agains standard enum target
+    assert matcher.match('sixenum://2001:db8:aa:400::0-ffff')
+    # test value outsite matcher
+    assert not matcher.match('sixenum://2001:db8:aa:300::0-ffff')
 
     for item in matcher.excls:
         repr(item)
