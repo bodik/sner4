@@ -128,7 +128,7 @@ def initdata_dev():
         'severity': SeverityEnum.MEDIUM,
         'descr': 'aggregable vuln description',
         'data': 'agg vuln data',
-        'tags': ['reportdata']
+        'tags': ['reportdata', 'i:via_sner']
     }
 
     host = Host(

@@ -50,7 +50,7 @@ class VulnFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     descr = 'a vulnerability description'
     data = 'vuln proof'
     refs = ['URL-http://localhost/ref1', 'ref2']
-    tags = ['tag1', 'tag2']
+    tags = ['tag1', 'tag2', 'i:tag3']
     comment = 'some test vuln comment'
 
 

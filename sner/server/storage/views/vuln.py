@@ -8,13 +8,13 @@ from datetime import datetime
 from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, Response, url_for
+from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, get_related_models, tag_model_multiid, vuln_export, vuln_report
+from sner.server.storage.core import annotate_model, filtered_vuln_tags_column, get_related_models, tag_model_multiid, vuln_export, vuln_report
 from sner.server.storage.forms import MultiidForm, VulnForm
 from sner.server.storage.models import Host, Service, Vuln
 from sner.server.storage.views import blueprint
@@ -164,14 +164,16 @@ def vuln_grouped_route():
 def vuln_grouped_json_route():
     """view grouped vulns, data endpoint"""
 
+    filtered_tags = filtered_vuln_tags_column(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
+
     columns = [
         ColumnDT(Vuln.name, mData='name'),
         ColumnDT(Vuln.severity, mData='severity'),
-        ColumnDT(Vuln.tags, mData='tags'),
+        ColumnDT(filtered_tags, mData='tags'),
         ColumnDT(func.count(Vuln.id), mData='cnt_vulns', global_search=False),
     ]
     # join allows filter over host attrs
-    query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, Vuln.tags)
+    query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, filtered_tags)
     if not (query := filter_query(query, request.values.get('filter'))):
         return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 

@@ -118,6 +118,25 @@ def list_to_lines(data):
     return '\n'.join(data) if data else ''
 
 
+def filtered_vuln_tags_column(prefix_filter):
+    """returns sqla expression which removes values from array column by sql"""
+
+    def drop_tags(alist, expr=None):
+        """generate nested expression; postgresql is missing remove(array, array) function"""
+
+        if expr is None:
+            expr = Vuln.tags
+        if not alist:
+            return expr
+        expr = func.array_remove(expr, alist.pop())
+        return drop_tags(alist, expr)
+
+    tags = db.session.execute(select(Vuln.tags).select_from(Vuln).group_by(Vuln.tags)).scalars().all()
+    tags = [item for sub_list in tags for item in sub_list]
+    tags = list(set(item for item in tags if item.startswith(prefix_filter)))
+    return drop_tags(tags)
+
+
 def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-locals
     """generate report from storage data"""
 
@@ -125,6 +144,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
     host_ident = coalesce(Vuln.via_target, Host.hostname, host_address_format)
     endpoint_address = func.concat_ws(':', host_address_format, Service.port)
     endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
+    filtered_tags = filtered_vuln_tags_column(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
 
     # note1: refs (itself and array) must be unnested in order to be correctly uniq and agg as individual elements by used axis
     # note2: unnesting refs should be implemented as
@@ -139,7 +159,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
             Vuln.name.label('vulnerability'),
             Vuln.descr.label('description'),
             func.text(Vuln.severity).label('severity'),
-            Vuln.tags,
+            filtered_tags.label('tags'),
             func.array_agg(func.distinct(host_ident)).label('host_ident'),
             func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
             func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
@@ -150,7 +170,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
         .outerjoin(Host, Vuln.host_id == Host.id) \
         .outerjoin(Service, Vuln.service_id == Service.id) \
         .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
-        .group_by(Vuln.name, Vuln.descr, Vuln.severity, Vuln.tags)
+        .group_by(Vuln.name, Vuln.descr, Vuln.severity, filtered_tags)
 
     if group_by_host:
         query = query.group_by(host_ident)

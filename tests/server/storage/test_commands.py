@@ -66,7 +66,12 @@ def test_vuln_report_command(runner, host_factory, service_factory, vuln_factory
     vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.CRITICAL)
     vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.UNKNOWN, descr='A'*1001)
 
-    aggregable_vuln_data = {'name': 'agg reportdata vuln', 'xtype': 'y', 'descr': 'agg reportdata vuln description', 'tags': ['reportdata']}
+    aggregable_vuln_data = {
+        'name': 'agg reportdata vuln',
+        'xtype': 'y',
+        'descr': 'agg reportdata vuln description',
+        'tags': ['reportdata', 'i:via_sner']
+    }
     vuln_factory.create(host=host1, **aggregable_vuln_data)
     service2 = service_factory.create(host=host2)
     vuln2 = vuln_factory.create(host=host2, service=service2, **aggregable_vuln_data)
@@ -78,6 +83,7 @@ def test_vuln_report_command(runner, host_factory, service_factory, vuln_factory
     assert ',"TRIMMED",' in result.output
     assert '[::127:3:3:2]' in result.output
     assert f'## Data IP: {vuln2.host.address}, Proto: {vuln2.service.proto}, Port: {service2.port}, Hostname: {host2.hostname}' in result.output
+    assert 'i:via_sner' not in result.output
 
     result = runner.invoke(command, ['vuln-report', '--group_by_host', '--filter', 'Host.address == "127.3.3.1"'])
     assert result.exit_code == 0

@@ -75,7 +75,7 @@ def test_vuln_edit_route(cl_operator, vuln):
 
     tvuln = Vuln.query.get(vuln.id)
     assert tvuln.name == form['name'].value
-    assert len(tvuln.tags) == 3
+    assert len(tvuln.tags) == 4
 
 
 def test_vuln_delete_route(cl_operator, vuln):
@@ -145,6 +145,7 @@ def test_vuln_grouped_json_route(cl_operator, vuln):
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
     assert vuln.name in response_data['data'][0]['name']
+    assert 'i:tag3' not in response_data['data'][0]['tags']
 
     response = cl_operator.post(url_for('storage.vuln_grouped_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
