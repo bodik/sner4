@@ -1,0 +1,7 @@
+[coverage:run]
+plugins =
+    coverage_conditional_plugin
+
+[coverage:coverage_conditional_plugin]
+rules =
+    "'PYTEST_SLOW' not in os_environ": cover-ignore-if-not-pytestslow

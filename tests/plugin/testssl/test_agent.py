@@ -4,6 +4,7 @@ testssl plugin agent tests
 """
 
 import json
+import os
 import ssl
 from uuid import uuid4
 
@@ -13,6 +14,7 @@ from werkzeug.serving import make_ssl_devcert
 
 from sner.agent.core import main as agent_main
 from sner.lib import file_from_zip
+import sner.plugin.testssl.agent  # noqa: F401  pylint: disable=unused-import  ; triggers coverage for module imports when not PYTEST_SLOW
 
 
 @pytest.fixture
@@ -34,6 +36,7 @@ def https_server(tmpworkdir):
         server.stop()
 
 
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='testssl tool is slow')
 def test_basic(tmpworkdir, https_server):  # pylint: disable=unused-argument
     """testssl module execution test"""
 

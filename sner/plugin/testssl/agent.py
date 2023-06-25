@@ -10,7 +10,7 @@ from schema import Schema
 from sner.agent.modules import ModuleBase
 
 
-class AgentModule(ModuleBase):
+class AgentModule(ModuleBase):  # pragma: cover-ignore-if-not-pytestslow
     """
     internet endpoints nmap-based scanner
 

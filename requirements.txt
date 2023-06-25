@@ -1,5 +1,6 @@
 authlib
 coverage
+coverage-conditional-plugin
 cpe
 defusedxml
 elasticsearch
