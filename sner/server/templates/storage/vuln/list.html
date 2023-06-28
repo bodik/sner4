@@ -79,8 +79,8 @@
 		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>
 		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags!="{}"') }}">Tagged</a>
-		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
-		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report"') }}">Only Report</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags not_any "report" AND Vuln.tags not_any "report:data" AND Vuln.tags not_any "info"') }}">Exclude reviewed</a>
+		<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.tags any "report" OR Vuln.tags any "report:data"') }}">Only Report</a>
 	</div>
 	{{ cm.filter_form() }}
 </div>

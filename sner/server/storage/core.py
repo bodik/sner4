@@ -196,7 +196,7 @@ def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-
         else:
             rdata['asset'] = rdata['host_ident'][0] if len(rdata['endpoint_address']) == 1 else 'misc'
 
-        if 'reportdata' in rdata['tags']:
+        if 'report:data' in rdata['tags']:
             query = Vuln.query.filter(Vuln.id.in_(rdata['vuln_ids']))
             for vdata in query.all():
                 data_ident = ', '.join(filter(lambda x: x is not None, [

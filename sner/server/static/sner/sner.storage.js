@@ -54,7 +54,7 @@ class SnerStorageComponent extends SnerComponentBase {
 			},
 			/* get class for tag label */
 			'color_for_tag': function(item) {
-				var colors = {'todo': 'badge-warning', 'report': 'badge-danger'};
+				var colors = {'todo': 'badge-warning', 'report': 'badge-danger', 'report:data': 'badge-danger'};
 				return (item in colors) ? colors[item] : 'badge-secondary';
 			},
 			/* simple each helper with sort for flat array-like contexts */

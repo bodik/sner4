@@ -70,7 +70,7 @@ def test_vuln_report_command(runner, host_factory, service_factory, vuln_factory
         'name': 'agg reportdata vuln',
         'xtype': 'y',
         'descr': 'agg reportdata vuln description',
-        'tags': ['reportdata', 'i:via_sner']
+        'tags': ['report:data', 'i:via_sner']
     }
     vuln_factory.create(host=host1, **aggregable_vuln_data)
     service2 = service_factory.create(host=host2)

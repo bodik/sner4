@@ -130,6 +130,19 @@ Storage is a main IP-centric database model and user interface heavily inspired
 by Metasploit framework PRO UI. Allows somewhat flexible data management
 including predefined aggregations and items tagging.
 
+##### Special tags
+
+Tags are being evaluated in certain usecases:
+
+* `i:anything` is ignored in vuln grouping (view and report generation).
+  Tag is used to differentiate availability of the vuln/service/host/note from
+  different scanning pivots (eg. i:via_externalnetwork, i:via_internalvpn), but
+  visibility is ignored during report aggregations.
+
+* `report`, `report:data`, `info` are used to sort out issues already been processed
+  by operator during engagement. Can be used to filter out and get "to be processed"
+  vulns.
+
 Parsers are used to parse and ingest agent output data or raw files to storage.
 
 For list of currently available parser plugins see `sner/plugin/*/parser.py`
