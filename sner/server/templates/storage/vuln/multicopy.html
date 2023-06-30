@@ -1,0 +1,59 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Vulns / Multicopy{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_vuln_multicopy_endpoints_table_options = {
+		'ajax': {'url': "{{ url_for('storage.vuln_multicopy_endpoints_json_route', **request.args) }}", 'method': 'POST'},
+		'columns': [
+			Sner.dt.column_select(),
+			Sner.dt.column('endpoint_id', {'visible': false}),
+			Sner.dt.column('host_address'),
+			Sner.dt.column('host_hostname'),
+			Sner.dt.column('service_proto'),
+			Sner.dt.column('service_port'),
+			Sner.dt.column('service_info'),
+		],
+		'select': {'style': 'multi', 'selector': 'tr'},
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+		}
+	};
+
+	function submit_multicopy(event) {
+		var input = $(event.target).find("input[name=endpoints]");
+		var data = [];
+		event.data.dt.rows({'selected': true}).data().each((item) => { data.push(item["endpoint_id"]); });
+     		input.val(JSON.stringify(data));
+	}
+
+	$(document).ready(function() {
+		var dt_vuln_multicopy_endpoints_table = $('#vuln_multicopy_endpoints_table').DataTable(dt_vuln_multicopy_endpoints_table_options);
+		$("#vuln_form").on('submit', {'dt': dt_vuln_multicopy_endpoints_table}, submit_multicopy);
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Vulns', 'Multicopy']) %}{% endcall %}
+
+<table id="vuln_multicopy_endpoints_table" class="table table-hover table-sm" width="100%"></table>
+
+<form id="vuln_form" method="post">
+	{{ form.csrf_token }}
+	{{ form.return_url }}
+	{{ bwtf.bootstrap_field(form.endpoints, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.name, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.xtype, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.severity, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.descr, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.data, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.refs, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.tags, horizontal=True) }}
+	{{ cm.addtag_buttons() }}
+	{{ bwtf.bootstrap_field(form.comment, horizontal=True) }}
+	{{ bwtf.bootstrap_field(form.submit, horizontal=True) }}
+</form>
+{% endblock %}

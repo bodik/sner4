@@ -165,3 +165,68 @@ def test_vuln_export_route(cl_operator, vuln):
     response = cl_operator.get(url_for('storage.vuln_export_route'))
     assert response.status_code == HTTPStatus.OK
     assert f',"{vuln.name}",' in response.body.decode('utf-8')
+
+
+def test_vuln_multicopy_route(cl_operator, vuln, host_factory):
+    """vuln multicopy route test"""
+
+    host = host_factory.create()
+
+    response = cl_operator.get(url_for('storage.vuln_multicopy_route', vuln_id=vuln.id))
+    assert response.status_code == HTTPStatus.OK
+
+    form = response.forms['vuln_form']
+    form["endpoints"] = json.dumps([{"host_id": host.id}])
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
+
+    assert Vuln.query.filter(Vuln.name == vuln.name).count() == 2
+
+
+def test_vuln_multicopy_endpoints_json_route(cl_operator, vuln):
+    """vuln multicopy endpoints route test"""
+
+    response = cl_operator.post(url_for('storage.vuln_multicopy_endpoints_json_route'))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert vuln.host.hostname in response_data['data'][0]["host_hostname"]
+
+
+def test_vuln_addedit_host_autocomplete_route(cl_operator, vuln):
+    """vuln addedit autocomplete host route test"""
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_host_autocomplete_route'))
+    assert json.loads(response.body.decode('utf-8')) == []
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_host_autocomplete_route', term=vuln.host.hostname[0]))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert vuln.host.hostname in response_data[0]["label"]
+
+
+def test_vuln_addedit_service_autocomplete_route(cl_operator, service, vuln_factory):
+    """vuln addedit autocomplete service route test"""
+
+    vuln = vuln_factory.create(host=service.host, service=service)
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_service_autocomplete_route'))
+    assert json.loads(response.body.decode('utf-8')) == []
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_service_autocomplete_route', host_id=vuln.host.id, service_term=vuln.service.proto[0]))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert vuln.service.proto in response_data[0]["label"]
+
+
+def test_vuln_addedit_viatarget_autocomplete_route(cl_operator, service, vuln_factory):
+    """vuln addedit autocomplete viatarget route test"""
+
+    vuln = vuln_factory.create(host=service.host, service=service, via_target='dummy via target')
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_viatarget_autocomplete_route'))
+    assert json.loads(response.body.decode('utf-8')) == []
+
+    response = cl_operator.get(url_for('storage.vuln_addedit_viatarget_autocomplete_route', host_id=vuln.host.id, target_term=vuln.via_target[0]))
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert vuln.via_target in response_data[0]

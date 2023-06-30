@@ -1,7 +1,7 @@
 {#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
 {#- flask, wtforms, jinja2 helpers for forms styled by bootstrap4 inspired by https://github.com/carlnewton/bootstrap-wtf -#}
 
-{% set text_field_types = ['DateField', 'DateTimeField', 'DecimalField', 'FloatField', 'IntegerField', 'PasswordField', 'QuerySelectField', 'SelectField', 'SelectMultipleField', 'StringField', 'StringNoneField', 'TextAreaField', 'TextAreaListField', 'TextAreaNoneField', 'TextField'] %}
+{% set text_field_types = ['DateField', 'DateTimeField', 'DecimalField', 'FloatField', 'IntegerField', 'PasswordField', 'QuerySelectField', 'SelectField', 'SelectMultipleField', 'StringField', 'StringNoneField', 'TextAreaField', 'TextAreaListField', 'TextAreaNoneField', 'TextField', 'JSONField'] %}
 
 {% macro bootstrap_form(form, labels=True, placeholders=True, errors=True, horizontal=False) -%}
 	{%- for field in form -%}

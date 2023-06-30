@@ -9,14 +9,14 @@ from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
 from flask import current_app, jsonify, redirect, render_template, request, Response, url_for
-from sqlalchemy import func, literal_column
+from sqlalchemy import cast, func, literal_column, or_, select, union
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.storage.core import annotate_model, filtered_vuln_tags_column, get_related_models, tag_model_multiid, vuln_export, vuln_report
-from sner.server.storage.forms import MultiidForm, VulnForm
-from sner.server.storage.models import Host, Service, Vuln
+from sner.server.storage.forms import MultiidForm, VulnMulticopyForm, VulnForm
+from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
 from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
 
@@ -203,3 +203,124 @@ def vuln_export_route():
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename=export-{datetime.now().isoformat()}.csv'}
     )
+
+
+@blueprint.route('/vuln/multicopy/<int:vuln_id>', methods=['GET', 'POST'])
+@session_required('operator')
+def vuln_multicopy_route(vuln_id):
+    """copu vuln"""
+
+    vuln = Vuln.query.get(vuln_id)
+    form = VulnMulticopyForm(obj=vuln)
+
+    if form.validate_on_submit():
+        new_vulns = []
+        for endpoint in form.endpoints.data:
+            vuln = Vuln()
+            form.populate_obj(vuln)
+            vuln.update(endpoint)
+            db.session.add(vuln)
+            new_vulns.append(vuln)
+        db.session.commit()
+
+        filter_string = 'Vuln.id in ' + json.dumps([vuln_id] + [x.id for x in new_vulns])
+        return redirect(url_for('storage.vuln_list_route', filter=filter_string))
+
+    return render_template('storage/vuln/multicopy.html', form=form)
+
+
+@blueprint.route('/vuln/multicopy_endpoints.json', methods=['GET', 'POST'])
+@session_required('operator')
+def vuln_multicopy_endpoints_json_route():
+    """multicopy endpoints endpoint"""
+
+    query = select(
+        func.jsonb_build_object('host_id', Host.id).label("endpoint_id"),
+        Host.address.label("host_address"),
+        Host.hostname.label("host_hostname"),
+    ).select_from(Host)
+    hosts = [
+        {**x._asdict(), "service_proto": None, "service_port": None, "service_info": None}
+        for x in db.session.execute(query).all()
+    ]
+
+    query = select(
+        func.jsonb_build_object('host_id', Host.id, 'service_id', Service.id).label("endpoint_id"),
+        Host.address.label("host_address"),
+        Host.hostname.label("host_hostname"),
+        Service.proto.label("service_proto"),
+        Service.port.label("service_port"),
+        Service.info.label("service_info")
+    ).select_from(Service).outerjoin(Host, Service.host_id == Host.id)
+    services = [x._asdict() for x in db.session.execute(query).all()]
+
+    data = {"data": sorted(hosts + services, key=lambda item: (item['host_address'], item['service_port'] or 0))}
+    return Response(json.dumps(data, cls=SnerJSONEncoder), mimetype='application/json')
+
+
+@blueprint.route('/vuln_addedit_host_autocomplete')
+@session_required('operator')
+def vuln_addedit_host_autocomplete_route():
+    """autocomplete suggestions for host"""
+
+    term = request.args.get('term', '')
+    if not term:
+        return jsonify([])
+
+    hosts = Host.query.filter(
+        or_(cast(Host.address, db.String).ilike(f"%{term}%"), Host.hostname.ilike(f"%{term}%"))
+    ).limit(current_app.config['SNER_AUTOCOMPLETE_LIMIT']).all()
+    data = [
+        {'value': host.id, 'label': f'{host.address} (hostname: {host.hostname} id:{host.id})'}
+        for host in hosts
+    ]
+
+    return jsonify(data)
+
+
+@blueprint.route('/vuln_addedit_service_autocomplete')
+@session_required('operator')
+def vuln_addedit_service_autocomplete_route():
+    """autocomplete suggestions for service"""
+
+    host_id = request.args.get('host_id', '', str)
+    service_term = request.args.get('service_term', '')
+    if not host_id.isnumeric():
+        return jsonify([])
+
+    data = []
+    services = Service.query.filter(
+        Service.host_id == host_id,
+        or_(
+            Service.proto.ilike(f'%{service_term}%'),
+            cast(Service.port, db.String).ilike(f"%{service_term}%")
+        )
+    ).all()
+    for service in services:
+        data.append({
+            'value': service.id,
+            'label': f'{service.proto}/{service.port} {service.host.address} (hostname: {service.host.hostname} id:{service.host.id})'
+        })
+
+    return jsonify(data)
+
+
+@blueprint.route('/vuln_addedit_viatarget_autocomplete')
+@session_required('operator')
+def vuln_addedit_viatarget_autocomplete_route():
+    """autocomplete suggestions for via_target"""
+
+    host_id = request.args.get('host_id', '', str)
+    target_term = request.args.get('target_term', '')
+    if not host_id.isnumeric():
+        return jsonify([])
+
+    data = []
+    query = union(
+        select(Vuln.via_target).filter(Vuln.host_id == host_id, Vuln.via_target.ilike(f"%{target_term}%")),
+        select(Note.via_target).filter(Note.host_id == host_id, Note.via_target.ilike(f"%{target_term}%"))
+    )
+    items = db.session.execute(query).scalars().all()
+    data = items
+
+    return jsonify(data)

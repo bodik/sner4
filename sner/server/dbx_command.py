@@ -153,7 +153,7 @@ def initdata_dev():
     db.session.add(Vuln(host=host, **aggregable_vuln))
 
     db.session.add(Note(host=host, service=service, xtype='cpe', data=json.dumps(["cpe:/o:microsoft:windows_nt:3.5.1"])))
-    db.session.add(Note(host=host, service=service, xtype='manual', data='some other note data'))
+    db.session.add(Note(host=host, service=service, xtype='manual', data='some other note data', via_target='dummy.via_target'))
 
     # storage test data host2
     host = Host(

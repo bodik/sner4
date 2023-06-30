@@ -3,6 +3,39 @@
 
 {% block title %}Vulns / Add or edit{% endblock %}
 
+{% block script %}
+<script type="text/javascript">
+	function suggest_host(req, response) {
+		$.ajax(Flask.url_for('storage.vuln_addedit_host_autocomplete_route', {'term': req.term}))
+			.done(function(data, textStatus, jqXHR) { return response(data); })
+			.fail(function(jqXHR, textStatus, errorThrown) { return response([]); });
+	}
+
+	function suggest_service(req, response) {
+		$.ajax(Flask.url_for('storage.vuln_addedit_service_autocomplete_route', {'host_id': $('#vuln_form input[name="host_id"]').val(), 'service_term': req.term}))
+			.done(function(data, textStatus, jqXHR) { return response(data); })
+			.fail(function(jqXHR, textStatus, errorThrown) { return response([]); });
+	}
+
+	function suggest_viatarget(req, response) {
+		$.ajax(Flask.url_for('storage.vuln_addedit_viatarget_autocomplete_route', {'host_id': $('#vuln_form input[name="host_id"]').val(), 'target_term': req.term}))
+			.done(function(data, textStatus, jqXHR) { return response(data); })
+			.fail(function(jqXHR, textStatus, errorThrown) { return response([]); });
+	}
+
+	$(document).ready(function() {
+		$('#vuln_form input[name="host_id"]')
+			.autocomplete({'source': suggest_host});
+		$('#vuln_form input[name="service_id"]')
+			.autocomplete({'source': suggest_service, 'minLength': 0})
+			.bind('focus', function(){ $(this).autocomplete("search"); });
+		$('#vuln_form input[name="via_target"]')
+			.autocomplete({'source': suggest_viatarget, 'minLength': 0})
+			.bind('focus', function(){ $(this).autocomplete("search"); });
+	});
+</script>
+{% endblock %}
+
 {% block content %}
 {% call cm.heading(['Vulns', 'Add or edit']) %}{% endcall %}
 

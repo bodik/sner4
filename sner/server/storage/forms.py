@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import FieldList, HiddenField, IntegerField, SelectField, SubmitField, ValidationError
 from wtforms.validators import AnyOf, InputRequired, IPAddress, Length, NumberRange, Optional
 
-from sner.server.forms import StringNoneField, TextAreaListField, TextAreaNoneField
+from sner.server.forms import JSONField, StringNoneField, TextAreaListField, TextAreaNoneField
 from sner.server.storage.models import Host, Service, SeverityEnum
 
 
@@ -58,8 +58,9 @@ class ServiceForm(FlaskForm):
 class VulnForm(FlaskForm):
     """note edit form"""
 
-    host_id = IntegerField('Host_id', [InputRequired(), host_id_exists])
-    service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host])
+    # retype field in render is required for autocomple to fire when searching for hostname
+    host_id = IntegerField('Host_id', [InputRequired(), host_id_exists], render_kw={'type': "text"})
+    service_id = IntegerField('Service_id', [Optional(), service_id_exists_and_belongs_to_host], render_kw={'type': "text"})
     via_target = StringNoneField('Via_target', [Length(max=250)])
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
     xtype = StringNoneField('xType', [Length(max=250)])
@@ -114,3 +115,19 @@ class QuickjumpForm(FlaskForm):
 
     quickjump = StringNoneField('quickjump', [InputRequired()])
     submit = SubmitField('Jump')
+
+
+class VulnMulticopyForm(FlaskForm):
+    """vuln multicopy form"""
+
+    endpoints = JSONField('endpoints')
+    name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
+    xtype = StringNoneField('xType', [Length(max=250)])
+    severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
+    descr = TextAreaNoneField('Descr', render_kw={'rows': '15'})
+    data = TextAreaNoneField('Data', render_kw={'rows': '10'})
+    refs = TextAreaListField('Refs', render_kw={'rows': '3'})
+    tags = TextAreaListField('Tags', render_kw={'class': 'form-control tageditor', 'rows': 6})
+    comment = TextAreaNoneField('Comment')
+    submit = SubmitField('Save')
+    return_url = HiddenField()
