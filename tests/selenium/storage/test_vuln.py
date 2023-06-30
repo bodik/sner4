@@ -258,3 +258,20 @@ def test_vuln_edit_route_autocomplete(live_server, sl_operator, vuln, host_facto
     db.session.refresh(vuln)
     assert vuln.host_id == host.id
     assert vuln.service_id == service.id
+
+
+def test_vuln_multicopy_route(live_server, sl_operator, vuln, host_factory, service_factory):  # pylint: disable=unused-argument
+    """test vuln multicopy route"""
+
+    host = host_factory.create(address='127.9.9.9')
+    service = service_factory.create(host=host, port=993)
+
+    sl_operator.get(url_for('storage.vuln_multicopy_route', vuln_id=vuln.id, _external=True))
+    dt_wait_processing(sl_operator, 'vuln_multicopy_endpoints_table')
+    sl_operator.find_element(By.XPATH, f'//table[@id="vuln_multicopy_endpoints_table"]/tbody/tr/td[text()="{service.port}"]').click()
+
+    sl_operator.find_element(By.XPATH, '//form[@id="vuln_form"]//input[@type="submit"]').click()
+    dt_elem = dt_wait_processing(sl_operator, 'vuln_list_table')
+
+    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+    assert Vuln.query.filter(Vuln.host_id == host.id, Vuln.service_id == service.id, Vuln.xtype == vuln.xtype).one()

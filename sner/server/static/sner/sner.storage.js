@@ -161,7 +161,7 @@ class SnerStorageComponent extends SnerComponentBase {
 						</div>
 					</div>
 					<a class="btn btn-outline-secondary" href="{{> storage.vuln_edit_route vuln_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
-					<a class="btn btn-outline-secondary" href="{{> storage.vuln_multicopy_route vuln_id=id}}" title="Multicopy"><i class="fas fa-copy"></i></a>
+					<a class="btn btn-outline-secondary" href="{{> storage.vuln_multicopy_route vuln_id=id}}" title="Multicopy"><i class="far fa-copy"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 			'vuln_list_filter_name_link': `<a href='{{> storage.vuln_list_route_filter_name filter_value=name_encoded}}'>{{name}}</a>`,

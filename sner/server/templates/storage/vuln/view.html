@@ -32,7 +32,7 @@ $(document).ready(function() {
 			</div>
 			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_list_route', filter='Vuln.name=="'+vuln.name+'"') }}" title="Jump to same name vuln listing"><i class="fas fa-list"></i></a>
 			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_edit_route', vuln_id=vuln.id) }}" title="Edit"><i class="fas fa-edit"></i></a>
-			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_multicopy_route', vuln_id=vuln.id) }}" title="Multicopy"><i class="fas fa-copy"></i></a>
+			<a class="btn btn-outline-primary" href="{{ url_for('storage.vuln_multicopy_route', vuln_id=vuln.id) }}" title="Multicopy"><i class="far fa-copy"></i></a>
 		</div>
 		{% with form=button_form, form_url=url_for('storage.vuln_delete_route', vuln_id=vuln.id) %}{% include 'button-delete.html' %}{% endwith %}
 	</div>
