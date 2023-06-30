@@ -219,3 +219,42 @@ def test_vuln_grouped_route_filtering(live_server, sl_operator, vulns_filtering)
 
     sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
     check_vulns_filtering(sl_operator, 'vuln_grouped_table')
+
+
+def test_vuln_edit_route_autocomplete(live_server, sl_operator, vuln, host_factory, service_factory):  # pylint: disable=unused-argument
+    """test vuln addedit autocompletes"""
+
+    host = host_factory.create(address='127.9.9.9')
+    service = service_factory.create(host=host, port=993)
+
+    assert vuln.host_id != host.id
+    assert vuln.service_id != service.id
+
+    sl_operator.get(url_for('storage.vuln_edit_route', vuln_id=vuln.id, _external=True))
+    sl_operator.find_element(By.XPATH, '//a[@data-toggle="collapse"]').click()
+
+    elem_hostid_xpath = '//input[@name="host_id"]'
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_hostid_xpath)))
+    elem_hostid = sl_operator.find_element(By.XPATH, elem_hostid_xpath)
+    elem_hostid.clear()
+    elem_hostid.send_keys(host.address)
+
+    elem_xpath = '//ul[contains(@class, "vuln_addedit_host_autocomplete")]/li'
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
+
+    elem_serviceid_xpath = '//input[@name="service_id"]'
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_serviceid_xpath)))
+    elem_serviceid = sl_operator.find_element(By.XPATH, elem_serviceid_xpath)
+    elem_serviceid.clear()
+    elem_serviceid.send_keys(str(service.port)[:2])
+
+    elem_xpath = '//ul[contains(@class, "vuln_addedit_service_autocomplete")]/li'
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
+
+    sl_operator.find_element(By.XPATH, '//form[@id="vuln_form"]//input[@type="submit"]').click()
+
+    db.session.refresh(vuln)
+    assert vuln.host_id == host.id
+    assert vuln.service_id == service.id

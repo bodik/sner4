@@ -25,12 +25,12 @@
 
 	$(document).ready(function() {
 		$('#vuln_form input[name="host_id"]')
-			.autocomplete({'source': suggest_host});
+			.autocomplete({'source': suggest_host, 'classes': {"ui-autocomplete": "vuln_addedit_host_autocomplete"}});
 		$('#vuln_form input[name="service_id"]')
-			.autocomplete({'source': suggest_service, 'minLength': 0})
+			.autocomplete({'source': suggest_service, 'minLength': 0, 'classes': {"ui-autocomplete": "vuln_addedit_service_autocomplete"}})
 			.bind('focus', function(){ $(this).autocomplete("search"); });
 		$('#vuln_form input[name="via_target"]')
-			.autocomplete({'source': suggest_viatarget, 'minLength': 0})
+			.autocomplete({'source': suggest_viatarget, 'minLength': 0, 'classes': {"ui-autocomplete": "vuln_addedit_viatarget_autocomplete"}})
 			.bind('focus', function(){ $(this).autocomplete("search"); });
 	});
 </script>
