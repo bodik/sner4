@@ -115,6 +115,10 @@ def test_vuln_list_route_service_endpoint_dropdown(live_server, sl_operator, vul
         f'{test_vuln.service.port}/{test_vuln.service.proto}'
     )
 
+    sl_operator.find_element(By.XPATH, '//i[@title="Copy to clipboard"]').click()
+    # readText is not supported in firefox
+    # clipboard_text = sl_operator.execute_script('return navigator.clipboard.readText()')
+
 
 def test_vuln_list_route_moredata_dropdown(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """moredata dropdown test"""

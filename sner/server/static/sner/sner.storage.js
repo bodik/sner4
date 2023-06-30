@@ -139,7 +139,15 @@ class SnerStorageComponent extends SnerComponentBase {
 						<div class="dropdown-menu">
 							<h6 class="dropdown-header">Service endpoint URIs</h6>
 							{{#links_for_service host_address host_hostname service_proto service_port}}
-								<a class="dropdown-item" rel="noreferrer" href="{{url}}"><i class="fas fa-external-link-alt text-secondary"></i> {{url}}</a>
+								<span class="dropdown-item">
+								<i 
+									class="far fa-clipboard"
+									onclick="Sner.storage.action_service_endpoint_clipboard(event)"
+									data="{{url}}"
+									title="Copy to clipboard"
+								></i> 
+								<a rel="noreferrer" href="{{url}}">{{url}}</a>
+								</span>
 							{{/links_for_service}}
 						</div>
 					</div>
@@ -282,5 +290,16 @@ class SnerStorageComponent extends SnerComponentBase {
 					event.preventDefault();
 				});
 			});
+	}
+
+	/**
+	 * copy service endpoint string from element data
+	 *
+	 * @param {object} event jquery event
+	 */
+	action_service_endpoint_clipboard(event) {
+		navigator.clipboard.writeText(event.target.getAttribute("data"));
+		toastr.warning('Copied to clipboard.');
+		event.preventDefault();
 	}
 }
