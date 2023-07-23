@@ -6,7 +6,7 @@
 {% block script %}
 <script type="text/javascript">
 	var dt_note_list_table_options = {
-		'ajax': {'url': "{{ url_for('storage.note_list_json_route', **request.args) }}", 'method': 'POST'},
+		'ajax': {'url': "{{ url_for('storage.note_list_json_route', **request.args) | safe }}", 'method': 'POST'},
 		'columns': [
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('host_id', {'visible': false}),
