@@ -4,7 +4,7 @@ flask forms
 """
 
 from flask_wtf import FlaskForm
-from wtforms import FieldList, HiddenField, IntegerField, SelectField, SubmitField, ValidationError
+from wtforms import FieldList, HiddenField, IntegerField, RadioField, SubmitField, ValidationError
 from wtforms.validators import AnyOf, InputRequired, IPAddress, Length, NumberRange, Optional
 
 from sner.server.forms import JSONField, StringNoneField, TextAreaListField, TextAreaNoneField
@@ -64,7 +64,7 @@ class VulnForm(FlaskForm):
     via_target = StringNoneField('Via_target', [Length(max=250)])
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
     xtype = StringNoneField('xType', [Length(max=250)])
-    severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
+    severity = RadioField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaNoneField('Descr', render_kw={'rows': '15'})
     data = TextAreaNoneField('Data', render_kw={'rows': '10'})
     refs = TextAreaListField('Refs', render_kw={'rows': '3'})
@@ -123,7 +123,7 @@ class VulnMulticopyForm(FlaskForm):
     endpoints = JSONField('endpoints')
     name = StringNoneField('Name', [InputRequired(), Length(min=1, max=1000)])
     xtype = StringNoneField('xType', [Length(max=250)])
-    severity = SelectField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
+    severity = RadioField('Severity', [InputRequired()], choices=SeverityEnum.choices(), coerce=SeverityEnum.coerce)
     descr = TextAreaNoneField('Descr', render_kw={'rows': '15'})
     data = TextAreaNoneField('Data', render_kw={'rows': '10'})
     refs = TextAreaListField('Refs', render_kw={'rows': '3'})
