@@ -18,7 +18,7 @@ body {
 
 
 /* required items on forms */
-div.form-group.required label:after {
+div.form-group.required label:not(.form-check-label):after {
 	content:"*"; color:red;
 }
 
