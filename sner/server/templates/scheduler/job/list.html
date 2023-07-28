@@ -6,7 +6,7 @@
 {% block script %}
 <script type="text/javascript">
 	var dt_job_list_table_options = {
-		'ajax': {'url': "{{ url_for('scheduler.job_list_json_route', **request.args) | safe }}", 'method': 'POST'},
+		'ajax': {'url': "{{ url_for('scheduler.job_list_json_route', **request.args) }}", 'method': 'POST'},
 		'columns': [
 			Sner.dt.column('id'),
 			Sner.dt.column('queue_name'),
