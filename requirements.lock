@@ -3,7 +3,7 @@ apispec==5.2.2
 arrow==1.2.2
 astroid==2.11.6
 attrs==21.4.0
-Authlib==1.0.1
+Authlib==1.2.1
 beautifulsoup4==4.11.1
 certifi==2022.6.15
 cffi==1.15.1

@@ -102,6 +102,7 @@ DEFAULT_CONFIG = {
 
     # oauth oidc
     'OIDC_NAME': None,
+    'OIDC_TIMEOUT': 10,
     # 'OIDC_DEFAULT_METADATA': 'https://URL/.well-known/openid-configuration',
     # 'OIDC_DEFAULT_CLIENT_ID': '',
     # 'OIDC_DEFAULT_CLIENT_SECRET': ''
@@ -197,7 +198,10 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
         oauth.register(
             name=app.config['OIDC_NAME'],
             server_metadata_url=app.config[f'{app.config["OIDC_NAME"]}_METADATA'],
-            client_kwargs={'scope': 'openid email'}
+            client_kwargs={
+                'scope': 'openid email',
+                'default_timeout': app.config["OIDC_TIMEOUT"],
+            }
         )
     webauthn.init_app(app)
 
