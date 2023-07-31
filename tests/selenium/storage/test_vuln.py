@@ -3,6 +3,8 @@
 selenium ui tests for storage.vuln component
 """
 
+import string
+
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -223,6 +225,21 @@ def test_vuln_grouped_route_filtering(live_server, sl_operator, vulns_filtering)
 
     sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
     check_vulns_filtering(sl_operator, 'vuln_grouped_table')
+
+
+def test_vuln_grouped_route_filter_specialchars(live_server, sl_operator, vuln_factory):  # pylint: disable=unused-argument
+    """test grouped vulns view and filtering features with specialchars"""
+
+    vuln_factory.create(name=string.printable)
+
+    sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
+    elem_xpath = f"//a[contains(text(), '{string.digits}')]"
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
+
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
+    dt_wait_processing(sl_operator, 'vuln_list_table')
+
+    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
 
 
 def test_vuln_edit_route_autocomplete(live_server, sl_operator, vuln, host_factory, service_factory):  # pylint: disable=unused-argument

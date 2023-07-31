@@ -3,13 +3,15 @@
 selenium ui tests for storage.service component
 """
 
+import string
+
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.extensions import db
 from sner.server.storage.models import Service
-from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
+from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
 
 
@@ -61,3 +63,18 @@ def test_service_list_route_moredata_dropdown(live_server, sl_operator, service)
         By.XPATH,
         '//table[@id="service_list_table"]//h6[text()="More data"]'
     )))
+
+
+def test_service_grouped_route_filter_specialchars(live_server, sl_operator, service_factory):  # pylint: disable=unused-argument
+    """test grouped service info view and filtering features with specialchars"""
+
+    service_factory.create(info=string.printable)
+
+    sl_operator.get(url_for('storage.service_grouped_route', _external=True))
+    elem_xpath = f"//a[contains(text(), '{string.digits}')]"
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
+
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
+    dt_wait_processing(sl_operator, 'service_list_table')
+
+    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
