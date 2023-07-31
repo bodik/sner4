@@ -92,6 +92,13 @@ def initdata_sner():
         priority=15,
     ))
 
+    db.session.add(Queue(
+        name='sner nuclei',
+        config=yaml_dump({'module': 'nuclei', 'args': '-rate-limit 15'}),
+        group_size=5,
+        priority=15,
+    ))
+
 
 def initdata_pentest():
     """initialize pentest data"""

@@ -41,5 +41,5 @@ def test_basic(tmpworkdir, httpserver):
     assert result == 0
 
     [report] = json.loads(file_from_zip(f'{test_a["id"]}.zip', 'output.json').decode('utf-8'))
-    assert 'flir-path-traversal' == report['template-id']
-    assert 'high' == report['info']['severity']
+    assert report['template-id'] == 'flir-path-traversal'
+    assert report['info']['severity'] == 'high'
