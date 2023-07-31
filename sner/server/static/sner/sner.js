@@ -13,16 +13,11 @@
 
 class SnerComponentBase {
 	constructor() {
-		this.partials = {};
 		this.helpers = {};
 		this.hbs = {};
 	}
 
 	setup() {
-		/* register partial routes */
-		for (var [name, params] of Object.entries(this.partials)) {
-			Handlebars.registerPartial(name, Flask.url_for(...params));
-		};
 		/* register helpers */
 		for (var [name, impl] of Object.entries(this.helpers)) {
 			Handlebars.registerHelper(name, impl);

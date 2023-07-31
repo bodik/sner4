@@ -5,12 +5,6 @@ class SnerStorageComponent extends SnerComponentBase {
 	constructor() {
 		super();
 
-		this.partials = {
-			'storage.service_list_route_filter_info': ['storage.service_list_route', {'filter': 'Service.info ilike "{{filter_value}}%"'}],
-			'storage.service_list_route_filter_info_null': ['storage.service_list_route', {'filter': 'Service.info is_null ""'}],
-			'storage.vuln_list_route_filter_name': ['storage.vuln_list_route', {'filter': 'Vuln.name=="{{filter_value}}"'}]
-		};
-
 		this.helpers = {
 			/* generate url for ref; python version used during export must remain in sync */
 			'url_for_ref': function(ref) {
@@ -84,6 +78,22 @@ class SnerStorageComponent extends SnerComponentBase {
 
 				urls.forEach((url) => { ret += options.fn({'url': url}); });
 				return ret;
+			},
+			/* generate filter url with properly encoded vuln.name */
+			'vuln_list_route_filter_name': function(name) {
+				return Flask.url_for(
+					"storage.vuln_list_route",
+					{"filter": "Vuln.name==" + Sner.storage.encodeRFC3986URIComponent(JSON.stringify(name))}
+				);
+			},
+			/* generate filter url with properly encoded ILIKE pattern */
+			'service_list_route_filter_info': function(info) {
+				if (info == null) {
+					var filter_value = 'Service.info is_null ""';
+				} else {
+					var filter_value = 'Service.info ilike ' + Sner.storage.encodeRFC3986URIComponent(JSON.stringify(info.replace(/\\/g, '\\\\')  + '%'));
+				}
+				return Flask.url_for('storage.service_list_route', {'filter': filter_value});
 			}
 		};
 
@@ -127,11 +137,13 @@ class SnerStorageComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.service_delete_route service_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 			'service_list_filter_info_link': `
+				<a href="{{service_list_route_filter_info info}}">
 				{{#if info}}
-					<a href='{{> storage.service_list_route_filter_info filter_value=info_encoded}}'>{{info}}</a>
+					{{info}}
 				{{else}}
-					<em>null</em> <a href='{{> storage.service_list_route_filter_info_null}}'><span class="fas fa-list"></span></a>
-				{{/if}}`,
+					<em>null</em> <i class="fas fa-exclamation-circle text-warning"></i>
+				{{/if}}
+				</a>`,
 			'service_endpoint_dropdown': `
 				{{#if value}}
 					<div class="dropdown d-flex">
@@ -172,7 +184,7 @@ class SnerStorageComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary" href="{{> storage.vuln_multicopy_route vuln_id=id}}" title="Multicopy"><i class="far fa-copy"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.vuln_delete_route vuln_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
-			'vuln_list_filter_name_link': `<a href='{{> storage.vuln_list_route_filter_name filter_value=name_encoded}}'>{{name}}</a>`,
+			'vuln_list_filter_name_link': `<a href="{{vuln_list_route_filter_name name}}">{{name}}</a>`,
 
 			'note_controls': `
 				<div class="btn-group btn-group-sm">
@@ -192,6 +204,15 @@ class SnerStorageComponent extends SnerComponentBase {
 		};
 
 		super.setup();
+	}
+
+	/**
+	 * percent encode string as much as possible fo use within URI
+	 * ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#encoding_for_rfc3986
+	 */
+	encodeRFC3986URIComponent(str) {
+		const reservedChars = /[!'()*]/g;
+		return encodeURIComponent(str).replace(reservedChars, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 	}
 
 	/**

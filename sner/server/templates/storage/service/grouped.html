@@ -6,9 +6,9 @@
 {% block script %}
 <script type="text/javascript">
 	var dt_service_grouped_table_options = {
-		'ajax': {'url': "{{ url_for('storage.service_grouped_json_route', **request.args) }}", 'method': 'POST'},
+		'ajax': {'url': Flask.url_for('storage.service_grouped_json_route') + window.location.search, 'method': 'POST'},
 		'columns': [
-			Sner.dt.column('info', {'render': function(data, type, row, meta) { return Sner.storage.hbs.service_list_filter_info_link({'info': row['info'], 'info_encoded': encodeURIComponent(row['info'])}); }}),
+			Sner.dt.column('info', {'render': function(data, type, row, meta) { return Sner.storage.hbs.service_list_filter_info_link(row); }}),
 			Sner.dt.column('cnt_services')
 		],
 		'order': [[1, 'desc']]
