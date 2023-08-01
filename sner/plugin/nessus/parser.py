@@ -66,7 +66,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
 
             # parse vuln
             vuln_data = {
-                'severity': SeverityEnum(cls.SEVERITY_MAP[report_item['severity']]),
+                'severity': str(SeverityEnum(cls.SEVERITY_MAP[report_item['severity']])),
                 'descr': f'## Synopsis\n\n{report_item["synopsis"]}\n\n'
                          + f'## Description\n\n{report_item["description"]}\n\n'
                          + f'## Solution\n\n{report_item["solution"]}',
