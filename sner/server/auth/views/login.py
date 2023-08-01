@@ -12,6 +12,7 @@ from fido2.webauthn import AuthenticatorData, CollectedClientData
 from flask import current_app, flash, redirect, request, render_template, Response, session, url_for
 from flask_login import login_user, logout_user
 from requests.exceptions import HTTPError
+from sqlalchemy import func
 
 from sner.server.auth.core import regenerate_session, redirect_after_login, TOTPImpl, webauthn_credentials
 from sner.server.auth.forms import LoginForm, TotpCodeForm, WebauthnLoginForm
@@ -163,7 +164,7 @@ def login_oidc_callback_route():
         return redirect(url_for('auth.login_route'))
 
     if userinfo and userinfo.get('email'):
-        user = User.query.filter(User.active, User.email == userinfo.get('email')).one_or_none()
+        user = User.query.filter(User.active, func.lower(User.email) == userinfo.get('email').lower()).one_or_none()
         if user:
             regenerate_session()
             login_user(user)
