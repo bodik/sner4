@@ -15,6 +15,7 @@ install:
 	sh bin/install_jarm.sh
 	sh bin/install_firefox.sh
 	sh bin/install_testssl.sh
+	sh bin/install_nuclei.sh
 
 install-db:
 	sh bin/install_db.sh

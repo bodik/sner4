@@ -99,6 +99,10 @@ $(document).ready(function() {
 
 <h2>Data</h2>
 <div>
-	<pre>{{ vuln.data }}</pre>
+	{% if vuln.xtype and vuln.xtype.startswith('nuclei.') %}
+		<pre>{{ vuln.data | json_indent }}</pre>
+	{% else %}
+		<pre>{{ vuln.data }}</pre>
+	{% endif %}
 </div>
 {% endblock %}
