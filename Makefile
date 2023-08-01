@@ -39,6 +39,10 @@ coverage-server:
 	coverage run --source sner/server -m pytest tests/server -x -vv
 	coverage report --show-missing --fail-under 100
 
+coverage-plugin:
+	coverage run --source sner/plugin -m pytest tests/plugin -x -vv
+	coverage report --show-missing --fail-under 100
+
 install-extra:
 	sh bin/install_selenium.sh
 
