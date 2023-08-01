@@ -17,6 +17,9 @@ from pprint import pprint
 from sner.server.parser import ParsedItemsDb, ParserBase
 
 
+logger = logging.getLogger(__name__)
+
+
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
     """nc output parser"""
 
@@ -45,7 +48,7 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
                     pidb.upsert_service(match.group('address'), 'tcp', match.group('port'), state='open:nc')
                 continue
 
-            logging.warning('skipped line: "%s"', line)
+            logger.warning('skipped line: "%s"', line)
 
         return pidb
 
