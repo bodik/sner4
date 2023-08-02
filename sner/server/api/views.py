@@ -44,11 +44,15 @@ def v2_scheduler_job_assign_route(args):
 
     try:
         resp = SchedulerService.job_assign(args.get('queue'), args.get('caps', []))
+
         if 'id' in resp:
             current_app.logger.info(f'api.scheduler job assign {resp.get("id")}')
     except SchedulerServiceBusyException:
         resp = {}  # nowork
-    return resp
+    return jsonify({
+        'apiVersion': 2.0,
+        'data': resp
+    })
 
 
 @blueprint.route('/v2/scheduler/job/output', methods=['POST'])
@@ -60,22 +64,46 @@ def v2_scheduler_job_output_route(args):
     try:
         output = b64decode(args['output'])
     except binascii.Error:
-        return jsonify({'message': 'invalid request'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'invalid request'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     job = Job.query.filter(Job.id == args['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
     if not job:
         # invalid/repeated requests are silently discarded, agent would delete working data
         # on it's side as well
-        return jsonify({'message': 'discard job'})
+        return jsonify({
+            'apiVersion': 2.0,
+            'success': {
+                'message': 'discard job'
+            }
+        })
 
     try:
         job_id = job.id
+        print("job: ", job)
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
-        return jsonify({'message': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.TOO_MANY_REQUESTS,
+                'message': 'server busy'
+            }
+        }), HTTPStatus.TOO_MANY_REQUESTS
 
     current_app.logger.info(f'api.scheduler job output {job_id}')
-    return jsonify({'message': 'success'})
+
+    return jsonify({
+        'apiVersion': 2.0,
+        'success': {
+            'message': 'success'
+        }
+    })
 
 
 @blueprint.route('/v2/stats/prometheus')
@@ -171,7 +199,13 @@ def v2_public_storage_servicelist_route(args):
     ).filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     current_app.logger.info(f'api.public storage servicelist {args}')
     return query.all()

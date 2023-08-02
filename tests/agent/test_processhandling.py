@@ -74,7 +74,12 @@ class SimpleServer():
         """handle assign request"""
         if request.headers.get('X-API-KEY') != 'dummy':
             return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
-        return xjsonify({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []})
+        return xjsonify({
+            'apiVersion': 2.0,
+            'data': {
+                'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []
+            }
+        })
 
     @staticmethod
     def handler_output(request):

@@ -197,7 +197,12 @@ class ServerableAgent(AgentBase):  # pylint: disable=too-many-instance-attribute
             try:
                 response = self.call_api(self.get_assignment_url, self.get_assignment_params)
                 response.raise_for_status()
+
                 assignment = response.json()
+
+                if 'data' in assignment:
+                    assignment = assignment['data']
+
                 if not assignment:  # response-nowork
                     self.log.debug('get_assignment response-nowork')
                     if self.oneshot:  # pylint: disable=no-else-break  ; improves readability for following pragma

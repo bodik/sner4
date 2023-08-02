@@ -55,7 +55,12 @@ class FailServer():
         if self.cnt_assign < 2:
             self.cnt_assign += 1
             return xjsonify({'invalid': 'assignment'})
-        return xjsonify({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []})
+        return xjsonify({
+            'apiVersion': 2.0,
+            'data': {
+                'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []
+            }
+        })
 
     def handler_output(self, request):
         """handle output request"""

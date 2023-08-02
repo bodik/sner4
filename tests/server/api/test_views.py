@@ -33,7 +33,7 @@ def test_v2_scheduler_job_assign_route(client, api_agent, target):
     # assign from non-existent queue, should return response-nowork
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'queue': 'notexist'})
     assert response.status_code == HTTPStatus.OK
-    assert not response.json
+    assert not response.json['data']
 
     # attempt without credentials
     response = client.post_json(url_for('api.v2_scheduler_job_assign_route'), status='*')
@@ -64,7 +64,7 @@ def test_v2_scheduler_job_assign_route_exclusion(api_agent, queue, target_factor
 
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'))  # should return response-nowork
     assert response.status_code == HTTPStatus.OK
-    assert not response.json
+    assert not response.json['data']
 
 
 def test_v2_scheduler_job_assign_route_locked(api_agent, target):  # pylint: disable=unused-argument
@@ -81,7 +81,7 @@ def test_v2_scheduler_job_assign_route_locked(api_agent, target):  # pylint: dis
         conn.execute(select(func.pg_advisory_unlock(SCHEDULER_LOCK_NUMBER)))
 
     assert response.status_code == HTTPStatus.OK
-    assert not response.json
+    assert not response.json['data']
 
 
 def test_v2_scheduler_job_assign_route_caps(api_agent, queue_factory, target_factory):  # pylint: disable=unused-argument
@@ -99,23 +99,23 @@ def test_v2_scheduler_job_assign_route_caps(api_agent, queue_factory, target_fac
 
     # should receive t1; priority
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1']})
-    assert 't1' in response.json['targets']
+    assert 't1' in response.json['data']['targets']
 
     # should receive response-nowork; specific queue name request
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1'], 'queue': 'q1'})
-    assert not response.json
+    assert not response.json['data']
 
     # should receive t2; q1 empty, caps match q2 reqs
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1']})
-    assert 't2' in response.json['targets']
+    assert 't2' in response.json['data']['targets']
 
     # should receive t4; priority
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1', 'req2', 'req3']})
-    assert 't4' in response.json['targets']
+    assert 't4' in response.json['data']['targets']
 
     # should receive t3; reqs match
     response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'caps': ['req1', 'req2', 'req3']})
-    assert 't3' in response.json['targets']
+    assert 't3' in response.json['data']['targets']
 
 
 def test_v2_scheduler_job_output_route(api_agent, job):
@@ -195,7 +195,7 @@ def test_v2_scheduler_job_lifecycle_with_heatmap(api_agent, queue, target_factor
 
     response = api_agent.post_json(
         url_for('api.v2_scheduler_job_output_route'),
-        {'id': assignment['id'], 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
+        {'id': assignment['data']['id'], 'retval': 12345, 'output': base64.b64encode(b'a-test-file-contents').decode('utf-8')},
     )
     assert response.status_code == HTTPStatus.OK
 
