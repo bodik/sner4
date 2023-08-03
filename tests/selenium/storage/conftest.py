@@ -9,6 +9,26 @@ from sner.server.storage.models import SeverityEnum
 
 
 @pytest.fixture
+def hosts_multiaction(host_factory):
+    """prepare hosts for multiple selection and actions tests"""
+
+    yield [
+        host_factory.create(address='127.0.0.3', comment='comment1'),
+        host_factory.create(address='127.0.0.4', comment='comment2'),
+    ]
+
+
+@pytest.fixture
+def services_multiaction(host, service_factory):
+    """prepare services for multiple selection and actions tests"""
+
+    yield [
+        service_factory.create(host=host, proto='tcp', port=1234, comment='comment1'),
+        service_factory.create(host=host, proto='tcp', port=12345, comment='comment2')
+    ]
+
+
+@pytest.fixture
 def vulns_multiaction(host, vuln_factory):
     """prepare vulns for multiple selection and actions tests"""
 
@@ -27,4 +47,14 @@ def vulns_filtering(host, vuln_factory):
         vuln_factory.create(host=host, name='vuln 2', xtype='test.123', severity=SeverityEnum.INFO, tags=['tagx']),
         vuln_factory.create(host=host, name='vuln 3', xtype='test.123', severity=SeverityEnum.INFO, tags=['info']),
         vuln_factory.create(host=host, name='vuln 4', xtype='test.123', severity=SeverityEnum.INFO, tags=['report'])
+    ]
+
+
+@pytest.fixture
+def notes_multiaction(host, note_factory):
+    """prepare notes for multiple selection and actions tests"""
+
+    yield [
+        note_factory.create(host=host, xtype='test.1234', data='dummy', comment='comment1'),
+        note_factory.create(host=host, xtype='test.12345', data='dummy', comment='comment2'),
     ]

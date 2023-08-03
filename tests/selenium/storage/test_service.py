@@ -3,8 +3,10 @@
 selenium ui tests for storage.service component
 """
 
+import os
 import string
 
+import pytest
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,7 +14,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.extensions import db
 from sner.server.storage.models import Service
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
+from tests.selenium.storage import (
+    check_annotate,
+    check_dt_toolbox_multiactions,
+    check_dt_toolbox_select_rows,
+    check_dt_toolbox_visibility_toggle,
+    check_service_endpoint_dropdown
+)
 
 
 def test_service_list_route(live_server, sl_operator, service):  # pylint: disable=unused-argument
@@ -63,6 +71,27 @@ def test_service_list_route_moredata_dropdown(live_server, sl_operator, service)
         By.XPATH,
         '//table[@id="service_list_table"]//h6[text()="More data"]'
     )))
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_service_list_route_selectrows(live_server, sl_operator, services_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_select_rows(sl_operator, 'storage.service_list_route', 'service_list_table')
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_service_list_route_dt_toolbox_visibility_toggle(live_server, sl_operator, service_factory):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_visibility_toggle(sl_operator, 'storage.service_list_route', 'service_list_table', service_factory)
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_service_list_route_dt_toolbox_multiactions(live_server, sl_operator, services_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_multiactions(sl_operator, 'storage.service_list_route', 'service_list_table', Service)
 
 
 def test_service_grouped_route_filter_specialchars(live_server, sl_operator, service_factory):  # pylint: disable=unused-argument

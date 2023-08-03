@@ -93,11 +93,32 @@
 
 <div class="tab-content">
 	<div class="tab-pane" id="services">
+		<div id="host_view_service_table_toolbar" class="dt_toolbar">
+			<div class="dt_toolbar_toolbox" id="host_view_service_table_toolbox">
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
+					<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
+				</div>
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+					{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_SERVICE'], 'btn btn-outline-secondary abutton_tag_multiid') }}
+				</div>
+				<div class="btn-group">
+					<div class="btn-group">
+						<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+						{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_SERVICE'], 'striked abutton_untag_multiid') }}
+					</div>
+					<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
+				</div>
+			</div>
+		</div>
 		<table id="host_view_service_table" class="table table-hover table-sm" width="100%"></table>
 		<script type="text/javascript">
 			var dt_host_view_service_table_options = {
 				'ajax': {'url': "{{ url_for('storage.service_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
+					Sner.dt.column_select({'visible': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible'))}),
 					Sner.dt.column('id', {'visible': false}),
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
@@ -117,6 +138,7 @@
 					Sner.dt.column_buttons(Sner.storage.hbs.service_controls)
 				],
 				'order': [[5, 'asc']],
+				'select': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')) ? {'style': 'multi', 'selector': 'td:first-child'} : false,
 				'drawCallback': function (settings) {
 					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 					this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.service_annotate_route'}, Sner.storage.action_annotate_dt);
@@ -124,27 +146,34 @@
 			};
 			$(document).ready(function() {
 				var dt_host_view_service_table = Sner.dt.init_datatable('#host_view_service_table', dt_host_view_service_table_options);
+				$('#host_view_service_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_service_table}, Sner.dt.selectall);
+				$('#host_view_service_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_service_table}, Sner.dt.selectnone);
+				$('#host_view_service_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_host_view_service_table, 'route_name': 'storage.service_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+				$('#host_view_service_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_host_view_service_table, 'route_name': 'storage.service_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+				$('#host_view_service_table_toolbar .abutton_delete_multiid').on('click', {'dt': dt_host_view_service_table, 'route_name': 'storage.service_delete_multiid_route'}, Sner.storage.action_delete_multiid);
 			});
 		</script>
 	</div>
 
 	<div class="tab-pane" id="vulns">
 		<div id="host_view_vuln_table_toolbar" class="dt_toolbar">
-			<div class="btn-group">
-				<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
-				<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
-				<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
-			</div>
-			<div class="btn-group">
-				<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
-				{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
-			</div>
-			<div class="btn-group">
+			<div class="dt_toolbar_toolbox_alwaysvisible" id="host_view_vuln_table_toolbox">
 				<div class="btn-group">
-					<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
-					{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_VULN'], 'striked abutton_untag_multiid') }}
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
+					<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
 				</div>
-				<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+					{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
+				</div>
+				<div class="btn-group">
+					<div class="btn-group">
+						<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+						{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_VULN'], 'striked abutton_untag_multiid') }}
+					</div>
+					<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
+				</div>
 			</div>
 		</div>
 		<table id="host_view_vuln_table" class="table table-hover table-sm" width="100%"></table>
@@ -193,11 +222,32 @@
 	</div>
 
 	<div class="tab-pane" id="notes">
+		<div id="host_view_note_table_toolbar" class="dt_toolbar">
+			<div class="dt_toolbar_toolbox" id="host_view_note_table_toolbox">
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
+					<a class="btn btn-outline-secondary abutton_selectnone" href="#">None</a>
+				</div>
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+					{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_NOTE'], 'btn btn-outline-secondary abutton_tag_multiid') }}
+				</div>
+				<div class="btn-group">
+					<div class="btn-group">
+						<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+						{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_NOTE'], 'striked abutton_untag_multiid') }}
+					</div>
+					<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
+				</div>
+			</div>
+		</div>
 		<table id="host_view_note_table" class="table table-hover table-sm" width="100%"></table>
 		<script type="text/javascript">
 			var dt_host_view_note_table_options = {
 				'ajax': {'url': "{{ url_for('storage.note_list_json_route', filter='Host.id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
+					Sner.dt.column_select({'visible': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible'))}),
 					Sner.dt.column('id', {'visible': false}),
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
@@ -218,6 +268,7 @@
 					Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 				],
+				'select': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')) ? {'style': 'multi', 'selector': 'td:first-child'} : false,
 				'drawCallback': function (settings) {
 					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 					this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.note_annotate_route'}, Sner.storage.action_annotate_dt);
@@ -225,6 +276,11 @@
 			};
 			$(document).ready(function() {
 				var dt_host_view_note_table = Sner.dt.init_datatable('#host_view_note_table', dt_host_view_note_table_options);
+				$('#host_view_note_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_note_table}, Sner.dt.selectall);
+				$('#host_view_note_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_note_table}, Sner.dt.selectnone);
+				$('#host_view_note_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+				$('#host_view_note_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+				$('#host_view_note_table_toolbar .abutton_delete_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_delete_multiid_route'}, Sner.storage.action_delete_multiid);
 			});
 		</script>
 	</div>

@@ -10,7 +10,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.extensions import db
 from sner.server.storage.models import Host, Note, Service, Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_select_rows, check_service_endpoint_dropdown, check_vulns_multiactions
+from tests.selenium.storage import (
+    check_annotate,
+    check_dt_toolbox_multiactions,
+    check_dt_toolbox_select_rows,
+    check_dt_toolbox_visibility_toggle,
+    check_service_endpoint_dropdown
+)
 
 
 def switch_tab(sclnt, tab_name, dt_name, control_data):
@@ -61,6 +67,24 @@ def test_host_list_route_moredata_dropdown(live_server, sl_operator, host):  # p
         By.XPATH,
         '//table[@id="host_list_table"]//h6[text()="More data"]'
     )))
+
+
+def test_host_list_route_selectrows(live_server, sl_operator, hosts_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_select_rows(sl_operator, 'storage.host_list_route', 'host_list_table')
+
+
+def test_host_list_route_dt_toolbox_multiactions(live_server, sl_operator, hosts_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_multiactions(sl_operator, 'storage.host_list_route', 'host_list_table', Host)
+
+
+def test_host_list_route_dt_toolbox_visibility_toggle(live_server, sl_operator, host_factory):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_visibility_toggle(sl_operator, 'storage.host_list_route', 'host_list_table', host_factory)
 
 
 def test_host_edit_route_addtag(live_server, sl_operator, host):  # pylint: disable=unused-argument
@@ -133,6 +157,26 @@ def test_host_view_route_services_list_moredata_dropdown(live_server, sl_operato
     )))
 
 
+def test_host_view_route_services_list_selectrows(live_server, sl_operator, services_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed services dt test; selections"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    sl_operator.get(url_for('storage.host_view_route', host_id=services_multiaction[0].host_id, _external=True))
+    switch_tab(sl_operator, 'services', 'host_view_service_table', services_multiaction[-1].comment)
+    check_dt_toolbox_select_rows(sl_operator, 'storage.host_view_route', 'host_view_service_table', load_route=False)
+
+
+def test_host_view_route_services_list_multiactions(live_server, sl_operator, services_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed services dt test; multiactions"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    sl_operator.get(url_for('storage.host_view_route', host_id=services_multiaction[0].host_id, _external=True))
+    switch_tab(sl_operator, 'services', 'host_view_service_table', services_multiaction[-1].comment)
+    check_dt_toolbox_multiactions(sl_operator, 'storage.host_view_route', 'host_view_service_table', Service, load_route=False)
+
+
 def test_host_view_route_vulns_list_inrow_delete(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
     """host view tabbed vulns dt test; render and inrow delete"""
 
@@ -180,7 +224,7 @@ def test_host_view_route_vulns_list_selectrows(live_server, sl_operator, vulns_m
 
     sl_operator.get(url_for('storage.host_view_route', host_id=vulns_multiaction[0].host_id, _external=True))
     switch_tab(sl_operator, 'vulns', 'host_view_vuln_table', vulns_multiaction[-1].comment)
-    check_select_rows(sl_operator, 'host_view_vuln_table')
+    check_dt_toolbox_select_rows(sl_operator, 'storage.host_view_route', 'host_view_vuln_table', load_route=False)
 
 
 def test_host_view_route_vulns_list_multiactions(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
@@ -188,7 +232,7 @@ def test_host_view_route_vulns_list_multiactions(live_server, sl_operator, vulns
 
     sl_operator.get(url_for('storage.host_view_route', host_id=vulns_multiaction[0].host_id, _external=True))
     switch_tab(sl_operator, 'vulns', 'host_view_vuln_table', vulns_multiaction[-1].comment)
-    check_vulns_multiactions(sl_operator, 'host_view_vuln_table')
+    check_dt_toolbox_multiactions(sl_operator, 'storage.host_view_route', 'host_view_vuln_table', Vuln, load_route=False)
 
 
 def test_host_view_route_notes_list_inrow_delete(live_server, sl_operator, note):  # pylint: disable=unused-argument
@@ -231,3 +275,23 @@ def test_host_view_route_notes_list_moredata_dropdown(live_server, sl_operator, 
         By.XPATH,
         '//table[@id="host_view_note_table"]//h6[text()="More data"]'
     )))
+
+
+def test_host_view_route_notes_list_selectrows(live_server, sl_operator, notes_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed notes dt test; selections"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    sl_operator.get(url_for('storage.host_view_route', host_id=notes_multiaction[0].host_id, _external=True))
+    switch_tab(sl_operator, 'notes', 'host_view_note_table', notes_multiaction[-1].comment)
+    check_dt_toolbox_select_rows(sl_operator, 'storage.host_view_route', 'host_view_note_table', load_route=False)
+
+
+def test_host_view_route_notes_list_multiactions(live_server, sl_operator, notes_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed notes dt test; multiactions"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    sl_operator.get(url_for('storage.host_view_route', host_id=notes_multiaction[0].host_id, _external=True))
+    switch_tab(sl_operator, 'notes', 'host_view_note_table', notes_multiaction[-1].comment)
+    check_dt_toolbox_multiactions(sl_operator, 'storage.host_view_route', 'host_view_note_table', Note, load_route=False)

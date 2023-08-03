@@ -13,7 +13,12 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.storage.models import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_select_rows, check_service_endpoint_dropdown, check_vulns_multiactions
+from tests.selenium.storage import (
+    check_annotate,
+    check_dt_toolbox_multiactions,
+    check_dt_toolbox_select_rows,
+    check_service_endpoint_dropdown
+)
 
 
 def check_vulns_filtering(sclnt, dt_id):
@@ -86,15 +91,13 @@ def test_vuln_list_route_annotate(live_server, sl_operator, vuln):  # pylint: di
 def test_vuln_list_route_selectrows(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
     """test dt selection and selection buttons"""
 
-    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
-    check_select_rows(sl_operator, 'vuln_list_table')
+    check_dt_toolbox_select_rows(sl_operator, 'storage.vuln_list_route', 'vuln_list_table')
 
 
-def test_vuln_list_route_multiactions(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
+def test_vuln_list_route_dt_toolbox_multiactions(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
     """test vulns multiactions"""
 
-    sl_operator.get(url_for('storage.vuln_list_route', _external=True))
-    check_vulns_multiactions(sl_operator, 'vuln_list_table')
+    check_dt_toolbox_multiactions(sl_operator, 'storage.vuln_list_route', 'vuln_list_table', Vuln)
 
 
 def test_vuln_list_route_filtering(live_server, sl_operator, vulns_filtering):  # pylint: disable=unused-argument

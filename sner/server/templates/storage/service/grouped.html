@@ -26,13 +26,15 @@
 	</div>
 {% endcall %}
 
-<div id="service_list_table_toolbar" class="dt_toolbar">
-	<div class="btn-group">
-		<a class="btn btn-outline-secondary disabled">crop at:</a>
-		{% for crop in [1, 2, 3, 4, 5] %}
-			<a class="btn btn-outline-secondary{% if request.values.get('crop')|int == crop %} active{% endif %}" href="{{ url_for('storage.service_grouped_route', crop=crop) }}">{{ crop }}</a>
-		{% endfor %}
-		<a class="btn btn-outline-secondary{% if not request.values.get('crop')|int %} active{% endif %}" href="{{ url_for('storage.service_grouped_route') }}">no crop</a>
+<div id="service_grouped_table_toolbar" class="dt_toolbar">
+	<div class="dt_toolbar_toolbox_alwaysvisible" id="service_grouped_table_toolbox">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled">crop at:</a>
+			{% for crop in [1, 2, 3, 4, 5] %}
+				<a class="btn btn-outline-secondary{% if request.values.get('crop')|int == crop %} active{% endif %}" href="{{ url_for('storage.service_grouped_route', crop=crop) }}">{{ crop }}</a>
+			{% endfor %}
+			<a class="btn btn-outline-secondary{% if not request.values.get('crop')|int %} active{% endif %}" href="{{ url_for('storage.service_grouped_route') }}">no crop</a>
+		</div>
 	</div>
 	{{ cm.filter_form() }}
 </div>

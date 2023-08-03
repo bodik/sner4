@@ -3,6 +3,9 @@
 selenium ui tests for storage.note component
 """
 
+import os
+
+import pytest
 from flask import url_for
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -11,7 +14,13 @@ from sner.server.extensions import db
 from sner.lib import format_host_address
 from sner.server.storage.models import Note
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
-from tests.selenium.storage import check_annotate, check_service_endpoint_dropdown
+from tests.selenium.storage import (
+    check_annotate,
+    check_dt_toolbox_multiactions,
+    check_dt_toolbox_select_rows,
+    check_dt_toolbox_visibility_toggle,
+    check_service_endpoint_dropdown
+)
 
 
 def test_note_list_route(live_server, sl_operator, note):  # pylint: disable=unused-argument
@@ -68,6 +77,27 @@ def test_note_list_route_moredata_dropdown(live_server, sl_operator, note):  # p
         By.XPATH,
         '//table[@id="note_list_table"]//h6[text()="More data"]'
     )))
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_note_list_route_selectrows(live_server, sl_operator, notes_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_select_rows(sl_operator, 'storage.note_list_route', 'note_list_table')
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_note_list_route_dt_toolbox_multiactions(live_server, sl_operator, notes_multiaction):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_multiactions(sl_operator, 'storage.note_list_route', 'note_list_table', Note)
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_note_list_route_dt_toolbox_visibility_toggle(live_server, sl_operator, note_factory):  # pylint: disable=unused-argument
+    """test dt selection and selection buttons"""
+
+    check_dt_toolbox_visibility_toggle(sl_operator, 'storage.note_list_route', 'note_list_table', note_factory)
 
 
 def test_note_view_route_annotate(live_server, sl_operator, note):  # pylint: disable=unused-argument
