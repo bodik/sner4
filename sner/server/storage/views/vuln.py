@@ -15,7 +15,7 @@ from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.storage.core import (
-    annotate_model,
+    model_annotate,
     filtered_vuln_tags_column,
     get_related_models,
     model_delete_multiid,
@@ -125,7 +125,7 @@ def vuln_delete_route(vuln_id):
 @session_required('operator')
 def vuln_annotate_route(model_id):
     """annotate vuln"""
-    return annotate_model(Vuln, model_id)
+    return model_annotate(Vuln, model_id)
 
 
 @blueprint.route('/vuln/view/<vuln_id>')

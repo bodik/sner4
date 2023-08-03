@@ -33,7 +33,7 @@ def get_related_models(model_name, model_id):
     return host, service
 
 
-def annotate_model(model, model_id):
+def model_annotate(model, model_id):
     """annotate model route"""
 
     model = model.query.get(model_id)

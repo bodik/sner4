@@ -13,7 +13,7 @@ from sqlalchemy import func, literal_column
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, get_related_models, model_delete_multiid, model_tag_multiid
+from sner.server.storage.core import model_annotate, get_related_models, model_delete_multiid, model_tag_multiid
 from sner.server.storage.forms import MultiidForm, NoteForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service
 from sner.server.storage.views import blueprint
@@ -114,7 +114,7 @@ def note_delete_route(note_id):
 @session_required('operator')
 def note_annotate_route(model_id):
     """annotate note"""
-    return annotate_model(Note, model_id)
+    return model_annotate(Note, model_id)
 
 
 @blueprint.route('/note/view/<note_id>')

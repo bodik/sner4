@@ -13,7 +13,7 @@ from sqlalchemy import func, literal_column
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, model_delete_multiid, model_tag_multiid
+from sner.server.storage.core import model_annotate, model_delete_multiid, model_tag_multiid
 from sner.server.storage.forms import HostForm, MultiidForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
@@ -115,7 +115,7 @@ def host_delete_route(host_id):
 @session_required('operator')
 def host_annotate_route(model_id):
     """annotate vuln"""
-    return annotate_model(Host, model_id)
+    return model_annotate(Host, model_id)
 
 
 @blueprint.route('/host/view/<host_id>')

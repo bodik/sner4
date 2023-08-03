@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, model_delete_multiid, model_tag_multiid
+from sner.server.storage.core import model_annotate, model_delete_multiid, model_tag_multiid
 from sner.server.storage.forms import MultiidForm, ServiceForm, TagMultiidForm
 from sner.server.storage.models import Host, Service
 from sner.server.storage.views import blueprint
@@ -123,7 +123,7 @@ def service_delete_route(service_id):
 @session_required('operator')
 def service_annotate_route(model_id):
     """annotate service"""
-    return annotate_model(Service, model_id)
+    return model_annotate(Service, model_id)
 
 
 @blueprint.route('/service/delete_multiid', methods=['POST'])
