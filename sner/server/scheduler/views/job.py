@@ -45,7 +45,13 @@ def job_list_json_route():
     ]
     query = db.session.query().select_from(Job).outerjoin(Queue)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     jobs = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(jobs, cls=SnerJSONEncoder), mimetype='application/json')
@@ -63,7 +69,13 @@ def job_delete_route(job_id):
             JobManager.delete(Job.query.get(job_id))
             return redirect(url_for('scheduler.job_list_route'))
         except RuntimeError as exc:
-            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({
+                'apiVersion': 2.0,
+                'error': {
+                    'code': HTTPStatus.INTERNAL_SERVER_ERROR,
+                    'message': f'Failed: {exc}'
+                }
+            }), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-delete.html', form=form)
 
@@ -79,7 +91,13 @@ def job_reconcile_route(job_id):
             JobManager.reconcile(Job.query.get(job_id))
             return redirect(url_for('scheduler.job_list_route'))
         except RuntimeError as exc:
-            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({
+                'apiVersion': 2.0,
+                'error': {
+                    'code': HTTPStatus.INTERNAL_SERVER_ERROR,
+                    'message': f'Failed: {exc}'
+                }
+            }), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-generic.html', form=form)
 

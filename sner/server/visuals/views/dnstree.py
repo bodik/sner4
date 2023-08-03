@@ -47,7 +47,13 @@ def dnstree_json_route():
 
     query = Host.query
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
     crop = request.values.get('crop', 0, type=int)
 
     hostnames_tree = {}

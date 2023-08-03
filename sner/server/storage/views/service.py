@@ -62,7 +62,13 @@ def service_list_json_route():
     ]
     query = db.session.query().select_from(Service).outerjoin(Host)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(services, cls=SnerJSONEncoder), mimetype='application/json')
@@ -147,7 +153,13 @@ def service_grouped_json_route():
     # join allows filter over host attrs
     query = db.session.query().select_from(Service).join(Host).group_by(info_column)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(services)

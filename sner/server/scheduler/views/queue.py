@@ -50,7 +50,13 @@ def queue_list_json_route():
         .outerjoin(query_nr_targets, Queue.id == query_nr_targets.c.queue_id) \
         .outerjoin(query_nr_jobs, Queue.id == query_nr_jobs.c.queue_id)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.BAD_REQUEST,
+                'message': 'Failed to filter query'
+            }
+        }), HTTPStatus.BAD_REQUEST
 
     queues = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(queues)
@@ -129,7 +135,13 @@ def queue_prune_route(queue_id):
             QueueManager.prune(Queue.query.get(queue_id))
             return redirect(url_for('scheduler.queue_list_route'))
         except RuntimeError as exc:
-            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({
+                'apiVersion': 2.0,
+                'error': {
+                    'code': HTTPStatus.INTERNAL_SERVER_ERROR,
+                    'message': f'Failed: {exc}'
+                }
+            }), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-generic.html', form=form, button_caption='Prune')
 
@@ -146,6 +158,12 @@ def queue_delete_route(queue_id):
             QueueManager.delete(Queue.query.get(queue_id))
             return redirect(url_for('scheduler.queue_list_route'))
         except RuntimeError as exc:
-            return jsonify({'message': f'Failed: {exc}'}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify({
+                'apiVersion': 2.0,
+                'error': {
+                    'code': HTTPStatus.INTERNAL_SERVER_ERROR,
+                    'message': f'Failed: {exc}'
+                }
+            }), HTTPStatus.INTERNAL_SERVER_ERROR
 
     return render_template('button-delete.html', form=form)

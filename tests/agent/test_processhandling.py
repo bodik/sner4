@@ -86,7 +86,12 @@ class SimpleServer():
         """handle output request"""
         if request.headers.get('X-API-KEY') != 'dummy':
             return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
-        return xjsonify({'message': 'success'})
+        return xjsonify({
+                'apiVersion': 2.0,
+                'success': {
+                    'message': 'success'
+                }
+        })
 
 
 def test_shutdown(tmpworkdir, httpserver):  # pylint: disable=unused-argument,redefined-outer-name

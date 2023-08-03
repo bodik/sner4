@@ -49,6 +49,7 @@ def v2_scheduler_job_assign_route(args):
             current_app.logger.info(f'api.scheduler job assign {resp.get("id")}')
     except SchedulerServiceBusyException:
         resp = {}  # nowork
+
     return jsonify({
         'apiVersion': 2.0,
         'data': resp
@@ -85,7 +86,6 @@ def v2_scheduler_job_output_route(args):
 
     try:
         job_id = job.id
-        print("job: ", job)
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
         return jsonify({

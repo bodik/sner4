@@ -39,9 +39,21 @@ def quickjump_route():
         if form.quickjump.data.isnumeric():
             return jsonify({'message': 'success', 'url': url_for('storage.service_list_route', filter=f"Service.port==\"{form.quickjump.data}\"")})
 
-        return jsonify({'message': 'Not found'}), HTTPStatus.NOT_FOUND
+        return jsonify({
+            'apiVersion': 2.0,
+            'error': {
+                'code': HTTPStatus.NOT_FOUND,
+                'message': 'Not found'
+            }
+        }), HTTPStatus.NOT_FOUND
 
-    return jsonify({'message': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+    return jsonify({
+        'apiVersion': 2.0,
+        'error': {
+            'code': HTTPStatus.BAD_REQUEST,
+            'message': 'Invalid request'
+        }
+    }), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/quickjump_autocomplete')
