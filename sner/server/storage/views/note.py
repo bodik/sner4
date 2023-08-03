@@ -13,8 +13,8 @@ from sqlalchemy import func, literal_column
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, get_related_models
-from sner.server.storage.forms import NoteForm
+from sner.server.storage.core import annotate_model, get_related_models, model_delete_multiid, model_tag_multiid
+from sner.server.storage.forms import MultiidForm, NoteForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service
 from sner.server.storage.views import blueprint
 from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
@@ -124,3 +124,27 @@ def note_view_route(note_id):
 
     note = Note.query.get(note_id)
     return render_template('storage/note/view.html', note=note, button_form=ButtonForm())
+
+
+@blueprint.route('/note/delete_multiid', methods=['POST'])
+@session_required('operator')
+def note_delete_multiid_route():
+    """delete multiple note route"""
+
+    form = MultiidForm()
+    if form.validate_on_submit():
+        model_delete_multiid(Note, [tmp.data for tmp in form.ids.entries])
+        return '', HTTPStatus.OK
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+
+
+@blueprint.route('/note/tag_multiid', methods=['POST'])
+@session_required('operator')
+def note_tag_multiid_route():
+    """tag multiple route"""
+
+    form = TagMultiidForm()
+    if form.validate_on_submit():
+        model_tag_multiid(Note, form.action.data, form.tag.data, [tmp.data for tmp in form.ids.entries])
+        return '', HTTPStatus.OK
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST

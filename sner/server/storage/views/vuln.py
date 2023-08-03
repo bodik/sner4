@@ -14,8 +14,16 @@ from sqlalchemy import cast, func, literal_column, or_, select, union
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model, filtered_vuln_tags_column, get_related_models, tag_model_multiid, vuln_export, vuln_report
-from sner.server.storage.forms import MultiidForm, VulnMulticopyForm, VulnForm
+from sner.server.storage.core import (
+    annotate_model,
+    filtered_vuln_tags_column,
+    get_related_models,
+    model_delete_multiid,
+    model_tag_multiid,
+    vuln_export,
+    vuln_report
+)
+from sner.server.storage.forms import MultiidForm, TagMultiidForm, VulnMulticopyForm, VulnForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
 from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
@@ -136,11 +144,8 @@ def vuln_delete_multiid_route():
 
     form = MultiidForm()
     if form.validate_on_submit():
-        Vuln.query.filter(Vuln.id.in_([tmp.data for tmp in form.ids.entries])).delete(synchronize_session=False)
-        db.session.commit()
-        db.session.expire_all()
+        model_delete_multiid(Vuln, [tmp.data for tmp in form.ids.entries])
         return '', HTTPStatus.OK
-
     return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
@@ -148,7 +153,12 @@ def vuln_delete_multiid_route():
 @session_required('operator')
 def vuln_tag_multiid_route():
     """tag multiple route"""
-    return tag_model_multiid(Vuln)
+
+    form = TagMultiidForm()
+    if form.validate_on_submit():
+        model_tag_multiid(Vuln, form.action.data, form.tag.data, [tmp.data for tmp in form.ids.entries])
+        return '', HTTPStatus.OK
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/vuln/grouped')

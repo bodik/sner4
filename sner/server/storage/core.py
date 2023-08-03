@@ -9,14 +9,14 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from io import StringIO
 
-from flask import current_app, jsonify, render_template
+from flask import current_app, render_template
 from pytimeparse import parse as timeparse
 from sqlalchemy import case, delete, func, or_, not_, select, update
 from sqlalchemy.sql.functions import coalesce
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.storage.forms import AnnotateForm, TagMultiidForm
+from sner.server.storage.forms import AnnotateForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.utils import filter_query, windowed_query
 
@@ -60,22 +60,24 @@ def tag_remove(model, tag):
     model.tags = [x for x in (model.tags or []) if x != tag]
 
 
-def tag_model_multiid(model_class):
+def model_tag_multiid(model_class, action, tag, ids):
     """tag model by id"""
 
-    form = TagMultiidForm()
-    if form.validate_on_submit():
-        tag = form.tag.data
-        for item in model_class.query.filter(model_class.id.in_([tmp.data for tmp in form.ids.entries])).all():
-            # full assignment must be used for sqla to realize the change
-            if form.action.data == 'set':
-                tag_add(item, tag)
-            if form.action.data == 'unset':
-                tag_remove(item, tag)
+    for item in model_class.query.filter(model_class.id.in_(ids)).all():
+        # full assignment must be used for sqla to realize the change
+        if action == 'set':
+            tag_add(item, tag)
+        if action == 'unset':
+            tag_remove(item, tag)
         db.session.commit()
-        return '', HTTPStatus.OK
 
-    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+
+def model_delete_multiid(model_class, ids):
+    """delete models by list of ids"""
+
+    model_class.query.filter(model_class.id.in_(ids)).delete(synchronize_session=False)
+    db.session.commit()
+    db.session.expire_all()
 
 
 def url_for_ref(ref):

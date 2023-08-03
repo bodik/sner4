@@ -89,8 +89,11 @@ class SnerDatatablesModule {
 	/**
 	 * generate _select column definition
 	 */
-	column_select() {
-		return {'name': '_select', 'title': '', 'data': null, 'defaultContent': '', 'orderable': false, 'className': 'select-checkbox'};
+	column_select(extra={}) {
+		return $.extend(
+			{'name': '_select', 'title': '', 'data': null, 'defaultContent': '', 'orderable': false, 'className': 'select-checkbox'},
+			extra
+		);
 	}
 
 	/**
@@ -188,11 +191,25 @@ class SnerDatatablesModule {
 		);
 
 		/* the saved states must be removed, the save state has precedence over dt initialization values */
-		Object.keys(sessionStorage).forEach(function(key) {
-			if (key.startsWith('DataTables_')) {
-				sessionStorage.removeItem(key);
-			}
-		});
+		Object.keys(sessionStorage).filter(key => key.startsWith('DataTables_')).map(key => sessionStorage.removeItem(key));
+
+		location.reload();
+	}
+
+	/**
+	 * toggle full dt toolboxes in current session via sessionStorage
+	 *
+	 */
+	toggle_dt_toolboxes_visibility() {
+		if (!confirm('Toggle will remove any datatable states and reaload the page. Are you sure?')) { return; }
+
+		sessionStorage.setItem(
+			'dt_toolboxes_visible',
+			JSON.stringify(!JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')))
+		);
+
+		/* the saved states must be removed, the save state has precedence over dt initialization values */
+		Object.keys(sessionStorage).filter(key => key.startsWith('DataTables_')).map(key => sessionStorage.removeItem(key));
 
 		location.reload();
 	}

@@ -14,8 +14,8 @@ from sqlalchemy.dialects import postgresql
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
-from sner.server.storage.core import annotate_model
-from sner.server.storage.forms import ServiceForm
+from sner.server.storage.core import annotate_model, model_delete_multiid, model_tag_multiid
+from sner.server.storage.forms import MultiidForm, ServiceForm, TagMultiidForm
 from sner.server.storage.models import Host, Service
 from sner.server.storage.views import blueprint
 from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
@@ -124,6 +124,30 @@ def service_delete_route(service_id):
 def service_annotate_route(model_id):
     """annotate service"""
     return annotate_model(Service, model_id)
+
+
+@blueprint.route('/service/delete_multiid', methods=['POST'])
+@session_required('operator')
+def service_delete_multiid_route():
+    """delete multiple service route"""
+
+    form = MultiidForm()
+    if form.validate_on_submit():
+        model_delete_multiid(Service, [tmp.data for tmp in form.ids.entries])
+        return '', HTTPStatus.OK
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+
+
+@blueprint.route('/service/tag_multiid', methods=['POST'])
+@session_required('operator')
+def service_tag_multiid_route():
+    """tag multiple route"""
+
+    form = TagMultiidForm()
+    if form.validate_on_submit():
+        model_tag_multiid(Service, form.action.data, form.tag.data, [tmp.data for tmp in form.ids.entries])
+        return '', HTTPStatus.OK
+    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
 
 
 @blueprint.route('/service/grouped')

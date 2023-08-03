@@ -8,6 +8,7 @@
 	var dt_note_list_table_options = {
 		'ajax': {'url': Flask.url_for('storage.note_list_json_route') + window.location.search, 'method': 'POST'},
 		'columns': [
+			Sner.dt.column_select({'visible': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible'))}),
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('host_id', {'visible': false}),
 			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
@@ -30,6 +31,7 @@
 			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 		],
+		'select': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')) ? {'style': 'multi', 'selector': 'td:first-child'} : false,
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
 			this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.note_annotate_route'}, Sner.storage.action_annotate_dt);
@@ -37,6 +39,11 @@
 	};
 	$(document).ready(function() {
 		var dt_note_list_table = Sner.dt.init_datatable('#note_list_table', dt_note_list_table_options);
+		$('#note_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_note_list_table}, Sner.dt.selectall);
+		$('#note_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_note_list_table}, Sner.dt.selectnone);
+		$('#note_list_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_note_list_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+		$('#note_list_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_note_list_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+		$('#note_list_table_toolbar .abutton_delete_multiid').on('click', {'dt': dt_note_list_table, 'route_name': 'storage.note_delete_multiid_route'}, Sner.storage.action_delete_multiid);
 	});
 </script>
 {% endblock %}
@@ -49,9 +56,29 @@
 {% endcall %}
 
 <div id="note_list_table_toolbar" class="dt_toolbar">
-	<div class="btn-group">
-		<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
-		<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
+	<div class="dt_toolbar_toolbox" id="note_list_table_toolbox">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+			<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+			<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+			{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_NOTE'], 'btn btn-outline-secondary abutton_tag_multiid') }}
+		</div>
+		<div class="btn-group">
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+				{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_NOTE'], 'striked abutton_untag_multiid') }}
+			</div>
+			<a class="btn btn-outline-secondary abutton_delete_multiid" href="#"><i class="fas fa-trash text-danger"></i></a>
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
+			<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.tags not_any "reviewed"') }}">Exclude reviewed</a>
+			<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.tags any "todo"') }}">Only Todo</a>
+			<a class="btn btn-outline-secondary" href="{{ url_for('storage.note_list_route', filter='Note.xtype not_ilike "nessus%"') }}">Not nessus</a>
+		</div>
 	</div>
 	{{ cm.filter_form() }}
 </div>

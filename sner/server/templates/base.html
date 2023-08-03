@@ -122,6 +122,7 @@
 						<a class="dropdown-item" href="{{ url_for('auth.user_list_route') }}">Manage users</a>
 					{% endif %}
 						<a class="dropdown-item" href="#" onclick="javascript:Sner.dt.toggle_viatarget_column_visibility();">Toggle via_target (<span id="menu_dt_viatarget_column_visible_value"></span>)</a>
+						<a class="dropdown-item" href="#" onclick="javascript:Sner.dt.toggle_dt_toolboxes_visibility();">Toggle DT toolboxes (<span id="menu_dt_toolboxes_visible_value"></span>)</a>
 						<a class="dropdown-item" href="{{ url_for('auth.profile_route') }}">Profile</a>
 						<a class="dropdown-item" href="{{ url_for('auth.logout_route') }}">Logout</a>
 					</div>
@@ -146,6 +147,8 @@
 		{% endfor %}
 
 		$('#menu_dt_viatarget_column_visible_value').text(sessionStorage.getItem('dt_viatarget_column_visible'));
+		$('#menu_dt_toolboxes_visible_value').text(sessionStorage.getItem('dt_toolboxes_visible'));
+		$('.dt_toolbar_toolbox')[JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')) ? 'removeClass' : 'addClass']('collapse');
 	</script>
 
 	<div id="modal-global" class="modal fade" tabindex="-1" role="dialog">
