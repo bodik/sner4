@@ -29,7 +29,7 @@
 {% endcall %}
 
 <div id="vuln_grouped_table_toolbar" class="dt_toolbar">
-	<div class="dt_toolbar_toolbox_alwaysvisible" id="vuln_grouped_table_toolbox">
+	<div id="vuln_grouped_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
 		<div class="btn-group">
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 			<a class="btn btn-outline-secondary" href="{{ url_for('storage.vuln_grouped_route', filter='Vuln.tags=="{}"') }}">Not tagged</a>

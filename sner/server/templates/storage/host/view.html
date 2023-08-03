@@ -85,16 +85,16 @@
 	</tbody>
 </table>
 
-<ul class="nav nav-tabs" id="host_view_tabs">
+<ul id="host_view_tabs" class="nav nav-tabs">
 	<li class="nav-item"><a class="nav-link" href="#services" data-toggle="tab">Services <span class="badge badge-pill badge-secondary">{{ host.services|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#vulns" data-toggle="tab">Vulns <span class="badge badge-pill badge-secondary">{{ host.vulns|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#notes" data-toggle="tab">Notes <span class="badge badge-pill badge-secondary">{{ host.notes|length }}</span></a></li>
 </ul>
 
 <div class="tab-content">
-	<div class="tab-pane" id="services">
+	<div id="services" class="tab-pane">
 		<div id="host_view_service_table_toolbar" class="dt_toolbar">
-			<div class="dt_toolbar_toolbox" id="host_view_service_table_toolbox">
+			<div id="host_view_service_table_toolbox" class="dt_toolbar_toolbox">
 				<div class="btn-group">
 					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
 					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
@@ -155,9 +155,9 @@
 		</script>
 	</div>
 
-	<div class="tab-pane" id="vulns">
+	<div id="vulns" class="tab-pane">
 		<div id="host_view_vuln_table_toolbar" class="dt_toolbar">
-			<div class="dt_toolbar_toolbox_alwaysvisible" id="host_view_vuln_table_toolbox">
+			<div id="host_view_vuln_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
 				<div class="btn-group">
 					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
 					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>
@@ -221,9 +221,9 @@
 		</script>
 	</div>
 
-	<div class="tab-pane" id="notes">
+	<div id="notes" class="tab-pane">
 		<div id="host_view_note_table_toolbar" class="dt_toolbar">
-			<div class="dt_toolbar_toolbox" id="host_view_note_table_toolbox">
+			<div id="host_view_note_table_toolbox" class="dt_toolbar_toolbox">
 				<div class="btn-group">
 					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
 					<a class="btn btn-outline-secondary abutton_selectall" href="#">All</a>

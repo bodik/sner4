@@ -27,7 +27,7 @@
 
 {%- macro filter_form() -%}
 {% set show_form = 'filter' in request.values %}
-<form class="form filter_bar collapse {% if show_form %}show{% endif %}" id="filter_form">
+<form id="filter_form" class="form filter_bar collapse {% if show_form %}show{% endif %}">
 	<div class="input-group flex-fill">
 		<div class="input-group-prepend">
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
