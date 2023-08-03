@@ -9,7 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.storage.models import Note
-from tests.server.storage.views import check_annotate
+from tests.server.storage.views import check_annotate, check_delete_multiid, check_tag_multiid
 
 
 def test_note_list_route(cl_operator):
@@ -84,6 +84,18 @@ def test_note_annotate_route(cl_operator, note):
     """note annotate route test"""
 
     check_annotate(cl_operator, 'storage.note_annotate_route', note)
+
+
+def test_note_tag_multiid_route(cl_operator, note):
+    """note tag_multiid route test"""
+
+    check_tag_multiid(cl_operator, 'storage.note_tag_multiid_route', note)
+
+
+def test_note_delete_multiid_route(cl_operator, note):
+    """note delete_multiid route test"""
+
+    check_delete_multiid(cl_operator, 'storage.note_delete_multiid_route', note)
 
 
 def test_note_view_route(cl_operator, note):

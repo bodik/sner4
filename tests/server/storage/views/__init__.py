@@ -39,3 +39,16 @@ def check_tag_multiid(clnt, route_name, test_model):
 
     response = clnt.post(url_for(route_name), {}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def check_delete_multiid(clnt, route_name, test_model):
+    """check multiid delete"""
+
+    test_model_id = test_model.id
+    data = {'ids-0': test_model.id, 'csrf_token': get_csrf_token(clnt)}
+    response = clnt.post(url_for(route_name), data)
+    assert response.status_code == HTTPStatus.OK
+    assert not test_model.query.get(test_model_id)
+
+    response = clnt.post(url_for(route_name), {}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST

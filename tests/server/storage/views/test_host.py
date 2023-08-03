@@ -9,7 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.storage.models import Host
-from tests.server.storage.views import check_annotate, check_tag_multiid
+from tests.server.storage.views import check_annotate, check_delete_multiid, check_tag_multiid
 
 
 def test_host_list_route(cl_operator):
@@ -100,3 +100,9 @@ def test_host_tag_multiid_route(cl_operator, host):
     """host multi tag route for ajaxed toolbars test"""
 
     check_tag_multiid(cl_operator, 'storage.host_tag_multiid_route', host)
+
+
+def test_host_delete_multiid_route(cl_operator, host):
+    """host multi delete route for ajaxed toolbars test"""
+
+    check_delete_multiid(cl_operator, 'storage.host_delete_multiid_route', host)

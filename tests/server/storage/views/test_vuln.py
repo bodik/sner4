@@ -9,8 +9,7 @@ from http import HTTPStatus
 from flask import url_for
 
 from sner.server.storage.models import Vuln
-from tests.server import get_csrf_token
-from tests.server.storage.views import check_annotate, check_tag_multiid
+from tests.server.storage.views import check_annotate, check_delete_multiid, check_tag_multiid
 
 
 def test_vuln_list_route(cl_operator):
@@ -104,14 +103,7 @@ def test_vuln_view_route(cl_operator, vuln):
 def test_vuln_delete_multiid_route(cl_operator, vuln):
     """vuln multi delete route for ajaxed toolbars test"""
 
-    tvuln_id = vuln.id
-    data = {'ids-0': vuln.id, 'csrf_token': get_csrf_token(cl_operator)}
-    response = cl_operator.post(url_for('storage.vuln_delete_multiid_route'), data)
-    assert response.status_code == HTTPStatus.OK
-    assert not Vuln.query.get(tvuln_id)
-
-    response = cl_operator.post(url_for('storage.vuln_delete_multiid_route'), {}, status='*')
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    check_delete_multiid(cl_operator, 'storage.vuln_delete_multiid_route', vuln)
 
 
 def test_vuln_tag_multiid_route(cl_operator, vuln):
