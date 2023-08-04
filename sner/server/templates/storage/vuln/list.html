@@ -44,6 +44,8 @@
 		$('#vuln_list_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_vuln_list_table, 'route_name': 'storage.vuln_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
 		$('#vuln_list_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_vuln_list_table, 'route_name': 'storage.vuln_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
 		$('#vuln_list_table_toolbar .abutton_delete_multiid').on('click', {'dt': dt_vuln_list_table, 'route_name': 'storage.vuln_delete_multiid_route'}, Sner.storage.action_delete_multiid);
+		$('#vuln_list_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_vuln_list_table, 'route_name': 'storage.vuln_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
+		$('#vuln_list_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_vuln_list_table, 'route_name': 'storage.vuln_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
 	});
 </script>
 {% endblock %}
@@ -66,10 +68,11 @@
 			<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
 		</div>
 		<div class="btn-group">
-			<a class="btn btn-outline-secondary disabled"><i class="fas fa-tag"></i></a>
+			<a class="btn btn-outline-secondary abutton_freetag_set_multiid" href="#"><i class="fas fa-tag"></i></a>
 			{{ cm.multiid_tagging_abuttons(config['SNER_TAGS_VULN'], 'btn btn-outline-secondary abutton_tag_multiid') }}
 		</div>
 		<div class="btn-group">
+			<a class="btn btn-outline-secondary abutton_freetag_unset_multiid" href="#"><i class="fas fa-eraser"></i></a>
 			<div class="btn-group">
 				<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
 				{{ cm.multiid_tagging_abuttons_dropdown(config['SNER_TAGS_VULN'], 'striked abutton_untag_multiid') }}

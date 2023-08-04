@@ -201,6 +201,15 @@ class SnerStorageComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
+			'modal_freetag_multiid': `
+				<form>
+					<div class="form-group row">
+						<div class="col-sm"><textarea class="form-control tageditor" name="tags" placeholder="Tags"></textarea></div>
+					</div>
+					<div class="form-group row">
+						<div class="col-sm"><input class="btn btn-primary" name="submit" type="submit" value="Save"></div>
+					</div>
+				</form>`,
 		};
 
 		super.setup();
@@ -218,7 +227,7 @@ class SnerStorageComponent extends SnerComponentBase {
 	/**
 	 * tag multiple items
 	 *
-	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string}
+	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string, 'action': string}
 	 */
 	action_tag_multiid(event) {
 		var data = Sner.dt.selected_ids_form_data(event.data.dt);
@@ -230,6 +239,36 @@ class SnerStorageComponent extends SnerComponentBase {
 		data['action'] = event.data.action;
 		Sner.submit_form(Flask.url_for(event.data.route_name), data)
 			.done(function() { event.data.dt.draw(); });
+	}
+
+	/**
+	 * free-form tag multiple items with multiple tags
+	 *
+	 * @param {object} event jquery event. data required: {'dt': datatable instance, 'tag': string, 'action': string}
+	 */
+	action_freetag_multiid(event) {
+		var data = Sner.dt.selected_ids_form_data(event.data.dt);
+		if ($.isEmptyObject(data)) {
+			toastr.warning('No items selected');
+			return Promise.resolve();
+		}
+
+		var action_text = event.data.action == 'set' ? 'Tag' : 'Untag';
+		Sner.modal(`${action_text} multiple items`, Sner.storage.hbs.modal_freetag_multiid);
+		$('#modal-global .tageditor').tagEditor({'delimiter': '\n'});
+
+		$('#modal-global form').on('submit', function(event_submit) {
+			data['tag'] = this.elements["tags"].value;
+			data['action'] = event.data.action;
+			Sner.submit_form(Flask.url_for(event.data.route_name), data)
+				.done(function() {
+					event.data.dt.draw();
+				})
+				.always(function() {
+					$('#modal-global').modal('toggle');
+				});
+			event_submit.preventDefault();
+		});
 	}
 
 	/**

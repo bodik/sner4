@@ -8,6 +8,7 @@ from csv import DictWriter, QUOTE_ALL
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from io import StringIO
+from typing import Union
 
 from flask import current_app, render_template
 from pytimeparse import parse as timeparse
@@ -47,17 +48,18 @@ def model_annotate(model, model_id):
     return render_template('storage/annotate.html', form=form)
 
 
-def tag_add(model, tag):
+def tag_add(model, tag: Union[str, list]):
     """add tag to model in sqla trackable way"""
 
     val = [tag] if isinstance(tag, str) else tag
     model.tags = list(set((model.tags or []) + val))
 
 
-def tag_remove(model, tag):
+def tag_remove(model, tag: Union[str, list]):
     """remove tag from model in sqla trackable way"""
 
-    model.tags = [x for x in (model.tags or []) if x != tag]
+    val = [tag] if isinstance(tag, str) else tag
+    model.tags = list(set(model.tags or []) - set(val))
 
 
 def model_tag_multiid(model_class, action, tag, ids):

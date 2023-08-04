@@ -98,7 +98,7 @@ class TagMultiidForm(FlaskForm):
     """ajax; tagmulti action"""
 
     ids = FieldList(IntegerField('id', [InputRequired()]), min_entries=1)
-    tag = StringNoneField('tag', [InputRequired()])
+    tag = TextAreaListField('tag', [InputRequired()])
     action = StringNoneField('action', [InputRequired(), AnyOf(['set', 'unset'])])
 
 
