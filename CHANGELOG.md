@@ -1,5 +1,21 @@
 # sner4 changelog
 
+## 0.10.0 - clicker clicker [BC BREAK]
+
+* changed: server: ux, storage service dropdown add copy to clipboard button/icon
+* changed: server: updates for report and reportdata (report:data) tags
+* changed: server: vulnerabilities group aggregate tags with 'i:' exclusion
+* changed: ci: update github actions to use current versions
+* changed: server: also other minor ux
+* added: server: ux, copy vulnerability to other host/service, add autocomplete for vuln addedit
+* added: coverage-plugin helper
+* added: nuclei plugin
+* added: server: ux, fuller storage datatables toolbar multi-action toolboxes
+* fixed: server: fix filter POST request
+* fixed: timeout for OIDC calls
+* security: bump jquery
+
+
 ## 0.9.2 - deploying snerlytics
 
 * changed: various snerlytics indexes updates
