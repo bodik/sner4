@@ -16,6 +16,7 @@ from sner.server.storage.models import Service
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
+    check_dt_toolbox_freetag,
     check_dt_toolbox_multiactions,
     check_dt_toolbox_select_rows,
     check_dt_toolbox_visibility_toggle,
@@ -92,6 +93,13 @@ def test_service_list_route_dt_toolbox_multiactions(live_server, sl_operator, se
     """test dt selection and selection buttons"""
 
     check_dt_toolbox_multiactions(sl_operator, 'storage.service_list_route', 'service_list_table', Service)
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_service_list_route_dt_toolbox_freetag(live_server, sl_operator, services_multiaction):  # pylint: disable=unused-argument
+    """test dt freetag buttons"""
+
+    check_dt_toolbox_freetag(sl_operator, 'storage.service_list_route', 'service_list_table', Service)
 
 
 def test_service_grouped_route_filter_specialchars(live_server, sl_operator, service_factory):  # pylint: disable=unused-argument

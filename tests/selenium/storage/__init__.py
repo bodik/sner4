@@ -87,6 +87,53 @@ def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_ro
     assert not model_class.query.all()
 
 
+def _ux_freetag_action(sclnt, toolbar_elem, button_class, modal_title):
+    """free tag ux selenium automation"""
+
+    toolbar_elem.find_element(By.XPATH, './/a[text()="All"]').click()
+    toolbar_elem.find_element(By.CLASS_NAME, button_class).click()
+    webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.XPATH, f'//h4[@class="modal-title" and text()="{modal_title}"]')))
+
+    # drop tag-editor, textarea in not reachable by keyborad in selenium
+    sclnt.execute_script("""$("#modal-global form ul.tag-editor").remove();""")
+    sclnt.execute_script("""$("#modal-global form textarea[name='tags']").removeClass("tag-editor-hidden-src");""")
+
+    sclnt.find_element(By.CSS_SELECTOR, '#modal-global form textarea[name="tags"]').send_keys("dummy1\ndummy2\n")
+
+    sclnt.find_element(By.CSS_SELECTOR, '#modal-global form').submit()
+    webdriver_waituntil(sclnt, EC.invisibility_of_element_located((By.XPATH, '//div[@class="modal-global"]')))
+    webdriver_waituntil(sclnt, JsNoAjaxPending())
+
+
+def check_dt_toolbox_freetag(sclnt, route_name, dt_id, model_class, load_route=True):
+    """check dt toolbar freetag actions; there must be 2 rows to perform the test"""
+
+    if load_route:
+        # in case of main data tables, toggle visibility, load page and test
+        # in host view vuln tab data table is page already prepared by callee
+        sclnt.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+        sclnt.get(url_for(route_name, _external=True))
+
+    # there should be two rows in total
+    dt_elem = dt_wait_processing(sclnt, dt_id)
+    toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
+    assert model_class.query.filter(model_class.tags.any("dummy1")).count() == 0
+    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+
+    # disable fade, the timing interferes with the test
+    sclnt.execute_script('$("div#modal-global").toggleClass("fade")')
+
+    _ux_freetag_action(sclnt, toolbar_elem, 'abutton_freetag_set_multiid', 'Tag multiple items')
+
+    assert model_class.query.filter(model_class.tags.any("dummy1")).count() == 2
+    assert model_class.query.filter(model_class.tags.any("dummy2")).count() == 2
+
+    _ux_freetag_action(sclnt, toolbar_elem, 'abutton_freetag_unset_multiid', 'Untag multiple items')
+
+    assert model_class.query.filter(model_class.tags.any("dummy1")).count() == 0
+    assert model_class.query.filter(model_class.tags.any("dummy2")).count() == 0
+
+
 def check_annotate(sclnt, annotate_elem_class, test_model):
     """check annotate functionality"""
 

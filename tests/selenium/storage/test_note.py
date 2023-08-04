@@ -16,6 +16,7 @@ from sner.server.storage.models import Note
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
+    check_dt_toolbox_freetag,
     check_dt_toolbox_multiactions,
     check_dt_toolbox_select_rows,
     check_dt_toolbox_visibility_toggle,
@@ -91,6 +92,13 @@ def test_note_list_route_dt_toolbox_multiactions(live_server, sl_operator, notes
     """test dt selection and selection buttons"""
 
     check_dt_toolbox_multiactions(sl_operator, 'storage.note_list_route', 'note_list_table', Note)
+
+
+@pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')
+def test_note_list_route_dt_toolbox_freetag(live_server, sl_operator, notes_multiaction):  # pylint: disable=unused-argument
+    """test dt freetag buttons"""
+
+    check_dt_toolbox_freetag(sl_operator, 'storage.note_list_route', 'note_list_table', Note)
 
 
 @pytest.mark.skipif('PYTEST_SLOW' not in os.environ, reason='ux tested by host_list')

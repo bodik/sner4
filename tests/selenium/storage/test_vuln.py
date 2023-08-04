@@ -15,6 +15,7 @@ from sner.server.storage.models import Vuln
 from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
+    check_dt_toolbox_freetag,
     check_dt_toolbox_multiactions,
     check_dt_toolbox_select_rows,
     check_service_endpoint_dropdown
@@ -98,6 +99,12 @@ def test_vuln_list_route_dt_toolbox_multiactions(live_server, sl_operator, vulns
     """test vulns multiactions"""
 
     check_dt_toolbox_multiactions(sl_operator, 'storage.vuln_list_route', 'vuln_list_table', Vuln)
+
+
+def test_vuln_list_route_dt_toolbox_freetag(live_server, sl_operator, vulns_multiaction):  # pylint: disable=unused-argument
+    """test dt freetag buttons"""
+
+    check_dt_toolbox_freetag(sl_operator, 'storage.vuln_list_route', 'vuln_list_table', Vuln)
 
 
 def test_vuln_list_route_filtering(live_server, sl_operator, vulns_filtering):  # pylint: disable=unused-argument
