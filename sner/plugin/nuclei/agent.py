@@ -14,7 +14,7 @@ class AgentModule(ModuleBase):
     nuclei module
 
     ## target specification
-    target = *(service-target SP) url
+    target = host-target / url
     """
 
     CONFIG_SCHEMA = Schema({
