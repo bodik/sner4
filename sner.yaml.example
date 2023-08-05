@@ -72,3 +72,7 @@
 #      schedule: 1hour
 #      host_interval: 60days
 #      service_interval: 20days
+#
+#    load_standalone:
+#      queues:
+#        - dummy1

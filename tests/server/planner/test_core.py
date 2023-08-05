@@ -178,6 +178,7 @@ def test_planner_simple(app, queue_factory):  # pylint: disable=unused-argument
     queue_factory.create(name='sner nmap servicedisco')
     queue_factory.create(name='sner six_dns_discover')
     queue_factory.create(name='sner six_enum_discover')
+    queue_factory.create(name='standalone')
 
     config = yaml.safe_load("""
 home_netranges_ipv4: []
@@ -207,6 +208,10 @@ stage:
     schedule: 1hour
     host_interval: 60days
     service_interval: 20days
+
+  load_standalone:
+    queues:
+      - standalone
 """)
 
     planner = Planner(config, oneshot=True)

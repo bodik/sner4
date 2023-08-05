@@ -54,3 +54,14 @@ class TerminateContextMixin:  # pylint: disable=too-few-public-methods
         finally:
             signal.signal(signal.SIGINT, self.original_signal_handlers[signal.SIGINT])
             signal.signal(signal.SIGTERM, self.original_signal_handlers[signal.SIGTERM])
+
+
+def get_nested_key(data, *keys):
+    """get nested key from dict"""
+
+    try:
+        for key in keys:
+            data = data[key]
+        return data
+    except KeyError:
+        return None

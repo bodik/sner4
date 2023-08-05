@@ -9,7 +9,7 @@ from zipfile import ZipFile
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from sner.lib import file_from_zip, is_zip
+from sner.lib import file_from_zip, get_nested_key, is_zip
 from sner.server.parser import ParsedItemsDb, ParserBase
 from sner.server.storage.models import SeverityEnum
 from sner.server.utils import SnerJSONEncoder
@@ -17,17 +17,6 @@ from sner.plugin.nessus.parser import ParserModule as NessusParser
 
 
 logger = logging.getLogger(__name__)
-
-
-def get_nested_key(data, *keys):
-    """get nested key from dict"""
-
-    try:
-        for key in keys:
-            data = data[key]
-        return data
-    except KeyError:
-        return None
 
 
 class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods

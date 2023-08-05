@@ -17,7 +17,7 @@ from pytimeparse import parse as timeparse
 from sqlalchemy import select
 from sqlalchemy.orm.exc import NoResultFound
 
-from sner.lib import format_host_address, TerminateContextMixin
+from sner.lib import format_host_address, get_nested_key, TerminateContextMixin
 from sner.server.extensions import db
 from sner.server.scheduler.core import enumerate_network, JobManager, QueueManager
 from sner.server.scheduler.models import Queue, Job, Target
@@ -390,6 +390,11 @@ class Planner(TerminateContextMixin):
             self.config['stage']['storage_rescan']['service_interval'],
             sscan_stages
         )
+
+        if standalones := get_nested_key(self.config, 'stage', 'load_standalone', 'queues'):
+            for qname in standalones:
+                queue = Queue.query.filter_by(name=qname).one()
+                self.stages[f'load_standalone-{queue.id}'] = StorageLoader(qname)
 
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""
