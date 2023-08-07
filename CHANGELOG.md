@@ -12,6 +12,7 @@
 * added: nuclei plugin
 * added: server: ux, fuller storage datatables toolbar multi-action toolboxes
 * added: planner, 'load_standalone' stages
+* added: server: scheduler maintenance mode
 * fixed: server: fix filter POST request
 * fixed: timeout for OIDC calls
 * security: bump jquery
