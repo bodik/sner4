@@ -7,7 +7,7 @@
 <script type="text/javascript">
 	function action_userapikey(event) {
 		Sner.submit_form(event.target.closest('a').getAttribute('data-url'))
-			.done(function(res, textStatus, jqXHR) { Sner.modal(res.success.message, res.success.detail); })
+			.done(function(res, textStatus, jqXHR) { Sner.modal('Apikey operation', res.data.message); })
 			.always(function() { event.data.dt.draw(); });
 	}
 

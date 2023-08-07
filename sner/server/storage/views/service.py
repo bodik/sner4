@@ -18,7 +18,7 @@ from sner.server.storage.core import annotate_model
 from sner.server.storage.forms import ServiceForm
 from sner.server.storage.models import Host, Service
 from sner.server.storage.views import blueprint
-from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url, json_error_response
 
 
 def service_info_column(crop):
@@ -62,13 +62,7 @@ def service_list_json_route():
     ]
     query = db.session.query().select_from(Service).outerjoin(Host)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({
-            'apiVersion': 2.0,
-            'error': {
-                'code': HTTPStatus.BAD_REQUEST,
-                'message': 'Failed to filter query'
-            }
-        }), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(services, cls=SnerJSONEncoder), mimetype='application/json')
@@ -153,13 +147,7 @@ def service_grouped_json_route():
     # join allows filter over host attrs
     query = db.session.query().select_from(Service).join(Host).group_by(info_column)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({
-            'apiVersion': 2.0,
-            'error': {
-                'code': HTTPStatus.BAD_REQUEST,
-                'message': 'Failed to filter query'
-            }
-        }), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     services = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(services)

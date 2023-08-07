@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, Response, url_for
+from flask import redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 
 from sner.server.auth.core import session_required
@@ -17,7 +17,7 @@ from sner.server.storage.core import annotate_model, tag_model_multiid
 from sner.server.storage.forms import HostForm
 from sner.server.storage.models import Host, Note, Service, Vuln
 from sner.server.storage.views import blueprint
-from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url, json_error_response
 
 
 @blueprint.route('/host/list')
@@ -56,13 +56,7 @@ def host_list_json_route():
         .outerjoin(query_cnt_vulns, Host.id == query_cnt_vulns.c.host_id) \
         .outerjoin(query_cnt_notes, Host.id == query_cnt_notes.c.host_id)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({
-            'apiVersion': 2.0,
-            'error': {
-                'code': HTTPStatus.BAD_REQUEST,
-                'message': 'Failed to filter query'
-            }
-        }), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     hosts = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(hosts, cls=SnerJSONEncoder), mimetype='application/json')

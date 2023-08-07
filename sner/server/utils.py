@@ -8,7 +8,7 @@ import json
 from urllib.parse import urlunparse, urlparse
 
 import yaml
-from flask import current_app, request
+from flask import current_app, request, jsonify
 from lark.exceptions import LarkError
 from sqlalchemy_filters import apply_filters
 from werkzeug.exceptions import HTTPException
@@ -106,3 +106,22 @@ def filter_query(query, qfilter):
         return None
 
     return query
+
+
+def json_data_response(data, status_code=200):
+    """Returns a JSON data response following the Google JSON Style Guide."""
+    return jsonify({
+        'apiVersion': "2.0",
+        'data': data
+    }), status_code
+
+
+def json_error_response(message, status_code):
+    """Returns a JSON error response following the Google JSON Style Guide."""
+    return jsonify({
+        'apiVersion': "2.0",
+        'error': {
+            'code': status_code,
+            'message': message
+        }
+    }), status_code

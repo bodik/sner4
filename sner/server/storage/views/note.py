@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, Response, url_for
+from flask import redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 
 from sner.server.auth.core import session_required
@@ -17,7 +17,7 @@ from sner.server.storage.core import annotate_model, get_related_models
 from sner.server.storage.forms import NoteForm
 from sner.server.storage.models import Host, Note, Service
 from sner.server.storage.views import blueprint
-from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url, json_error_response
 
 
 @blueprint.route('/note/list')
@@ -54,13 +54,7 @@ def note_list_json_route():
     ]
     query = db.session.query().select_from(Note).outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({
-            'apiVersion': 2.0,
-            'error': {
-                'code': HTTPStatus.BAD_REQUEST,
-                'message': 'Failed to filter query'
-            }
-        }), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     notes = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(notes, cls=SnerJSONEncoder), mimetype='application/json')

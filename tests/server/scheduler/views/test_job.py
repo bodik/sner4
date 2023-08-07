@@ -61,6 +61,7 @@ def test_job_delete_route_runningjob(cl_operator, job):
 
     form = cl_operator.get(url_for('scheduler.job_delete_route', job_id=job.id)).form
     response = form.submit(expect_errors=True)
+
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     assert Job.query.get(job.id)

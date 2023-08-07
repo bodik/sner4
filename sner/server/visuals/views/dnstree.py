@@ -9,7 +9,7 @@ from flask import jsonify, render_template, request
 
 from sner.server.auth.core import session_required
 from sner.server.storage.models import Host
-from sner.server.utils import filter_query
+from sner.server.utils import filter_query, json_error_response
 from sner.server.visuals.views import blueprint
 
 
@@ -47,13 +47,7 @@ def dnstree_json_route():
 
     query = Host.query
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({
-            'apiVersion': 2.0,
-            'error': {
-                'code': HTTPStatus.BAD_REQUEST,
-                'message': 'Failed to filter query'
-            }
-        }), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
     crop = request.values.get('crop', 0, type=int)
 
     hostnames_tree = {}

@@ -51,36 +51,20 @@ class FailServer():
     def handler_assign(self, request):
         """handle assign request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
+            return xjsonify({'message': 'unauthorized'})
         if self.cnt_assign < 2:
             self.cnt_assign += 1
             return xjsonify({'invalid': 'assignment'})
-        return xjsonify({
-            'apiVersion': 2.0,
-            'data': {
-                'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []
-            }
-        })
+        return xjsonify({'id': str(uuid4()), 'config': {'module': 'dummy'}, 'targets': []})
 
     def handler_output(self, request):
         """handle output request"""
         if request.headers.get('X-API-KEY') != 'dummy':
-            return xjsonify({'message': 'unauthorized'}), HTTPStatus.UNAUTHORIZED
+            return xjsonify({'message': 'unauthorized'})
         if self.cnt_output < 2:
             self.cnt_output += 1
-            return xjsonify({
-                'apiVersion': 2.0,
-                'error': {
-                    'code': HTTPStatus.BAD_REQUEST,
-                    'message': 'invalid request'
-                }
-            }), HTTPStatus.BAD_REQUEST
-        return xjsonify({
-            'apiVersion': 2.0,
-            'success': {
-                'message': 'success'
-            }
-        })
+            return xjsonify({'message': 'invalid request'}), HTTPStatus.BAD_REQUEST
+        return xjsonify({'message': 'success'})
 
 
 def test_fail_server_communication(tmpworkdir, httpserver):  # pylint: disable=unused-argument,redefined-outer-name
