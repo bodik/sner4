@@ -42,6 +42,9 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 def v2_scheduler_job_assign_route(args):
     """assign job for agent"""
 
+    if current_app.config['SNER_MAINTENANCE']:
+        return {}  # nowork
+
     try:
         resp = SchedulerService.job_assign(args.get('queue'), args.get('caps', []))
         if 'id' in resp:

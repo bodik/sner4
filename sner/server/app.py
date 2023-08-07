@@ -72,6 +72,7 @@ DEFAULT_CONFIG = {
     'SNER_AUTOCOMPLETE_LIMIT': 10,
 
     # sner server scheduler
+    'SNER_MAINTENANCE': False,
     'SNER_HEATMAP_HOT_LEVEL': 0,
     'SNER_EXCLUSIONS': [
         ['regex', r'^tcp://.*:22$'],

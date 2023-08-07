@@ -40,6 +40,24 @@ def test_v2_scheduler_job_assign_route(client, api_agent, target):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
+def test_v2_scheduler_job_assign_route_maintenance(api_agent, target):
+    """job assign route test maintenance test"""
+
+    qname = target.queue.name
+
+    # test maintenance
+    current_app.config['SNER_MAINTENANCE'] = True
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'queue': qname})
+    assert response.status_code == HTTPStatus.OK
+    assert not response.json
+
+    current_app.config['SNER_MAINTENANCE'] = False
+    response = api_agent.post_json(url_for('api.v2_scheduler_job_assign_route'), {'queue': qname})
+    assert response.status_code == HTTPStatus.OK
+    assert response.json
+    assert len(Queue.query.filter(Queue.name == qname).one().jobs) == 1
+
+
 def test_v2_scheduler_job_assign_route_priority(api_agent, queue_factory, target_factory):
     """job assign route test"""
 
