@@ -8,7 +8,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 from datatables import ColumnDT, DataTables
-from flask import jsonify, redirect, render_template, request, Response, url_for
+from flask import redirect, render_template, request, Response, url_for
 from sqlalchemy import func, literal_column
 
 from sner.server.auth.core import session_required
@@ -18,7 +18,7 @@ from sner.server.storage.core import annotate_model, get_related_models, tag_mod
 from sner.server.storage.forms import MultiidForm, VulnForm
 from sner.server.storage.models import Host, Service, Vuln
 from sner.server.storage.views import blueprint
-from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url
+from sner.server.utils import filter_query, relative_referrer, SnerJSONEncoder, valid_next_url, json_error_response
 
 
 @blueprint.route('/vuln/list')
@@ -58,7 +58,7 @@ def vuln_list_json_route():
     ]
     query = db.session.query().select_from(Vuln).outerjoin(Host, Vuln.host_id == Host.id).outerjoin(Service, Vuln.service_id == Service.id)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')
@@ -141,7 +141,7 @@ def vuln_delete_multiid_route():
         db.session.expire_all()
         return '', HTTPStatus.OK
 
-    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return json_error_response('Invalid form submitted.', HTTPStatus.BAD_REQUEST)
 
 
 @blueprint.route('/vuln/tag_multiid', methods=['POST'])
@@ -173,7 +173,7 @@ def vuln_grouped_json_route():
     # join allows filter over host attrs
     query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, Vuln.tags)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     vulns = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulns, cls=SnerJSONEncoder), mimetype='application/json')

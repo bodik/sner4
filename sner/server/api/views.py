@@ -8,7 +8,7 @@ from base64 import b64decode
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
-from flask import current_app, jsonify, Response
+from flask import current_app, Response
 from flask_login import current_user
 from flask_smorest import Blueprint
 from sqlalchemy import func, or_
@@ -29,8 +29,7 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job, Queue, Target
 from sner.server.storage.models import Host, Note, Service, Vuln
-from sner.server.utils import filter_query
-
+from sner.server.utils import filter_query, json_data_response, json_error_response
 
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
@@ -44,11 +43,15 @@ def v2_scheduler_job_assign_route(args):
 
     try:
         resp = SchedulerService.job_assign(args.get('queue'), args.get('caps', []))
+
         if 'id' in resp:
             current_app.logger.info(f'api.scheduler job assign {resp.get("id")}')
     except SchedulerServiceBusyException:
         resp = {}  # nowork
-    return resp
+
+    serialized_data = JobAssignmentSchema().dump(resp)
+
+    return json_data_response(serialized_data)
 
 
 @blueprint.route('/v2/scheduler/job/output', methods=['POST'])
@@ -60,22 +63,23 @@ def v2_scheduler_job_output_route(args):
     try:
         output = b64decode(args['output'])
     except binascii.Error:
-        return jsonify({'message': 'invalid request'}), HTTPStatus.BAD_REQUEST
+        return json_error_response('invalid request', HTTPStatus.BAD_REQUEST)
 
     job = Job.query.filter(Job.id == args['id'], Job.retval == None).one_or_none()  # noqa: E711  pylint: disable=singleton-comparison
     if not job:
         # invalid/repeated requests are silently discarded, agent would delete working data
         # on it's side as well
-        return jsonify({'message': 'discard job'})
+        return json_data_response({'message': 'discard job'})
 
     try:
         job_id = job.id
         SchedulerService.job_output(job, args['retval'], output)
     except SchedulerServiceBusyException:
-        return jsonify({'message': 'server busy'}), HTTPStatus.TOO_MANY_REQUESTS
+        return json_error_response('server busy', HTTPStatus.TOO_MANY_REQUESTS)
 
     current_app.logger.info(f'api.scheduler job output {job_id}')
-    return jsonify({'message': 'success'})
+
+    return json_data_response({'message': 'success'})
 
 
 @blueprint.route('/v2/stats/prometheus')
@@ -171,7 +175,7 @@ def v2_public_storage_servicelist_route(args):
     ).filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     current_app.logger.info(f'api.public storage servicelist {args}')
     return query.all()

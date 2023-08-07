@@ -16,7 +16,7 @@ from sner.server.auth.views import blueprint
 from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from sner.server.utils import filter_query
+from sner.server.utils import filter_query, json_data_response, json_error_response
 
 
 @blueprint.route('/user/list')
@@ -43,7 +43,7 @@ def user_list_json_route():
     ]
     query = db.session.query().select_from(User)
     if not (query := filter_query(query, request.values.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        return json_error_response('Failed to filter query', HTTPStatus.BAD_REQUEST)
 
     users = DataTables(request.values.to_dict(), query, columns).output_result()
     return jsonify(users)
@@ -111,10 +111,10 @@ def user_apikey_route(user_id, action):
     if user and form.validate_on_submit():
         if action == 'generate':
             apikey = UserManager.apikey_generate(user)
-            return jsonify({'message': 'Apikey operation', 'detail': f'New apikey generated: {apikey}'}), HTTPStatus.OK
+            return json_data_response({'message': f'New apikey generated: {apikey}'})
 
         if action == 'revoke':
             UserManager.apikey_revoke(user)
-            return jsonify({'message': 'Apikey operation', 'detail': 'Apikey revoked'}), HTTPStatus.OK
+            return json_data_response({'message': 'Apikey revoked'})
 
-    return jsonify({'message': 'Apikey operation', 'detail': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+    return json_error_response('Invalid request', HTTPStatus.BAD_REQUEST)

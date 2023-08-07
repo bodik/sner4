@@ -14,6 +14,7 @@ from sner.server.extensions import db
 from sner.server.storage.forms import QuickjumpForm
 from sner.server.storage.models import Host
 from sner.server.storage.views import blueprint
+from sner.server.utils import json_error_response
 
 
 AUTOCOMPLETE_LIMIT = 10
@@ -39,9 +40,9 @@ def quickjump_route():
         if form.quickjump.data.isnumeric():
             return jsonify({'message': 'success', 'url': url_for('storage.service_list_route', filter=f"Service.port==\"{form.quickjump.data}\"")})
 
-        return jsonify({'message': 'Not found'}), HTTPStatus.NOT_FOUND
+        return json_error_response('Not found', HTTPStatus.NOT_FOUND)
 
-    return jsonify({'message': 'Invalid request'}), HTTPStatus.BAD_REQUEST
+    return json_error_response('Invalid request', HTTPStatus.BAD_REQUEST)
 
 
 @blueprint.route('/quickjump_autocomplete')

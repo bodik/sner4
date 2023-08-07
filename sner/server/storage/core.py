@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from io import StringIO
 
-from flask import current_app, jsonify, render_template
+from flask import current_app, render_template
 from pytimeparse import parse as timeparse
 from sqlalchemy import case, delete, func, or_, not_, select, update
 from sqlalchemy.sql.functions import coalesce
@@ -18,7 +18,7 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.storage.forms import AnnotateForm, TagMultiidForm
 from sner.server.storage.models import Host, Note, Service, Vuln
-from sner.server.utils import filter_query, windowed_query
+from sner.server.utils import filter_query, windowed_query, json_error_response
 
 
 def get_related_models(model_name, model_id):
@@ -75,7 +75,7 @@ def tag_model_multiid(model_class):
         db.session.commit()
         return '', HTTPStatus.OK
 
-    return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+    return json_error_response('Invalid form submitted.', HTTPStatus.BAD_REQUEST)
 
 
 def url_for_ref(ref):
