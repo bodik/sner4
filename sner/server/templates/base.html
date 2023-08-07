@@ -110,7 +110,10 @@
 
 			<ul class="navbar-nav">
 			{% if config['DEBUG'] %}
-				<li><span class="nav-link text-warning">debug enabled</span></li>
+				<li><span class="nav-link text-warning">debug</span></li>
+			{% endif %}
+			{% if config['SNER_MAINTENANCE'] %}
+				<li><span class="nav-link text-warning">maintenance</span></li>
 			{% endif %}
 			{% if not current_user.is_authenticated %}
 				<li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login_route') }}">Login</a></li>
