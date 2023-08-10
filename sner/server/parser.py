@@ -51,8 +51,6 @@ def auto_detect_parser(path):
             parser = 'nmap'
         elif '<NessusClientData_v2>' in output:
             parser = 'nessus'
-        elif 'testssl.sh' in output:
-            parser = 'testssl'
 
     return parser
 

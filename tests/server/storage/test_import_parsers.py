@@ -77,6 +77,7 @@ def test_import_command_nc(runner):
     assert len(host.services) == 2
     assert sorted([x.port for x in host.services]) == [21, 22]
 
+
 def test_import_command_auto(runner):
     """test automatic detection of parser"""
 
