@@ -76,3 +76,18 @@ def test_import_command_nc(runner):
     host = Host.query.one()
     assert len(host.services) == 2
     assert sorted([x.port for x in host.services]) == [21, 22]
+
+def test_import_command_auto(runner):
+    """test automatic detection of parser"""
+
+    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-nmap-output.xml'])
+    assert result.exit_code == 0
+    assert Host.query.count() == 1
+
+    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-nessus-simple.xml'])
+    assert result.exit_code == 0
+    assert Host.query.count() == 2
+
+    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-six_dns_discover-job.zip'])
+    assert result.exit_code == 0
+    assert Host.query.count() == 3

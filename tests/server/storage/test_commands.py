@@ -40,6 +40,15 @@ def test_import_command_dryrun(runner):
     assert 'new service:' in result.output
     assert 'new vuln:' in result.output
 
+    result = runner.invoke(command, ['import', '--dry', 'auto', 'tests/server/data/parser-jarm-job.zip'])
+    assert result.exit_code == 0
+    assert 'new host:' in result.output
+    assert 'new service:' in result.output
+    assert 'new note:' in result.output
+
+    result = runner.invoke(command, ['import', '--dry', 'auto', 'tests/server/data/parser-dummy-job.zip'])
+    assert result.exit_code == 0
+
 
 def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument
     """flush storage database"""

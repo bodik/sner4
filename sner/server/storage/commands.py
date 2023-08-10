@@ -13,7 +13,7 @@ from flask.cli import with_appcontext
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.parser import REGISTERED_PARSERS
+from sner.server.parser import REGISTERED_PARSERS, auto_detect_parser
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service
 from sner.server.storage.vulnsearch import sync_vulnsearch
@@ -35,15 +35,25 @@ def command():
 def storage_import(path, parser, **kwargs):
     """import data"""
 
-    if parser not in REGISTERED_PARSERS:
+    is_auto_parser = parser == 'auto'
+
+    if parser not in REGISTERED_PARSERS and not is_auto_parser:
         current_app.logger.error('no such parser')
         sys.exit(1)
 
-    parser_impl = REGISTERED_PARSERS[parser]
     for item in path:
         if not Path(item).is_file():
             current_app.logger.warning(f'invalid path "{item}"')
             continue
+
+        if is_auto_parser:
+            parser = auto_detect_parser(item)
+
+            if parser is None:
+                current_app.logger.error(f'parser was not automatically detected for the file: {item}')
+                continue
+
+        parser_impl = REGISTERED_PARSERS[parser]
 
         try:
             if kwargs.get('dry'):
