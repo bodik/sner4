@@ -25,6 +25,7 @@ def db_remove():
     db.session.close()
     db.drop_all()
     db.session.execute('DROP TABLE IF EXISTS alembic_version')
+    db.session.execute('DROP TYPE IF EXISTS severityenum')
     db.session.commit()
 
     path = current_app.config['SNER_VAR']

@@ -176,4 +176,6 @@ def downgrade():
     op.drop_table('host')
     op.drop_table('heatmap')
     op.drop_table('excl')
+    sa.Enum(name='exclfamily').drop(op.get_bind())
+    sa.Enum(name='severityenum').drop(op.get_bind())
     # ### end Alembic commands ###
