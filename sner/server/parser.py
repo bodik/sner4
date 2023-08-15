@@ -34,25 +34,15 @@ def load_parser_plugins():
 
 def auto_detect_parser(path):
     """tries automatically detect parser"""
-    parser = None
-
     if is_zip(path):
         with ZipFile(path) as fzip:
             for fname in filter(lambda x: x == 'assignment.json', fzip.namelist()):
                 try:
-                    parser = json.loads(file_from_zip(path, fname).decode('utf-8'))['config']['module']
+                    return json.loads(file_from_zip(path, fname).decode('utf-8'))['config']['module']
                 except KeyError:
-                    pass
-    else:
-        output = Path(path).read_text(encoding='utf-8')
+                    return None
 
-        # tries to detect the parser based on the output
-        if '<!DOCTYPE nmaprun>' in output:
-            parser = 'nmap'
-        elif '<NessusClientData_v2>' in output:
-            parser = 'nessus'
-
-    return parser
+    return None
 
 
 class ParsedItemBase:  # pylint: disable=too-few-public-methods

@@ -30,12 +30,12 @@ def command():
 @with_appcontext
 @click.option('--dry', is_flag=True, help='do not update database, only print new items')
 @click.option('--addtag', multiple=True, help='add tag to all imported objects, can be used several times')
-@click.argument('parser')
+@click.option('--parser', help='specify which parser to use instead of auto detection')
 @click.argument('path', nargs=-1)
 def storage_import(path, parser, **kwargs):
     """import data"""
 
-    is_auto_parser = parser == 'auto'
+    is_auto_parser = parser is None
 
     if parser not in REGISTERED_PARSERS and not is_auto_parser:
         current_app.logger.error('no such parser')

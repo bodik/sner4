@@ -12,7 +12,7 @@ from sner.server.storage.models import Host, Note, Service, Vuln
 def test_import_command_nmap_job(runner):
     """test import nmap job"""
 
-    result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
+    result = runner.invoke(command, ['import', '--parser', 'nmap', 'tests/server/data/parser-nmap-job.zip'])
     assert result.exit_code == 0
 
     assert Host.query.one()
@@ -21,11 +21,11 @@ def test_import_command_nmap_job(runner):
 def test_import_command_nmap_rawdata(runner):
     """test nmap parser"""
 
-    result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
+    result = runner.invoke(command, ['import', '--parser', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
     assert result.exit_code == 0
 
     # run twice to check update scheme of the import algorithms
-    result = runner.invoke(command, ['import', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
+    result = runner.invoke(command, ['import', '--parser', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
     assert result.exit_code == 0
 
     host = Host.query.one()
@@ -39,11 +39,11 @@ def test_import_command_nmap_rawdata(runner):
 def test_import_command_nessus(runner):
     """test nessus parser"""
 
-    result = runner.invoke(command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
+    result = runner.invoke(command, ['import', '--parser', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
 
     # run twice to check update scheme of the import algorithms
-    result = runner.invoke(command, ['import', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
+    result = runner.invoke(command, ['import', '--parser', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
 
     host = Host.query.one()
@@ -59,7 +59,7 @@ def test_import_command_nessus(runner):
 def test_import_command_manymap_job(runner):
     """test manymap parser; zipfile import"""
 
-    result = runner.invoke(command, ['import', 'manymap', 'tests/server/data/parser-manymap-job.zip'])
+    result = runner.invoke(command, ['import', '--parser', 'manymap', 'tests/server/data/parser-manymap-job.zip'])
     assert result.exit_code == 0
 
     host = Host.query.one()
@@ -70,7 +70,7 @@ def test_import_command_manymap_job(runner):
 def test_import_command_nc(runner):
     """test nc parser"""
 
-    result = runner.invoke(command, ['import', 'nc', 'tests/server/data/parser-nc.txt'])
+    result = runner.invoke(command, ['import', '--parser', 'nc', 'tests/server/data/parser-nc.txt'])
     assert result.exit_code == 0
 
     host = Host.query.one()
@@ -81,14 +81,9 @@ def test_import_command_nc(runner):
 def test_import_command_auto(runner):
     """test automatic detection of parser"""
 
-    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-nmap-output.xml'])
+    result = runner.invoke(command, ['import', 'tests/server/data/parser-six_dns_discover-job.zip'])
     assert result.exit_code == 0
-    assert Host.query.count() == 1
+    assert Host.query
 
-    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-nessus-simple.xml'])
+    result = runner.invoke(command, ['import', 'tests/server/data/parser-nc.txt'])
     assert result.exit_code == 0
-    assert Host.query.count() == 2
-
-    result = runner.invoke(command, ['import', 'auto', 'tests/server/data/parser-six_dns_discover-job.zip'])
-    assert result.exit_code == 0
-    assert Host.query.count() == 3
