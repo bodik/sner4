@@ -148,3 +148,32 @@ def note_tag_multiid_route():
         model_tag_multiid(Note, form.action.data, form.tag.data, [tmp.data for tmp in form.ids.entries])
         return '', HTTPStatus.OK
     return jsonify({'message': 'Invalid form submitted.'}), HTTPStatus.BAD_REQUEST
+
+
+@blueprint.route('/note/grouped')
+@session_required('operator')
+def note_grouped_route():
+    """view grouped notes"""
+
+    return render_template('storage/note/grouped.html')
+
+
+@blueprint.route('/note/grouped.json', methods=['GET', 'POST'])
+@session_required('operator')
+def note_grouped_json_route():
+    """view grouped notes, data endpoint"""
+
+    columns = [
+        ColumnDT(Note.xtype, mData='xtype'),
+        ColumnDT(func.count(Note.id), mData='cnt_notes', global_search=False),
+    ]
+    # join allows filter over host attrs
+    query = db.session.query().select_from(Note) \
+        .outerjoin(Host, Note.host_id == Host.id) \
+        .outerjoin(Service, Note.service_id == Service.id) \
+        .group_by(Note.xtype)
+    if not (query := filter_query(query, request.values.get('filter'))):
+        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+
+    notes = DataTables(request.values.to_dict(), query, columns).output_result()
+    return jsonify(notes)

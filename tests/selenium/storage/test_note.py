@@ -4,6 +4,7 @@ selenium ui tests for storage.note component
 """
 
 import os
+import string
 
 import pytest
 from flask import url_for
@@ -13,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.server.extensions import db
 from sner.lib import format_host_address
 from sner.server.storage.models import Note
-from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
+from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
     check_dt_toolbox_freetag,
@@ -140,3 +141,18 @@ def test_note_view_route_moredata_dropdown(live_server, sl_operator, note):  # p
         By.XPATH,
         '//div[contains(@class, "breadcrumb-buttons")]//h6[text()="More data"]'
     )))
+
+
+def test_note_grouped_route_filter_specialchars(live_server, sl_operator, note_factory):  # pylint: disable=unused-argument
+    """test grouped note info view and filtering features with specialchars"""
+
+    note_factory.create(xtype=string.printable)
+
+    sl_operator.get(url_for('storage.note_grouped_route', _external=True))
+    elem_xpath = f"//a[contains(text(), '{string.digits}')]"
+    webdriver_waituntil(sl_operator, EC.visibility_of_element_located((By.XPATH, elem_xpath)))
+
+    sl_operator.find_element(By.XPATH, elem_xpath).click()
+    dt_wait_processing(sl_operator, 'note_list_table')
+
+    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1

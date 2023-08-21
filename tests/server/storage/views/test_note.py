@@ -103,3 +103,33 @@ def test_note_view_route(cl_operator, note):
 
     response = cl_operator.get(url_for('storage.note_view_route', note_id=note.id))
     assert response.status_code == HTTPStatus.OK
+
+
+def test_note_grouped_route(cl_operator):
+    """note grouped route test"""
+
+    response = cl_operator.get(url_for('storage.note_grouped_route'))
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_note_grouped_json_route(cl_operator, note):
+    """note grouped json route test"""
+
+    response = cl_operator.post(
+        url_for('storage.note_grouped_json_route'),
+        {'draw': 1, 'start': 0, 'length': 1, 'search[value]': note.xtype}
+    )
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert note.xtype in response_data['data'][0]['xtype']
+
+    response = cl_operator.post(
+        url_for('storage.note_grouped_json_route', filter=f'Note.xtype=="{note.xtype}"'),
+        {'draw': 1, 'start': 0, 'length': 1}
+    )
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert note.xtype in response_data['data'][0]['xtype']
+
+    response = cl_operator.post(url_for('storage.note_grouped_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST

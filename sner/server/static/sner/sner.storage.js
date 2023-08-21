@@ -94,7 +94,14 @@ class SnerStorageComponent extends SnerComponentBase {
 					var filter_value = 'Service.info ilike ' + Sner.storage.encodeRFC3986URIComponent(JSON.stringify(info.replace(/\\/g, '\\\\')  + '%'));
 				}
 				return Flask.url_for('storage.service_list_route', {'filter': filter_value});
-			}
+			},
+			/* generate filter url with properly encoded note.xtype */
+			'note_list_route_filter_xtype': function(xtype) {
+				return Flask.url_for(
+					"storage.note_list_route",
+					{"filter": "Note.xtype==" + Sner.storage.encodeRFC3986URIComponent(JSON.stringify(xtype))}
+				);
+			},
 		};
 
 		this.hbs_source = {
@@ -201,6 +208,8 @@ class SnerStorageComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary" href="{{> storage.note_edit_route note_id=id}}" title="Edit"><i class="fas fa-edit"></i></a>
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
+			'note_list_filter_xtype_link': `<a href="{{note_list_route_filter_xtype xtype}}">{{xtype}}</a>`,
+
 			'modal_freetag_multiid': `
 				<form>
 					<div class="form-group row">

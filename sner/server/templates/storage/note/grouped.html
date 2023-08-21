@@ -1,0 +1,38 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Notes / Grouped{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_note_grouped_table_options = {
+		'ajax': {'url': Flask.url_for('storage.note_grouped_json_route') + window.location.search, 'method': 'POST'},
+		'columns': [
+			Sner.dt.column('xtype', {'render': function(data, type, row, meta) { return Sner.storage.hbs.note_list_filter_xtype_link(row); }}),
+			Sner.dt.column('cnt_notes')
+		],
+		'order': [[1, 'desc']]
+	};
+	$(document).ready(function() {
+		var dt_note_grouped_table = Sner.dt.init_datatable('#note_grouped_table', dt_note_grouped_table_options);
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Notes', 'Grouped']) %}
+	<div class="breadcrumb-buttons pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
+
+<div id="Note_grouped_table_toolbar" class="dt_toolbar">
+	<div id="note_grouped_table_toolbox" class="dt_toolbar_toolbox">
+		<div class="btn-group">
+		</div>
+	</div>
+	{{ cm.filter_form() }}
+</div>
+
+<table id="note_grouped_table" class="table table-hover table-sm" width="100%"></table>
+{% endblock %}
