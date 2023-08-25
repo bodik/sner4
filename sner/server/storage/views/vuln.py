@@ -244,6 +244,10 @@ def vuln_multicopy_route(vuln_id):
 def vuln_multicopy_endpoints_json_route():
     """multicopy endpoints endpoint"""
 
+    # returned data does not require dummy _select column because DT instance
+    # does not use serverSide processing/sorting (unlinke other DT instances
+    # host/list, service/list, ...)
+
     query = select(
         func.jsonb_build_object('host_id', Host.id).label("endpoint_id"),
         Host.address.label("host_address"),

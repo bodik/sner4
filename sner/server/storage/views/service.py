@@ -43,6 +43,7 @@ def service_list_json_route():
     """list services, data endpoint"""
 
     columns = [
+        ColumnDT(literal_column('1'), mData='_select', search_method='none', global_search=False),
         ColumnDT(Service.id, mData='id'),
         ColumnDT(Host.id, mData='host_id'),
         ColumnDT(Host.address, mData='host_address'),

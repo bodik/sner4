@@ -37,6 +37,7 @@ def host_list_json_route():
     query_cnt_vulns = db.session.query(Vuln.host_id, func.count(Vuln.id).label('cnt')).group_by(Vuln.host_id).subquery()
     query_cnt_notes = db.session.query(Note.host_id, func.count(Note.id).label('cnt')).group_by(Note.host_id).subquery()
     columns = [
+        ColumnDT(literal_column('1'), mData='_select', search_method='none', global_search=False),
         ColumnDT(Host.id, mData='id'),
         ColumnDT(Host.address, mData='address'),
         ColumnDT(Host.hostname, mData='hostname'),
