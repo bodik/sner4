@@ -89,6 +89,17 @@ class ParserModule(ParserBase):  # pylint: disable=too-few-public-methods
                         import_time=import_time
                     )
 
+                if iservice.banner_dict:
+                    pidb.upsert_note(
+                        ihost.address,
+                        'nmap.banner_dict',
+                        iservice.protocol,
+                        iservice.port,
+                        via_target,
+                        data=json.dumps(iservice.banner_dict),
+                        import_time=import_time
+                    )
+
                 # parse service scripts
                 for iscript in iservice.scripts_results:
                     pidb.upsert_note(

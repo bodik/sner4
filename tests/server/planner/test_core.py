@@ -135,7 +135,7 @@ def test_storageloader(app, job_completed_nmap):  # pylint: disable=unused-argum
 
     assert Host.query.count() == 1
     assert Service.query.count() == 6
-    assert Note.query.count() == 17
+    assert Note.query.count() == 21
 
 
 def test_storageloader_invalidjobs(app, queue_factory, job_completed_factory):  # pylint: disable=unused-argument

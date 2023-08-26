@@ -29,3 +29,4 @@ def test_parse_path():
     assert [x.address for x in pidb.hosts] == expected_hosts
     assert [x.port for x in pidb.services] == expected_services
     assert len(list(filter(lambda x: x.xtype == 'cpe', pidb.notes))) == 5
+    assert len(list(filter(lambda x: x.xtype == 'nmap.banner_dict', pidb.notes))) == 4
