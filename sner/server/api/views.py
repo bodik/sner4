@@ -19,6 +19,8 @@ from sner.server.api.schema import (
     JobOutputSchema,
     PublicHostArgsSchema,
     PublicHostSchema,
+    PublicNotelistArgsSchema,
+    PublicNotelistSchema,
     PublicRangeArgsSchema,
     PublicRangeSchema,
     PublicServicelistArgsSchema,
@@ -177,4 +179,44 @@ def v2_public_storage_servicelist_route(args):
         return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 
     current_app.logger.info(f'api.public storage servicelist {args}')
+    return query.all()
+
+
+@blueprint.route("/v2/public/storage/notelist")
+@apikey_required("user")
+@blueprint.arguments(PublicNotelistArgsSchema, location="query")
+@blueprint.response(HTTPStatus.OK, PublicNotelistSchema(many=True))
+def v2_public_storage_notelist_route(args):
+    """filtered notelist (see sner.server.sqlafilter for syntax)"""
+
+    if not current_user.api_networks:
+        return None
+
+    restrict = [Host.address.op("<<=")(net) for net in current_user.api_networks]
+    query = (
+        db.session.query()
+        .select_from(Note)
+        .outerjoin(Host, Note.host_id == Host.id)
+        .outerjoin(Service, Note.service_id == Service.id)
+        .add_columns(
+            Host.address,
+            Host.hostname,
+            Service.proto,
+            Service.port,
+            Note.via_target,
+            Note.xtype,
+            Note.data,
+            Note.tags,
+            Note.comment,
+            Note.created,
+            Note.modified,
+            Note.import_time,
+        )
+        .filter(or_(*restrict))
+    )
+
+    if not (query := filter_query(query, args.get("filter"))):
+        return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
+
+    current_app.logger.info(f"api.public storage notelist {args}")
     return query.all()

@@ -13,7 +13,7 @@ from flask import current_app, url_for
 from sqlalchemy import create_engine, func, select
 
 import sner.server.api.views
-from sner.server.api.schema import PublicHostSchema, PublicServicelistSchema, PublicRangeSchema
+from sner.server.api.schema import PublicHostSchema, PublicNotelistSchema, PublicServicelistSchema, PublicRangeSchema
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SCHEDULER_LOCK_NUMBER
 from sner.server.scheduler.models import Heatmap, Job, Queue, Readynet, Target
@@ -288,7 +288,7 @@ def test_v2_public_storage_servicelist_route(api_user, service_factory):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_v2_public_storage_host_route_nonetworks(api_user_nonetworks, host, service):
+def test_v2_public_storage_api_nonetworks(api_user_nonetworks, host, service, note):
     """test queries with user without any configured networks"""
 
     response = api_user_nonetworks.get(url_for('api.v2_public_storage_host_route', address=host.address))
@@ -299,3 +299,20 @@ def test_v2_public_storage_host_route_nonetworks(api_user_nonetworks, host, serv
 
     response = api_user_nonetworks.get(url_for('api.v2_public_storage_servicelist_route', filter=f'Service.port=="{service.port}"'))
     assert not response.json
+
+    response = api_user_nonetworks.get(url_for('api.v2_public_storage_notelist_route', filter=f'Note.xtype=="{note.xtype}"'))
+    assert not response.json
+
+
+def test_v2_public_storage_notelist_route(api_user, note_factory):
+    """test public notelist api"""
+
+    note_factory.create(data='dummy1')
+    note_factory.create(data='dummy2')
+
+    response = api_user.get(url_for('api.v2_public_storage_notelist_route', filter='Note.data=="dummy1"'))
+    assert PublicNotelistSchema(many=True).load(response.json)
+    assert len(response.json) == 1
+
+    response = api_user.get(url_for('api.v2_public_storage_notelist_route', filter='invalid'), status='*')
+    assert response.status_code == HTTPStatus.BAD_REQUEST

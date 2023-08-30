@@ -152,6 +152,29 @@ class PublicServicelistSchema(BaseSchema):
     info = fields.String()
 
 
+class PublicNotelistArgsSchema(BaseSchema):
+    """public note list args schema"""
+
+    filter = fields.String()
+
+
+class PublicNotelistSchema(BaseSchema):
+    """public note list schema"""
+
+    address = fields.String()
+    hostname = fields.String()
+    proto = fields.String()
+    port = fields.Integer()
+    via_target = fields.String()
+    xtype = fields.String()
+    data = fields.String()
+    tags = fields.List(fields.String)
+    comment = fields.String()
+    created = fields.DateTime()
+    modified = fields.DateTime()
+    import_time = fields.DateTime()
+
+
 class ElasticHostSchema(PublicHostSchema):
     """elastic storage_host schema"""
 
