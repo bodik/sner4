@@ -31,6 +31,7 @@
 			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.note_controls)
 		],
+		'order': [[3, 'asc']],
 		'select': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible')) ? {'style': 'multi', 'selector': 'td:first-child'} : false,
 		'drawCallback': function (settings) {
 			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
