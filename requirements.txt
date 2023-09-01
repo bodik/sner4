@@ -17,6 +17,7 @@ gunicorn
 lark-parser
 littletable
 lxml
+packaging
 psycopg2
 pylint
 pyroute2

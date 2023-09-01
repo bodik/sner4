@@ -1,3 +1,9 @@
+# This file is part of sner4 project governed by MIT license, see the LICENSE.txt file.
+"""
+version parser, pulled from 713/logs/va2am
+"""
+
+
 import re
 from typing import List
 from packaging.specifiers import SpecifierSet, InvalidSpecifier
@@ -43,29 +49,17 @@ def parse(versions_input: str) -> List[SpecifierSet]:
             raise InvalidFormatException(
                 'Invalid format: version specifier "' + spec +
                 '" does not meet the format criteria.'
-            )
+            ) from None
 
     return version_specifiers
 
 
-def is_in_version_range(version: str, extrainfo: str, specifiers: List[SpecifierSet]) -> bool:
+def is_in_version_range(version: str, specifiers: List[SpecifierSet]) -> bool:
     """
     Checks if the version is in the range specified by a list of SpecifierSets.
     If at least one of the specifiers matches the version, then the result
     is True, otherwise it is False.
     """
-    # For now, this tool cannot say if the version is vulnerable, if the used
-    # system is some kind of derivate of Red Hat Enterprise Linux, because they
-    # fix older versions without adding "pX" (e.g. "p1") suffix like Debian.
-    DISABLED_OPERATING_SYSTEMS = ["CentOS",
-                                  "Scientific Linux",
-                                  "Red Hat Enterprise Linux",
-                                  "Rocky",
-                                  "AlmaLinux",
-                                  "Oracle Linux"]
-    for system in DISABLED_OPERATING_SYSTEMS:
-        if system.lower() in extrainfo.lower():
-            return False
 
     # Recommended reading to understand this regex:
     # https://docs.python.org/3.8/library/re.html#index-22
