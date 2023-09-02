@@ -3,7 +3,7 @@
 all: lint coverage
 
 freeze:
-	@pip freeze | grep -v '^pkg-resources='
+	@pip freeze | grep -v '^pkg[-_]resources='
 
 githook:
 	ln -sf ../../extra/git_hookprecommit.sh .git/hooks/pre-commit
