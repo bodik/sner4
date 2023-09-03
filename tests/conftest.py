@@ -14,6 +14,7 @@ from sner.server.app import create_app
 from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
+from sner.server.storage.versioninfo import VersionInfoMapManager
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
     JobFactory,
@@ -88,3 +89,42 @@ factoryboy_register(HostFactory)
 factoryboy_register(NoteFactory)
 factoryboy_register(ServiceFactory)
 factoryboy_register(VulnFactory)
+
+
+@pytest.fixture
+def versioninfo_notes(host, service_factory, note_factory):
+    """prepare notes for versioninfo map generation"""
+
+    yield [
+        note_factory.create(
+            host=host,
+            service=service_factory.create(
+                host=host,
+                port=80,
+                name='http',
+                info='product: Apache httpd version: 2.2.21 extrainfo: (Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1',
+            ),
+            xtype='nmap.banner_dict',
+            data='{"product": "Apache httpd", "version": "2.2.21", '
+                 '"extrainfo": "(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1"}'
+        ),
+        note_factory.create(
+            host=host,
+            service=service_factory.create(
+                host=host,
+                port=15002,
+                name='pbs-maui',
+                info='product: PBS/Maui Roll extrainfo: Rocks Cluster devicetype: specialized',
+            ),
+            xtype='nmap.banner_dict',
+            data='{"product": "PBS/Maui Roll", "extrainfo": "Rocks Cluster", "devicetype": "specialized"}'
+        )
+    ]
+
+
+@pytest.fixture
+def versioninfo(versioninfo_notes):  # pylint: disable=redefined-outer-name,unused-argument
+    """prepare versioninfo map snap"""
+
+    VersionInfoMapManager.rebuild()
+    return versioninfo_notes

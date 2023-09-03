@@ -131,3 +131,12 @@ class VulnMulticopyForm(FlaskForm):
     comment = TextAreaNoneField('Comment')
     submit = SubmitField('Save')
     return_url = HiddenField()
+
+
+class VersionInfoQueryForm(FlaskForm):
+    """versioninfo query form"""
+
+    product = StringNoneField('Product', description='SQL ilike query token')
+    versionspec = StringNoneField('Versionspec', description='version constraint specifier, eg. ">=4.0; ==2.0"')
+    filter = HiddenField('Filter', id='versioninfo_query_form_filter')
+    submit_query = SubmitField('Query')

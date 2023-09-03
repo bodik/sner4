@@ -1,0 +1,66 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Versioninfos / List {% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_versioninfo_list_table_options = {
+		'ajax': {'url': Flask.url_for('storage.versioninfo_list_json_route') + window.location.search, 'method': 'POST'},
+		'columns': [
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('host_id', {'visible': false}),
+			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
+			Sner.dt.column('host_hostname'),
+			Sner.dt.column('service_proto', {'visible': false}),
+			Sner.dt.column('service_port', {'visible': false}),
+			Sner.dt.column('service', {
+				'className': 'service_endpoint_dropdown',
+				'render': function(data, type, row, meta) {
+					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+				}
+			}),
+			Sner.dt.column('via_target'),
+			Sner.dt.column('product'),
+			Sner.dt.column('version'),
+		],
+		'order': [[2, 'desc']]
+	};
+	$(document).ready(function() {
+		var dt_versioninfo_list_table = Sner.dt.init_datatable('#versioninfo_list_table', dt_versioninfo_list_table_options);
+		$('#versioninfo_query_form').submit(function (e) {
+			e.preventDefault();
+			var filterElem = $('#versioninfo_query_form_filter');
+			if (filterElem.val().trim() === '') { filterElem.remove(); }
+			this.submit();
+		});
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Versioninfo']) %}
+	<div class="breadcrumb-buttons pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
+
+<div id="versioninfo_list_table_toolbar" class="dt_toolbar">
+	{{ cm.filter_form() }}
+</div>
+
+<div class="container-fluid">
+	<form id="versioninfo_query_form" method="get">
+		<div class="row">
+			<div class="col">{{ bwtf.bootstrap_field(form.product, horizontal=True) }}</div>
+			<div class="col">{{ bwtf.bootstrap_field(form.versionspec, horizontal=True) }}</div>
+			<div class="col">{{ bwtf.bootstrap_field(form.submit_query, horizontal=True) }}</div>
+		</div>
+		{{ bwtf.bootstrap_field(form.filter, horizontal=True) }}
+	</form>
+</div>
+
+<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
+
+<table id="versioninfo_list_table" class="table table-hover table-sm" width="100%"></table>
+{% endblock %}

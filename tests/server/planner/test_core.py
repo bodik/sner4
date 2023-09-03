@@ -212,6 +212,9 @@ stage:
   load_standalone:
     queues:
       - standalone
+
+  rebuild_versioninfo_map:
+    schedule: 1h
 """)
 
     planner = Planner(config, oneshot=True)

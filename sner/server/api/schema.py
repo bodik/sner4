@@ -199,3 +199,26 @@ class ElasticNoteSchema(PublicNoteSchema):
     host_hostname = fields.String()
     service_proto = fields.String()
     service_port = fields.Integer()
+
+
+class PublicVersionInfoArgsSchema(BaseSchema):
+    """public versioninfo args schema"""
+
+    filter = fields.String()
+    product = fields.String()
+    versionspec = fields.String()
+
+
+class PublicVersionInfoSchema(BaseSchema):
+    """public versioninfo schema"""
+
+    # endpoint data
+    host_address = fields.String()
+    host_hostname = fields.String()
+    service_proto = fields.String()
+    service_port = fields.Integer()
+    via_target = fields.String()
+    # product data
+    product = fields.String()
+    version = fields.String()
+    extra = fields.Dict()

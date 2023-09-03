@@ -241,6 +241,38 @@ def initdata_dev():
         comment='test note comment'
     ))
 
+    product_host = Host(address='127.5.5.5', hostname='productdummy')
+    db.session.add(product_host)
+    product_service = Service(
+        host=product_host,
+        proto='tcp',
+        port=80,
+        state='open:syn-ack',
+        name='http',
+        info='product: Apache httpd version: 2.2.21 extrainfo: (Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1',
+    )
+    db.session.add(product_service)
+    db.session.add(Note(
+        host=product_host,
+        service=product_service,
+        xtype='cpe',
+        data='["cpe:/a:apache:http_server:2.2.21"]'
+    ))
+    db.session.add(Note(
+        host=product_host,
+        service=product_service,
+        xtype='nmap.banner_dict',
+        data='{"product": "Apache httpd", "version": "2.2.21", '
+             '"extrainfo": "(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1"}'
+    ))
+
+    db.session.add(Note(
+        host=product_host,
+        service=product_service,
+        xtype='hostnames',
+        data='["productdummy"]'
+    ))
+
 
 @click.group(name='dbx', help='sner.server db management')
 def command():

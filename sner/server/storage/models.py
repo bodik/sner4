@@ -32,11 +32,13 @@ monitoring.
 
 from datetime import datetime
 
+from sqlalchemy import select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
+from sner.server.materialized_views import create_materialized_view
 from sner.server.models import SelectableEnum
 
 
@@ -163,3 +165,24 @@ class Note(StorageModelBase):
         host = format_host_address(self.host.address) if self.host else None
         service = f'{self.service.proto}.{self.service.port}' if self.service else None
         return f'<Note {self.id}: {host} {service} {self.xtype}>'
+
+
+class VersionInfoTemp(StorageModelBase):
+    """version info model, temporary table"""
+
+    id = db.Column(db.Integer, primary_key=True)
+    host_id = db.Column(db.Integer, nullable=False)
+    host_address = db.Column(postgresql.INET, nullable=False)
+    host_hostname = db.Column(db.String(256))
+    service_proto = db.Column(db.String(250), nullable=False)
+    service_port = db.Column(db.Integer, nullable=False)
+    via_target = db.Column(db.String(250))
+    product = db.Column(db.String(250))
+    version = db.Column(db.String(250))
+    extra = db.Column(db.JSON)
+
+
+class VersionInfo(StorageModelBase):
+    """version info (materialized view) model"""
+
+    __table__ = create_materialized_view('version_info', select(VersionInfoTemp), db.metadata)

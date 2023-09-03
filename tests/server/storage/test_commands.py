@@ -178,3 +178,10 @@ def test_syncstorage_command(runner):
 
     assert result.exit_code == 0
     update_alias_mock.assert_called()
+
+
+def test_rebuildversioninfomap_command(runner):
+    """tests rebuild versioninfo command"""
+
+    result = runner.invoke(command, ['rebuild-versioninfo-map'])
+    assert result.exit_code == 0

@@ -22,6 +22,7 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import enumerate_network, JobManager, QueueManager
 from sner.server.scheduler.models import Queue, Job, Target
 from sner.server.storage.core import StorageManager
+from sner.server.storage.versioninfo import VersionInfoMapManager
 
 
 def configure_logging():
@@ -329,6 +330,16 @@ class StorageCleanup(Stage):  # pylint: disable=too-few-public-methods
         current_app.logger.debug(f'{self.__class__.__name__} finished')
 
 
+class RebuildVersionInfoMap(Schedule):  # pylint: disable=too-few-public-methods
+    """recount versioninfo map"""
+
+    def _run(self):
+        """run"""
+
+        VersionInfoMapManager.rebuild()
+        current_app.logger.info(f'{self.__class__.__name__} finished')
+
+
 class Planner(TerminateContextMixin):
     """planner"""
 
@@ -350,8 +361,6 @@ class Planner(TerminateContextMixin):
 
     def _setup_stages(self):
         """setup plannet stages"""
-
-        self.stages['storage_cleanup'] = StorageCleanup()
 
         sscan_stages = []
         for sscan_qname in self.config['stage']['service_scan']['queues']:
@@ -395,6 +404,11 @@ class Planner(TerminateContextMixin):
             for qname in standalones:
                 queue = Queue.query.filter_by(name=qname).one()
                 self.stages[f'load_standalone-{queue.id}'] = StorageLoader(qname)
+
+        self.stages['storage_cleanup'] = StorageCleanup()
+
+        if get_nested_key(self.config, 'stage', 'rebuild_versioninfo_map'):
+            self.stages['rebuild_versioninfo_map'] = RebuildVersionInfoMap(self.config['stage']['rebuild_versioninfo_map']['schedule'])
 
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""

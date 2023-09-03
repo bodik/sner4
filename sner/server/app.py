@@ -185,6 +185,9 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     app.config.update(config_from_yaml(config_file))  # service configuration
     app.config.update(config_from_yaml(os.environ.get(config_env)))  # wsgi/container config
 
+    if app.config["DEBUG"]:
+        logging.getLogger('sner.server').setLevel(logging.DEBUG)
+
     if app.config['XFLASK_PROXYFIX']:
         app.wsgi_app = ProxyFix(app.wsgi_app)
     app.session_interface = FilesystemSessionInterface(os.path.join(app.config['SNER_VAR'], 'sessions'), app.config['SNER_SESSION_IDLETIME'])
