@@ -27,12 +27,13 @@ def test_syncstorage(app, tmpworkdir, service, note):  # pylint: disable=unused-
     update_alias_mock.assert_called()
 
 
-def test_syncstorage_filter(app, host_factory):  # pylint: disable=unused-argument
+def test_syncstorage_filter(app, host_factory, note_factory):  # pylint: disable=unused-argument
     """test sync-storage command"""
 
     host_factory.create(address='127.0.1.1')
-    host_factory.create(address='127.0.2.1')
     host_factory.create(address='2001:db8::11')
+    host2 = host_factory.create(address='127.0.2.1')
+    note_factory.create(host=host2, xtype='filteredout')
 
     indexer_mock = Mock()
 

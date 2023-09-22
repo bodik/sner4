@@ -62,8 +62,10 @@ class BulkIndexer:
     def update_alias(self, alias, current_index):  # pragma: nocover  ; mocked
         """update alias, pune old indices"""
 
-        self.esclient.indices.put_alias(index=current_index, name=alias)
+        if self.esclient.indices.exists(index=current_index):
+            self.esclient.indices.put_alias(index=current_index, name=alias)
+            self.esclient.indices.refresh(index=current_index)
+
         for item in self.esclient.indices.get(index=f'{alias}-*'):
             if item != current_index:
                 self.esclient.indices.delete(index=item)
-        self.esclient.indices.refresh(index=current_index)

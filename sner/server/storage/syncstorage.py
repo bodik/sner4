@@ -78,7 +78,7 @@ def sync_notes(indexer, index_time, host_filter_expr=None):
     if host_filter_expr is not None:
         query = query.filter(host_filter_expr)
 
-    for note in windowed_query(Note.query, Note.id):
+    for note in windowed_query(query, Note.id):
         data_id = md5(
             f'{note.host.address}'
             f'|{note.service.proto if note.service else None}'
