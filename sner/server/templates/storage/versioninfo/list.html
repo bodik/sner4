@@ -20,9 +20,10 @@
 					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
 				}
 			}),
-			Sner.dt.column('via_target'),
+			Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
 			Sner.dt.column('product'),
 			Sner.dt.column('version'),
+			Sner.dt.column('extra', {'orderable': false, 'render': (d, t, r, m) => JSON.stringify(d)}),
 		],
 		'order': [[2, 'desc']]
 	};

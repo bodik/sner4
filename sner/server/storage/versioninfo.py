@@ -161,7 +161,7 @@ class VersionInfoMapManager:
                 extra = {}
                 for part in data["extrainfo"].split(' '):
                     if match := re.match(r'\((?P<osflavor>.*)\)', part):
-                        extra["os"] = match.group('osflavor')
+                        extra["os"] = match.group('osflavor').lower()
                     if extracted := cls.extract_version(part):
                         raw_map.add(**item, **asdict(extracted), extra=extra)
                         item_extracted = True
