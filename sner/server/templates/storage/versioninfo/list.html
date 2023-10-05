@@ -23,7 +23,7 @@
 			Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
 			Sner.dt.column('product'),
 			Sner.dt.column('version'),
-			Sner.dt.column('extra', {'orderable': false, 'render': (d, t, r, m) => JSON.stringify(d)}),
+			Sner.dt.column('extra', {'render': $.fn.dataTable.render.ellipsis(50, false, true)}),
 		],
 		'order': [[2, 'desc']]
 	};

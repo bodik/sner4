@@ -46,7 +46,7 @@ def versioninfo_list_json_route():
         ColumnDT(VersionInfo.via_target, mData='via_target'),
         ColumnDT(VersionInfo.product, mData='product'),
         ColumnDT(VersionInfo.version, mData='version'),
-        ColumnDT(VersionInfo.extra, mData='extra'),
+        ColumnDT(func.text(VersionInfo.extra), mData='extra'),
     ]
     query = db.session.query().select_from(VersionInfo)
     if not (query := filter_query(query, request.values.get('filter'))):

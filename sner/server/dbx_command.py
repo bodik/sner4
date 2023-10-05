@@ -237,7 +237,7 @@ def initdata_dev():
     db.session.add(Note(
         host=host,
         xtype='sner.testnote',
-        data='testnote data',
+        data='testnote data<script>alert(2);</script>',
         comment='test note comment'
     ))
 
@@ -264,6 +264,12 @@ def initdata_dev():
         xtype='nmap.banner_dict',
         data='{"product": "Apache httpd", "version": "2.2.21", '
              '"extrainfo": "(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1"}'
+    ))
+    db.session.add(Note(
+        host=product_host,
+        service=product_service,
+        xtype='nmap.banner_dict',
+        data='{"product": "Apache httpd", "version": "0.0", "extrainfo": "(xssdummy<script>alert(window);</script>) dummy/1.1"}'
     ))
 
     db.session.add(Note(
