@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.storage.models import Vuln
-from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
+from tests.selenium import dt_count_rows, dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
     check_dt_toolbox_freetag,
@@ -29,37 +29,37 @@ def check_vulns_filtering(sclnt, dt_id):
 
     # there should be 4 rows in total
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 4
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 4
 
     # one not tagged
     sclnt.find_element(By.ID, toolbar_id).find_element(By.XPATH, '//a[text()="Not tagged"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
-    assert dt_elem.find_element(By.XPATH, '//td/a[text()="vuln 1"]')
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 1
+    assert dt_elem.find_element(By.XPATH, './/td/a[text()="vuln 1"]')
 
     # three tagged
     sclnt.find_element(By.ID, toolbar_id).find_element(By.XPATH, '//a[text()="Tagged"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 3
-    assert not dt_elem.find_elements(By.XPATH, '//td/a[text()="vuln 1"]')
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 3
+    assert not dt_elem.find_elements(By.XPATH, './/td/a[text()="vuln 1"]')
 
     # two already reviewed
     sclnt.find_element(By.ID, toolbar_id).find_element(By.XPATH, '//a[text()="Exclude reviewed"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
-    assert dt_elem.find_element(By.XPATH, '//td/a[text()="vuln 1"]')
-    assert dt_elem.find_element(By.XPATH, '//td/a[text()="vuln 2"]')
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 2
+    assert dt_elem.find_element(By.XPATH, './/td/a[text()="vuln 1"]')
+    assert dt_elem.find_element(By.XPATH, './/td/a[text()="vuln 2"]')
 
     # one should go directly to report
     sclnt.find_element(By.ID, toolbar_id).find_element(By.XPATH, '//a[text()="Only Report"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
-    assert dt_elem.find_element(By.XPATH, '//td/a[text()="vuln 4"]')
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 1
+    assert dt_elem.find_element(By.XPATH, './/td/a[text()="vuln 4"]')
 
     # and user must be able to loose the filter
     sclnt.find_element(By.XPATH, '//a[text()="Unfilter"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 4
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 4
 
 
 def test_vuln_list_route(live_server, sl_operator, vuln):  # pylint: disable=unused-argument
@@ -227,7 +227,7 @@ def test_vuln_grouped_route(live_server, sl_operator, vuln):  # pylint: disable=
 
     sl_operator.get(url_for('storage.vuln_grouped_route', _external=True))
     dt_wait_processing(sl_operator, 'vuln_grouped_table')
-    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
+    assert dt_count_rows(sl_operator, 'vuln_grouped_table') == 1
 
 
 def test_vuln_grouped_route_filtering(live_server, sl_operator, vulns_filtering):  # pylint: disable=unused-argument
@@ -249,7 +249,7 @@ def test_vuln_grouped_route_filter_specialchars(live_server, sl_operator, vuln_f
     sl_operator.find_element(By.XPATH, elem_xpath).click()
     dt_wait_processing(sl_operator, 'vuln_list_table')
 
-    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
+    assert dt_count_rows(sl_operator, 'vuln_list_table') == 1
 
 
 def test_vuln_edit_route_autocomplete(live_server, sl_operator, vuln, host_factory, service_factory):  # pylint: disable=unused-argument
@@ -304,5 +304,5 @@ def test_vuln_multicopy_route(live_server, sl_operator, vuln, host_factory, serv
     sl_operator.find_element(By.XPATH, '//form[@id="vuln_form"]//input[@type="submit"]').click()
     dt_elem = dt_wait_processing(sl_operator, 'vuln_list_table')
 
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 2
     assert Vuln.query.filter(Vuln.host_id == host.id, Vuln.service_id == service.id, Vuln.xtype == vuln.xtype).one()

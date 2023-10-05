@@ -46,3 +46,9 @@ def dt_inrow_delete(sclnt, dt_id, index=0):
     webdriver_waituntil(sclnt, EC.alert_is_present())
     sclnt.switch_to.alert.accept()
     dt_wait_processing(sclnt, dt_id)
+
+
+def dt_count_rows(sclnt, dt_id):
+    """count number of rows in table"""
+
+    return len(sclnt.find_elements(By.XPATH, f'//table[@id="{dt_id}"]/tbody/tr'))

@@ -26,19 +26,19 @@ def check_dt_toolbox_select_rows(sclnt, route_name, dt_id, load_route=True):
     toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
 
     # there should be two rows in total
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 2
 
     # user must be able to select only one
-    dt_elem.find_element(By.XPATH, '(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[1]').click()
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"][contains(@class, "selected")]')) == 1
+    dt_elem.find_element(By.XPATH, '(.//tbody/tr/td[contains(@class, "select-checkbox")])[1]').click()
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr[contains(@class, "selected")]')) == 1
 
     # select all
     toolbar_elem.find_element(By.XPATH, './/a[text()="All"]').click()
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"][contains(@class, "selected")]')) == 2
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr[contains(@class, "selected")]')) == 2
 
     # or deselect any of them
     toolbar_elem.find_element(By.XPATH, './/a[text()="None"]').click()
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"][contains(@class, "selected")]')) == 0  # pylint: disable=len-as-condition
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr[contains(@class, "selected")]')) == 0  # pylint: disable=len-as-condition
 
 
 def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_route=True):
@@ -54,16 +54,16 @@ def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_ro
     dt_elem = dt_wait_processing(sclnt, dt_id)
     toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
 
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 2
 
     # one cloud be be tagged
-    dt_elem.find_element(By.XPATH, '(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[1]').click()
+    dt_elem.find_element(By.XPATH, '(.//tbody/tr/td[contains(@class, "select-checkbox")])[1]').click()
     toolbar_elem.find_element(By.XPATH, './/a[contains(@class, "abutton_tag_multiid") and text()="Todo"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert model_class.query.filter(model_class.comment == 'comment1', model_class.tags.any('todo')).one()
 
     # or the other one
-    dt_elem.find_element(By.XPATH, '(//tr[@role="row"]/td[contains(@class, "select-checkbox")])[2]').click()
+    dt_elem.find_element(By.XPATH, '(.//tbody/tr/td[contains(@class, "select-checkbox")])[2]').click()
     toolbar_elem.find_element(By.XPATH, './/a[contains(@class, "abutton_tag_multiid") and text()="Todo"]').click()
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert model_class.query.filter(model_class.comment == 'comment2', model_class.tags.any('todo')).one()
@@ -118,7 +118,7 @@ def check_dt_toolbox_freetag(sclnt, route_name, dt_id, model_class, load_route=T
     dt_elem = dt_wait_processing(sclnt, dt_id)
     toolbar_elem = sclnt.find_element(By.ID, f'{dt_id}_toolbar')
     assert model_class.query.filter(model_class.tags.any("dummy1")).count() == 0
-    assert len(dt_elem.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 2
+    assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr')) == 2
 
     # disable fade, the timing interferes with the test
     sclnt.execute_script('$("div#modal-global").toggleClass("fade")')

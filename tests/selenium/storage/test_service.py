@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.extensions import db
 from sner.server.storage.models import Service
-from tests.selenium import dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
+from tests.selenium import dt_count_rows, dt_inrow_delete, dt_rendered, dt_wait_processing, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
     check_dt_toolbox_freetag,
@@ -114,4 +114,4 @@ def test_service_grouped_route_filter_specialchars(live_server, sl_operator, ser
     sl_operator.find_element(By.XPATH, elem_xpath).click()
     dt_wait_processing(sl_operator, 'service_list_table')
 
-    assert len(sl_operator.find_elements(By.XPATH, '//tbody/tr[@role="row"]')) == 1
+    assert dt_count_rows(sl_operator, 'service_list_table') == 1
