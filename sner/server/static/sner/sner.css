@@ -48,6 +48,9 @@ td.dt-nowrap {
 	white-space: nowrap;
 }
 
+table.dataTable.table-sm > thead > tr > th {
+  padding-right: 20px;
+}
 
 /* other */
 .striked {
