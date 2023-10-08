@@ -28,7 +28,14 @@ def ignore_warning(category):
 class BulkIndexer:
     """elasticsearch bulk indexing buffer"""
 
+    TIMEOUT = 30
+
     def __init__(self, esd_url, tlsauth_key, tlsauth_cert, buflen=1000):
+        """constructor"""
+
+        self.buf = []
+        self.buflen = buflen
+
         esclient_options = {}
         if tlsauth_key and tlsauth_cert:
             ctx = ssl.create_default_context()
@@ -37,10 +44,7 @@ class BulkIndexer:
             # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
             ctx.post_handshake_auth = True
             esclient_options['ssl_context'] = ctx
-        self.esclient = Elasticsearch([esd_url], **esclient_options)
-
-        self.buf = []
-        self.buflen = buflen
+        self.esclient = Elasticsearch([esd_url], request_timeout=self.TIMEOUT, **esclient_options)
 
     def index(self, index, doc_id, doc):
         """index item in buffered way"""
@@ -54,13 +58,16 @@ class BulkIndexer:
     def flush(self):
         """flush buffer"""
 
-        res = es_bulk(self.esclient, self.buf)
+        res = es_bulk(self.esclient, self.buf, request_timeout=self.TIMEOUT)
         self.buf = []
         return res
 
     @ignore_warning(ElasticsearchWarning)
     def update_alias(self, alias, current_index):  # pragma: nocover  ; mocked
         """update alias, pune old indices"""
+
+        if not self.esclient.indices.exists(index=current_index):
+            return
 
         if self.esclient.indices.exists(index=current_index):
             self.esclient.indices.put_alias(index=current_index, name=alias)
