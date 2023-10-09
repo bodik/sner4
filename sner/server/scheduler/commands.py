@@ -99,3 +99,14 @@ def readynet_recount_command():
 
     SchedulerService.readynet_recount()
     sys.exit(0)
+
+
+@command.command(name='heatmap-check', help='check heatmap if corresponds with running jobs')
+@with_appcontext
+def heatmap_check_command():
+    """check heatmap if corresponds with running jobs"""
+
+    if not SchedulerService.heatmap_check():
+        current_app.logger.error('heatmap not correct')
+        sys.exit(1)
+    sys.exit(0)

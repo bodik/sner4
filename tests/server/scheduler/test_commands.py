@@ -5,7 +5,9 @@ scheduler.commands tests
 
 from pathlib import Path
 
+from sner.server.extensions import db
 from sner.server.scheduler.commands import command
+from sner.server.scheduler.core import SchedulerService
 from sner.server.scheduler.models import Job, Queue
 
 
@@ -90,3 +92,16 @@ def test_readynet_recount_command(runner):
 
     result = runner.invoke(command, ['readynet-recount'])
     assert result.exit_code == 0
+
+
+def test_heatmap_check_command(runner, target):  # pylint: disable=unused-argument
+    """test heatmap-check command"""
+
+    result = runner.invoke(command, ['heatmap-check'])
+    assert result.exit_code == 0
+
+    assignment = SchedulerService.job_assign(None, [])
+    Job.query.filter(Job.id == assignment['id']).delete()
+    db.session.commit()
+    result = runner.invoke(command, ['heatmap-check'])
+    assert result.exit_code == 1

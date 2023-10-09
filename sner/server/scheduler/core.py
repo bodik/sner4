@@ -6,7 +6,7 @@ scheduler shared functions
 import json
 import re
 from abc import ABC, abstractmethod
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from datetime import datetime
 from enum import Enum
 from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
@@ -611,3 +611,37 @@ class SchedulerService:
 
         db.session.commit()
         cls.release_lock()
+
+    @classmethod
+    def heatmap_check(cls):
+        """
+        check if heatmap corresponds with assigned targets from running jobs
+
+        :return: True if the database is in an okay state, False otherwise.
+        :rtype: bool
+        """
+
+        cls.get_lock()
+
+        ref_heatmap = defaultdict(int)
+        for job in Job.query.filter(Job.retval == None).all():  # noqa: E711  pylint: disable=singleton-comparison
+            for target in json.loads(job.assignment)['targets']:
+                ref_heatmap[SchedulerService.hashval(target)] += 1
+
+        db_heatmap = {
+            item.hashval: item.count
+            for item in Heatmap.query.all()
+            if item.count != 0
+        }
+
+        keys_only_in_dict1 = set(ref_heatmap.keys()) - set(db_heatmap.keys())
+        keys_only_in_dict2 = set(db_heatmap.keys()) - set(ref_heatmap.keys())
+        different_values = {
+            key: (ref_heatmap[key], db_heatmap[key])
+            for key in ref_heatmap
+            if (key in db_heatmap) and (ref_heatmap[key] != db_heatmap[key])
+        }
+
+        heatmaps_equal = not bool(keys_only_in_dict1 or keys_only_in_dict2 or different_values)
+        cls.release_lock()
+        return heatmaps_equal

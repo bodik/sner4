@@ -174,3 +174,16 @@ def test_schedulerservice_readynetrecount(app, queue, target_factory):  # pylint
     current_app.config['SNER_HEATMAP_HOT_LEVEL'] = 3
     SchedulerService.readynet_recount()
     assert Readynet.query.count() == 0
+
+
+def test_schedulerservice_heatmapcheck(app, target):  # pylint: disable=unused-argument
+    """test scheduler service readynet manipulation"""
+
+    assert SchedulerService.heatmap_check()
+
+    assignment = SchedulerService.job_assign(None, [])
+    assert SchedulerService.heatmap_check()
+
+    Job.query.filter(Job.id == assignment['id']).delete()
+    db.session.commit()
+    assert not SchedulerService.heatmap_check()
