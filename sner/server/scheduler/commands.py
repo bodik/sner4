@@ -19,7 +19,7 @@ def command():
     """scheduler commands container"""
 
 
-@command.command(name='enumips', help='enumerate ip address range')
+@command.command(name='enumips', help='enumerate ip address range; uses stdin by default')
 @click.argument('targets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 def enumips_command(targets, **kwargs):
@@ -28,6 +28,8 @@ def enumips_command(targets, **kwargs):
     targets = list(targets)
     if kwargs['file']:
         targets += kwargs['file'].read().splitlines()
+    if not targets:
+        targets.extend(sys.stdin.readlines())
     for target in targets:
         print('\n'.join(enumerate_network(target)))
 

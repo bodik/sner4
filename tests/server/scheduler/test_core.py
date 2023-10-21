@@ -11,8 +11,22 @@ import yaml
 from flask import current_app
 
 from sner.server.extensions import db
-from sner.server.scheduler.core import ExclMatcher, QueueManager, SchedulerService, sixenum_target_boundaries
+from sner.server.scheduler.core import enumerate_network, ExclMatcher, QueueManager, SchedulerService, sixenum_target_boundaries
 from sner.server.scheduler.models import Heatmap, Job, Readynet
+
+
+def test_enumerate_network():
+    """check enumerate_network"""
+
+    assert len(enumerate_network('127.0.1.123')) == 1
+    assert len(enumerate_network('127.0.1.123/32')) == 1
+
+    output = enumerate_network('127.0.2.0/31')
+    assert len(output) == 2
+    assert '127.0.2.0' in output
+    assert '127.0.2.0' in output
+
+    assert 'fe80::1:3' in enumerate_network('fe80::1:0/126')
 
 
 def test_sixenum_target_boundaries():

@@ -233,7 +233,7 @@ bin/server run
 1. Generate target list
   ```
   bin/server scheduler enumips 127.0.0.0/24 > targets1
-  bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips --file=- > targets2
+  bin/server scheduler rangetocidr 127.0.0.1 127.0.3.5 | bin/server scheduler enumips > targets2
   ```
 2. Enqueue targets in queue (web: *scheduler > queue > enqueue*)
   ```

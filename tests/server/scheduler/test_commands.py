@@ -14,21 +14,19 @@ from sner.server.scheduler.models import Job, Queue
 def test_enumips_command(runner, tmpworkdir):  # pylint: disable=unused-argument
     """basic enumerator test"""
 
-    apath = Path('enumips.txt')
-    apath.write_text('127.0.1.123/32\n127.0.2.0/31\nfe80::1:0/126', encoding='utf-8')
-
-    result = runner.invoke(command, ['enumips', '127.0.0.128/30', '--file', apath])
+    result = runner.invoke(command, ['enumips', '127.0.0.128/30'])
     assert result.exit_code == 0
+    assert len(result.output.splitlines()) == 4
 
-    assert len(result.output.splitlines()) == 11
-    assert '127.0.1.123' in result.output
-    assert '127.0.2.0' in result.output
-    assert '127.0.2.1' in result.output
-    assert '127.0.0.128' in result.output
-    assert '127.0.0.129' in result.output
-    assert '127.0.0.130' in result.output
-    assert '127.0.0.131' in result.output
-    assert 'fe80::1:3' in result.output
+    apath = Path('enumips.txt')
+    apath.write_text('127.0.1.123/32', encoding='utf-8')
+    result = runner.invoke(command, ['enumips', '--file', apath])
+    assert result.exit_code == 0
+    assert len(result.output.splitlines()) == 1
+
+    result = runner.invoke(command, ['enumips'], input='127.0.0.3')
+    assert result.exit_code == 0
+    assert len(result.output.splitlines()) == 1
 
 
 def test_rangetocidr_command(runner):
