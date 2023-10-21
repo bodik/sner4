@@ -143,6 +143,23 @@ def test_vuln_grouped_json_route(cl_operator, vuln):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
+def test_vuln_grouped_json_route_tagaggregation(cl_operator, vuln_factory):
+    """vuln grouped json route test, different order tags"""
+
+    vuln_name = 'aggregable vuln'
+    vuln_factory.create(name=vuln_name, tags=['1', '2'])
+    vuln_factory.create(name=vuln_name, tags=['2', '1'])
+    vuln_factory.create(name=vuln_name, tags=[])
+
+    response = cl_operator.post(
+        url_for('storage.vuln_grouped_json_route'),
+        {'draw': 1, 'start': 0, 'length': 10, 'search[value]': vuln_name}
+    )
+    assert response.status_code == HTTPStatus.OK
+    response_data = json.loads(response.body.decode('utf-8'))
+    assert len(response_data['data']) == 2
+
+
 def test_vuln_report_route(cl_operator, vuln):
     """vuln report route test"""
 

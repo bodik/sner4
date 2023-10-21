@@ -16,7 +16,7 @@ from sner.server.extensions import db
 from sner.server.forms import ButtonForm
 from sner.server.storage.core import (
     model_annotate,
-    filtered_vuln_tags_column,
+    filtered_vuln_tags_query,
     get_related_models,
     model_delete_multiid,
     model_tag_multiid,
@@ -174,16 +174,21 @@ def vuln_grouped_route():
 def vuln_grouped_json_route():
     """view grouped vulns, data endpoint"""
 
-    filtered_tags = filtered_vuln_tags_column(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
+    vuln_tags_query, vuln_tags_column = filtered_vuln_tags_query(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
 
     columns = [
         ColumnDT(Vuln.name, mData='name'),
         ColumnDT(Vuln.severity, mData='severity'),
-        ColumnDT(filtered_tags, mData='tags'),
+        ColumnDT(vuln_tags_column, mData='tags'),
         ColumnDT(func.count(Vuln.id), mData='cnt_vulns', global_search=False),
     ]
-    # join allows filter over host attrs
-    query = db.session.query().select_from(Vuln).join(Host).group_by(Vuln.name, Vuln.severity, filtered_tags)
+    query = (
+        db.session.query()
+        .select_from(Vuln)
+        .outerjoin(vuln_tags_query, Vuln.id==vuln_tags_query.c.id)
+        .outerjoin(Host, Vuln.host_id == Host.id)  # allows filter over host attrs
+        .group_by(Vuln.name, Vuln.severity, vuln_tags_query.c.utags)
+    )
     if not (query := filter_query(query, request.values.get('filter'))):
         return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
 

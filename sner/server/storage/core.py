@@ -12,7 +12,8 @@ from typing import Union
 
 from flask import current_app, render_template
 from pytimeparse import parse as timeparse
-from sqlalchemy import case, delete, func, or_, not_, select, update
+from sqlalchemy import case, cast, delete, func, or_, not_, select, update
+from sqlalchemy.dialects.postgresql import ARRAY as pg_ARRAY
 from sqlalchemy.sql.functions import coalesce
 
 from sner.lib import format_host_address
@@ -139,6 +140,40 @@ def filtered_vuln_tags_column(prefix_filter):
     tags = [item for sub_list in tags for item in sub_list]
     tags = list(set(item for item in tags if item.startswith(prefix_filter)))
     return drop_tags(tags)
+
+
+def filtered_vuln_tags_query(prefix_filter):
+    """
+    returns sqlalchemy selectable
+
+    # note
+
+    model.tags attributes are postgresql arrays. vuln grouping views and report
+    generation aggregates vulns also by tags. some tags (tags ignored by
+    configurable prefix) are to be omitted in aggregation. postgresql does
+    account array item order (eg [1,2] != [2,1]). to support required function,
+    coresponding aggregation sql should:
+      * create subquery for each vuln with unnested tags (also sort)
+      * filter out "prefixed" values from tags and regroup the data in another subquery
+      * use result as outerjoin table/query to actual data query from vuln table
+    """
+
+    utags_column = func.unnest(Vuln.tags).label('utags')
+    tags_query = (
+        select(Vuln.id, utags_column)
+        .select_from(Vuln)
+        .order_by(Vuln.id, utags_column)
+        .subquery()
+    )
+    filtered_tags_query = (
+        select(tags_query.c.id, func.array_agg(tags_query.c.utags).label('utags'))
+        .filter(not_(tags_query.c.utags.ilike('i:%')))
+        .group_by(tags_query.c.id)
+        .subquery()
+    )
+    tags_column = func.coalesce(filtered_tags_query.c.utags, cast([], pg_ARRAY(db.String)))
+
+    return filtered_tags_query, tags_column
 
 
 def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-locals
