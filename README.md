@@ -268,7 +268,7 @@ bin/server storage import nmap scan-dnsenum.xml
 #### Use-case: Basic recon
 
 ```
-bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner servicedisco nmap' --file=-
+bin/server scheduler enumips 192.0.2.0/24 | bin/server scheduler queue-enqueue 'sner servicedisco nmap'
 bin/agent --debug
 bin/server storage import nmap /var/lib/sner/scheduler/queue-<queue.id>/*
 ```

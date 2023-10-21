@@ -42,12 +42,12 @@ def rangetocidr_command(start, end):
         print(tmp)
 
 
-@command.command(name='queue-enqueue', help='add targets to queue')
+@command.command(name='queue-enqueue', help='add targets to queue; uses stdin by default')
 @click.argument('queue_name')
-@click.argument('argtargets', nargs=-1)
+@click.argument('targets', nargs=-1)
 @click.option('--file', type=click.File('r'))
 @with_appcontext
-def queue_enqueue_command(queue_name, argtargets, **kwargs):
+def queue_enqueue_command(queue_name, targets, **kwargs):
     """enqueue targets to queue"""
 
     queue = Queue.query.filter(Queue.name == queue_name).one_or_none()
@@ -55,10 +55,12 @@ def queue_enqueue_command(queue_name, argtargets, **kwargs):
         current_app.logger.error('no such queue')
         sys.exit(1)
 
-    argtargets = list(argtargets)
+    targets = list(targets)
     if kwargs['file']:
-        argtargets.extend(kwargs['file'].read().splitlines())
-    QueueManager.enqueue(queue, argtargets)
+        targets.extend(kwargs['file'].read().splitlines())
+    if not targets:
+        targets.extend(sys.stdin.readlines())
+    QueueManager.enqueue(queue, targets)
     sys.exit(0)
 
 

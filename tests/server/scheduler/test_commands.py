@@ -59,6 +59,10 @@ def test_queue_enqueue_command(runner, tmpworkdir, queue, target_factory):  # py
     assert result.exit_code == 0
     assert len(Queue.query.get(queue.id).targets) == 2
 
+    result = runner.invoke(command, ['queue-enqueue', queue.name], input='dummy\n')
+    assert result.exit_code == 0
+    assert len(Queue.query.get(queue.id).targets) == 3
+
 
 def test_queue_flush_command(runner, target):
     """queue flush command test"""
