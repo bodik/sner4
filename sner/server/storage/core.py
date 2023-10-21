@@ -123,25 +123,6 @@ def list_to_lines(data):
     return '\n'.join(data) if data else ''
 
 
-def filtered_vuln_tags_column(prefix_filter):
-    """returns sqla expression which removes values from array column by sql"""
-
-    def drop_tags(alist, expr=None):
-        """generate nested expression; postgresql is missing remove(array, array) function"""
-
-        if expr is None:
-            expr = Vuln.tags
-        if not alist:
-            return expr
-        expr = func.array_remove(expr, alist.pop())
-        return drop_tags(alist, expr)
-
-    tags = db.session.execute(select(Vuln.tags).select_from(Vuln).group_by(Vuln.tags)).scalars().all()
-    tags = [item for sub_list in tags for item in sub_list]
-    tags = list(set(item for item in tags if item.startswith(prefix_filter)))
-    return drop_tags(tags)
-
-
 def filtered_vuln_tags_query(prefix_filter):
     """
     returns sqlalchemy selectable
@@ -167,7 +148,7 @@ def filtered_vuln_tags_query(prefix_filter):
     )
     filtered_tags_query = (
         select(tags_query.c.id, func.array_agg(tags_query.c.utags).label('utags'))
-        .filter(not_(tags_query.c.utags.ilike('i:%')))
+        .filter(not_(tags_query.c.utags.ilike(f'{prefix_filter}%')))
         .group_by(tags_query.c.id)
         .subquery()
     )
@@ -179,40 +160,44 @@ def filtered_vuln_tags_query(prefix_filter):
 def vuln_report(qfilter=None, group_by_host=False):  # pylint: disable=too-many-locals
     """generate report from storage data"""
 
+    vuln_severity = func.text(Vuln.severity)
+    vuln_tags_query, vuln_tags_column = filtered_vuln_tags_query(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
+
     host_address_format = case([(func.family(Host.address) == 6, func.concat('[', func.host(Host.address), ']'))], else_=func.host(Host.address))
-    host_ident = coalesce(Vuln.via_target, Host.hostname, host_address_format)
-    endpoint_address = func.concat_ws(':', host_address_format, Service.port)
-    endpoint_hostname = func.concat_ws(':', host_ident, Service.port)
-    filtered_tags = filtered_vuln_tags_column(current_app.config["SNER_VULN_GROUP_IGNORE_TAG_PREFIX"])
+    host_ident_format = coalesce(Vuln.via_target, Host.hostname, host_address_format)
 
-    # note1: refs (itself and array) must be unnested in order to be correctly uniq and agg as individual elements by used axis
-    # note2: unnesting refs should be implemented as
-    # SELECT vuln.name, array_remove(array_agg(urefs.ref), NULL) FROM vuln
-    #   LEFT OUTER JOIN LATERAL unnest(vuln.refs) as urefs(ref) ON TRUE
-    # GROUP BY vuln.name;`
-    # but could not construct appropriate sqla expression `.label('x(y)')` always rendered as string instead of 'table with column'
-    unnested_refs = db.session.query(Vuln.id, func.unnest(Vuln.refs).label('ref')).subquery()
+    host_ident = func.array_agg(func.distinct(host_ident_format))
+    endpoint_address = func.array_agg(func.distinct(func.concat_ws(':', host_address_format, Service.port)))
+    endpoint_hostname = func.array_agg(func.distinct(func.concat_ws(':', host_ident_format, Service.port)))
 
-    query = db.session \
-        .query(
+    unnested_refs_query = select(Vuln.id, func.unnest(Vuln.refs).label('ref')).subquery()
+    unnested_refs_column = func.array_remove(func.array_agg(func.distinct(unnested_refs_query.c.ref)), None)
+
+    vuln_ids = func.array_agg(Vuln.id)
+    vuln_xtypes = func.array_remove(func.array_agg(func.distinct(Vuln.xtype)), None)
+
+    query = (
+        db.session.query(
             Vuln.name.label('vulnerability'),
             Vuln.descr.label('description'),
-            func.text(Vuln.severity).label('severity'),
-            filtered_tags.label('tags'),
-            func.array_agg(func.distinct(host_ident)).label('host_ident'),
-            func.array_agg(func.distinct(endpoint_address)).label('endpoint_address'),
-            func.array_agg(func.distinct(endpoint_hostname)).label('endpoint_hostname'),
-            func.array_remove(func.array_agg(func.distinct(unnested_refs.c.ref)), None).label('references'),
-            func.array_agg(Vuln.id).label('vuln_ids'),
-            func.array_remove(func.array_agg(func.distinct(Vuln.xtype)), None).label('xtype')
-        ) \
-        .outerjoin(Host, Vuln.host_id == Host.id) \
-        .outerjoin(Service, Vuln.service_id == Service.id) \
-        .outerjoin(unnested_refs, Vuln.id == unnested_refs.c.id) \
-        .group_by(Vuln.name, Vuln.descr, Vuln.severity, filtered_tags)
+            vuln_severity.label('severity'),
+            vuln_tags_column.label('tags'),
+            host_ident.label('host_ident'),
+            endpoint_address.label('endpoint_address'),
+            endpoint_hostname.label('endpoint_hostname'),
+            unnested_refs_column.label('references'),
+            vuln_ids.label('vuln_ids'),
+            vuln_xtypes.label('xtype')
+        )
+        .outerjoin(Host, Vuln.host_id == Host.id)
+        .outerjoin(Service, Vuln.service_id == Service.id)
+        .outerjoin(vuln_tags_query, Vuln.id == vuln_tags_query.c.id)
+        .outerjoin(unnested_refs_query, Vuln.id == unnested_refs_query.c.id)
+        .group_by(Vuln.name, Vuln.descr, Vuln.severity, vuln_tags_query.c.utags)
+    )
 
     if group_by_host:
-        query = query.group_by(host_ident)
+        query = query.group_by(host_ident_format)
 
     if not (query := filter_query(query, qfilter)):
         raise ValueError('failed to filter query')

@@ -185,7 +185,7 @@ def vuln_grouped_json_route():
     query = (
         db.session.query()
         .select_from(Vuln)
-        .outerjoin(vuln_tags_query, Vuln.id==vuln_tags_query.c.id)
+        .outerjoin(vuln_tags_query, Vuln.id == vuln_tags_query.c.id)
         .outerjoin(Host, Vuln.host_id == Host.id)  # allows filter over host attrs
         .group_by(Vuln.name, Vuln.severity, vuln_tags_query.c.utags)
     )
