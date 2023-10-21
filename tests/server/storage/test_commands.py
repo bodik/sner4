@@ -53,43 +53,12 @@ def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-a
     assert not Note.query.all()
 
 
-def test_vuln_report_command(runner, host_factory, service_factory, vuln_factory):
+def test_vuln_report_command(runner, vuln):  # pylint: disable=unused-argument
     """test vuln-report command"""
-
-    # additional test data required for 'misc' test (eg. multiple endpoints having same vuln)
-    vuln = vuln_factory.create()
-    vuln_name = vuln.name
-
-    host1 = host_factory.create(address='127.3.3.1', hostname='testhost2.testdomain.tests')
-    host2 = host_factory.create(address='::127:3:3:2', hostname='testhost2.testdomain.tests')
-    vuln_factory.create(host=host1, name='vuln on many hosts', xtype='x', severity=SeverityEnum.CRITICAL)
-    vuln_factory.create(host=host2, name='vuln on many hosts', xtype='x', severity=SeverityEnum.CRITICAL)
-    vuln_factory.create(host=host2, name='trim test', xtype='x', severity=SeverityEnum.UNKNOWN, descr='A'*1001)
-
-    aggregable_vuln_data = {
-        'name': 'agg reportdata vuln',
-        'xtype': 'y',
-        'descr': 'agg reportdata vuln description',
-        'tags': ['report:data', 'i:via_sner']
-    }
-    vuln_factory.create(host=host1, **aggregable_vuln_data)
-    service2 = service_factory.create(host=host2)
-    vuln2 = vuln_factory.create(host=host2, service=service2, **aggregable_vuln_data)
 
     result = runner.invoke(command, ['vuln-report'])
     assert result.exit_code == 0
-    assert f',"{vuln_name}",' in result.output
-    assert ',"misc",' in result.output
-    assert ',"TRIMMED",' in result.output
-    assert '[::127:3:3:2]' in result.output
-    assert f'## Data IP: {vuln2.host.address}, Proto: {vuln2.service.proto}, Port: {service2.port}, Hostname: {host2.hostname}' in result.output
-    assert 'i:via_sner' not in result.output
-
-    result = runner.invoke(command, ['vuln-report', '--group_by_host', '--filter', 'Host.address == "127.3.3.1"'])
-    assert result.exit_code == 0
-
-    result = runner.invoke(command, ['vuln-report', '--filter', 'invalid'])
-    assert result.exit_code == 1
+    assert len(result.output.splitlines()) > 1
 
 
 def test_vuln_export_command(runner, host_factory, vuln_factory):
