@@ -6,6 +6,9 @@
 {% block content %}
 {% call cm.heading(['Visuals', 'Internals']) %}{% endcall %}
 
+<h2>Metrics</h2>
+<pre><code class="hljs">{{ metrics }}</code></pre>
+
 <h2>Exclusions</h2>
 <pre><code class="hljs language-yaml">{{ config['SNER_EXCLUSIONS'] | yaml_dump }}</code></pre>
 

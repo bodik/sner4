@@ -5,14 +5,14 @@ apiv2 controller
 
 import binascii
 from base64 import b64decode
-from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from flask import current_app, jsonify, Response
 from flask_login import current_user
 from flask_smorest import Blueprint
-from sqlalchemy import func, or_
+from sqlalchemy import or_
 
+from sner.server.api.core import get_metrics
 from sner.server.api.schema import (
     JobAssignArgsSchema,
     JobAssignmentSchema,
@@ -31,8 +31,8 @@ from sner.server.api.schema import (
 from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
-from sner.server.scheduler.models import Job, Queue, Target
-from sner.server.storage.models import Host, Note, Service, Vuln, VersionInfo
+from sner.server.scheduler.models import Job
+from sner.server.storage.models import Host, Note, Service, VersionInfo
 from sner.server.storage.version_parser import is_in_version_range, parse as versionspec_parse
 from sner.server.utils import filter_query
 
@@ -91,25 +91,7 @@ def v2_scheduler_job_output_route(args):
 def v2_stats_prometheus_route():
     """internal stats"""
 
-    stats = {}
-
-    stats['sner_storage_hosts_total'] = Host.query.count()
-    stats['sner_storage_services_total'] = Service.query.count()
-    stats['sner_storage_vulns_total'] = Vuln.query.count()
-    stats['sner_storage_notes_total'] = Note.query.count()
-
-    stale_horizont = datetime.utcnow() - timedelta(days=5)
-    stats['sner_scheduler_jobs_total{state="running"}'] = Job.query.filter(Job.retval == None, Job.time_start > stale_horizont).count()  # noqa: E501,E711  pylint: disable=singleton-comparison
-    stats['sner_scheduler_jobs_total{state="stale"}'] = Job.query.filter(Job.retval == None, Job.time_start < stale_horizont).count()  # noqa: E501,E711  pylint: disable=singleton-comparison
-    stats['sner_scheduler_jobs_total{state="finished"}'] = Job.query.filter(Job.retval == 0).count()
-    stats['sner_scheduler_jobs_total{state="failed"}'] = Job.query.filter(Job.retval != 0).count()
-
-    queue_targets = db.session.query(Queue.name, func.count(Target.id).label('cnt')).select_from(Queue).outerjoin(Target).group_by(Queue.name).all()
-    for queue, targets in queue_targets:
-        stats[f'sner_scheduler_queue_targets_total{{name="{queue}"}}'] = targets
-
-    output = '\n'.join(f'{key} {val}' for key, val in stats.items())
-    return Response(output, mimetype='text/plain')
+    return Response(get_metrics(), mimetype='text/plain')
 
 
 @blueprint.route('/v2/public/storage/host')

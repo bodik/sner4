@@ -5,6 +5,7 @@ controller internals
 
 from flask import render_template
 
+from sner.server.api.core import get_metrics
 from sner.server.auth.core import session_required
 from sner.server.visuals.views import blueprint
 
@@ -14,4 +15,4 @@ from sner.server.visuals.views import blueprint
 def internals_route():
     """show various internals"""
 
-    return render_template('visuals/internals.html')
+    return render_template('visuals/internals.html', metrics=get_metrics())
