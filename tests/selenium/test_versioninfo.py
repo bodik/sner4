@@ -8,7 +8,7 @@ import json
 from flask import url_for
 from selenium.webdriver.common.by import By
 
-from sner.server.storage.versioninfo import VersionInfoMapManager
+from sner.server.storage.versioninfo import VersionInfoManager
 from tests.selenium import dt_count_rows, dt_rendered
 
 
@@ -36,7 +36,7 @@ def test_versioninfo_list_route_query_form(live_server, sl_operator, host, servi
         xtype='nmap.banner_dict',
         data='{"product": "Apache httpd", "version": "3.14"}'
     )
-    VersionInfoMapManager.rebuild()
+    VersionInfoManager.rebuild()
 
     expected_version = "3.14"
 

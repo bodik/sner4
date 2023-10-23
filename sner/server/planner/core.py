@@ -22,7 +22,7 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import enumerate_network, JobManager, QueueManager
 from sner.server.scheduler.models import Queue, Job, Target
 from sner.server.storage.core import StorageManager
-from sner.server.storage.versioninfo import VersionInfoMapManager
+from sner.server.storage.versioninfo import VersionInfoManager
 
 
 def configure_logging():
@@ -336,7 +336,7 @@ class RebuildVersionInfoMap(Schedule):  # pylint: disable=too-few-public-methods
     def _run(self):
         """run"""
 
-        VersionInfoMapManager.rebuild()
+        VersionInfoManager.rebuild()
         current_app.logger.info(f'{self.__class__.__name__} finished')
 
 
