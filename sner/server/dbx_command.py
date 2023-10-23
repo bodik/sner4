@@ -16,7 +16,8 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import QueueManager
 from sner.server.scheduler.models import Queue
 from sner.server.storage.versioninfo import VersionInfoManager
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
+from sner.server.storage.vulnsearch import LocaldbWriter as VulnsearchLocaldbWriter, vulndata_docid
+from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, VulnsearchTemp
 from sner.server.utils import yaml_dump
 
 
@@ -253,12 +254,15 @@ def initdata_dev():
         info='product: Apache httpd version: 2.2.21 extrainfo: (Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1',
     )
     db.session.add(product_service)
-    db.session.add(Note(
+    product_note = Note(
         host=product_host,
         service=product_service,
         xtype='cpe',
         data='["cpe:/a:apache:http_server:2.2.21"]'
-    ))
+    )
+    db.session.add(product_note)
+    db.session.commit()  # required to obtain ids
+
     db.session.add(Note(
         host=product_host,
         service=product_service,
@@ -280,7 +284,28 @@ def initdata_dev():
         data='["productdummy"]'
     ))
 
+    _cveid = 'CVE-1900-0000'
+    db.session.add(VulnsearchTemp(
+        id=vulndata_docid(product_note.host.address, product_note.service.proto, product_note.service.port, _cveid),
+        host_id=product_note.host.id,
+        service_id=product_note.service.id,
+        host_address=product_note.host.address,
+        host_hostname=product_note.host.hostname,
+        service_proto=product_note.service.proto,
+        service_port=product_note.service.port,
+        via_target=product_note.via_target,
+        cveid=_cveid,
+        name='dummy cve',
+        description='dummy cve description',
+        cvss=1.3,
+        cvss3=2.4,
+        attack_vector='NETWORK',
+        data={'dummmy': 'data'},
+        cpe={'full': 'cpe:/a:apache:http_server:2.2.21'}
+    ))
+
     VersionInfoManager.rebuild()
+    VulnsearchLocaldbWriter(0).refresh_view()
 
 
 @click.group(name='dbx', help='sner.server db management')
