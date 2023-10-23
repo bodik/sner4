@@ -17,9 +17,15 @@ from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service, VersionInfoTemp
 from sner.server.storage.versioninfo import VersionInfoMapManager
-from sner.server.storage.vulnsearch import sync_vulnsearch
+from sner.server.storage.vulnsearch import VulnsearchManager
 from sner.server.storage.syncstorage import sync_storage
 from sner.server.utils import filter_query
+
+
+def kwargs_or_config(kwargs, name):
+    """get key from kwargs or app.config"""
+
+    return kwargs.get(name) or current_app.config['SNER_VULNSEARCH'].get(name)
 
 
 @click.group(name='storage', help='sner.server storage management')
@@ -128,28 +134,46 @@ def storage_service_list(**kwargs):
         print(fmt.format(**get_data(tmp), host=get_host(tmp, kwargs['hostnames'])))
 
 
-@command.command(name='sync-vulnsearch', help='synchronize vulnsearch elk index')
+@command.command(name='rebuild-vulnsearch-elastic', help='synchronize vulnsearch elk index')
 @with_appcontext
-@click.option('--namelen', default=100, help='emited name length')
 @click.option('--cvesearch', help='cvesearch base url')
 @click.option('--esd', help='elasticsearch url')
 @click.option('--tlsauth_key', help='tlsauth key path')
 @click.option('--tlsauth_cert', help='tlsauth cert path')
 @click.option('--host_filter',  type=click.Path(exists=True), help='path to host filter file')
-def storage_sync_vulnsearch(**kwargs):
+def storage_rebuild_vulnsearch_elastic(**kwargs):
     """synchronize vulnsearch elk index"""
 
-    cvesearch = kwargs.get('cvesearch') or current_app.config['SNER_VULNSEARCH'].get('cvesearch')
-    esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
-    tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
-    tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+    cvesearch = kwargs_or_config(kwargs, 'cvesearch')
+    esd = kwargs_or_config(kwargs, 'esd')
+    tlsauth_key = kwargs_or_config(kwargs, 'tlsauth_key')
+    tlsauth_cert = kwargs_or_config(kwargs, 'tlsauth_cert')
     host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not all([cvesearch, esd]):
         current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    sync_vulnsearch(cvesearch, esd, kwargs.get('namelen'), tlsauth_key, tlsauth_cert, host_filter)
+    VulnsearchManager(cvesearch, tlsauth_key, tlsauth_cert).rebuild_elastic(esd, host_filter)
+
+
+@command.command(name='rebuild-vulnsearch-localdb', help='synchronize localdb vulnsearch')
+@with_appcontext
+@click.option('--cvesearch', help='cvesearch base url')
+@click.option('--tlsauth_key', help='tlsauth key path')
+@click.option('--tlsauth_cert', help='tlsauth cert path')
+def storage_rebuild_vulnsearch_localdb(**kwargs):
+    """synchronize vulnsearch elk index"""
+
+    cvesearch = kwargs_or_config(kwargs, 'cvesearch')
+    tlsauth_key = kwargs_or_config(kwargs, 'tlsauth_key')
+    tlsauth_cert = kwargs_or_config(kwargs, 'tlsauth_cert')
+
+    if not cvesearch:
+        current_app.logger.error('configuration required (config or cmdline)')
+        sys.exit(1)
+
+    VulnsearchManager(cvesearch, tlsauth_key, tlsauth_cert).rebuild_localdb()
 
 
 @command.command(name='sync-storage', help='synchronize storage elk index')
@@ -161,9 +185,9 @@ def storage_sync_vulnsearch(**kwargs):
 def storage_sync_storage(**kwargs):
     """synchronize storage elk index"""
 
-    esd = kwargs.get('esd') or current_app.config['SNER_VULNSEARCH'].get('esd')
-    tlsauth_key = kwargs.get('tlsauth_key') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_key')
-    tlsauth_cert = kwargs.get('tlsauth_cert') or current_app.config['SNER_VULNSEARCH'].get('tlsauth_cert')
+    esd = kwargs_or_config(kwargs, 'esd')
+    tlsauth_key = kwargs_or_config(kwargs, 'tlsauth_key')
+    tlsauth_cert = kwargs_or_config(kwargs, 'tlsauth_cert')
     host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not esd:

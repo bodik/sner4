@@ -222,3 +222,31 @@ class PublicVersionInfoSchema(BaseSchema):
     product = fields.String()
     version = fields.String()
     extra = fields.Dict()
+
+
+class PublicVulnsearchArgsSchema(BaseSchema):
+    """public vulnsearch list args schema"""
+
+    filter = fields.String()
+
+
+class PublicVulnsearchSchema(BaseSchema):
+    """public vulnsearch schema"""
+
+    # endpoint data
+    host_address = fields.String()
+    host_hostname = fields.String()
+    service_proto = fields.String()
+    service_port = fields.Integer()
+    via_target = fields.String()
+
+    # vulnsearch data
+    cveid = fields.String()
+    name = fields.String()
+    description = fields.String()
+    cvss = fields.Float()
+    cvss3 = fields.Float()
+    attack_vector = fields.String()
+    data = fields.String()
+    cpe = fields.Dict()
+    cpe_full = fields.String()

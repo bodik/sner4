@@ -1,0 +1,53 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Vulnsearch / List {% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	var dt_vulnsearch_list_table_options = {
+		'ajax': {'url': Flask.url_for('storage.vulnsearch_list_json_route') + window.location.search, 'method': 'POST'},
+		'columns': [
+			Sner.dt.column('id', {'visible': false}),
+			Sner.dt.column('host_id', {'visible': false}),
+			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
+			Sner.dt.column('host_hostname'),
+			Sner.dt.column('service_proto', {'visible': false}),
+			Sner.dt.column('service_port', {'visible': false}),
+			Sner.dt.column('service', {
+				'className': 'service_endpoint_dropdown',
+				'render': function(data, type, row, meta) {
+					return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+				}
+			}),
+			Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
+			Sner.dt.column('cveid'),
+			Sner.dt.column('cvss'),
+			Sner.dt.column('cvss3'),
+			Sner.dt.column('attack_vector'),
+			Sner.dt.column('cpe_full'),
+			Sner.dt.column('name'),
+		],
+		'order': [[2, 'desc']]
+	};
+	$(document).ready(function() {
+		var dt_vulnsearch_list_table = Sner.dt.init_datatable('#vulnsearch_list_table', dt_vulnsearch_list_table_options);
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Vulnsearch']) %}
+	<div class="breadcrumb-buttons pl-2">
+		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
+	</div>
+{% endcall %}
+
+<div id="vulnsearch_list_table_toolbar" class="dt_toolbar">
+	{{ cm.filter_form() }}
+</div>
+
+<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
+
+<table id="vulnsearch_list_table" class="table table-hover table-sm" width="100%"></table>
+{% endblock %}

@@ -15,6 +15,7 @@ from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
 from sner.server.storage.versioninfo import VersionInfoMapManager
+from sner.server.storage.vulnsearch import LocaldbWriter as VulnsearchLocaldbWriter
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
     JobFactory,
@@ -22,7 +23,7 @@ from tests.server.scheduler.models import (
     QueueFactory,
     TargetFactory
 )
-from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory
+from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory, VulnsearchTempFactory
 
 
 @pytest.fixture
@@ -89,6 +90,7 @@ factoryboy_register(HostFactory)
 factoryboy_register(NoteFactory)
 factoryboy_register(ServiceFactory)
 factoryboy_register(VulnFactory)
+factoryboy_register(VulnsearchTempFactory)
 
 
 @pytest.fixture
@@ -128,3 +130,12 @@ def versioninfo(versioninfo_notes):  # pylint: disable=redefined-outer-name,unus
 
     VersionInfoMapManager.rebuild()
     return versioninfo_notes
+
+
+@pytest.fixture
+def vulnsearch(vulnsearch_temp_factory):  # pylint: disable=redefined-outer-name,unused-argument
+    """prepare vulnsearch data; mostly faked, the original source comes from external cvsearch"""
+
+    vulnsearch_temp = vulnsearch_temp_factory.create()
+    VulnsearchLocaldbWriter().refresh_view()
+    yield vulnsearch_temp

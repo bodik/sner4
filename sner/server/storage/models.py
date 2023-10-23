@@ -177,6 +177,7 @@ class VersionInfoTemp(StorageModelBase):
     service_proto = db.Column(db.String(250))
     service_port = db.Column(db.Integer)
     via_target = db.Column(db.String(250))
+
     product = db.Column(db.String(250))
     version = db.Column(db.String(250))
     extra = db.Column(db.JSON)
@@ -186,3 +187,32 @@ class VersionInfo(StorageModelBase):
     """version info (materialized view) model"""
 
     __table__ = create_materialized_view('version_info', select(VersionInfoTemp), db.metadata)
+
+
+class VulnsearchTemp(StorageModelBase):
+    """local vulnsearch model, temporary table"""
+
+    id = db.Column(db.String(32), primary_key=True)
+    host_id = db.Column(db.Integer, nullable=False)
+    service_id = db.Column(db.Integer)
+    host_address = db.Column(postgresql.INET, nullable=False)
+    host_hostname = db.Column(db.String(256))
+    service_proto = db.Column(db.String(250))
+    service_port = db.Column(db.Integer)
+    via_target = db.Column(db.String(250))
+
+    cveid = db.Column(db.String(250))
+    name = db.Column(db.Text)
+    description = db.Column(db.Text)
+    cvss = db.Column(db.Float)
+    cvss3 = db.Column(db.Float)
+    attack_vector = db.Column(db.String(250))
+    data = db.Column(db.JSON)
+    cpe = db.Column(db.JSON)
+    cpe_full = db.Column(db.String(1000))
+
+
+class Vulnsearch(StorageModelBase):
+    """version info (materialized view) model"""
+
+    __table__ = create_materialized_view('vulnsearch', select(VulnsearchTemp), db.metadata)

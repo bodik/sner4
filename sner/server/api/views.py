@@ -12,27 +12,13 @@ from flask_login import current_user
 from flask_smorest import Blueprint
 from sqlalchemy import or_
 
+import sner.server.api.schema as api_schema
 from sner.server.api.core import get_metrics
-from sner.server.api.schema import (
-    JobAssignArgsSchema,
-    JobAssignmentSchema,
-    JobOutputSchema,
-    PublicHostArgsSchema,
-    PublicHostSchema,
-    PublicNotelistArgsSchema,
-    PublicNotelistSchema,
-    PublicRangeArgsSchema,
-    PublicRangeSchema,
-    PublicServicelistArgsSchema,
-    PublicServicelistSchema,
-    PublicVersionInfoArgsSchema,
-    PublicVersionInfoSchema
-)
 from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job
-from sner.server.storage.models import Host, Note, Service, VersionInfo
+from sner.server.storage.models import Host, Note, Service, VersionInfo, Vulnsearch
 from sner.server.storage.version_parser import is_in_version_range, parse as versionspec_parse
 from sner.server.utils import filter_query
 
@@ -42,8 +28,8 @@ blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 @blueprint.route('/v2/scheduler/job/assign', methods=['POST'])
 @apikey_required('agent')
-@blueprint.arguments(JobAssignArgsSchema)
-@blueprint.response(HTTPStatus.OK, JobAssignmentSchema)
+@blueprint.arguments(api_schema.JobAssignArgsSchema)
+@blueprint.response(HTTPStatus.OK, api_schema.JobAssignmentSchema)
 def v2_scheduler_job_assign_route(args):
     """assign job for agent"""
 
@@ -61,7 +47,7 @@ def v2_scheduler_job_assign_route(args):
 
 @blueprint.route('/v2/scheduler/job/output', methods=['POST'])
 @apikey_required('agent')
-@blueprint.arguments(JobOutputSchema)
+@blueprint.arguments(api_schema.JobOutputSchema)
 def v2_scheduler_job_output_route(args):
     """receive output from assigned job"""
 
@@ -96,8 +82,8 @@ def v2_stats_prometheus_route():
 
 @blueprint.route('/v2/public/storage/host')
 @apikey_required('user')
-@blueprint.arguments(PublicHostArgsSchema, location='query')
-@blueprint.response(HTTPStatus.OK, PublicHostSchema)
+@blueprint.arguments(api_schema.PublicHostArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, api_schema.PublicHostSchema)
 def v2_public_storage_host_route(args):
     """host data by address"""
 
@@ -126,8 +112,8 @@ def v2_public_storage_host_route(args):
 
 @blueprint.route('/v2/public/storage/range')
 @apikey_required('user')
-@blueprint.arguments(PublicRangeArgsSchema, location='query')
-@blueprint.response(HTTPStatus.OK, PublicRangeSchema(many=True))
+@blueprint.arguments(api_schema.PublicRangeArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, api_schema.PublicRangeSchema(many=True))
 def v2_public_storage_range_route(args):
     """list of hosts by cidr with simplified data"""
 
@@ -142,8 +128,8 @@ def v2_public_storage_range_route(args):
 
 @blueprint.route('/v2/public/storage/servicelist')
 @apikey_required('user')
-@blueprint.arguments(PublicServicelistArgsSchema, location='query')
-@blueprint.response(HTTPStatus.OK, PublicServicelistSchema(many=True))
+@blueprint.arguments(api_schema.PublicServicelistArgsSchema, location='query')
+@blueprint.response(HTTPStatus.OK, api_schema.PublicServicelistSchema(many=True))
 def v2_public_storage_servicelist_route(args):
     """filtered servicelist (see sner.server.sqlafilter for syntax)"""
 
@@ -169,8 +155,8 @@ def v2_public_storage_servicelist_route(args):
 
 @blueprint.route("/v2/public/storage/notelist")
 @apikey_required("user")
-@blueprint.arguments(PublicNotelistArgsSchema, location="query")
-@blueprint.response(HTTPStatus.OK, PublicNotelistSchema(many=True))
+@blueprint.arguments(api_schema.PublicNotelistArgsSchema, location="query")
+@blueprint.response(HTTPStatus.OK, api_schema.PublicNotelistSchema(many=True))
 def v2_public_storage_notelist_route(args):
     """filtered notelist (see sner.server.sqlafilter for syntax)"""
 
@@ -209,8 +195,8 @@ def v2_public_storage_notelist_route(args):
 
 @blueprint.route("/v2/public/storage/versioninfo", methods=["POST"])
 @apikey_required("user")
-@blueprint.arguments(PublicVersionInfoArgsSchema)
-@blueprint.response(HTTPStatus.OK, PublicVersionInfoSchema(many=True))
+@blueprint.arguments(api_schema.PublicVersionInfoArgsSchema)
+@blueprint.response(HTTPStatus.OK, api_schema.PublicVersionInfoSchema(many=True))
 def v2_public_storage_versioninfo_route(args):
     """simple version search"""
 
@@ -237,3 +223,23 @@ def v2_public_storage_versioninfo_route(args):
 
     current_app.logger.info(f"api.public storage versioninfo {args}")
     return data
+
+
+@blueprint.route("/v2/public/storage/vulnsearch", methods=["POST"])
+@apikey_required("user")
+@blueprint.arguments(api_schema.PublicVulnsearchArgsSchema)
+@blueprint.response(HTTPStatus.OK, api_schema.PublicVulnsearchSchema(many=True))
+def v2_public_storage_vulnsearch_route(args):
+    """simple vulnsearch search (see sner.server.sqlafilter for syntax)"""
+
+    if not current_user.api_networks:
+        return None
+
+    restrict = [Vulnsearch.host_address.op("<<=")(net) for net in current_user.api_networks]
+    query = Vulnsearch.query.filter(or_(*restrict))
+
+    if not (query := filter_query(query, args.get("filter"))):
+        return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
+
+    current_app.logger.info(f"api.public storage vulnsearch {args}")
+    return query.all()

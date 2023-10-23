@@ -3,9 +3,10 @@
 storage test models
 """
 
-from factory import SubFactory
+from factory import LazyAttribute, SubFactory
 
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln
+from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, VulnsearchTemp
+from sner.server.storage.vulnsearch import vulndata_docid
 from tests import BaseModelFactory
 
 
@@ -65,3 +66,29 @@ class NoteFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     xtype = 'testnote.xtype'
     data = 'test note data'
     comment = 'some test note comment'
+
+
+class VulnsearchTempFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test vulnsearchtemp model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test vulnsearchtem model factory"""
+        model = VulnsearchTemp
+
+    id = LazyAttribute(lambda o: vulndata_docid(o.host_address, o.service_proto, o.service_port, o.cveid))
+    host_id = 400
+    service_id = 401
+    host_address = '127.2.0.1'
+    host_hostname = 'dummy.vulnsearch.test'
+    service_proto = 'tcp'
+    service_port = 11
+    via_target = 'virtualhost.vulnsearch.test'
+
+    cveid = 'CVE-1999-0000'
+    name = 'dummy vulnsearch name'
+    description = 'dummy description'
+    cvss = 3.3
+    cvss3 = 3.4
+    attack_vector = 'NETWORK'
+    data = {'dummy': 'data'}
+    cpe = {'full': 'cpe:/a:apache:http_server:2.4.38'}
+    cpe_full = 'cpe:/a:apache:http_server:2.4.38'
