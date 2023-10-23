@@ -16,7 +16,7 @@ from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service, VersionInfoTemp
-from sner.server.storage.versioninfo import VersionInfoMapManager
+from sner.server.storage.versioninfo import VersionInfoManager
 from sner.server.storage.vulnsearch import VulnsearchManager
 from sner.server.storage.syncstorage import sync_storage
 from sner.server.utils import filter_query
@@ -71,7 +71,7 @@ def storage_flush():
     db.session.query(Host).delete()
     db.session.commit()
     db.session.query(VersionInfoTemp).delete()
-    VersionInfoMapManager.rebuild()
+    VersionInfoManager.rebuild()
 
 
 @command.command(name='vuln-report', help='generate vulnerabilities report')
@@ -197,9 +197,9 @@ def storage_sync_storage(**kwargs):
     sync_storage(esd, tlsauth_key, tlsauth_cert, host_filter)
 
 
-@command.command(name='rebuild-versioninfo-map', help='rebuild versioninfo map')
+@command.command(name='rebuild-versioninfo', help='rebuild versioninfo map')
 @with_appcontext
-def storage_rebuild_versioninfo_map():
-    """rebuild versioninfo map command"""
+def storage_rebuild_versioninfo():
+    """rebuild versioninfo command"""
 
-    VersionInfoMapManager.rebuild()
+    VersionInfoManager.rebuild()

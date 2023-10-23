@@ -14,7 +14,7 @@ from sner.server.app import create_app
 from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from sner.server.storage.versioninfo import VersionInfoMapManager
+from sner.server.storage.versioninfo import VersionInfoManager
 from sner.server.storage.vulnsearch import LocaldbWriter as VulnsearchLocaldbWriter
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
@@ -128,7 +128,7 @@ def versioninfo_notes(host, service_factory, note_factory):
 def versioninfo(versioninfo_notes):  # pylint: disable=redefined-outer-name,unused-argument
     """prepare versioninfo map snap"""
 
-    VersionInfoMapManager.rebuild()
+    VersionInfoManager.rebuild()
     return versioninfo_notes
 
 

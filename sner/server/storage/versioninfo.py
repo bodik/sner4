@@ -78,7 +78,7 @@ class RawMap:
         return len(self.data)
 
 
-class VersionInfoMapManager:
+class VersionInfoManager:
     """version info map manager"""
 
     @staticmethod

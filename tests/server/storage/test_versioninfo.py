@@ -4,21 +4,42 @@ storage.versioninfo_map functions tests
 """
 
 from sner.server.storage.models import VersionInfo
-from sner.server.storage.versioninfo import ExtractedVersion, RawMap, VersionInfoMapManager
+from sner.server.storage.versioninfo import ExtractedVersion, RawMap, VersionInfoManager
 
 
-def test_vinfomapmgr_rebuild(app, versioninfo_notes):  # pylint: disable=unused-argument
+def test_rawmap_aggregation():
+    """test rawmap aggregation feature"""
+
+    item = {
+        'host_id': 1,
+        'host_address': '127.0.0.1',
+        'host_hostname': 'localhost.localdomain',
+        'service_proto': 'tcp',
+        'service_port': 1,
+        'via_target': 'localhostx.localdomain',
+        'product': 'dummy',
+        'version': '0.1',
+    }
+
+    raw_map = RawMap()
+    raw_map.add(**item, extra={'extra1': 'val1'})
+    raw_map.add(**item, extra={'extra2': 'val2'})
+
+    assert raw_map.values()[0]['extra'] == {'extra1': 'val1', 'extra2': 'val2'}
+
+
+def test_versioninfomanager_rebuild(app, versioninfo_notes):  # pylint: disable=unused-argument
     """test versioninfo map rebuild"""
 
-    VersionInfoMapManager.rebuild()
+    VersionInfoManager.rebuild()
 
     assert VersionInfo.query.count() == 6
     assert VersionInfo.query.filter(VersionInfo.product == "apache httpd").one().version == "2.2.21"
     assert VersionInfo.query.filter(VersionInfo.product == "mod_ssl").one().version == "2.2.21"
 
 
-def test_vinfomapmgr_extract_version():
-    """test VersionInfoMapManager.extract_version"""
+def test_versioninfomanager_extract_version():
+    """test VersionInfoManager.extract_version"""
 
     test_data = [
         # nmap.banner_dict
@@ -44,35 +65,14 @@ def test_vinfomapmgr_extract_version():
         {"in": "mkdocs-1.1.2, mkdocs-material-6.1.6", "out": ("mkdocs", "1.1.2")},
     ]
 
-    assert VersionInfoMapManager.extract_version('dummy') is None
+    assert VersionInfoManager.extract_version('dummy') is None
 
     for item in test_data:
-        assert VersionInfoMapManager.extract_version(item["in"]) == ExtractedVersion(*item["out"])
+        assert VersionInfoManager.extract_version(item["in"]) == ExtractedVersion(*item["out"])
 
 
-def test_rawmap_aggregation():
-    """test rawmap aggregation feature"""
-
-    item = {
-        'host_id': 1,
-        'host_address': '127.0.0.1',
-        'host_hostname': 'localhost.localdomain',
-        'service_proto': 'tcp',
-        'service_port': 1,
-        'via_target': 'localhostx.localdomain',
-        'product': 'dummy',
-        'version': '0.1',
-    }
-
-    raw_map = RawMap()
-    raw_map.add(**item, extra={'extra1': 'val1'})
-    raw_map.add(**item, extra={'extra2': 'val2'})
-
-    assert raw_map.values()[0]['extra'] == {'extra1': 'val1', 'extra2': 'val2'}
-
-
-def test_vinfomapmgr_notequeryiterator(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager note query iterator"""
+def test_versioninfomanager_notequeryiterator(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
+    """test VersionInfoManager note query iterator"""
 
     note_factory.create(
         host=host,
@@ -88,18 +88,18 @@ def test_vinfomapmgr_notequeryiterator(app, host, service_factory, note_factory)
         data='invalid_dummy'
     )
 
-    assert len(list(VersionInfoMapManager._jsondata_iterator(VersionInfoMapManager._base_note_query()))) == 1  # pylint: disable=protected-access
+    assert len(list(VersionInfoManager._jsondata_iterator(VersionInfoManager._base_note_query()))) == 1  # pylint: disable=protected-access
 
 
-def test_vinfomapmgr_collect_nmap_bannerdict(app, versioninfo_notes):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager.collect_nmap_bannerdict"""
+def test_versioninfomanager_collect_nmap_bannerdict(app, versioninfo_notes):  # pylint: disable=unused-argument
+    """test VersionInfoManager.collect_nmap_bannerdict"""
 
-    raw_map = VersionInfoMapManager.collect_nmap_bannerdict(RawMap())
+    raw_map = VersionInfoManager.collect_nmap_bannerdict(RawMap())
     assert raw_map.len() == 6
 
 
-def test_vinfomapmgr_collect_nmap_httpgenerator(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager.collect_nmap_httpgenerator"""
+def test_versioninfomanager_collect_nmap_httpgenerator(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
+    """test VersionInfoManager.collect_nmap_httpgenerator"""
 
     note_factory.create(
         host=host,
@@ -114,12 +114,12 @@ def test_vinfomapmgr_collect_nmap_httpgenerator(app, host, service_factory, note
         data='{"id": "http-generator", "output": "yproduct", "elements": {}}'
     )
 
-    raw_map = VersionInfoMapManager.collect_nmap_httpgenerator(RawMap())
+    raw_map = VersionInfoManager.collect_nmap_httpgenerator(RawMap())
     assert raw_map.len() == 1
 
 
-def test_vinfomapmgr_collect_nmap_mysqlinfo(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager.collect_nmap_mysqlinfo"""
+def test_versioninfomanager_collect_nmap_mysqlinfo(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
+    """test VersionInfoManager.collect_nmap_mysqlinfo"""
 
     note_factory.create(
         host=host,
@@ -128,12 +128,12 @@ def test_vinfomapmgr_collect_nmap_mysqlinfo(app, host, service_factory, note_fac
         data='{"id": "mysql-info", "elements": {"Version": "5.5.5-10.3.38-MariaDB-1:10.3.38+maria~ubu2004-log"}}'
     )
 
-    raw_map = VersionInfoMapManager.collect_nmap_mysqlinfo(RawMap())
+    raw_map = VersionInfoManager.collect_nmap_mysqlinfo(RawMap())
     assert raw_map.len() == 1
 
 
-def test_vinfomapmgr_collect_nmap_rdpntlminfo(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager.collect_nmap_rdpntlminfo"""
+def test_versioninfomanager_collect_nmap_rdpntlminfo(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
+    """test VersionInfoManager.collect_nmap_rdpntlminfo"""
 
     note_factory.create(
         host=host,
@@ -142,12 +142,12 @@ def test_vinfomapmgr_collect_nmap_rdpntlminfo(app, host, service_factory, note_f
         data='{"id": "rdp-ntlm-info", "elements": {"Product_Version": "10.0.14393"}}'
     )
 
-    raw_map = VersionInfoMapManager.collect_nmap_rdpntlminfo(RawMap())
+    raw_map = VersionInfoManager.collect_nmap_rdpntlminfo(RawMap())
     assert raw_map.len() == 1
 
 
-def test_vinfomapmgr_collect_cpes(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
-    """test VersionInfoMapManager.collect_cpes"""
+def test_versioninfomanager_collect_cpes(app, host, service_factory, note_factory):  # pylint: disable=unused-argument
+    """test VersionInfoManager.collect_cpes"""
 
     note_factory.create(
         host=host,
@@ -156,5 +156,5 @@ def test_vinfomapmgr_collect_cpes(app, host, service_factory, note_factory):  # 
         data='["cpe:/a:openbsd:openssh:8.4p1", "cpe:/o:linux:linux_kernel", "invalid"]'
     )
 
-    raw_map = VersionInfoMapManager.collect_cpes(RawMap())
+    raw_map = VersionInfoManager.collect_cpes(RawMap())
     assert raw_map.len() == 1

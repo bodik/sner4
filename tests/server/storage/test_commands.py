@@ -159,8 +159,8 @@ def test_syncstorage_command(runner):
     update_alias_mock.assert_called()
 
 
-def test_rebuildversioninfomap_command(runner):
+def test_rebuild_versioninfo_command(runner):
     """tests rebuild versioninfo command"""
 
-    result = runner.invoke(command, ['rebuild-versioninfo-map'])
+    result = runner.invoke(command, ['rebuild-versioninfo'])
     assert result.exit_code == 0
