@@ -119,19 +119,29 @@ def test_service_list_command(runner, service):
     assert result.exit_code == 1
 
 
-def test_syncvulnsearch_command(runner):
+def test_rebuild_vulnsearch_elastic_command(runner):
     """tests param/config handling"""
 
-    result = runner.invoke(command, ['sync-vulnsearch'])
+    result = runner.invoke(command, ['rebuild-vulnsearch-elastic'])
     assert result.exit_code == 1
 
     update_alias_mock = Mock()
     patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
     with patch_update:
-        result = runner.invoke(command, ['sync-vulnsearch', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
+        result = runner.invoke(command, ['rebuild-vulnsearch-elastic', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
     update_alias_mock.assert_called_once()
+
+
+def test_rebuild_vulnsearch_localdb_command(runner):
+    """tests rebuild vulnsearch localdb command"""
+
+    result = runner.invoke(command, ['rebuild-vulnsearch-localdb'])
+    assert result.exit_code == 1
+
+    result = runner.invoke(command, ['rebuild-vulnsearch-localdb', '--cvesearch', 'http://dummy:80'])
+    assert result.exit_code == 0
 
 
 def test_syncstorage_command(runner):

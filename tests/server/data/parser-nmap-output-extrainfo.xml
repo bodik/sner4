@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.80 scan initiated Tue Aug 22 20:55:20 2023 as: nmap -sV -p80 -oX nmap-extrainfo vuzt.cesnet.cz -->
+<nmaprun scanner="nmap" args="nmap -sV -p80 -oX nmap-extrainfo vuzt.cesnet.cz" start="1692730520" startstr="Tue Aug 22 20:55:20 2023" version="7.80" xmloutputversion="1.04">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="80"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1692730520" endtime="1692730526"><status state="up" reason="syn-ack" reason_ttl="124"/>
+<address addr="78.128.216.160" addrtype="ipv4"/>
+<hostnames>
+<hostname name="vuzt.cesnet.cz" type="user"/>
+<hostname name="vuzt.cesnet.cz" type="PTR"/>
+</hostnames>
+<ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="124"/><service name="http" product="Apache httpd" version="2.2.21" extrainfo="(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1" method="probed" conf="10"><cpe>cpe:/a:apache:http_server:2.2.21</cpe></service></port>
+</ports>
+<times srtt="4928" rttvar="3757" to="100000"/>
+</host>
+<runstats><finished time="1692730526" timestr="Tue Aug 22 20:55:26 2023" elapsed="6.47" summary="Nmap done at Tue Aug 22 20:55:26 2023; 1 IP address (1 host up) scanned in 6.47 seconds" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

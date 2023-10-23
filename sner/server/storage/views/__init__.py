@@ -13,4 +13,5 @@ import sner.server.storage.views.quickjump  # noqa: E402  pylint: disable=wrong-
 import sner.server.storage.views.note  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.storage.views.service  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.storage.views.versioninfo  # noqa: E402  pylint: disable=wrong-import-position
+import sner.server.storage.views.vulnsearch  # noqa: E402  pylint: disable=wrong-import-position
 import sner.server.storage.views.vuln  # noqa: E402,F401  pylint: disable=wrong-import-position

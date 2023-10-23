@@ -42,7 +42,7 @@ from sner.server.storage.commands import command as storage_command
 # shell context helpers
 from sner.server.auth.models import User, WebauthnCredential
 from sner.server.scheduler.models import Job, Heatmap, Queue, Readynet, Target
-from sner.server.storage.models import Host, Note, Service, Vuln
+from sner.server.storage.models import Host, Note, Service, VersionInfo, Vuln, Vulnsearch
 
 
 DEFAULT_CONFIG = {
@@ -66,7 +66,8 @@ DEFAULT_CONFIG = {
     'SNER_TAGS_ANNOTATE': ['sslhell'],
     'SNER_TRIM_REPORT_CELLS': 65000,
     'SNER_TRIM_NOTE_LIST_DATA': 4096,
-    'SNER_SYNCVULNSEARCH_ELASTIC_BUFLEN': 1000,
+    'SNER_VULNSEARCH_NAMELEN': 100,
+    'SNER_VULNSEARCH_REBUILD_BUFLEN': 1000,
     'SNER_SYNCSTORAGE_ELASTIC_BUFLEN': 100,
     'SNER_VULN_GROUP_IGNORE_TAG_PREFIX': "i:",
     'SNER_AUTOCOMPLETE_LIMIT': 10,
@@ -268,10 +269,25 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
     @app.shell_context_processor
     def make_shell_context():
         return {
-            'app': app, 'db': db, 'func': func,
-            'Heatmap': Heatmap, 'Job': Job, 'Queue': Queue, 'Readynet': Readynet, 'Target': Target,
-            'Host': Host, 'Note': Note, 'Service': Service, 'Vuln': Vuln,
-            'User': User, 'WebauthnCredential': WebauthnCredential
+            'app': app,
+            'db': db,
+            'func': func,
+
+            'Heatmap': Heatmap,
+            'Job': Job,
+            'Queue': Queue,
+            'Readynet': Readynet,
+            'Target': Target,
+
+            'Host': Host,
+            'Note': Note,
+            'Service': Service,
+            'VersionInfo': VersionInfo,
+            'Vuln': Vuln,
+            'Vulnsearch': Vulnsearch,
+
+            'User': User,
+            'WebauthnCredential': WebauthnCredential,
         }
 
     @app.route('/')
