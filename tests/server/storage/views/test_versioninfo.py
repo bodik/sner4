@@ -8,6 +8,8 @@ from http import HTTPStatus
 
 from flask import url_for
 
+from sner.server.storage.models import VersionInfo
+
 
 def test_versioninfo_list_route(cl_operator):
     """versioninfo list route test"""
@@ -44,3 +46,15 @@ def test_versioninfo_list_json_route(cl_operator, versioninfo):
 
     response = cl_operator.post(url_for('storage.versioninfo_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_versioninfo_rebuild_route(cl_operator, versioninfo_notes):
+    """test versioninfo rebuild route"""
+
+    assert VersionInfo.query.count() == 0
+
+    form = cl_operator.get(url_for('storage.versioninfo_rebuild_route')).form
+    response = form.submit()
+    assert response.status_code == HTTPStatus.FOUND
+
+    assert VersionInfo.query.count() > 0

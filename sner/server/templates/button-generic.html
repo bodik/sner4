@@ -2,5 +2,5 @@
 {% import "bootstrap_wtf.html" as bwtf %}
 <form class="form-inline" style="display: inline;" {% if form_url %}action="{{ form_url }}"{% endif %} method="post">
 	{{ bwtf.bootstrap_form(form) }}
-	<button class="btn btn-outline-secondary" type="submit">{{ button_caption }}</button>
+	<button class="btn {{ button_class | default('btn-outline-secondary') }}" type="submit">{{ button_caption }}</button>
 </form>

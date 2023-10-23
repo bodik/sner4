@@ -7,14 +7,16 @@ from http import HTTPStatus
 
 import json
 from datatables import ColumnDT, DataTables
-from flask import jsonify, render_template, request, Response
+from flask import jsonify, redirect, render_template, request, Response, url_for
 from sqlalchemy import func
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
+from sner.server.forms import ButtonForm
 from sner.server.storage.forms import VersionInfoQueryForm
 from sner.server.storage.models import VersionInfo
 from sner.server.storage.version_parser import is_in_version_range, parse as versionspec_parse
+from sner.server.storage.versioninfo import VersionInfoManager
 from sner.server.storage.views import blueprint
 from sner.server.utils import filter_query, SnerJSONEncoder
 
@@ -26,7 +28,8 @@ def versioninfo_list_route():
 
     return render_template(
         'storage/versioninfo/list.html',
-        form=VersionInfoQueryForm(request.values)
+        form=VersionInfoQueryForm(request.values),
+        button_form=ButtonForm()
     )
 
 
@@ -66,3 +69,16 @@ def versioninfo_list_json_route():
         versioninfos["recordsFiltered"] = len(versioninfos["data"])
 
     return Response(json.dumps(versioninfos, cls=SnerJSONEncoder), mimetype='application/json')
+
+
+@blueprint.route('/versioninfo/rebuild', methods=['GET', 'POST'])
+@session_required('operator')
+def versioninfo_rebuild_route():
+    """rebuild versioninfo route"""
+
+    form = ButtonForm()
+    if form.validate_on_submit():
+        VersionInfoManager.rebuild()
+        return redirect(url_for('storage.versioninfo_list_route'))
+
+    return render_template('button-generic.html', form=form, button_caption='Rebuild')

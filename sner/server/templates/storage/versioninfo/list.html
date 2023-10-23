@@ -42,6 +42,7 @@
 {% block content %}
 {% call cm.heading(['Versioninfo']) %}
 	<div class="breadcrumb-buttons pl-2">
+		{% with form=button_form, form_url=url_for('storage.versioninfo_rebuild_route'), button_caption='Rebuild', button_class='btn-outline-primary' %}{% include 'button-generic.html' %}{% endwith %}
 		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
