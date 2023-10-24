@@ -71,3 +71,7 @@ table.auth-user-profile th {
 	text-align: right;
 	vertical-align: middle;
 }
+
+.break-spaces {
+	white-space: break-spaces;
+}

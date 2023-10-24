@@ -102,7 +102,7 @@ $(document).ready(function() {
 	{% if vuln.xtype and vuln.xtype.startswith('nuclei.') %}
 		<pre>{{ vuln.data | json_indent }}</pre>
 	{% else %}
-		<pre>{{ vuln.data }}</pre>
+		<pre class="break-spaces">{{ vuln.data }}</pre>
 	{% endif %}
 </div>
 {% endblock %}

@@ -97,7 +97,7 @@ def test_vuln_view_route(cl_operator, vuln):
 
     response = cl_operator.get(url_for('storage.vuln_view_route', vuln_id=vuln.id))
     assert response.status_code == HTTPStatus.OK
-    assert f'<pre>{vuln.data}</pre>' in response
+    assert f'>{vuln.data}</pre>' in response
 
 
 def test_vuln_delete_multiid_route(cl_operator, vuln):
