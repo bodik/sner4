@@ -175,32 +175,6 @@ class PublicNotelistSchema(BaseSchema):
     import_time = fields.DateTime()
 
 
-class ElasticHostSchema(PublicHostSchema):
-    """elastic storage_host schema"""
-
-    host_address = fields.String(required=True)
-    host_hostname = fields.String()
-    services_count = fields.Integer()
-    vulns_count = fields.Integer()
-    notes_count = fields.Integer()
-
-
-class ElasticServiceSchema(PublicServiceSchema):
-    """elastic storage_service schema"""
-
-    host_address = fields.String(required=True)
-    host_hostname = fields.String()
-
-
-class ElasticNoteSchema(PublicNoteSchema):
-    """elastic storage_note schema"""
-
-    host_address = fields.String(required=True)
-    host_hostname = fields.String()
-    service_proto = fields.String()
-    service_port = fields.Integer()
-
-
 class PublicVersionInfoArgsSchema(BaseSchema):
     """public versioninfo args schema"""
 

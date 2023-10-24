@@ -147,13 +147,13 @@ def test_rebuild_vulnsearch_localdb_command(runner):
 def test_syncstorage_command(runner):
     """tests param/config handling"""
 
-    result = runner.invoke(command, ['sync-storage'])
+    result = runner.invoke(command, ['rebuild-elasticstorage'])
     assert result.exit_code == 1
 
     update_alias_mock = Mock()
     patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
     with patch_update:
-        result = runner.invoke(command, ['sync-storage', '--esd', 'http://dummy:80'])
+        result = runner.invoke(command, ['rebuild-elasticstorage', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
     update_alias_mock.assert_called()
