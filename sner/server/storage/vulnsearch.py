@@ -12,12 +12,12 @@ from http import HTTPStatus
 import requests
 from cpe import CPE
 from flask import current_app
-from sqlalchemy import func
+from sqlalchemy import func, inspect
 from sqlalchemy.dialects.postgresql import ARRAY, CIDR, insert as pg_insert
 
 from sner.server.extensions import db
 from sner.server.storage.elastic import BulkIndexer
-from sner.server.storage.models import Host, Note, VulnsearchTemp
+from sner.server.storage.models import Host, Note, Vulnsearch, VulnsearchTemp
 from sner.server.materialized_views import refresh_materialized_view
 from sner.server.utils import windowed_query
 
@@ -36,14 +36,10 @@ def get_attack_vector(cve):
     return None
 
 
-def cpe_notes(host_filter=None):
+def cpe_notes():
     """storage data cpe notes iterator"""
 
     query = Note.query.filter(Note.xtype == 'cpe').outerjoin(Host)
-    if host_filter:
-        host_filter_expr = Host.address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR)))) if host_filter else None
-        query = query.filter(host_filter_expr)
-
     for note in windowed_query(query, Note.id):
         for icpe in json.loads(note.data):
             try:
@@ -171,27 +167,32 @@ class VulnsearchManager:
         current_app.logger.warning('cvesearch call failed')
         return []
 
-    def rebuild_elastic(self, esd_url, host_filter=None):
+    def rebuild_elastic(self, elastic_url, host_filter=None):
         """
-        synchronize vulnsearch esd index with cvesearch data for all cpe notes in storage
+        rebuilds vulnsearch elastic index from localdb
         """
 
         alias = 'vulnsearch'
         index = f'{alias}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
         esd_indexer = (
-            BulkIndexer(esd_url, self.tlsauth_key, self.tlsauth_cert, self.rebuild_buflen)
-            if esd_url
+            BulkIndexer(elastic_url, self.tlsauth_key, self.tlsauth_cert, self.rebuild_buflen)
+            if elastic_url
             else None
         )
 
-        for note, icpe, parsed_cpe in cpe_notes(host_filter):
-            for cve in self.cvefor(icpe):
-                data_id, data = vulndata(note, parsed_cpe, cve, self.namelen)
-                esd_indexer.index(index, data_id, data)
+        query = Vulnsearch.query
+        if host_filter:
+            host_filter_expr = Vulnsearch.host_address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR)))) if host_filter else None
+            query = query.filter(host_filter_expr)
+
+        column_attrs = inspect(Vulnsearch).mapper.column_attrs
+        for data in windowed_query(query, Vulnsearch.id):
+            data = {c.key: getattr(data, c.key) for c in column_attrs}
+            data_id = data.pop('id')
+            esd_indexer.index(index, data_id, data)
 
         esd_indexer.flush()
         esd_indexer.update_alias(alias, index)
-        current_app.logger.debug(f'cvefor cache: {self.cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect
 
     def rebuild_localdb(self):
         """build local vulnsearch tables"""
