@@ -139,8 +139,8 @@ class VersionInfoManager:
         if raw_map.len():
             db.session.connection().execute(pg_insert(VersionInfoTemp), raw_map.values())
             db.session.commit()
-            refresh_materialized_view(db.session, 'version_info')
-            db.session.commit()
+        refresh_materialized_view(db.session, 'version_info')
+        db.session.commit()
 
     @classmethod
     def collect_nmap_bannerdict(cls, raw_map):

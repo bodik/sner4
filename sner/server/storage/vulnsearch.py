@@ -180,6 +180,8 @@ class VulnsearchManager:
             else None
         )
 
+        esd_indexer.initialize(index)
+
         query = Vulnsearch.query
         if host_filter:
             host_filter_expr = Vulnsearch.host_address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR)))) if host_filter else None

@@ -46,6 +46,12 @@ class BulkIndexer:
             esclient_options['ssl_context'] = ctx
         self.esclient = Elasticsearch([esd_url], request_timeout=self.TIMEOUT, **esclient_options)
 
+    def initialize(self, index):  # pragma: nocover  ; mocked
+        """initialize empty index"""
+
+        if not self.esclient.indices.exists(index=index):
+            self.esclient.indices.create(index=index)
+
     def index(self, index, doc_id, doc):
         """index item in buffered way"""
 

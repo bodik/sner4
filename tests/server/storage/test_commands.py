@@ -126,8 +126,10 @@ def test_rebuild_vulnsearch_elastic_command(runner):
     assert result.exit_code == 1
 
     update_alias_mock = Mock()
-    patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
-    with patch_update:
+    with (
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'initialize', Mock()),
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
+    ):
         result = runner.invoke(command, ['rebuild-vulnsearch-elastic', '--cvesearch', 'http://dummy:80', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0
@@ -144,15 +146,17 @@ def test_rebuild_vulnsearch_localdb_command(runner):
     assert result.exit_code == 0
 
 
-def test_syncstorage_command(runner):
+def test_rebuild_elasticstorage_command(runner):
     """tests param/config handling"""
 
     result = runner.invoke(command, ['rebuild-elasticstorage'])
     assert result.exit_code == 1
 
     update_alias_mock = Mock()
-    patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
-    with patch_update:
+    with (
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'initialize', Mock()),
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
+    ):
         result = runner.invoke(command, ['rebuild-elasticstorage', '--esd', 'http://dummy:80'])
 
     assert result.exit_code == 0

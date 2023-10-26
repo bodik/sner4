@@ -38,9 +38,11 @@ def test_rebuild_elastic(app, tmpworkdir, vulnsearch):  # pylint: disable=unused
     cert, key = make_ssl_devcert('testcert')
     current_app.config['SNER_VULNSEARCH_REBUILD_BUFLEN'] = 0
 
-    patch_esbulk = patch.object(sner.server.storage.elastic, 'es_bulk', es_bulk_mock)
-    patch_update = patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
-    with patch_esbulk, patch_update:
+    with (
+        patch.object(sner.server.storage.elastic, 'es_bulk', es_bulk_mock),
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'initialize', Mock()),
+        patch.object(sner.server.storage.elastic.BulkIndexer, 'update_alias', update_alias_mock)
+    ):
         VulnsearchManager('https://dummy:80', key, cert).rebuild_elastic('https://dummy:80')
 
     assert es_bulk_mock.call_count == 2
