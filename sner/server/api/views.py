@@ -80,9 +80,9 @@ def v2_stats_prometheus_route():
     return Response(get_metrics(), mimetype='text/plain')
 
 
-@blueprint.route('/v2/public/storage/host')
+@blueprint.route('/v2/public/storage/host', methods=['POST'])
 @apikey_required('user')
-@blueprint.arguments(api_schema.PublicHostArgsSchema, location='query')
+@blueprint.arguments(api_schema.PublicHostArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicHostSchema)
 def v2_public_storage_host_route(args):
     """host data by address"""
@@ -110,9 +110,9 @@ def v2_public_storage_host_route(args):
     return host_data
 
 
-@blueprint.route('/v2/public/storage/range')
+@blueprint.route('/v2/public/storage/range', methods=['POST'])
 @apikey_required('user')
-@blueprint.arguments(api_schema.PublicRangeArgsSchema, location='query')
+@blueprint.arguments(api_schema.PublicRangeArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicRangeSchema(many=True))
 def v2_public_storage_range_route(args):
     """list of hosts by cidr with simplified data"""
@@ -126,9 +126,9 @@ def v2_public_storage_range_route(args):
     return query.all()
 
 
-@blueprint.route('/v2/public/storage/servicelist')
+@blueprint.route('/v2/public/storage/servicelist', methods=['POST'])
 @apikey_required('user')
-@blueprint.arguments(api_schema.PublicServicelistArgsSchema, location='query')
+@blueprint.arguments(api_schema.PublicServicelistArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicServicelistSchema(many=True))
 def v2_public_storage_servicelist_route(args):
     """filtered servicelist (see sner.server.sqlafilter for syntax)"""
@@ -153,9 +153,9 @@ def v2_public_storage_servicelist_route(args):
     return query.all()
 
 
-@blueprint.route("/v2/public/storage/notelist")
+@blueprint.route("/v2/public/storage/notelist", methods=['POST'])
 @apikey_required("user")
-@blueprint.arguments(api_schema.PublicNotelistArgsSchema, location="query")
+@blueprint.arguments(api_schema.PublicNotelistArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicNotelistSchema(many=True))
 def v2_public_storage_notelist_route(args):
     """filtered notelist (see sner.server.sqlafilter for syntax)"""

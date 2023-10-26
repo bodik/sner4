@@ -232,7 +232,7 @@ def test_v2_stats_prometheus_route(client, queue):  # pylint: disable=unused-arg
 def test_v2_public_storage_host_route_nonetworks(api_user_nonetworks, host):  # pylint: disable=unused-argument
     """test queries with user without any configured networks"""
 
-    response = api_user_nonetworks.get(url_for('api.v2_public_storage_host_route', address=host.address))
+    response = api_user_nonetworks.post_json(url_for('api.v2_public_storage_host_route'), {'address': host.address})
     assert not response.json
 
 
@@ -243,19 +243,19 @@ def test_v2_public_storage_host_route(api_user, host_factory, service_factory, s
     host_factory.create(address='192.0.2.1')
 
     # ipv4
-    response = api_user.get(url_for('api.v2_public_storage_host_route', address=service.host.address))
+    response = api_user.post_json(url_for('api.v2_public_storage_host_route'), {'address': service.host.address})
     assert api_schema.PublicHostSchema().load(response.json)
     assert response.json['address'] == service.host.address
     assert len(response.json['services']) == 1
 
     # ipv6
-    response = api_user.get(url_for('api.v2_public_storage_host_route', address='2001:db8:0000::11'))
+    response = api_user.post_json(url_for('api.v2_public_storage_host_route'), {'address': '2001:db8:0000::11'})
     assert api_schema.PublicHostSchema().load(response.json)
     assert response.json['address'] == '2001:db8::11'
     assert len(response.json['services']) == 1
 
     # query not-allowed ip
-    response = api_user.get(url_for('api.v2_public_storage_host_route', address='192.0.2.1'))
+    response = api_user.post_json(url_for('api.v2_public_storage_host_route'), {'address': '192.0.2.1'})
     assert not response.json
 
 
@@ -265,7 +265,7 @@ def test_v2_public_storage_host_route_morenotes(api_user, service, note_factory)
     note_factory.create(host=service.host, xtype='xtest', data='host note data1')
     note_factory.create(host=service.host, service=service, xtype='xtest', data='service note data2')
 
-    response = api_user.get(url_for('api.v2_public_storage_host_route', address=service.host.address))
+    response = api_user.post_json(url_for('api.v2_public_storage_host_route'), {'address': service.host.address})
     assert len(response.json['notes']) == 1
     assert len(response.json['services'][0]['notes']) == 1
 
@@ -273,7 +273,7 @@ def test_v2_public_storage_host_route_morenotes(api_user, service, note_factory)
 def test_v2_public_storage_range_route_nonetworks(api_user_nonetworks, host):  # pylint: disable=unused-argument
     """test queries with user without any configured networks"""
 
-    response = api_user_nonetworks.get(url_for('api.v2_public_storage_range_route', cidr=f'{host.address}/32'))
+    response = api_user_nonetworks.post_json(url_for('api.v2_public_storage_range_route'), {'cidr': f'{host.address}/32'})
     assert not response.json
 
 
@@ -283,7 +283,7 @@ def test_v2_public_storage_range_route(api_user, host_factory):
     host_factory.create(address='127.0.1.1')
     host_factory.create(address='127.0.2.1')
 
-    response = api_user.get(url_for('api.v2_public_storage_range_route', cidr='127.0.0.0/8'))
+    response = api_user.post_json(url_for('api.v2_public_storage_range_route'), {'cidr': '127.0.0.0/8'})
     assert api_schema.PublicRangeSchema(many=True).load(response.json)
     assert len(response.json) == 2
 
@@ -291,7 +291,7 @@ def test_v2_public_storage_range_route(api_user, host_factory):
 def test_v2_public_storage_servicelist_route_nonetworks(api_user_nonetworks, service):  # pylint: disable=unused-argument
     """test queries with user without any configured networks"""
 
-    response = api_user_nonetworks.get(url_for('api.v2_public_storage_servicelist_route', filter=f'Service.port=="{service.port}"'))
+    response = api_user_nonetworks.post_json(url_for('api.v2_public_storage_servicelist_route'), {'filter': f'Service.port=="{service.port}"'})
     assert not response.json
 
 
@@ -301,18 +301,18 @@ def test_v2_public_storage_servicelist_route(api_user, service_factory):
     service_factory.create(port=1)
     service_factory.create(port=2)
 
-    response = api_user.get(url_for('api.v2_public_storage_servicelist_route', filter='Service.port=="1"'))
+    response = api_user.post_json(url_for('api.v2_public_storage_servicelist_route'), {'filter': 'Service.port=="1"'})
     assert api_schema.PublicServicelistSchema(many=True).load(response.json)
     assert len(response.json) == 1
 
-    response = api_user.get(url_for('api.v2_public_storage_servicelist_route', filter='invalid'), status='*')
+    response = api_user.post_json(url_for('api.v2_public_storage_servicelist_route'), {'filter': 'invalid'}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_v2_public_storage_notelist_route_nonetworks(api_user_nonetworks, note):  # pylint: disable=unused-argument
     """test queries with user without any configured networks"""
 
-    response = api_user_nonetworks.get(url_for('api.v2_public_storage_notelist_route', filter=f'Note.xtype=="{note.xtype}"'))
+    response = api_user_nonetworks.post_json(url_for('api.v2_public_storage_notelist_route'), {'filter': f'Note.xtype=="{note.xtype}"'})
     assert not response.json
 
 
@@ -322,11 +322,11 @@ def test_v2_public_storage_notelist_route(api_user, note_factory):
     note_factory.create(data='dummy1')
     note_factory.create(data='dummy2')
 
-    response = api_user.get(url_for('api.v2_public_storage_notelist_route', filter='Note.data=="dummy1"'))
+    response = api_user.post_json(url_for('api.v2_public_storage_notelist_route'), {'filter': 'Note.data=="dummy1"'})
     assert api_schema.PublicNotelistSchema(many=True).load(response.json)
     assert len(response.json) == 1
 
-    response = api_user.get(url_for('api.v2_public_storage_notelist_route', filter='invalid'), status='*')
+    response = api_user.post_json(url_for('api.v2_public_storage_notelist_route'), {'filter': 'invalid'}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
