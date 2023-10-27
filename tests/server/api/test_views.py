@@ -242,6 +242,12 @@ def test_v2_public_storage_host_route(api_user, host_factory, service_factory, s
     service_factory.create(host=host_factory.create(address='2001:db8::11'), proto='udp', port=0, state='open:test')
     host_factory.create(address='192.0.2.1')
 
+    # DEPRECATED
+    response = api_user.get(url_for('api.v2_public_storage_host_route_get', address=service.host.address))
+    assert api_schema.PublicHostSchema().load(response.json)
+    assert response.json['address'] == service.host.address
+    assert len(response.json['services']) == 1
+
     # ipv4
     response = api_user.post_json(url_for('api.v2_public_storage_host_route'), {'address': service.host.address})
     assert api_schema.PublicHostSchema().load(response.json)
@@ -282,6 +288,11 @@ def test_v2_public_storage_range_route(api_user, host_factory):
 
     host_factory.create(address='127.0.1.1')
     host_factory.create(address='127.0.2.1')
+
+    # DEPRECATED
+    response = api_user.get(url_for('api.v2_public_storage_range_route_get', cidr='127.0.0.0/8'))
+    assert api_schema.PublicRangeSchema(many=True).load(response.json)
+    assert len(response.json) == 2
 
     response = api_user.post_json(url_for('api.v2_public_storage_range_route'), {'cidr': '127.0.0.0/8'})
     assert api_schema.PublicRangeSchema(many=True).load(response.json)
