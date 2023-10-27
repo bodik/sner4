@@ -76,11 +76,15 @@ Project goals:
 
 ### 2.1 General features
 
-Flask-based web interface with plain login, OTP, FIDO2 or external OIDC
-support. Role-based authorization: agent (scheduler, jobs), operator
-(scheduler, storage, visuals), user (profile, api), admin (user mgmt).
-Server-side session storage. CLI interface and automation scripts. Agent and
-parser subsystem uses extendable plugin architecture.
+* Flask-based web interface
+* Authentication
+  * username/password with optional OTP
+  * FIDO2 / WebAuthn
+  * OIDC
+* Per-route role-based authorization
+* Server-side session storage (DEPRECATED)
+* CLI interface and automation scripts
+* Extendable plugin mechanims for extending agents and parsers
 
 
 ### 2.2 Reconnaissance subsystem
@@ -147,26 +151,32 @@ Parsers are used to parse and ingest agent output data or raw files to storage.
 
 For list of currently available parser plugins see `sner/plugin/*/parser.py`
 
+##### Versioninfo
+
+(EXPERIMENTAL) Pre-compiled view from various storage objects mapping product-version tuple to
+corresponding endpoints.
+
+##### Vulnsearch
+
+(EXPERIMENTAL) Pre-compiled view of CPE-CVE correlations.
+
 
 #### Server: Visuals
 
-Visualization modules for configuration and storage data.
+Visualization modules for configuration and storage.
 
 
 #### Api: REST API interface
 
-(EXPERIMENTAL) Provides basic access to managed data.
+Basic access to managed data.
 
 
-#### Snerlytics: Storage vulnsearch
+### 2.4 Snerlytics
 
-(EXPERIMENTAL) Uses https://github.com/cve-search/cve-search (by circl.lu) to
-correlate and analyze storage CPE data via ELK stack.
+(EXPERIMENTAL) Set of external services for data analysis.
 
-
-#### Snerlytics: Storage sync
-
-(EXPERIMENTAL) Synchronizes storage data to ELK stack
+  * Elastic storage (copy of storage with Kibana)
+  * CVE-Search (local instance used for CPE-CVE corelations)
 
 
 
