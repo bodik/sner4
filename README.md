@@ -128,7 +128,7 @@ reconnaissance data.
 
 ### 2.3 Data management subsystem
 
-#### Server: Storage and Parsers
+#### 2.3.1 Storage and Parsers
 
 Storage is a main IP-centric database model and user interface heavily inspired
 by Metasploit framework PRO UI. Allows somewhat flexible data management
@@ -161,12 +161,12 @@ corresponding endpoints.
 (EXPERIMENTAL) Pre-compiled view of CPE-CVE correlations.
 
 
-#### Server: Visuals
+#### 2.3.2 Visuals
 
 Visualization modules for configuration and storage.
 
 
-#### Api: REST API interface
+#### 2.3.3 API interface
 
 Basic access to managed data.
 
