@@ -175,7 +175,7 @@ Basic access to managed data.
 
 (EXPERIMENTAL) Set of external services for data analysis.
 
-  * Elastic storage (copy of storage with Kibana)
+  * Elastic storage (copy of storage data for analysis)
   * CVE-Search (local instance used for CPE-CVE corelations)
 
 
