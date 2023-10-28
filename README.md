@@ -234,6 +234,16 @@ make test-extra
 bin/server run
 ```
 
+### 3.3 Upgrade procedure
+
+* restart server with maintenance flag (`sner_maintenance: True`)
+* wait for agents to finish
+* stop agents, server and planner
+* pull new version
+* update dependencies
+* perform db migrations
+* start all components
+* restart server without maintenance flag
 
 
 ## 4 Usage
