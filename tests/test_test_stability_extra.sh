@@ -4,7 +4,7 @@
 # test the stability of the selenium tests
 
 for iter in $(seq 1 100); do
-	timeout 600 make test-extra
+	timeout 900 make test-extra
 	RET=$?
 	echo "INFO: round ${iter}"
 	if [ $RET -ne 0 ]; then
