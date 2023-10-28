@@ -1,5 +1,29 @@
 # sner4 changelog
 
+## 0.11.0 - local analytics [BC BREAK]
+
+changed: syncstorage to elasticstorage refactoring
+changed: bump misc javascript libraries
+changed: storage queue-enqueue read from stdin
+changed: scheduler enumips read from stdin
+changed: rename syncstorage and syncvulnsearch to rebuild-\* commands
+changed: other minor ui tweaks
+changed: public api with parameters use only post json
+added: grouped notes
+added: api note list
+added: plugin nmap, save banner_dict
+added: storage versioninfo
+added: storage heatmap-check
+added: storage heatmap metrics
+added: show metrics in internal visual
+added: vulnsearch localdb and sync to elastic 
+fixed: migrations
+fixed: ui dt sorting
+fixed: elasticstorage note sync
+fixed: vuln group aggegation with tags in different order
+security: bump datatables plugin.ellipsis, fixes possible XSS (no CVE)
+
+
 ## 0.10.0 - clicker clicker [BC BREAK]
 
 * changed: server: ux, storage service dropdown add copy to clipboard button/icon
