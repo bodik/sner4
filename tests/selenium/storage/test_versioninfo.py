@@ -3,8 +3,6 @@
 selenium ui tests for storage.versioninfo component
 """
 
-import json
-
 from flask import url_for
 from selenium.webdriver.common.by import By
 
@@ -12,10 +10,10 @@ from sner.server.storage.versioninfo import VersionInfoManager
 from tests.selenium import dt_count_rows, dt_rendered
 
 
-def test_versioninfo_list_route(live_server, sl_operator, versioninfo):  # pylint: disable=unused-argument
+def test_versioninfo_list_route(live_server, sl_operator, versioninfos):  # pylint: disable=unused-argument
     """simple test ajaxed datatable rendering"""
 
-    expected_product = json.loads(versioninfo[0].data)["product"].lower()
+    expected_product = versioninfos[0].product
 
     sl_operator.get(url_for('storage.versioninfo_list_route', _external=True))
     dt_rendered(sl_operator, 'versioninfo_list_table', expected_product)

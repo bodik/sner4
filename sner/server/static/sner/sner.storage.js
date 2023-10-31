@@ -28,6 +28,10 @@ class SnerStorageComponent extends SnerComponentBase {
 				}
 				return '#';
 			},
+			/* generate url for cveid */
+			'url_for_cveid': function(cveid) {
+				return 'https://cve.circl.lu/cve/' + cveid;
+			},
 			/* generate text for ref */
 			'text_for_ref': function(ref) {
 				if (ref.startsWith('URL-')) { return 'URL'; }
@@ -209,6 +213,8 @@ class SnerStorageComponent extends SnerComponentBase {
 					<a class="btn btn-outline-secondary abutton_submit_dataurl_delete" data-url="{{> storage.note_delete_route note_id=id}}" title="Delete"><i class="fas fa-trash text-danger"></i></a>
 				</div>`,
 			'note_list_filter_xtype_link': `<a href="{{note_list_route_filter_xtype xtype}}">{{xtype}}</a>`,
+
+			'vulnsearch_cveid_link': `<a href="{{url_for_cveid cveid}}">{{cveid}}</a>`,
 
 			'modal_freetag_multiid': `
 				<form>

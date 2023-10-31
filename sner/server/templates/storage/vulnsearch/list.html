@@ -21,7 +21,11 @@
 				}
 			}),
 			Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
-			Sner.dt.column('cveid'),
+			Sner.dt.column('cveid', {
+				'render': function(data, type, row, meta) {
+					return Sner.storage.hbs.vulnsearch_cveid_link({'cveid': row['cveid']});
+				}
+			}),
 			Sner.dt.column('cvss'),
 			Sner.dt.column('cvss3'),
 			Sner.dt.column('attack_vector'),

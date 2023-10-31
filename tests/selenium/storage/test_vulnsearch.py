@@ -11,5 +11,6 @@ from tests.selenium import dt_rendered
 def test_vulnsearch_list_route(live_server, sl_operator, vulnsearch):  # pylint: disable=unused-argument
     """simple test ajaxed datatable rendering"""
 
+    test_vulnsearch = vulnsearch[0]
     sl_operator.get(url_for('storage.vulnsearch_list_route', _external=True))
-    dt_rendered(sl_operator, 'vulnsearch_list_table', vulnsearch.cveid)
+    dt_rendered(sl_operator, 'vulnsearch_list_table', test_vulnsearch.name)

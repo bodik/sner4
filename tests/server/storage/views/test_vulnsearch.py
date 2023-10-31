@@ -19,7 +19,7 @@ def test_vulnsearch_list_route(cl_operator):
 def test_vulnsearch_list_json_route(cl_operator, vulnsearch):
     """vulnsearch list_json route test"""
 
-    expected_cveid = vulnsearch.cveid
+    expected_cveid = vulnsearch[0].cveid
 
     response = cl_operator.post(
         url_for('storage.vulnsearch_list_json_route'),

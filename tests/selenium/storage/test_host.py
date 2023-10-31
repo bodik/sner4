@@ -20,7 +20,7 @@ from tests.selenium.storage import (
 )
 
 
-def get_host_view_tab(sclnt, host_id, model):
+def get_host_view_tab(sclnt, host_id, model, wait_attr_value='comment'):
     """switches host view tab and waits until dt is rendered"""
 
     model_name = model.__class__.__name__.lower()
@@ -33,7 +33,7 @@ def get_host_view_tab(sclnt, host_id, model):
     ).click()
 
     webdriver_waituntil(sclnt, EC.visibility_of_element_located((By.ID, dt_name)))
-    dt_rendered(sclnt, dt_name, model.comment)
+    dt_rendered(sclnt, dt_name, getattr(model, wait_attr_value))
 
 
 def test_host_list_route(live_server, sl_operator, host):  # pylint: disable=unused-argument
@@ -323,3 +323,17 @@ def test_host_view_route_notes_list_freetag(live_server, sl_operator, notes_mult
     sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
     get_host_view_tab(sl_operator, notes_multiaction[0].host_id, notes_multiaction[-1])
     check_dt_toolbox_freetag(sl_operator, 'storage.host_view_route', 'host_view_note_table', Note, load_route=False)
+
+
+def test_host_view_route_versioninfos_list(live_server, sl_operator, versioninfos):  # pylint: disable=unused-argument
+    """host view tabbed versioninfo"""
+
+    test_versioninfo = versioninfos[0]
+    get_host_view_tab(sl_operator, test_versioninfo.host_id, test_versioninfo, 'product')
+
+
+def test_host_view_route_vulnsearch_list(live_server, sl_operator, vulnsearch):  # pylint: disable=unused-argument
+    """host view tabbed vulnsearch"""
+
+    test_vulnsearch = vulnsearch[0]
+    get_host_view_tab(sl_operator, test_vulnsearch.host_id, test_vulnsearch, 'name')

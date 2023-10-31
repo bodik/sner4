@@ -16,10 +16,10 @@ def test_versioninfo_list_route(cl_operator):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_versioninfo_list_json_route(cl_operator, versioninfo):
+def test_versioninfo_list_json_route(cl_operator, versioninfos):
     """versioninfo list_json route test"""
 
-    expected_product = json.loads(versioninfo[0].data)["product"].lower()
+    expected_product = versioninfos[0].product
 
     response = cl_operator.post(
         url_for('storage.versioninfo_list_json_route'),

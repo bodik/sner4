@@ -89,6 +89,8 @@
 	<li class="nav-item"><a class="nav-link" href="#host_view_service_tab" data-toggle="tab">Services <span class="badge badge-pill badge-secondary">{{ host.services|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#host_view_vuln_tab" data-toggle="tab">Vulns <span class="badge badge-pill badge-secondary">{{ host.vulns|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#host_view_note_tab" data-toggle="tab">Notes <span class="badge badge-pill badge-secondary">{{ host.notes|length }}</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#host_view_versioninfo_tab" data-toggle="tab">VersionInfos <span id="host_view_tabs_versioninfos_count" class="badge badge-pill badge-secondary">?</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#host_view_vulnsearch_tab" data-toggle="tab">Vulnsearches <span id="host_view_tabs_vulnsearches_count" class="badge badge-pill badge-secondary">?</span></a></li>
 </ul>
 
 <div class="tab-content">
@@ -293,6 +295,93 @@
 				$('#host_view_note_table_toolbar .abutton_delete_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_delete_multiid_route'}, Sner.storage.action_delete_multiid);
 				$('#host_view_note_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
 				$('#host_view_note_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_host_view_note_table, 'route_name': 'storage.note_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
+			});
+		</script>
+	</div>
+
+	<div id="host_view_versioninfo_tab" class="tab-pane">
+		<div id="host_view_versioninfo_table_toolbar" class="dt_toolbar">
+			<div id="host_view_versioninfo_table_toolbox" class="dt_toolbar_toolbox">
+			</div>
+		</div>
+		<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
+		<table id="host_view_versioninfo_table" class="table table-hover table-sm" width="100%"></table>
+		<script type="text/javascript">
+			var dt_host_view_versioninfo_table_options = {
+				'ajax': {'url': "{{ url_for('storage.versioninfo_list_json_route', filter='VersionInfo.host_id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'columns': [
+					Sner.dt.column('id', {'visible': false}),
+					Sner.dt.column('host_id', {'visible': false}),
+					Sner.dt.column('host_address', {'visible': false}),
+					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('service_proto', {'visible': false}),
+					Sner.dt.column('service_port', {'visible': false}),
+					Sner.dt.column('service', {
+						'className': 'service_endpoint_dropdown',
+						'render': function(data, type, row, meta) {
+							return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+						}
+					}),
+					Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
+					Sner.dt.column('product'),
+					Sner.dt.column('version'),
+					Sner.dt.column('extra'),
+				],
+				'order': [[6, 'asc']],
+				'drawCallback': function (settings) {
+					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					$('#host_view_tabs_versioninfos_count').text(this.api().rows().data().length);
+				}
+			};
+			$(document).ready(function() {
+				var dt_host_view_versioninfo_table = Sner.dt.init_datatable('#host_view_versioninfo_table', dt_host_view_versioninfo_table_options);
+			});
+		</script>
+	</div>
+
+	<div id="host_view_vulnsearch_tab" class="tab-pane">
+		<div id="host_view_vulnsearch_table_toolbar" class="dt_toolbar">
+			<div id="host_view_vulnsearch_table_toolbox" class="dt_toolbar_toolbox">
+			</div>
+		</div>
+		<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
+		<table id="host_view_vulnsearch_table" class="table table-hover table-sm" width="100%"></table>
+		<script type="text/javascript">
+			var dt_host_view_vulnsearch_table_options = {
+				'ajax': {'url': "{{ url_for('storage.vulnsearch_list_json_route', filter='Vulnsearch.host_id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'columns': [
+					Sner.dt.column('id', {'visible': false}),
+					Sner.dt.column('host_id', {'visible': false}),
+					Sner.dt.column('host_address', {'visible': false}),
+					Sner.dt.column('host_hostname', {'visible': false}),
+					Sner.dt.column('service_proto', {'visible': false}),
+					Sner.dt.column('service_port', {'visible': false}),
+					Sner.dt.column('service', {
+						'className': 'service_endpoint_dropdown',
+						'render': function(data, type, row, meta) {
+							return Sner.storage.hbs.service_endpoint_dropdown({...row, 'value': row['service']});
+						}
+					}),
+					Sner.dt.column('via_target', {'visible': JSON.parse(sessionStorage.getItem('dt_viatarget_column_visible'))}),
+					Sner.dt.column('cveid', {
+						'render': function(data, type, row, meta) {
+							return Sner.storage.hbs.vulnsearch_cveid_link({'cveid': row['cveid']});
+						}
+					}),
+					Sner.dt.column('cvss'),
+					Sner.dt.column('cvss3'),
+					Sner.dt.column('attack_vector'),
+					Sner.dt.column('cpe_full'),
+					Sner.dt.column('name'),
+				],
+				'order': [[6, 'asc']],
+				'drawCallback': function (settings) {
+					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					$('#host_view_tabs_vulnsearches_count').text(this.api().rows().data().length);
+				}
+			};
+			$(document).ready(function() {
+				var dt_host_view_vulnsearch_table = Sner.dt.init_datatable('#host_view_vulnsearch_table', dt_host_view_vulnsearch_table_options);
 			});
 		</script>
 	</div>
