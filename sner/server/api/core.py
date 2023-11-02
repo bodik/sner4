@@ -37,7 +37,7 @@ def get_metrics():
     metrics['sner_scheduler_jobs_total{state="failed"}'] = Job.query.filter(Job.retval != 0).count()
 
     metrics['sner_scheduler_heatmap_hashvals_total'] = Heatmap.query.filter(Heatmap.count != 0).count()
-    metrics['sner_scheduler_heatmap_targets_total'] = db.session.query(func.sum(Heatmap.count)).scalar()
+    metrics['sner_scheduler_heatmap_targets_total'] = db.session.query(func.coalesce(func.sum(Heatmap.count), 0)).scalar()
 
     metrics['sner_scheduler_readynets_available_total'] = db.session.query(func.distinct(Readynet.hashval)).count()
 
