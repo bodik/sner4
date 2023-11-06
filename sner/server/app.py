@@ -40,9 +40,9 @@ from sner.server.scheduler.commands import command as scheduler_command
 from sner.server.storage.commands import command as storage_command
 
 # shell context helpers
-from sner.server.auth.models import User, WebauthnCredential
-from sner.server.scheduler.models import Job, Heatmap, Queue, Readynet, Target
-from sner.server.storage.models import Host, Note, Service, VersionInfo, Vuln, Vulnsearch
+import sner.server.auth.models as auth_models
+import sner.server.scheduler.models as scheduler_models
+import sner.server.storage.models as storage_models
 
 
 DEFAULT_CONFIG = {
@@ -273,21 +273,21 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
             'db': db,
             'func': func,
 
-            'Heatmap': Heatmap,
-            'Job': Job,
-            'Queue': Queue,
-            'Readynet': Readynet,
-            'Target': Target,
+            'Heatmap': scheduler_models.Heatmap,
+            'Job': scheduler_models.Job,
+            'Queue': scheduler_models.Queue,
+            'Readynet': scheduler_models.Readynet,
+            'Target': scheduler_models.Target,
 
-            'Host': Host,
-            'Note': Note,
-            'Service': Service,
-            'VersionInfo': VersionInfo,
-            'Vuln': Vuln,
-            'Vulnsearch': Vulnsearch,
+            'Host': storage_models.Host,
+            'Note': storage_models.Note,
+            'Service': storage_models.Service,
+            'VersionInfo': storage_models.VersionInfo,
+            'Vuln': storage_models.Vuln,
+            'Vulnsearch': storage_models.Vulnsearch,
 
-            'User': User,
-            'WebauthnCredential': WebauthnCredential,
+            'User': auth_models.User,
+            'WebauthnCredential': auth_models.WebauthnCredential,
         }
 
     @app.route('/')
