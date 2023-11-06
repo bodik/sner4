@@ -33,7 +33,10 @@ SEARCH_GRAMMAR = r"""
 
     criteria: COLSPEC OP _value
     COLSPEC: /[a-z]+\.[a-z_]+/i
-    OP: "==" | "!=" | ">=" | "<=" | ">" | "<" | "ilike" | "not_ilike" | "is_null" | "is_not_null" | "in" | "not_in" | "any" | "not_any"
+    OP: "==" | "!=" | ">=" | "<=" | ">" | "<"
+        | "ilike" | "not_ilike" | "astext_ilike" | "astext_not_ilike"
+        | "is_null" | "is_not_null"
+        | "in" | "not_in" | "any" | "not_any"
 
     _value: _item | array
     _item: string | number
