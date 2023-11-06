@@ -49,6 +49,14 @@
 {% endcall %}
 
 <div id="vulnsearch_list_table_toolbar" class="dt_toolbar">
+	<div id="vuln_grouped_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
+			{% for key, value in config['SNER_VULNSEARCH_LIST_FILTERS'].items(): %}
+			<a class="btn btn-outline-secondary" href="{{ url_for('storage.vulnsearch_list_route', filter=value) }}">{{ key }}</a>
+			{% endfor %}
+		</div>
+	</div>
 	{{ cm.filter_form() }}
 </div>
 

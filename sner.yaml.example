@@ -20,6 +20,8 @@
 #    esd: 'https://hostname:18200/esd'
 #    tlsauth_key: 'filename'
 #    tlsauth_cert: 'filename'
+#  sner_vulnsearch_list_filters:
+#    has_exploit: 'Vulnsearch.data astext_ilike "%exploit-db%"'
 #  sner_heatmap_hot_level: 10
 #  sner_exclusions:
 #    - [regex, '^tcp://.*:22$']
