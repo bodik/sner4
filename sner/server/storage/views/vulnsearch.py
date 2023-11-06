@@ -8,7 +8,7 @@ from http import HTTPStatus
 import json
 from datatables import ColumnDT, DataTables
 from flask import jsonify, render_template, request, Response
-from sqlalchemy import func
+from sqlalchemy import func, inspect, literal_column
 
 from sner.server.auth.core import session_required
 from sner.server.extensions import db
@@ -45,6 +45,7 @@ def vulnsearch_list_json_route():
         ColumnDT(Vulnsearch.attack_vector, mData='attack_vector'),
         ColumnDT(Vulnsearch.cpe_full, mData='cpe_full'),
         ColumnDT(Vulnsearch.name, mData='name'),
+        ColumnDT(literal_column('1'), mData='_buttons', search_method='none', global_search=False)
     ]
     query = db.session.query().select_from(Vulnsearch)
     if not (query := filter_query(query, request.values.get('filter'))):
@@ -52,3 +53,16 @@ def vulnsearch_list_json_route():
 
     vulnsearches = DataTables(request.values.to_dict(), query, columns).output_result()
     return Response(json.dumps(vulnsearches, cls=SnerJSONEncoder), mimetype='application/json')
+
+
+@blueprint.route('/vulnsearch/view/<vulnsearch_id>')
+@session_required('operator')
+def vulnsearch_view_route(vulnsearch_id):
+    """view vulnsearch"""
+
+    vulnsearch = Vulnsearch.query.get(vulnsearch_id)
+    column_attrs = inspect(Vulnsearch).mapper.column_attrs
+    vsearch = {c.key: getattr(vulnsearch, c.key) for c in column_attrs}
+    cve_data = vsearch.pop('data')
+
+    return render_template('storage/vulnsearch/view.html', vsearch=vsearch, cve_data=cve_data)

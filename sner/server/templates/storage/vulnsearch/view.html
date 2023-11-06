@@ -1,0 +1,19 @@
+{#- This file is part of sner4 project governed by MIT license, see the LICENSE.txt file. -#}
+{% extends "base.html" %}
+
+{% block title %}Vulnsearch / View / {{ vsearch.id }}{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block content %}
+{% call cm.heading(['Vulnsearch', vsearch.id]) %}
+{% endcall %}
+
+<h2>Vulnsearch {{ vsearch.id }}</h2>
+<pre class="break-spaces">{{ vsearch | tojson | json_indent}}</pre>
+
+<h2>CVE data</h2>
+<pre class="break-spaces">{{ cve_data | tojson | json_indent}}</pre>
+
+{% endblock %}

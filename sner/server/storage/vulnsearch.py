@@ -85,7 +85,7 @@ def vulndata(note, parsed_cpe, cve, namelen):
         'cvss': cve.get('cvss'),
         'cvss3': cve.get('cvss3'),
         'attack_vector': get_attack_vector(cve),
-        'data': json.dumps(cve),
+        'data': cve,
 
         'cpe': {
             'full': parsed_cpe.cpe_str,
@@ -188,10 +188,12 @@ class VulnsearchManager:
             query = query.filter(host_filter_expr)
 
         column_attrs = inspect(Vulnsearch).mapper.column_attrs
-        for data in windowed_query(query, Vulnsearch.id):
-            data = {c.key: getattr(data, c.key) for c in column_attrs}
-            data_id = data.pop('id')
-            esd_indexer.index(index, data_id, data)
+        for item in windowed_query(query, Vulnsearch.id):
+            item = {c.key: getattr(item, c.key) for c in column_attrs}
+            # raw cve data might vary a lot, encode to string to prevent elastic schema type collisions
+            item["data"] = json.dumps(item["data"])
+            item_id = item.pop('id')
+            esd_indexer.index(index, item_id, item)
 
         esd_indexer.flush()
         esd_indexer.update_alias(alias, index)

@@ -31,3 +31,10 @@ def test_vulnsearch_list_json_route(cl_operator, vulnsearch):
 
     response = cl_operator.post(url_for('storage.vulnsearch_list_json_route', filter='invalid'), {'draw': 1, 'start': 0, 'length': 1}, status='*')
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_vulnsearch_view_route(cl_operator, vulnsearch):
+    """vulnsearch view route test"""
+
+    response = cl_operator.get(url_for('storage.vulnsearch_view_route', vulnsearch_id=vulnsearch[0].id))
+    assert response.status_code == HTTPStatus.OK

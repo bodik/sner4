@@ -89,6 +89,6 @@ class VulnsearchTempFactory(BaseModelFactory):  # pylint: disable=too-few-public
     cvss = 3.3
     cvss3 = 3.4
     attack_vector = 'NETWORK'
-    data = {'dummy': 'data'}
+    data = {"dummy": "data"}
     cpe = {'full': 'cpe:/a:apache:http_server:2.4.38'}
     cpe_full = 'cpe:/a:apache:http_server:2.4.38'

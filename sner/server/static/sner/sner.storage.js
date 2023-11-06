@@ -214,7 +214,12 @@ class SnerStorageComponent extends SnerComponentBase {
 				</div>`,
 			'note_list_filter_xtype_link': `<a href="{{note_list_route_filter_xtype xtype}}">{{xtype}}</a>`,
 
+			'vulnsearch_link': `<a href="{{> storage.vulnsearch_view_route vulnsearch_id=id}}"><i class="fa fa-eye"></i></a>`,
 			'vulnsearch_cveid_link': `<a href="{{url_for_cveid cveid}}">{{cveid}}</a>`,
+			'vulnsearch_controls': `
+				<div class="btn-group btn-group-sm">
+					<a class="btn btn-outline-secondary" href="{{> storage.vulnsearch_view_route vulnsearch_id=id}}"><i class="fa fa-eye"></i></a>
+				</div>`,
 
 			'modal_freetag_multiid': `
 				<form>
