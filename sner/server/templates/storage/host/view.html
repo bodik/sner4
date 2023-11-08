@@ -342,6 +342,23 @@
 	<div id="host_view_vulnsearch_tab" class="tab-pane">
 		<div id="host_view_vulnsearch_table_toolbar" class="dt_toolbar">
 			<div id="host_view_vulnsearch_table_toolbox" class="dt_toolbar_toolbox">
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+					<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+					<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
+				</div>
+				{% set tags = ['reviewed', 'todo'] %}
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary abutton_freetag_set_multiid" href="#"><i class="fas fa-tag"></i></a>
+					{{ cm.multiid_tagging_abuttons(tags, 'btn btn-outline-secondary abutton_tag_multiid') }}
+				</div>
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary abutton_freetag_unset_multiid" href="#"><i class="fas fa-eraser"></i></a>
+					<div class="btn-group">
+						<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+						{{ cm.multiid_tagging_abuttons_dropdown(tags, 'striked abutton_untag_multiid') }}
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
@@ -350,6 +367,7 @@
 			var dt_host_view_vulnsearch_table_options = {
 				'ajax': {'url': "{{ url_for('storage.vulnsearch_list_json_route', filter='Vulnsearch.host_id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
+					Sner.dt.column_select({'visible': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible'))}),
 					Sner.dt.column('id', {'visible': false}),
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
@@ -373,16 +391,26 @@
 					Sner.dt.column('attack_vector'),
 					Sner.dt.column('cpe_full'),
 					Sner.dt.column('name'),
+					Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
+					Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 					Sner.dt.column_buttons(Sner.storage.hbs.vulnsearch_controls),
 				],
 				'order': [[6, 'asc']],
+				'select': {'style': 'multi', 'selector': 'td:first-child'},
 				'drawCallback': function (settings) {
 					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.vulnsearch_annotate_route'}, Sner.storage.action_annotate_dt);
 					$('#host_view_tabs_vulnsearches_count').text(this.api().rows().data().length);
 				}
 			};
 			$(document).ready(function() {
 				var dt_host_view_vulnsearch_table = Sner.dt.init_datatable('#host_view_vulnsearch_table', dt_host_view_vulnsearch_table_options);
+				$('#host_view_vulnsearch_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_vulnsearch_table}, Sner.dt.selectall);
+				$('#host_view_vulnsearch_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_vulnsearch_table}, Sner.dt.selectnone);
+				$('#host_view_vulnsearch_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_host_view_vulnsearch_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+				$('#host_view_vulnsearch_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_host_view_vulnsearch_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+				$('#host_view_vulnsearch_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_host_view_vulnsearch_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
+				$('#host_view_vulnsearch_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_host_view_vulnsearch_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
 			});
 		</script>
 	</div>

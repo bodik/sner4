@@ -12,13 +12,12 @@ from http import HTTPStatus
 import requests
 from cpe import CPE
 from flask import current_app
-from sqlalchemy import func, inspect
+from sqlalchemy import func, inspect, select
 from sqlalchemy.dialects.postgresql import ARRAY, CIDR, insert as pg_insert
 
 from sner.server.extensions import db
 from sner.server.storage.elastic import BulkIndexer
-from sner.server.storage.models import Host, Note, Vulnsearch, VulnsearchTemp
-from sner.server.materialized_views import refresh_materialized_view
+from sner.server.storage.models import Host, Note, Vulnsearch
 from sner.server.utils import windowed_query
 
 
@@ -107,12 +106,12 @@ class LocaldbWriter:
 
         self.buf = []
         self.buflen = buflen
+        self.prune_list = []
 
-    def initialize(self):
-        """cleanup build tables"""
+    def prune_init(self):
+        """initialize prune list"""
 
-        VulnsearchTemp.query.delete()
-        db.session.commit()
+        self.prune_list = db.session.execute(select(Vulnsearch.id)).scalars().all()
 
     def index(self, doc_id, doc):
         """index item in buffered way"""
@@ -126,15 +125,24 @@ class LocaldbWriter:
         """flush buffer"""
 
         if self.buf:
-            db.session.connection().execute(pg_insert(VulnsearchTemp), self.buf)
+            for item in self.buf:
+                db.session.execute(
+                    pg_insert(Vulnsearch).values(item).on_conflict_do_update(constraint='vulnsearch_pkey', set_=item)
+                )
+                try:
+                    self.prune_list.remove(item["id"])
+                except ValueError:
+                    pass
             db.session.commit()
             self.buf = []
 
-    def refresh_view(self):
-        """refresh view"""
+    def prune(self):
+        """prune gone items"""
 
-        refresh_materialized_view(db.session, 'vulnsearch')
+        current_app.logger.debug('prune vulnsearch %d items', len(self.prune_list))
+        Vulnsearch.query.filter(Vulnsearch.id.in_(self.prune_list)).delete(synchronize_session=False)
         db.session.commit()
+        db.session.expire_all()
 
 
 class VulnsearchManager:
@@ -202,7 +210,7 @@ class VulnsearchManager:
         """build local vulnsearch tables"""
 
         vulnsearch_writer = LocaldbWriter(self.rebuild_buflen)
-        vulnsearch_writer.initialize()
+        vulnsearch_writer.prune_init()
 
         for note, icpe, parsed_cpe in cpe_notes():
             for cve in self.cvefor(icpe):
@@ -210,5 +218,5 @@ class VulnsearchManager:
                 vulnsearch_writer.index(data_id, data)
 
         vulnsearch_writer.flush()
-        vulnsearch_writer.refresh_view()
+        vulnsearch_writer.prune()
         current_app.logger.debug(f'cvefor cache: {self.cvefor.cache_info()}')  # pylint: disable=no-value-for-parameter  ; lru decorator side-effect

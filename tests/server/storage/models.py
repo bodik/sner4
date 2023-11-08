@@ -5,7 +5,7 @@ storage test models
 
 from factory import LazyAttribute, SubFactory
 
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, VulnsearchTemp
+from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, Vulnsearch
 from sner.server.storage.vulnsearch import vulndata_docid
 from tests import BaseModelFactory
 
@@ -68,15 +68,15 @@ class NoteFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     comment = 'some test note comment'
 
 
-class VulnsearchTempFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+class VulnsearchFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     """test vulnsearchtemp model factory"""
     class Meta:  # pylint: disable=too-few-public-methods
-        """test vulnsearchtem model factory"""
-        model = VulnsearchTemp
+        """test vulnsearch model factory"""
+        model = Vulnsearch
 
     id = LazyAttribute(lambda o: vulndata_docid(o.host_address, o.service_proto, o.service_port, o.cveid))
-    host_id = 400
-    service_id = 401
+    host_id = 400  # dangling id
+    service_id = 401  # dangling id
     host_address = '127.2.0.1'
     host_hostname = 'dummy.vulnsearch.test'
     service_proto = 'tcp'
@@ -92,3 +92,6 @@ class VulnsearchTempFactory(BaseModelFactory):  # pylint: disable=too-few-public
     data = {"dummy": "data"}
     cpe = {'full': 'cpe:/a:apache:http_server:2.4.38'}
     cpe_full = 'cpe:/a:apache:http_server:2.4.38'
+
+    tags = ['dummy']
+    comment = ['dummy comment']

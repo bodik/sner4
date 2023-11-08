@@ -14,9 +14,8 @@ from sner.server.app import create_app
 from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from sner.server.storage.models import VersionInfo, Vulnsearch
+from sner.server.storage.models import VersionInfo
 from sner.server.storage.versioninfo import VersionInfoManager
-from sner.server.storage.vulnsearch import LocaldbWriter as VulnsearchLocaldbWriter
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
     JobFactory,
@@ -24,7 +23,7 @@ from tests.server.scheduler.models import (
     QueueFactory,
     TargetFactory
 )
-from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory, VulnsearchTempFactory
+from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory, VulnsearchFactory
 
 
 @pytest.fixture
@@ -91,7 +90,7 @@ factoryboy_register(HostFactory)
 factoryboy_register(NoteFactory)
 factoryboy_register(ServiceFactory)
 factoryboy_register(VulnFactory)
-factoryboy_register(VulnsearchTempFactory)
+factoryboy_register(VulnsearchFactory, 'vulnsearch_dangling')
 
 
 @pytest.fixture
@@ -134,9 +133,19 @@ def versioninfos(versioninfo_notes):  # pylint: disable=redefined-outer-name,unu
 
 
 @pytest.fixture
-def vulnsearch(service, vulnsearch_temp_factory):  # pylint: disable=redefined-outer-name,unused-argument
-    """prepare vulnsearch data; mostly faked, the original source comes from external cvsearch"""
+def vulnsearch(service, vulnsearch_factory):
+    """
+    prepare vulnsearch
 
-    vulnsearch_temp_factory.create(host_id=service.host.id, service_id=service.id)
-    VulnsearchLocaldbWriter().refresh_view()
-    return Vulnsearch.query.all()
+    factory_boy cannot create model with multiple related subfactories, hence
+    the "proper" vulnsearch generation is done here by hand
+    """
+
+    yield vulnsearch_factory(
+        host_id=service.host.id,
+        service_id=service.id,
+        host_address=service.host.address,
+        host_hostname=service.host.hostname,
+        service_proto=service.proto,
+        service_port=service.port
+    )

@@ -52,3 +52,16 @@ def dt_count_rows(sclnt, dt_id):
     """count number of rows in table"""
 
     return len(sclnt.find_elements(By.XPATH, f'//table[@id="{dt_id}"]/tbody/tr'))
+
+
+def screenshot(sclnt):
+    """
+    create screenshot debug helper
+
+    usage:
+    ```
+    from tests.selenium import screenshot; screenshot(sclnt)
+    ```
+    """
+
+    sclnt.save_screenshot("sner/server/static/screen.png")

@@ -58,3 +58,29 @@ def notes_multiaction(host, note_factory):
         note_factory.create(host=host, xtype='test.1234', data='dummy', comment='comment1'),
         note_factory.create(host=host, xtype='test.12345', data='dummy', comment='comment2'),
     ]
+
+
+@pytest.fixture
+def vulnsearch_multiaction(service, vulnsearch_factory):
+    """prepare vulnsearch for multiple selection and actions tests"""
+
+    yield [
+        vulnsearch_factory.create(
+            host_id=service.host.id,
+            service_id=service.id,
+            host_address=service.host.address,
+            service_proto=service.proto,
+            service_port=service.port,
+            cveid='CVE-1990-0003',
+            comment='comment1'
+        ),
+        vulnsearch_factory.create(
+            host_id=service.host.id,
+            service_id=service.id,
+            host_address=service.host.address,
+            service_proto=service.proto,
+            service_port=service.port,
+            cveid='CVE-1990-0004',
+            comment='comment2'
+        ),
+    ]

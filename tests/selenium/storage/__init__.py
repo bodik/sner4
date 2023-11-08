@@ -41,7 +41,7 @@ def check_dt_toolbox_select_rows(sclnt, route_name, dt_id, load_route=True):
     assert len(dt_elem.find_elements(By.XPATH, './/tbody/tr[contains(@class, "selected")]')) == 0  # pylint: disable=len-as-condition
 
 
-def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_route=True):
+def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_route=True, test_delete=True):  # pylint: disable=too-many-arguments
     """check dt toolbar toolbox actions; there must be 2 rows to perform the test"""
 
     if load_route:
@@ -78,13 +78,14 @@ def check_dt_toolbox_multiactions(sclnt, route_name, dt_id, model_class, load_ro
     dt_elem = dt_wait_processing(sclnt, dt_id)
     assert model_class.query.filter(model_class.tags.any('todo')).count() == 0
 
-    # or deleted
-    toolbar_elem.find_element(By.XPATH, './/a[text()="All"]').click()
-    toolbar_elem.find_element(By.XPATH, './/a[contains(@class, "abutton_delete_multiid")]').click()
-    webdriver_waituntil(sclnt, EC.alert_is_present())
-    sclnt.switch_to.alert.accept()
-    dt_wait_processing(sclnt, dt_id)
-    assert not model_class.query.all()
+    if test_delete:
+        # or deleted
+        toolbar_elem.find_element(By.XPATH, './/a[text()="All"]').click()
+        toolbar_elem.find_element(By.XPATH, './/a[contains(@class, "abutton_delete_multiid")]').click()
+        webdriver_waituntil(sclnt, EC.alert_is_present())
+        sclnt.switch_to.alert.accept()
+        dt_wait_processing(sclnt, dt_id)
+        assert not model_class.query.all()
 
 
 def _ux_freetag_action(sclnt, toolbar_elem, button_class, modal_title):

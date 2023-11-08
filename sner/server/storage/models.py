@@ -189,8 +189,8 @@ class VersionInfo(StorageModelBase):
     __table__ = create_materialized_view('version_info', select(VersionInfoTemp), db.metadata)
 
 
-class VulnsearchTemp(StorageModelBase):
-    """local vulnsearch model, temporary table"""
+class Vulnsearch(StorageModelBase):
+    """vulnsearch model"""
 
     id = db.Column(db.String(32), primary_key=True)
     host_id = db.Column(db.Integer, nullable=False)
@@ -211,8 +211,5 @@ class VulnsearchTemp(StorageModelBase):
     cpe = db.Column(db.JSON)
     cpe_full = db.Column(db.String(1000))
 
-
-class Vulnsearch(StorageModelBase):
-    """version info (materialized view) model"""
-
-    __table__ = create_materialized_view('vulnsearch', select(VulnsearchTemp), db.metadata)
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
+    comment = db.Column(db.Text)

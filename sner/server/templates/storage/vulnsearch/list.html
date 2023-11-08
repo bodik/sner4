@@ -8,6 +8,7 @@
 	var dt_vulnsearch_list_table_options = {
 		'ajax': {'url': Flask.url_for('storage.vulnsearch_list_json_route') + window.location.search, 'method': 'POST'},
 		'columns': [
+			Sner.dt.column_select(),
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('host_id', {'visible': false}),
 			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
@@ -31,12 +32,25 @@
 			Sner.dt.column('attack_vector'),
 			Sner.dt.column('cpe_full'),
 			Sner.dt.column('name'),
+			Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 			Sner.dt.column_buttons(Sner.storage.hbs.vulnsearch_controls),
 		],
-		'order': [[2, 'desc']]
+		'order': [[2, 'desc']],
+		'select': {'style': 'multi', 'selector': 'td:first-child'},
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.vulnsearch_annotate_route'}, Sner.storage.action_annotate_dt);
+		}
 	};
 	$(document).ready(function() {
 		var dt_vulnsearch_list_table = Sner.dt.init_datatable('#vulnsearch_list_table', dt_vulnsearch_list_table_options);
+		$('#vulnsearch_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_vulnsearch_list_table}, Sner.dt.selectall);
+		$('#vulnsearch_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_vulnsearch_list_table}, Sner.dt.selectnone);
+		$('#vulnsearch_list_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_vulnsearch_list_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+		$('#vulnsearch_list_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_vulnsearch_list_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+		$('#vulnsearch_list_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_vulnsearch_list_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
+		$('#vulnsearch_list_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_vulnsearch_list_table, 'route_name': 'storage.vulnsearch_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
 	});
 </script>
 {% endblock %}
@@ -49,7 +63,24 @@
 {% endcall %}
 
 <div id="vulnsearch_list_table_toolbar" class="dt_toolbar">
-	<div id="vuln_grouped_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
+	<div id="vulnsearch_list_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+			<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+			<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
+		</div>
+		{% set tags = ['reviewed', 'todo'] %}
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary abutton_freetag_set_multiid" href="#"><i class="fas fa-tag"></i></a>
+			{{ cm.multiid_tagging_abuttons(tags, 'btn btn-outline-secondary abutton_tag_multiid') }}
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary abutton_freetag_unset_multiid" href="#"><i class="fas fa-eraser"></i></a>
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+				{{ cm.multiid_tagging_abuttons_dropdown(tags, 'striked abutton_untag_multiid') }}
+			</div>
+		</div>
 		<div class="btn-group">
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 			{% for key, value in config['SNER_VULNSEARCH_LIST_FILTERS'].items(): %}

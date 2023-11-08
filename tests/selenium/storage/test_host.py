@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 from sner.server.extensions import db
-from sner.server.storage.models import Host, Note, Service, Vuln
+from sner.server.storage.models import Host, Note, Service, Vuln, Vulnsearch
 from tests.selenium import dt_inrow_delete, dt_rendered, webdriver_waituntil
 from tests.selenium.storage import (
     check_annotate,
@@ -335,5 +335,38 @@ def test_host_view_route_versioninfos_list(live_server, sl_operator, versioninfo
 def test_host_view_route_vulnsearch_list(live_server, sl_operator, vulnsearch):  # pylint: disable=unused-argument
     """host view tabbed vulnsearch"""
 
-    test_vulnsearch = vulnsearch[0]
-    get_host_view_tab(sl_operator, test_vulnsearch.host_id, test_vulnsearch, 'name')
+    get_host_view_tab(sl_operator, vulnsearch.host_id, vulnsearch, 'name')
+
+
+def test_host_view_route_vulnsearch_list_selectrows(live_server, sl_operator, vulnsearch_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed vulnsearch dt test; selections"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    get_host_view_tab(sl_operator, vulnsearch_multiaction[0].host_id, vulnsearch_multiaction[-1])
+    check_dt_toolbox_select_rows(sl_operator, 'storage.host_view_route', 'host_view_vulnsearch_table', load_route=False)
+
+
+def test_host_view_route_vulnsearch_list_multiactions(live_server, sl_operator, vulnsearch_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed vulnsearch dt test; multiactions"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    get_host_view_tab(sl_operator, vulnsearch_multiaction[0].host_id, vulnsearch_multiaction[-1])
+    check_dt_toolbox_multiactions(
+        sl_operator,
+        'storage.host_view_route',
+        'host_view_vulnsearch_table',
+        Vulnsearch,
+        load_route=False,
+        test_delete=False
+    )
+
+
+def test_host_view_route_vulnsearch_list_freetag(live_server, sl_operator, vulnsearch_multiaction):  # pylint: disable=unused-argument
+    """host view tabbed vulnsearch dt test; freetag"""
+
+    # wacky, to handle togglable ux
+    sl_operator.execute_script("window.sessionStorage.setItem('dt_toolboxes_visible', '\"true\"');")
+    get_host_view_tab(sl_operator, vulnsearch_multiaction[0].host_id, vulnsearch_multiaction[-1])
+    check_dt_toolbox_freetag(sl_operator, 'storage.host_view_route', 'host_view_vulnsearch_table', Vulnsearch, load_route=False)

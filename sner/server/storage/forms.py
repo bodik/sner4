@@ -102,6 +102,12 @@ class TagMultiidForm(FlaskForm):
     action = StringNoneField('action', [InputRequired(), AnyOf(['set', 'unset'])])
 
 
+class TagMultiidStringyForm(TagMultiidForm):
+    """ajax; tagmulti action"""
+
+    ids = FieldList(StringNoneField('id', [InputRequired()]), min_entries=1)
+
+
 class AnnotateForm(FlaskForm):
     """generic annotation form; update tags and comments"""
 

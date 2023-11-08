@@ -16,8 +16,8 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import QueueManager
 from sner.server.scheduler.models import Queue
 from sner.server.storage.versioninfo import VersionInfoManager
-from sner.server.storage.vulnsearch import LocaldbWriter as VulnsearchLocaldbWriter, vulndata_docid
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, VulnsearchTemp
+from sner.server.storage.vulnsearch import vulndata_docid
+from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, Vulnsearch
 from sner.server.utils import yaml_dump
 
 
@@ -285,7 +285,7 @@ def initdata_dev():
     ))
 
     _cveid = 'CVE-1900-0000'
-    db.session.add(VulnsearchTemp(
+    db.session.add(Vulnsearch(
         id=vulndata_docid(product_note.host.address, product_note.service.proto, product_note.service.port, _cveid),
         host_id=product_note.host.id,
         service_id=product_note.service.id,
@@ -305,7 +305,6 @@ def initdata_dev():
     ))
 
     VersionInfoManager.rebuild()
-    VulnsearchLocaldbWriter(0).refresh_view()
 
 
 @click.group(name='dbx', help='sner.server db management')
