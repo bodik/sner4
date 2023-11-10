@@ -353,7 +353,7 @@ def test_v2_public_storage_versioninfo_route(api_user, versioninfos):  # pylint:
 
     response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'))
     assert api_schema.PublicVersionInfoSchema(many=True).load(response.json)
-    assert len(response.json) == 6
+    assert len(response.json) == 7
 
     response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'product': 'ApAcHe', 'versionspec': '>1.0'})
     assert api_schema.PublicVersionInfoSchema(many=True).load(response.json)

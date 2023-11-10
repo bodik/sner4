@@ -120,6 +120,17 @@ def versioninfo_notes(host, service_factory, note_factory):
             ),
             xtype='nmap.banner_dict',
             data='{"product": "PBS/Maui Roll", "extrainfo": "Rocks Cluster", "devicetype": "specialized"}'
+        ),
+        note_factory.create(
+            host=host,
+            service=service_factory.create(
+                host=host,
+                port=111,
+                name='rpcbind',
+                info='version: 2-4 extrainfo: RPC #100000',
+            ),
+            xtype='nmap.banner_dict',
+            data='{"version": "2-4", "extrainfo": "RPC #100000"}'
         )
     ]
 

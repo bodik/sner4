@@ -33,7 +33,7 @@ def test_versioninfomanager_rebuild(app, versioninfo_notes):  # pylint: disable=
 
     VersionInfoManager.rebuild()
 
-    assert VersionInfo.query.count() == 6
+    assert VersionInfo.query.count() == 7
     assert VersionInfo.query.filter(VersionInfo.product == "apache httpd").one().version == "2.2.21"
     assert VersionInfo.query.filter(VersionInfo.product == "mod_ssl").one().version == "2.2.21"
 
@@ -95,7 +95,7 @@ def test_versioninfomanager_collect_nmap_bannerdict(app, versioninfo_notes):  # 
     """test VersionInfoManager.collect_nmap_bannerdict"""
 
     raw_map = VersionInfoManager.collect_nmap_bannerdict(RawMap())
-    assert raw_map.len() == 6
+    assert raw_map.len() == 7
 
 
 def test_versioninfomanager_collect_nmap_httpgenerator(app, host, service_factory, note_factory):  # pylint: disable=unused-argument

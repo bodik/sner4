@@ -150,13 +150,19 @@ class VersionInfoManager:
         for item, data in cls._jsondata_iterator(query):
             item_extracted = False
 
-            # {"product": "Apache httpd", "version": "2.4.6", ...}
-            if {'product', 'version'}.issubset(data.keys()):
-                raw_map.add(**item, product=data["product"], version=data["version"])
+            # {
+            #   "product": "Apache httpd",
+            #   "version": "2.4.6", ...
+            # }
+            if 'product' in data:
+                raw_map.add(**item, product=data["product"], version=data.get("version", "0"))
                 item_extracted = True
 
-            # {"product": "Apache httpd", "version": "2.2.21",
-            # "extrainfo": "(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1"}
+            # {
+            #   "product": "Apache httpd",
+            #   "version": "2.2.21",
+            #   "extrainfo": "(Win32) mod_ssl/2.2.21 OpenSSL/1.0.0e PHP/5.3.8 mod_perl/2.0.4 Perl/v5.10.1"
+            # }
             if {'product', 'extrainfo'}.issubset(data.keys()) and data["product"] == "Apache httpd":
                 extra = {}
                 for part in data["extrainfo"].split(' '):
