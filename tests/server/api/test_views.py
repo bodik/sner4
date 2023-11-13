@@ -341,26 +341,26 @@ def test_v2_public_storage_notelist_route(api_user, note_factory):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_v2_public_storage_versioninfo_route_nonetworks(api_user_nonetworks, versioninfos):  # pylint: disable=unused-argument
+def test_v2_public_storage_versioninfo_route_nonetworks(api_user_nonetworks, versioninfo):  # pylint: disable=unused-argument
     """test queries with user without any configured networks"""
 
     response = api_user_nonetworks.post_json(url_for('api.v2_public_storage_versioninfo_route'))
     assert not response.json
 
 
-def test_v2_public_storage_versioninfo_route(api_user, versioninfos):  # pylint: disable=unused-argument
+def test_v2_public_storage_versioninfo_route(api_user, versioninfo):  # pylint: disable=unused-argument
     """test public versioninfo query api"""
 
     response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'))
-    assert api_schema.PublicVersionInfoSchema(many=True).load(response.json)
-    assert len(response.json) == 7
-
-    response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'product': 'ApAcHe', 'versionspec': '>1.0'})
-    assert api_schema.PublicVersionInfoSchema(many=True).load(response.json)
+    assert api_schema.PublicVersioninfoSchema(many=True).load(response.json)
     assert len(response.json) == 1
-    assert response.json[0]["product"] == "apache httpd"
 
-    response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'product': 'ApAcHe', 'versionspec': '<1.0'})
+    response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'product': 'DuMmY', 'versionspec': '>1.0'})
+    assert api_schema.PublicVersioninfoSchema(many=True).load(response.json)
+    assert len(response.json) == 1
+    assert response.json[0]["product"] == "dummy product"
+
+    response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'product': 'dummy', 'versionspec': '<1.0'})
     assert len(response.json) == 0
 
     response = api_user.post_json(url_for('api.v2_public_storage_versioninfo_route'), {'filter': 'invalid'}, status='*')

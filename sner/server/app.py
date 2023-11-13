@@ -283,7 +283,7 @@ def create_app(config_file='/etc/sner.yaml', config_env='SNER_CONFIG'):
             'Host': storage_models.Host,
             'Note': storage_models.Note,
             'Service': storage_models.Service,
-            'VersionInfo': storage_models.VersionInfo,
+            'Versioninfo': storage_models.Versioninfo,
             'Vuln': storage_models.Vuln,
             'Vulnsearch': storage_models.Vulnsearch,
 

@@ -6,6 +6,7 @@ storage version info map functions
 import json
 import re
 from dataclasses import asdict, dataclass, field
+from hashlib import md5
 
 from cpe import CPE
 from flask import current_app
@@ -13,12 +14,33 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from sner.lib import get_nested_key
 from sner.server.extensions import db
-from sner.server.materialized_views import refresh_materialized_view
-from sner.server.storage.models import Host, Note, Service, VersionInfoTemp
+from sner.server.storage.models import Host, Note, Service, Versioninfo
+
+
+def versioninfo_docid(host_id, host_address, host_hostname, service_proto, service_port, via_target, product):  # pylint: disable=too-many-arguments
+    """compute versioninfo docid"""
+
+    keydata = '|'.join(map(str, [
+        host_id,
+        host_address,
+        host_hostname,
+        service_proto,
+        service_port,
+        via_target,
+        product,
+    ]))
+    return md5(keydata.encode()).hexdigest()
 
 
 @dataclass
-class RawMapItem:
+class ExtractedVersion:
+    """extracted version"""
+    product: str
+    version: str
+
+
+@dataclass
+class VMapItem:
     """raw map item"""
     # pylint: disable=too-many-instance-attributes
 
@@ -35,15 +57,21 @@ class RawMapItem:
     def __post_init__(self):
         self.product = self.product.lower()
 
+    def aggkey(self):
+        """compute vmap aggregation key"""
 
-@dataclass
-class ExtractedVersion:
-    """extracted version"""
-    product: str
-    version: str
+        return versioninfo_docid(
+            self.host_id,
+            self.host_address,
+            self.host_hostname,
+            self.service_proto,
+            self.service_port,
+            self.via_target,
+            self.product
+        )
 
 
-class RawMap:
+class VMap:
     """raw version info map"""
 
     def __init__(self):
@@ -52,33 +80,39 @@ class RawMap:
     def add(self, **kwargs):
         """add data into raw map, account for uniqueness and aggregation"""
 
-        entry = RawMapItem(**kwargs)
-        aggkey = hash((
-            entry.host_id,
-            entry.host_address,
-            entry.host_hostname,
-            entry.service_proto,
-            entry.service_port,
-            entry.via_target,
-            entry.product,
-            entry.version
-        ))
+        entry = VMapItem(**kwargs)
+        aggkey = entry.aggkey()
 
         if aggkey in self.data:
-            self.data[aggkey].extra.update(kwargs.get('extra', {}))
+            self.data[aggkey].version = entry.version
+            self.data[aggkey].extra.update(entry.extra)
         else:
             self.data[aggkey] = entry
 
-    def values(self):
-        """return plain data iterable"""
-        return list(map(asdict, self.data.values()))
+    def flush(self):
+        """upsert database, prune gone"""
 
-    def len(self):
-        """get size of data"""
+        current_app.logger.debug('upsert versioninfo %d items', len(self.data))
+        for key, val in self.data.items():
+            db.session.execute(
+                pg_insert(Versioninfo)
+                .values({'id': key, **val.__dict__})
+                .on_conflict_do_update(constraint='versioninfo_pkey', set_=val.__dict__)
+            )
+        db.session.commit()
+
+        affected_rows = Versioninfo.query.filter(Versioninfo.id.not_in(self.data.keys())).delete(synchronize_session=False)
+        current_app.logger.debug('prune versioninfo %d items', affected_rows)
+        db.session.commit()
+        db.session.expire_all()
+
+    def __len__(self):
+        """return data dict size"""
+
         return len(self.data)
 
 
-class VersionInfoManager:
+class VersioninfoManager:
     """version info map manager"""
 
     @staticmethod
@@ -127,23 +161,16 @@ class VersionInfoManager:
     def rebuild(cls):
         """rebuild versioninfo map"""
 
-        raw_map = RawMap()
-        raw_map = cls.collect_cpes(raw_map)
-        raw_map = cls.collect_nmap_bannerdict(raw_map)
-        raw_map = cls.collect_nmap_httpgenerator(raw_map)
-        raw_map = cls.collect_nmap_mysqlinfo(raw_map)
-        raw_map = cls.collect_nmap_rdpntlminfo(raw_map)
-
-        VersionInfoTemp.query.delete()
-        db.session.commit()
-        if raw_map.len():
-            db.session.connection().execute(pg_insert(VersionInfoTemp), raw_map.values())
-            db.session.commit()
-        refresh_materialized_view(db.session, 'version_info')
-        db.session.commit()
+        vmap = VMap()
+        vmap = cls.collect_cpes(vmap)
+        vmap = cls.collect_nmap_bannerdict(vmap)
+        vmap = cls.collect_nmap_httpgenerator(vmap)
+        vmap = cls.collect_nmap_mysqlinfo(vmap)
+        vmap = cls.collect_nmap_rdpntlminfo(vmap)
+        vmap.flush()
 
     @classmethod
-    def collect_nmap_bannerdict(cls, raw_map):
+    def collect_nmap_bannerdict(cls, vmap):
         """collects nmap.banner_dict notes"""
 
         query = cls._base_note_query().filter(Note.xtype == 'nmap.banner_dict')
@@ -155,7 +182,12 @@ class VersionInfoManager:
             #   "version": "2.4.6", ...
             # }
             if 'product' in data:
-                raw_map.add(**item, product=data["product"], version=data.get("version", "0"))
+                tmp = (
+                    {'version': data['version']}
+                    if 'version' in data
+                    else {'version': '0', 'extra': {'flag': 'noversion'}}
+                )
+                vmap.add(**item, product=data["product"], **tmp)
                 item_extracted = True
 
             # {
@@ -169,16 +201,16 @@ class VersionInfoManager:
                     if match := re.match(r'\((?P<osflavor>.*)\)', part):
                         extra["os"] = match.group('osflavor').lower()
                     if extracted := cls.extract_version(part):
-                        raw_map.add(**item, **asdict(extracted), extra=extra)
+                        vmap.add(**item, **asdict(extracted), extra=extra)
                         item_extracted = True
 
             if not item_extracted:
                 current_app.logger.debug(f'{__name__} skipped {item} {data}')
 
-        return raw_map
+        return vmap
 
     @classmethod
-    def collect_nmap_httpgenerator(cls, raw_map):
+    def collect_nmap_httpgenerator(cls, vmap):
         """collects nmap.http_generator notes"""
 
         query = cls._base_note_query().filter(Note.xtype == 'nmap.http-generator')
@@ -186,16 +218,16 @@ class VersionInfoManager:
             item_extracted = False
 
             if extracted := cls.extract_version(data.get('output', '')):
-                raw_map.add(**item, **asdict(extracted))
+                vmap.add(**item, **asdict(extracted))
                 item_extracted = True
 
             if not item_extracted:
                 current_app.logger.debug(f'{__name__} skipped {item} {data}')
 
-        return raw_map
+        return vmap
 
     @classmethod
-    def collect_nmap_mysqlinfo(cls, raw_map):
+    def collect_nmap_mysqlinfo(cls, vmap):
         """collects nmap.mysql-info notes"""
 
         version_regexp = r'(?:.*?)-(?P<version>.*?)-(?P<product>.*?)-(?P<flavor>.*)'
@@ -204,28 +236,28 @@ class VersionInfoManager:
         for item, data in cls._jsondata_iterator(query):
             if verdata := get_nested_key(data, 'elements', 'Version'):
                 if match := re.match(version_regexp, verdata):
-                    raw_map.add(
+                    vmap.add(
                         **item,
                         product=match.group('product'),
                         version=match.group('version'),
                         extra={'full_version': verdata}
                     )
 
-        return raw_map
+        return vmap
 
     @classmethod
-    def collect_nmap_rdpntlminfo(cls, raw_map):
+    def collect_nmap_rdpntlminfo(cls, vmap):
         """collects nmap.rdp-ntlm-info notes"""
 
         query = cls._base_note_query().filter(Note.xtype == 'nmap.rdp-ntlm-info')
         for item, data in cls._jsondata_iterator(query):
             if verdata := get_nested_key(data, 'elements', 'Product_Version'):
-                raw_map.add(**item, product="Microsoft Windows", version=verdata)
+                vmap.add(**item, product="Microsoft Windows", version=verdata)
 
-        return raw_map
+        return vmap
 
     @classmethod
-    def collect_cpes(cls, raw_map):
+    def collect_cpes(cls, vmap):
         """collects cpe notes"""
 
         def cpe_iterator(cpes):
@@ -243,6 +275,6 @@ class VersionInfoManager:
         query = cls._base_note_query().filter(Note.xtype == 'cpe')
         for item, data in cls._jsondata_iterator(query):
             for extracted in cpe_iterator(data):
-                raw_map.add(**item, **asdict(extracted))
+                vmap.add(**item, **asdict(extracted))
 
-        return raw_map
+        return vmap

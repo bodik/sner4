@@ -139,7 +139,7 @@ class VulnMulticopyForm(FlaskForm):
     return_url = HiddenField()
 
 
-class VersionInfoQueryForm(FlaskForm):
+class VersioninfoQueryForm(FlaskForm):
     """versioninfo query form"""
 
     product = StringNoneField('Product', description='SQL ilike query token')

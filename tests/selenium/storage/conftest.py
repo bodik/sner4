@@ -61,6 +61,35 @@ def notes_multiaction(host, note_factory):
 
 
 @pytest.fixture
+def versioninfo_multiaction(host, service_factory, versioninfo_factory):
+    """prepare versioninfo for multiple selection and actions tests"""
+
+    service1 = service_factory.create(host=host, port=2)
+    service2 = service_factory.create(host=host, port=3)
+
+    yield [
+        versioninfo_factory.create(
+            host_id=service1.host.id,
+            host_address=service1.host.address,
+            host_hostname=service1.host.hostname,
+            service_proto=service1.proto,
+            service_port=service1.port,
+            version='1.0',
+            comment='comment1'
+        ),
+        versioninfo_factory.create(
+            host_id=service2.host.id,
+            host_address=service2.host.address,
+            host_hostname=service2.host.hostname,
+            service_proto=service2.proto,
+            service_port=service2.port,
+            version='2.0',
+            comment='comment2'
+        )
+    ]
+
+
+@pytest.fixture
 def vulnsearch_multiaction(service, vulnsearch_factory):
     """prepare vulnsearch for multiple selection and actions tests"""
 

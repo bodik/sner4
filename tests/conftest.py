@@ -14,8 +14,6 @@ from sner.server.app import create_app
 from sner.server.extensions import db
 from sner.server.dbx_command import db_remove
 from sner.server.password_supervisor import PasswordSupervisor as PWS
-from sner.server.storage.models import VersionInfo
-from sner.server.storage.versioninfo import VersionInfoManager
 from tests.server.auth.models import UserFactory, WebauthnCredentialFactory
 from tests.server.scheduler.models import (
     JobFactory,
@@ -23,7 +21,14 @@ from tests.server.scheduler.models import (
     QueueFactory,
     TargetFactory
 )
-from tests.server.storage.models import HostFactory, NoteFactory, ServiceFactory, VulnFactory, VulnsearchFactory
+from tests.server.storage.models import (
+    HostFactory,
+    NoteFactory,
+    ServiceFactory,
+    VersioninfoFactory,
+    VulnFactory,
+    VulnsearchFactory
+)
 
 
 @pytest.fixture
@@ -89,6 +94,7 @@ factoryboy_register(TargetFactory)
 factoryboy_register(HostFactory)
 factoryboy_register(NoteFactory)
 factoryboy_register(ServiceFactory)
+factoryboy_register(VersioninfoFactory, 'versioninfo_dangling')
 factoryboy_register(VulnFactory)
 factoryboy_register(VulnsearchFactory, 'vulnsearch_dangling')
 
@@ -136,11 +142,22 @@ def versioninfo_notes(host, service_factory, note_factory):
 
 
 @pytest.fixture
-def versioninfos(versioninfo_notes):  # pylint: disable=redefined-outer-name,unused-argument
-    """prepare versioninfo map snap"""
+def versioninfo(service, versioninfo_factory):  # pylint: disable=redefined-outer-name,unused-argument
+    """
+    prepare versioninfo
 
-    VersionInfoManager.rebuild()
-    return VersionInfo.query.all()
+    factory_boy cannot create model with multiple related subfactories, hence
+    the "proper" versioninfo generation is done here by hand
+    """
+
+    yield versioninfo_factory(
+        host_id=service.host.id,
+        # xTODO service_id=service.id,
+        host_address=service.host.address,
+        host_hostname=service.host.hostname,
+        service_proto=service.proto,
+        service_port=service.port,
+    )
 
 
 @pytest.fixture

@@ -89,8 +89,8 @@
 	<li class="nav-item"><a class="nav-link" href="#host_view_service_tab" data-toggle="tab">Services <span class="badge badge-pill badge-secondary">{{ host.services|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#host_view_vuln_tab" data-toggle="tab">Vulns <span class="badge badge-pill badge-secondary">{{ host.vulns|length }}</span></a></li>
 	<li class="nav-item"><a class="nav-link" href="#host_view_note_tab" data-toggle="tab">Notes <span class="badge badge-pill badge-secondary">{{ host.notes|length }}</span></a></li>
-	<li class="nav-item"><a class="nav-link" href="#host_view_versioninfo_tab" data-toggle="tab">VersionInfos <span id="host_view_tabs_versioninfos_count" class="badge badge-pill badge-secondary">?</span></a></li>
-	<li class="nav-item"><a class="nav-link" href="#host_view_vulnsearch_tab" data-toggle="tab">Vulnsearches <span id="host_view_tabs_vulnsearches_count" class="badge badge-pill badge-secondary">?</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#host_view_versioninfo_tab" data-toggle="tab"><i class="far fa-clock text-secondary" title="pre-computed data, host links might be dangling"></i> Versioninfos <span id="host_view_tabs_versioninfos_count" class="badge badge-pill badge-secondary">?</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="#host_view_vulnsearch_tab" data-toggle="tab"><i class="far fa-clock text-secondary" title="pre-computed data, host links might be dangling"></i> Vulnsearches <span id="host_view_tabs_vulnsearches_count" class="badge badge-pill badge-secondary">?</span></a></li>
 </ul>
 
 <div class="tab-content">
@@ -302,14 +302,31 @@
 	<div id="host_view_versioninfo_tab" class="tab-pane">
 		<div id="host_view_versioninfo_table_toolbar" class="dt_toolbar">
 			<div id="host_view_versioninfo_table_toolbox" class="dt_toolbar_toolbox">
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+					<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+					<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
+				</div>
+				{% set tags = ['reviewed', 'todo'] %}
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary abutton_freetag_set_multiid" href="#"><i class="fas fa-tag"></i></a>
+					{{ cm.multiid_tagging_abuttons(tags, 'btn btn-outline-secondary abutton_tag_multiid') }}
+				</div>
+				<div class="btn-group">
+					<a class="btn btn-outline-secondary abutton_freetag_unset_multiid" href="#"><i class="fas fa-eraser"></i></a>
+					<div class="btn-group">
+						<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+						{{ cm.multiid_tagging_abuttons_dropdown(tags, 'striked abutton_untag_multiid') }}
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
 		<table id="host_view_versioninfo_table" class="table table-hover table-sm" width="100%"></table>
 		<script type="text/javascript">
 			var dt_host_view_versioninfo_table_options = {
-				'ajax': {'url': "{{ url_for('storage.versioninfo_list_json_route', filter='VersionInfo.host_id=="%d"'|format(host.id)) }}", 'method': 'POST'},
+				'ajax': {'url': "{{ url_for('storage.versioninfo_list_json_route', filter='Versioninfo.host_id=="%d"'|format(host.id)) }}", 'method': 'POST'},
 				'columns': [
+					Sner.dt.column_select({'visible': JSON.parse(sessionStorage.getItem('dt_toolboxes_visible'))}),
 					Sner.dt.column('id', {'visible': false}),
 					Sner.dt.column('host_id', {'visible': false}),
 					Sner.dt.column('host_address', {'visible': false}),
@@ -326,15 +343,25 @@
 					Sner.dt.column('product'),
 					Sner.dt.column('version'),
 					Sner.dt.column('extra'),
+					Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
+					Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 				],
 				'order': [[6, 'asc']],
+				'select': {'style': 'multi', 'selector': 'td:first-child'},
 				'drawCallback': function (settings) {
 					Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+					this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.versioninfo_annotate_route'}, Sner.storage.action_annotate_dt);
 					$('#host_view_tabs_versioninfos_count').text(this.api().rows().data().length);
 				}
 			};
 			$(document).ready(function() {
 				var dt_host_view_versioninfo_table = Sner.dt.init_datatable('#host_view_versioninfo_table', dt_host_view_versioninfo_table_options);
+				$('#host_view_versioninfo_table_toolbar .abutton_selectall').on('click', {'dt': dt_host_view_versioninfo_table}, Sner.dt.selectall);
+				$('#host_view_versioninfo_table_toolbar .abutton_selectnone').on('click', {'dt': dt_host_view_versioninfo_table}, Sner.dt.selectnone);
+				$('#host_view_versioninfo_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_host_view_versioninfo_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+				$('#host_view_versioninfo_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_host_view_versioninfo_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+				$('#host_view_versioninfo_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_host_view_versioninfo_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
+				$('#host_view_versioninfo_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_host_view_versioninfo_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
 			});
 		</script>
 	</div>
@@ -361,7 +388,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
 		<table id="host_view_vulnsearch_table" class="table table-hover table-sm" width="100%"></table>
 		<script type="text/javascript">
 			var dt_host_view_vulnsearch_table_options = {

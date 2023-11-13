@@ -32,13 +32,11 @@ monitoring.
 
 from datetime import datetime
 
-from sqlalchemy import select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.materialized_views import create_materialized_view
 from sner.server.models import SelectableEnum
 
 
@@ -167,10 +165,10 @@ class Note(StorageModelBase):
         return f'<Note {self.id}: {host} {service} {self.xtype}>'
 
 
-class VersionInfoTemp(StorageModelBase):
-    """version info model, temporary table"""
+class Versioninfo(StorageModelBase):
+    """version info model"""
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(32), primary_key=True)
     host_id = db.Column(db.Integer, nullable=False)
     host_address = db.Column(postgresql.INET, nullable=False)
     host_hostname = db.Column(db.String(256))
@@ -182,11 +180,8 @@ class VersionInfoTemp(StorageModelBase):
     version = db.Column(db.String(250))
     extra = db.Column(db.JSON)
 
-
-class VersionInfo(StorageModelBase):
-    """version info (materialized view) model"""
-
-    __table__ = create_materialized_view('version_info', select(VersionInfoTemp), db.metadata)
+    tags = db.Column(postgresql.ARRAY(db.String, dimensions=1), nullable=False, default=[])
+    comment = db.Column(db.Text)
 
 
 class Vulnsearch(StorageModelBase):

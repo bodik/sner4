@@ -18,7 +18,7 @@ from sner.server.auth.core import apikey_required
 from sner.server.extensions import db
 from sner.server.scheduler.core import SchedulerService, SchedulerServiceBusyException
 from sner.server.scheduler.models import Job
-from sner.server.storage.models import Host, Note, Service, VersionInfo, Vulnsearch
+from sner.server.storage.models import Host, Note, Service, Versioninfo, Vulnsearch
 from sner.server.storage.version_parser import is_in_version_range, parse as versionspec_parse
 from sner.server.utils import filter_query
 
@@ -227,22 +227,22 @@ def v2_public_storage_notelist_route(args):
 
 @blueprint.route("/v2/public/storage/versioninfo", methods=["POST"])
 @apikey_required("user")
-@blueprint.arguments(api_schema.PublicVersionInfoArgsSchema)
-@blueprint.response(HTTPStatus.OK, api_schema.PublicVersionInfoSchema(many=True))
+@blueprint.arguments(api_schema.PublicVersioninfoArgsSchema)
+@blueprint.response(HTTPStatus.OK, api_schema.PublicVersioninfoSchema(many=True))
 def v2_public_storage_versioninfo_route(args):
     """simple version search"""
 
     if not current_user.api_networks:
         return None
 
-    restrict = [VersionInfo.host_address.op("<<=")(net) for net in current_user.api_networks]
-    query = VersionInfo.query.filter(or_(*restrict))
+    restrict = [Versioninfo.host_address.op("<<=")(net) for net in current_user.api_networks]
+    query = Versioninfo.query.filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get("filter"))):
         return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
 
     if "product" in args:
-        query = query.filter(VersionInfo.product.ilike(f'%{args["product"]}%'))
+        query = query.filter(Versioninfo.product.ilike(f'%{args["product"]}%'))
 
     data = query.all()
 

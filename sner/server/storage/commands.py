@@ -15,8 +15,8 @@ from sner.lib import format_host_address
 from sner.server.extensions import db
 from sner.server.parser import REGISTERED_PARSERS
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
-from sner.server.storage.models import Host, Service, VersionInfoTemp
-from sner.server.storage.versioninfo import VersionInfoManager
+from sner.server.storage.models import Host, Service, Versioninfo, Vulnsearch
+from sner.server.storage.versioninfo import VersioninfoManager
 from sner.server.storage.vulnsearch import VulnsearchManager
 from sner.server.storage.elasticstorage import ElasticStorageManager
 from sner.server.utils import filter_query
@@ -69,9 +69,9 @@ def storage_flush():
     """flush all objects from storage"""
 
     db.session.query(Host).delete()
+    db.session.query(Versioninfo).delete()
+    db.session.query(Vulnsearch).delete()
     db.session.commit()
-    db.session.query(VersionInfoTemp).delete()
-    VersionInfoManager.rebuild()
 
 
 @command.command(name='vuln-report', help='generate vulnerabilities report')
@@ -202,4 +202,4 @@ def storage_rebuild_elasticstorage(**kwargs):
 def storage_rebuild_versioninfo():
     """rebuild versioninfo command"""
 
-    VersionInfoManager.rebuild()
+    VersioninfoManager.rebuild()

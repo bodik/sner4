@@ -5,7 +5,8 @@ storage test models
 
 from factory import LazyAttribute, SubFactory
 
-from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, Vulnsearch
+from sner.server.storage.models import Host, Note, Service, SeverityEnum, Versioninfo, Vuln, Vulnsearch
+from sner.server.storage.versioninfo import versioninfo_docid
 from sner.server.storage.vulnsearch import vulndata_docid
 from tests import BaseModelFactory
 
@@ -68,8 +69,39 @@ class NoteFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
     comment = 'some test note comment'
 
 
+class VersioninfoFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
+    """test versioninfo model factory"""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """test versioninfo model factory"""
+        model = Versioninfo
+
+    id = LazyAttribute(lambda o: versioninfo_docid(
+            o.host_id,
+            o.host_address,
+            o.host_hostname,
+            o.service_proto,
+            o.service_port,
+            o.via_target,
+            o.product
+    ))
+    host_id = 400  # dangling id
+    # xTODO service_id = 401  # dangling id
+    host_address = '127.2.0.1'
+    host_hostname = 'dummy.versioninfo.test'
+    service_proto = 'tcp'
+    service_port = 10
+    via_target = 'virtualhost.versioninfo.test'
+
+    product = 'dummy product'
+    version = '1.2.3'
+    extra = {'flags': 'dummy_flag'}
+
+    tags = ['dummy']
+    comment = ['dummy comment']
+
+
 class VulnsearchFactory(BaseModelFactory):  # pylint: disable=too-few-public-methods
-    """test vulnsearchtemp model factory"""
+    """test vulnsearch model factory"""
     class Meta:  # pylint: disable=too-few-public-methods
         """test vulnsearch model factory"""
         model = Vulnsearch

@@ -175,7 +175,7 @@ class PublicNotelistSchema(BaseSchema):
     import_time = fields.DateTime()
 
 
-class PublicVersionInfoArgsSchema(BaseSchema):
+class PublicVersioninfoArgsSchema(BaseSchema):
     """public versioninfo args schema"""
 
     filter = fields.String()
@@ -183,7 +183,7 @@ class PublicVersionInfoArgsSchema(BaseSchema):
     versionspec = fields.String()
 
 
-class PublicVersionInfoSchema(BaseSchema):
+class PublicVersioninfoSchema(BaseSchema):
     """public versioninfo schema"""
 
     # endpoint data

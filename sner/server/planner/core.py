@@ -22,7 +22,7 @@ from sner.server.extensions import db
 from sner.server.scheduler.core import enumerate_network, JobManager, QueueManager
 from sner.server.scheduler.models import Queue, Job, Target
 from sner.server.storage.core import StorageManager
-from sner.server.storage.versioninfo import VersionInfoManager
+from sner.server.storage.versioninfo import VersioninfoManager
 
 
 def configure_logging():
@@ -330,13 +330,13 @@ class StorageCleanup(Stage):  # pylint: disable=too-few-public-methods
         current_app.logger.debug(f'{self.__class__.__name__} finished')
 
 
-class RebuildVersionInfoMap(Schedule):  # pylint: disable=too-few-public-methods
+class RebuildVersioninfoMap(Schedule):  # pylint: disable=too-few-public-methods
     """recount versioninfo map"""
 
     def _run(self):
         """run"""
 
-        VersionInfoManager.rebuild()
+        VersioninfoManager.rebuild()
         current_app.logger.info(f'{self.__class__.__name__} finished')
 
 
@@ -408,7 +408,7 @@ class Planner(TerminateContextMixin):
         self.stages['storage_cleanup'] = StorageCleanup()
 
         if get_nested_key(self.config, 'stage', 'rebuild_versioninfo_map'):
-            self.stages['rebuild_versioninfo_map'] = RebuildVersionInfoMap(self.config['stage']['rebuild_versioninfo_map']['schedule'])
+            self.stages['rebuild_versioninfo_map'] = RebuildVersioninfoMap(self.config['stage']['rebuild_versioninfo_map']['schedule'])
 
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""

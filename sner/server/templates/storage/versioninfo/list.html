@@ -8,6 +8,7 @@
 	var dt_versioninfo_list_table_options = {
 		'ajax': {'url': Flask.url_for('storage.versioninfo_list_json_route') + window.location.search, 'method': 'POST'},
 		'columns': [
+			Sner.dt.column_select(),
 			Sner.dt.column('id', {'visible': false}),
 			Sner.dt.column('host_id', {'visible': false}),
 			Sner.dt.column('host_address', {'render': function(data, type, row, meta) { return Sner.storage.hbs.host_link(row); }}),
@@ -24,11 +25,24 @@
 			Sner.dt.column('product'),
 			Sner.dt.column('version'),
 			Sner.dt.column('extra', {'render': $.fn.dataTable.render.ellipsis(50, false, true)}),
+			Sner.dt.column('tags', {'className': 'abutton_annotate_dt', 'render': function(data, type, row, meta) {return Sner.storage.hbs.tag_labels(row);}}),
+			Sner.dt.column('comment', {'className': 'abutton_annotate_dt forcewrap', 'title': 'cmnt'}),
 		],
-		'order': [[2, 'desc']]
+		'order': [[2, 'asc']],
+		'select': {'style': 'multi', 'selector': 'td:first-child'},
+		'drawCallback': function (settings) {
+			Sner.dt.ajax_options['drawCallback'].call(this, settings); // call parent
+			this.find('td.abutton_annotate_dt').on('dblclick', {'dt': this.api(), 'route_name': 'storage.versioninfo_annotate_route'}, Sner.storage.action_annotate_dt);
+		}
 	};
 	$(document).ready(function() {
 		var dt_versioninfo_list_table = Sner.dt.init_datatable('#versioninfo_list_table', dt_versioninfo_list_table_options);
+		$('#versioninfo_list_table_toolbar .abutton_selectall').on('click', {'dt': dt_versioninfo_list_table}, Sner.dt.selectall);
+		$('#versioninfo_list_table_toolbar .abutton_selectnone').on('click', {'dt': dt_versioninfo_list_table}, Sner.dt.selectnone);
+		$('#versioninfo_list_table_toolbar .abutton_tag_multiid').on('click', {'dt': dt_versioninfo_list_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'set'}, Sner.storage.action_tag_multiid);
+		$('#versioninfo_list_table_toolbar .abutton_untag_multiid').on('click', {'dt': dt_versioninfo_list_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_tag_multiid);
+		$('#versioninfo_list_table_toolbar .abutton_freetag_set_multiid').on('click', {'dt': dt_versioninfo_list_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'set'}, Sner.storage.action_freetag_multiid);
+		$('#versioninfo_list_table_toolbar .abutton_freetag_unset_multiid').on('click', {'dt': dt_versioninfo_list_table, 'route_name': 'storage.versioninfo_tag_multiid_route', 'action': 'unset'}, Sner.storage.action_freetag_multiid);
 		$('#versioninfo_query_form').submit(function (e) {
 			e.preventDefault();
 			var filterElem = $('#versioninfo_query_form_filter');
@@ -40,15 +54,11 @@
 {% endblock %}
 
 {% block content %}
-{% call cm.heading(['Versioninfo']) %}
+{% call cm.heading(['Versioninfo (pre-computed)']) %}
 	<div class="breadcrumb-buttons pl-2">
 		<a class="btn btn-outline-secondary" data-toggle="collapse" href="#filter_form"><i class="fas fa-filter"></i></a>
 	</div>
 {% endcall %}
-
-<div id="versioninfo_list_table_toolbar" class="dt_toolbar">
-	{{ cm.filter_form() }}
-</div>
 
 <div class="container-fluid">
 	<form id="versioninfo_query_form" method="get">
@@ -61,7 +71,28 @@
 	</form>
 </div>
 
-<div class="alert alert-warning" role="alert">Pre-computed view, host links might be incorrect.</div>
+<div id="versioninfo_list_table_toolbar" class="dt_toolbar">
+	<div id="versioninfo_list_table_toolbox" class="dt_toolbar_toolbox_alwaysvisible">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary disabled"><i class="fas fa-check-square"></i></a>
+			<a class="btn btn-outline-secondary abutton_selectall" href="#" title="select all">All</a>
+			<a class="btn btn-outline-secondary abutton_selectnone" href="#" title="unselect all">None</a>
+		</div>
+		{% set tags = ['reviewed', 'todo'] %}
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary abutton_freetag_set_multiid" href="#"><i class="fas fa-tag"></i></a>
+			{{ cm.multiid_tagging_abuttons(tags, 'btn btn-outline-secondary abutton_tag_multiid') }}
+		</div>
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary abutton_freetag_unset_multiid" href="#"><i class="fas fa-eraser"></i></a>
+			<div class="btn-group">
+				<a class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" href="#" title="remove tag dropdown"><i class="fas fa-remove-format"></i></a>
+				{{ cm.multiid_tagging_abuttons_dropdown(tags, 'striked abutton_untag_multiid') }}
+			</div>
+		</div>
+	</div>
+	{{ cm.filter_form() }}
+</div>
 
 <table id="versioninfo_list_table" class="table table-hover table-sm" width="100%"></table>
 {% endblock %}

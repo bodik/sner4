@@ -15,7 +15,7 @@ from sner.server.auth.models import User
 from sner.server.extensions import db
 from sner.server.scheduler.core import QueueManager
 from sner.server.scheduler.models import Queue
-from sner.server.storage.versioninfo import VersionInfoManager
+from sner.server.storage.versioninfo import VersioninfoManager
 from sner.server.storage.vulnsearch import vulndata_docid
 from sner.server.storage.models import Host, Note, Service, SeverityEnum, Vuln, Vulnsearch
 from sner.server.utils import yaml_dump
@@ -304,7 +304,7 @@ def initdata_dev():
         cpe='cpe:/a:apache:http_server:2.2.21'
     ))
 
-    VersionInfoManager.rebuild()
+    VersioninfoManager.rebuild()
 
 
 @click.group(name='dbx', help='sner.server db management')
