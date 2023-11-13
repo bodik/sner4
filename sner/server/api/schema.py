@@ -196,6 +196,9 @@ class PublicVersioninfoSchema(BaseSchema):
     product = fields.String()
     version = fields.String()
     extra = fields.Dict()
+    # user data
+    tags = fields.List(fields.String)
+    comment = fields.String()
 
 
 class PublicVulnsearchArgsSchema(BaseSchema):
@@ -221,6 +224,10 @@ class PublicVulnsearchSchema(BaseSchema):
     cvss = fields.Float()
     cvss3 = fields.Float()
     attack_vector = fields.String()
-    data = fields.String()
+    data = fields.Dict()
     cpe = fields.Dict()
     cpe_full = fields.String()
+
+    # user data
+    tags = fields.List(fields.String)
+    comment = fields.String()
