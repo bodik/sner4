@@ -12,7 +12,7 @@ from http import HTTPStatus
 import requests
 from cpe import CPE
 from flask import current_app
-from sqlalchemy import func, inspect, select
+from sqlalchemy import func, inspect
 from sqlalchemy.dialects.postgresql import ARRAY, CIDR, insert as pg_insert
 
 from sner.server.extensions import db
