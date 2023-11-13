@@ -17,28 +17,37 @@ def test_import_command_errorhandling(runner):
     """test invalid parser"""
 
     # invalid parser
-    result = runner.invoke(command, ['import', 'invalid', 'dummy'])
+    result = runner.invoke(command, ['import', '--parser', 'invalid', 'dummy'])
     assert result.exit_code == 1
 
     # parse exception handling
-    result = runner.invoke(command, ['import', 'nmap', 'sner.yaml.example', 'notexist'])
+    result = runner.invoke(command, ['import', '--parser', 'nmap', 'sner.yaml.example', 'notexist'])
     assert result.exit_code == 0
 
 
 def test_import_command_dryrun(runner):
     """test import dry run"""
 
-    result = runner.invoke(command, ['import', '--dry', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
+    result = runner.invoke(command, ['import', '--dry', '--parser', 'nmap', 'tests/server/data/parser-nmap-output.xml'])
     assert result.exit_code == 0
     assert 'new host:' in result.output
     assert 'new service:' in result.output
     assert 'new note:' in result.output
 
-    result = runner.invoke(command, ['import', '--dry', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
+    result = runner.invoke(command, ['import', '--dry', '--parser', 'nessus', 'tests/server/data/parser-nessus-simple.xml'])
     assert result.exit_code == 0
     assert 'new host:' in result.output
     assert 'new service:' in result.output
     assert 'new vuln:' in result.output
+
+    result = runner.invoke(command, ['import', '--dry', 'tests/server/data/parser-jarm-job.zip'])
+    assert result.exit_code == 0
+    assert 'new host:' in result.output
+    assert 'new service:' in result.output
+    assert 'new note:' in result.output
+
+    result = runner.invoke(command, ['import', '--dry', 'tests/server/data/parser-dummy-job.zip'])
+    assert result.exit_code == 0
 
 
 def test_flush_command(runner, service, vuln, note):  # pylint: disable=unused-argument

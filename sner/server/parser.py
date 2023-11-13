@@ -7,6 +7,7 @@ tools. Parsers should be implemented via sner.plugin package and must
 implement ParserBase interface.
 """
 
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -16,6 +17,7 @@ from pathlib import Path
 from littletable import Table as LittleTable
 
 import sner.plugin
+from sner.lib import ZipFile, file_from_zip, is_zip
 
 
 REGISTERED_PARSERS = {}
@@ -28,6 +30,19 @@ def load_parser_plugins():
         plugin_name = plugin_path.parent.name
         module = import_module(f'sner.plugin.{plugin_name}.parser')
         REGISTERED_PARSERS[plugin_name] = getattr(module, 'ParserModule')
+
+
+def auto_detect_parser(path):
+    """tries automatically detect parser"""
+    if is_zip(path):
+        with ZipFile(path) as fzip:
+            for fname in filter(lambda x: x == 'assignment.json', fzip.namelist()):
+                try:
+                    return json.loads(file_from_zip(path, fname).decode('utf-8'))['config']['module']
+                except KeyError:
+                    return None
+
+    return None
 
 
 class ParsedItemBase:  # pylint: disable=too-few-public-methods
