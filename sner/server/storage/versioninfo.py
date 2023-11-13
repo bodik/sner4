@@ -101,6 +101,9 @@ class VMap:
             )
         db.session.commit()
 
+    def prune(self):
+        """prune database of gone items"""
+
         affected_rows = Versioninfo.query.filter(Versioninfo.id.not_in(self.data.keys())).delete(synchronize_session=False)
         current_app.logger.debug('prune versioninfo %d items', affected_rows)
         db.session.commit()
@@ -168,6 +171,7 @@ class VersioninfoManager:
         vmap = cls.collect_nmap_mysqlinfo(vmap)
         vmap = cls.collect_nmap_rdpntlminfo(vmap)
         vmap.flush()
+        vmap.prune()
 
     @classmethod
     def collect_nmap_bannerdict(cls, vmap):

@@ -106,12 +106,7 @@ class LocaldbWriter:
 
         self.buf = []
         self.buflen = buflen
-        self.prune_list = []
-
-    def prune_init(self):
-        """initialize prune list"""
-
-        self.prune_list = db.session.execute(select(Vulnsearch.id)).scalars().all()
+        self.prune_list = set()
 
     def index(self, doc_id, doc):
         """index item in buffered way"""
@@ -129,18 +124,15 @@ class LocaldbWriter:
                 db.session.execute(
                     pg_insert(Vulnsearch).values(item).on_conflict_do_update(constraint='vulnsearch_pkey', set_=item)
                 )
-                try:
-                    self.prune_list.remove(item["id"])
-                except ValueError:
-                    pass
+                self.prune_list.add(item['id'])
             db.session.commit()
             self.buf = []
 
     def prune(self):
         """prune gone items"""
 
-        current_app.logger.debug('prune vulnsearch %d items', len(self.prune_list))
-        Vulnsearch.query.filter(Vulnsearch.id.in_(self.prune_list)).delete(synchronize_session=False)
+        affected_rows = Vulnsearch.query.filter(Vulnsearch.id.not_in(self.prune_list)).delete(synchronize_session=False)
+        current_app.logger.debug('prune vulnsearch %d items', affected_rows)
         db.session.commit()
         db.session.expire_all()
 
@@ -210,7 +202,6 @@ class VulnsearchManager:
         """build local vulnsearch tables"""
 
         vulnsearch_writer = LocaldbWriter(self.rebuild_buflen)
-        vulnsearch_writer.prune_init()
 
         for note, icpe, parsed_cpe in cpe_notes():
             for cve in self.cvefor(icpe):
