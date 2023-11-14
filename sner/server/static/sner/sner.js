@@ -44,7 +44,7 @@ class SnerDatatablesModule {
 			'info': true,
 			'paging': true,
 			'pageLength': 200,
-			'lengthMenu': [ 10, 50, 100, 200, 500, 1000 ],
+			'lengthMenu': [ 10, 50, 100, 200, 500, 1000, 5000 ],
 
 			// behaviors
 			'drawCallback': function (settings) {
