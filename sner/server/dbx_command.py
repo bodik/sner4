@@ -301,7 +301,7 @@ def initdata_dev():
         cvss3=2.4,
         attack_vector='NETWORK',
         data={'dummmy': 'data'},
-        cpe='cpe:/a:apache:http_server:2.2.21'
+        cpe={'full': 'cpe:/a:apache:http_server:2.4.38'}
     ))
 
     VersioninfoManager.rebuild()

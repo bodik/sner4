@@ -9,7 +9,7 @@ from http import HTTPStatus
 
 from flask import current_app, jsonify, Response
 from flask_login import current_user
-from flask_smorest import Blueprint
+from flask_smorest import abort, Blueprint, Page
 from sqlalchemy import or_
 
 import sner.server.api.schema as api_schema
@@ -257,21 +257,33 @@ def v2_public_storage_versioninfo_route(args):
     return data
 
 
+class QueryPage(Page):
+    """flask_smorest paging helper class"""
+
+    @property
+    def item_count(self):
+        if not self.collection:
+            return 0
+        return self.collection.count()
+
+
 @blueprint.route("/v2/public/storage/vulnsearch", methods=["POST"])
 @apikey_required("user")
 @blueprint.arguments(api_schema.PublicVulnsearchArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicVulnsearchSchema(many=True))
+@blueprint.paginate(QueryPage, page_size=1000, max_page_size=10000)
 def v2_public_storage_vulnsearch_route(args):
     """simple vulnsearch search (see sner.server.sqlafilter for syntax)"""
 
     if not current_user.api_networks:
-        return None
+        return []
 
     restrict = [Vulnsearch.host_address.op("<<=")(net) for net in current_user.api_networks]
     query = Vulnsearch.query.filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get("filter"))):
-        return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
+        # must use abort for paginate
+        abort(HTTPStatus.BAD_REQUEST, "Failed to filter query")
 
     current_app.logger.info(f"api.public storage vulnsearch {args}")
-    return query.all()
+    return query
