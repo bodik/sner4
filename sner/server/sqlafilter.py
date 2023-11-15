@@ -7,6 +7,7 @@ parsing simple boolean enabled filter expressions into sqlalchemy-filters tree
 ```
 Host.address >= "10.2.1.0" AND Host.address <= "10.2.1.255" AND Host.tags not_any "reviewed"
 (Host.address <= "10.2.1.0" OR Host.address >= "10.2.1.255") AND Host.tags not_any "reviewed"
+Host.address inet_in "10.2.1.0/24" AND Host.tags not_any "reviewed"
 
 Service.state ilike "open:%" AND (Host.address <= "10.0.0.0" OR Host.address >= "10.255.255.255")
 
@@ -37,6 +38,7 @@ SEARCH_GRAMMAR = r"""
         | "ilike" | "not_ilike" | "astext_ilike" | "astext_not_ilike"
         | "is_null" | "is_not_null"
         | "in" | "not_in" | "any" | "not_any"
+        | "inet_in" | "inet_not_in"
 
     _value: _item | array
     _item: string | number

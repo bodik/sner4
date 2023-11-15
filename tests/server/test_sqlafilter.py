@@ -25,6 +25,8 @@ def test_sqlafilter():
     check('A.a=="a\\"]a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a"]a'})
     check('A.a in [1,2]', {'model': 'A', 'field': 'a', 'op': 'in', 'value': [1, 2]})
     check('A.a not_in ["1","]2\\""]', {'model': 'A', 'field': 'a', 'op': 'not_in', 'value': ['1', ']2"']})
+    check('A.a astext_not_ilike "dummy%"', {'model': 'A', 'field': 'a', 'op': 'astext_not_ilike', 'value': 'dummy%'})
+    check('A.a inet_in "127.0.0.1/32"', {'model': 'A', 'field': 'a', 'op': 'inet_in', 'value': '127.0.0.1/32'})
 
     # AND parsing
     check('A.a=="a"', {'model': 'A', 'field': 'a', 'op': '==', 'value': 'a'})

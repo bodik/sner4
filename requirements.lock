@@ -89,7 +89,7 @@ soft-webauthn==0.1.4
 soupsieve==2.3.2.post1
 SQLAlchemy==1.4.39
 sqlalchemy-datatables==2.0.1
-sqlalchemy-filters @ git+https://github.com/bodik/sqlalchemy-filters@07b876a8bc27b0a5fc4a495eac63c5924854d871
+sqlalchemy-filters @ git+https://github.com/bodik/sqlalchemy-filters@3c7a1c502fda4de82848daa77cce81ca5af0c64d
 tenacity==6.3.1
 toml==0.10.2
 tomli==2.0.1
