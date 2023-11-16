@@ -245,6 +245,19 @@ bin/server run
 * start all components
 * restart server without maintenance flag
 
+```
+systemctl stop sner-server
+systemctl stop 'sner-agent@*'
+cd /opt/sner
+. venv/bin/activate
+bin/server db stamp head
+git fetch --all
+git checkout origin/devel
+pip install -r requirements.lock
+bin/server db upgrade
+systemctl start sner-server
+```
+
 
 ## 4 Usage
 
