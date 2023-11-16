@@ -111,6 +111,7 @@ class LocaldbWriter:
     def index(self, doc_id, doc):
         """index item in buffered way"""
 
+        current_app.logger.debug(f'{self.__class__.__name__} index {doc_id} {str(doc)[:300]}')
         doc['cpe_full'] = doc['cpe']['full']
         self.buf.append({'id': doc_id, **doc})
         if len(self.buf) > self.buflen:
