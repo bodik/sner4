@@ -33,7 +33,7 @@ SEARCH_GRAMMAR = r"""
     _factor: criteria | "(" expression ")"
 
     criteria: COLSPEC OP _value
-    COLSPEC: /[a-z]+\.[a-z_]+/i
+    COLSPEC: /[a-z0-9]+\.[a-z0-9_]+/i
     OP: "==" | "!=" | ">=" | "<=" | ">" | "<"
         | "ilike" | "not_ilike" | "astext_ilike" | "astext_not_ilike"
         | "is_null" | "is_not_null"
