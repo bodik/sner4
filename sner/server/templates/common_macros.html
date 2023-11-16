@@ -33,7 +33,7 @@
 			<a class="btn btn-outline-secondary disabled"><i class="fas fa-filter"></i></a>
 			{% if show_form %}<a class="btn btn-info" href="{{ url_for(request.endpoint) }}">Unfilter</a>{% endif %}
 		</div>
-		<input class="form-control" type="text" name="filter" value="{{ request.values.filter }}" placeholder="Filter">
+		<input class="form-control" type="text" name="filter" value="{{ request.values.filter }}" placeholder="Filter" title="Filter string, check the syntax in sner.server.sqlafilter for reference.">
 		<div class="input-group-append">
 			<button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
 		</div>
