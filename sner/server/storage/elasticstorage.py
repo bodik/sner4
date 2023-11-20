@@ -8,8 +8,6 @@ from hashlib import md5
 
 from flask import current_app
 from marshmallow import fields
-from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import ARRAY, CIDR
 
 from sner.server.api.schema import PublicHostSchema, PublicNoteSchema, PublicServiceSchema
 from sner.server.utils import windowed_query
@@ -52,30 +50,22 @@ class ElasticStorageManager():
         self.tlsauth_cert = tlsauth_cert
         self.rebuild_buflen = current_app.config['SNER_ELASTICSTORAGE_REBUILD_BUFLEN']
 
-    def rebuild(self, host_filter=None):
+    def rebuild(self):
         """sychronize storage do elastic"""
 
         index_time = datetime.now().strftime('%Y%m%d%H%M%S')
         indexer = BulkIndexer(self.esd_url, self.tlsauth_key, self.tlsauth_cert, self.rebuild_buflen)
-        host_filter_expr = (
-            Host.address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR))))
-            if host_filter
-            else None
-        )
+        self.rebuild_hosts(indexer, index_time)
+        self.rebuild_services(indexer, index_time)
+        self.rebuild_notes(indexer, index_time)
 
-        self.rebuild_hosts(indexer, index_time, host_filter_expr)
-        self.rebuild_services(indexer, index_time, host_filter_expr)
-        self.rebuild_notes(indexer, index_time, host_filter_expr)
-
-    def rebuild_hosts(self, indexer, index_time, host_filter_expr=None):
+    def rebuild_hosts(self, indexer, index_time):
         """sync hosts to elastic"""
 
         alias = 'storage_host'
         index = f'{alias}-{index_time}'
         schema = ElasticHostSchema()
         query = Host.query
-        if host_filter_expr is not None:
-            query = query.filter(host_filter_expr)
 
         for host in windowed_query(query, Host.id):
             data_id = md5(f'{host.address}'.encode()).hexdigest()
@@ -95,15 +85,13 @@ class ElasticStorageManager():
         indexer.flush()
         indexer.update_alias(alias, index)
 
-    def rebuild_services(self, indexer, index_time, host_filter_expr=None):
+    def rebuild_services(self, indexer, index_time):
         """sync services to elastic"""
 
         alias = 'storage_service'
         index = f'{alias}-{index_time}'
         schema = ElasticServiceSchema()
         query = Service.query.outerjoin(Host)
-        if host_filter_expr is not None:
-            query = query.filter(host_filter_expr)
 
         for service in windowed_query(query, Service.id):
             data_id = md5(f'{service.host.address}|{service.proto}|{service.port}'.encode()).hexdigest()
@@ -117,15 +105,13 @@ class ElasticStorageManager():
         indexer.flush()
         indexer.update_alias(alias, index)
 
-    def rebuild_notes(self, indexer, index_time, host_filter_expr=None):
+    def rebuild_notes(self, indexer, index_time):
         """sync notes to elastic"""
 
         alias = 'storage_note'
         index = f'{alias}-{index_time}'
         schema = ElasticNoteSchema()
         query = Note.query.outerjoin(Host, Note.host_id == Host.id).outerjoin(Service, Note.service_id == Service.id)
-        if host_filter_expr is not None:
-            query = query.filter(host_filter_expr)
 
         for note in windowed_query(query, Note.id):
             data_id = md5(

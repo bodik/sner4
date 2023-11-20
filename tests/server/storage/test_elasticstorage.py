@@ -25,22 +25,3 @@ def test_rebuild_elasticstorage(app, tmpworkdir, service, note):  # pylint: disa
 
     es_bulk_mock.assert_called()
     update_alias_mock.assert_called()
-
-
-def test_rebuild_elasticstorage_filter(app, host_factory, note_factory):  # pylint: disable=unused-argument
-    """test sync-storage command"""
-
-    host_factory.create(address='127.0.1.1')
-    host_factory.create(address='2001:db8::11')
-    host2 = host_factory.create(address='127.0.2.1')
-    note_factory.create(host=host2, xtype='filteredout')
-
-    indexer_mock = Mock()
-
-    patch_indexer = patch.object(sner.server.storage.elasticstorage, 'BulkIndexer', indexer_mock)
-    with patch_indexer:
-        ElasticStorageManager('https://dummy:80').rebuild(['127.0.1.0/24', '2001:db8::/48'])
-
-    indexed_hosts = [x[0][2]['host_address'] for x in indexer_mock.return_value.index.call_args_list]
-    assert '127.0.2.1' not in indexed_hosts
-    assert '2001:db8::11' in indexed_hosts

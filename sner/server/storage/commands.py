@@ -140,7 +140,6 @@ def storage_service_list(**kwargs):
 @click.option('--esd', help='elasticsearch url')
 @click.option('--tlsauth_key', help='tlsauth key path')
 @click.option('--tlsauth_cert', help='tlsauth cert path')
-@click.option('--host_filter',  type=click.Path(exists=True), help='path to host filter file')
 def storage_rebuild_vulnsearch_elastic(**kwargs):
     """synchronize vulnsearch elk index"""
 
@@ -148,13 +147,12 @@ def storage_rebuild_vulnsearch_elastic(**kwargs):
     esd = kwargs_or_config(kwargs, 'esd')
     tlsauth_key = kwargs_or_config(kwargs, 'tlsauth_key')
     tlsauth_cert = kwargs_or_config(kwargs, 'tlsauth_cert')
-    host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not all([cvesearch, esd]):
         current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    VulnsearchManager(cvesearch, tlsauth_key, tlsauth_cert).rebuild_elastic(esd, host_filter)
+    VulnsearchManager(cvesearch, tlsauth_key, tlsauth_cert).rebuild_elastic(esd)
 
 
 @command.command(name='rebuild-vulnsearch-localdb', help='synchronize localdb vulnsearch')
@@ -181,20 +179,18 @@ def storage_rebuild_vulnsearch_localdb(**kwargs):
 @click.option('--esd', help='elasticsearch url')
 @click.option('--tlsauth_key', help='tlsauth key path')
 @click.option('--tlsauth_cert', help='tlsauth cert path')
-@click.option('--host_filter',  type=click.Path(exists=True), help='path to host filter file')
 def storage_rebuild_elasticstorage(**kwargs):
     """synchronize storage elk index"""
 
     esd = kwargs_or_config(kwargs, 'esd')
     tlsauth_key = kwargs_or_config(kwargs, 'tlsauth_key')
     tlsauth_cert = kwargs_or_config(kwargs, 'tlsauth_cert')
-    host_filter = Path(kwargs['host_filter']).read_text(encoding='utf-8').splitlines() if kwargs.get('host_filter') else None
 
     if not esd:
         current_app.logger.error('configuration required (config or cmdline)')
         sys.exit(1)
 
-    ElasticStorageManager(esd, tlsauth_key, tlsauth_cert).rebuild(host_filter)
+    ElasticStorageManager(esd, tlsauth_key, tlsauth_cert).rebuild()
 
 
 @command.command(name='rebuild-versioninfo', help='rebuild versioninfo map')

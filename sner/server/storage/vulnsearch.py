@@ -12,8 +12,8 @@ from http import HTTPStatus
 import requests
 from cpe import CPE
 from flask import current_app
-from sqlalchemy import func, inspect
-from sqlalchemy.dialects.postgresql import ARRAY, CIDR, insert as pg_insert
+from sqlalchemy import inspect
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from sner.server.extensions import db
 from sner.server.storage.elastic import BulkIndexer
@@ -168,7 +168,7 @@ class VulnsearchManager:
         current_app.logger.warning('cvesearch call failed')
         return []
 
-    def rebuild_elastic(self, elastic_url, host_filter=None):
+    def rebuild_elastic(self, elastic_url):
         """
         rebuilds vulnsearch elastic index from localdb
         """
@@ -180,14 +180,9 @@ class VulnsearchManager:
             if elastic_url
             else None
         )
-
         esd_indexer.initialize(index)
 
         query = Vulnsearch.query
-        if host_filter:
-            host_filter_expr = Vulnsearch.host_address.op('<<=')(func.any(func.cast(host_filter, ARRAY(CIDR)))) if host_filter else None
-            query = query.filter(host_filter_expr)
-
         column_attrs = inspect(Vulnsearch).mapper.column_attrs
         for item in windowed_query(query, Vulnsearch.id):
             item = {c.key: getattr(item, c.key) for c in column_attrs}

@@ -49,49 +49,6 @@ def test_rebuild_elastic(app, tmpworkdir, vulnsearch):  # pylint: disable=unused
     update_alias_mock.assert_called_once()
 
 
-def test_rebuild_elastic_filter(app, host_factory, vulnsearch_factory):  # pylint: disable=unused-argument
-    """test vulnsearch rebuild_elastic with filter"""
-
-    host1 = host_factory.create(address='127.0.1.1')
-    vulnsearch_factory(
-        host_id=host1.id,
-        service_id=None,
-        host_address=host1.address,
-        host_hostname=host1.hostname,
-        service_proto=None,
-        service_port=None
-    )
-    host2 = host_factory.create(address='127.0.2.1')
-    vulnsearch_factory(
-        host_id=host2.id,
-        service_id=None,
-        host_address=host2.address,
-        host_hostname=host2.hostname,
-        service_proto=None,
-        service_port=None
-    )
-    host3 = host_factory.create(address='2001:db8::11')
-    vulnsearch_factory(
-        host_id=host3.id,
-        service_id=None,
-        host_address=host3.address,
-        host_hostname=host3.hostname,
-        service_proto=None,
-        service_port=None
-    )
-
-    indexer_mock = Mock()
-    patch_indexer = patch.object(sner.server.storage.vulnsearch, 'BulkIndexer', indexer_mock)
-
-    with patch_indexer:
-        vmgr = VulnsearchManager('https://dummy:80')
-        vmgr.rebuild_elastic('https://dummy:80', ['127.0.1.0/24', '2001:db8::/48'])
-
-    indexed_hosts = [x[0][2]['host_address'] for x in indexer_mock.return_value.index.call_args_list]
-    assert '127.0.2.1' not in indexed_hosts
-    assert '2001:db8::11' in indexed_hosts
-
-
 def test_rebuild_localdb(app, note_factory):  # pylint: disable=unused-argument
     """test rebuild localdb"""
 
