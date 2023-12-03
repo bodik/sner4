@@ -4,12 +4,15 @@ planner core
 """
 
 import logging
+import subprocess
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
+from fcntl import flock, LOCK_EX, LOCK_NB, LOCK_UN
 from ipaddress import ip_address, ip_network, IPv6Address
 from pathlib import Path
-from time import sleep
+from time import sleep, time
 
 import psycopg2
 from flask import current_app
@@ -340,10 +343,74 @@ class RebuildVersioninfoMap(Schedule):  # pylint: disable=too-few-public-methods
         current_app.logger.info(f'{self.__class__.__name__} finished')
 
 
+class StorageRebuilderFileLock:
+    """non-blocking file-based lock"""
+
+    def __init__(self):
+        self.lock_path = f"{current_app.config['SNER_VAR']}/{self.__class__.__name__}.lock"
+        self.lock = None
+
+    def acquire(self):
+        """lock"""
+
+        self.lock = Path(self.lock_path).open(mode="w+", encoding="utf-8")  # pylint: disable=consider-using-with
+        try:
+            flock(self.lock, LOCK_EX | LOCK_NB)
+        except BlockingIOError:
+            self.lock.close()
+            self.lock = None
+            return False
+
+        return True
+
+    def release(self):
+        """unlock"""
+
+        flock(self.lock, LOCK_UN)
+        self.lock.close()
+        self.lock = None
+
+
+@dataclass
+class StorageRebuilderCrontabItem:
+    fname: str
+    period: int
+    next_run: int
+
+
+class StorageRebuilder(Stage):
+    """runs rebuild tasks on background in detached processes"""
+
+    def __init__(self, config):
+        now = time()
+        self.crontab = [StorageRebuilderCrontabItem(*item, now + item[1]) for item in config]
+        self.lock = StorageRebuilderFileLock()
+
+    def _next_to_run(self):
+
+        if not self.lock.acquire():
+            return None
+        self.lock.release()
+
+        now = time()
+        for idx, item in enumerate(self.crontab):
+            if now > item.next_run:
+                run_item = self.crontab.pop(idx)
+                self.crontab.append(StorageRebuilderCrontabItem(run_item.fname, run_item.period, now+run_item.period))
+                return run_item
+        return None
+
+    def run(self):
+        if run_item := self._next_to_run():
+            current_app.logger.debug(f'{self.__class__.__name__} run {run_item}')
+            subprocess.Popen(['/usr/bin/sleep', '5'], close_fds=True, start_new_session=True)
+            #subprocess.Popen([sys.executable, sys.argv[0], run_item.fname], close_fds=True, start_new_session=True)
+
+
 class Planner(TerminateContextMixin):
     """planner"""
 
-    LOOPSLEEP = 60
+    LOOPSLEEP = 1
 
     def __init__(self, config=None, oneshot=False):
         configure_logging()
@@ -407,8 +474,13 @@ class Planner(TerminateContextMixin):
 
         self.stages['storage_cleanup'] = StorageCleanup()
 
-        if get_nested_key(self.config, 'stage', 'rebuild_versioninfo_map'):
-            self.stages['rebuild_versioninfo_map'] = RebuildVersioninfoMap(self.config['stage']['rebuild_versioninfo_map']['schedule'])
+#        if get_nested_key(self.config, 'stage', 'rebuild_versioninfo_map'):
+#            self.stages['rebuild_versioninfo_map'] = RebuildVersioninfoMap(self.config['stage']['rebuild_versioninfo_map']['schedule'])
+
+        self.stages['storage_rebuilder'] = StorageRebuilder([
+            ('abc', 1),
+            ('cde', 5),
+        ])
 
     def terminate(self, signum=None, frame=None):  # pragma: no cover  pylint: disable=unused-argument  ; running over multiprocessing
         """terminate at once"""
