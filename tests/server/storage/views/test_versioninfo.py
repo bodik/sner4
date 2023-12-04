@@ -61,13 +61,23 @@ def test_versioninfo_list_json_route_query_form(cl_operator, service_factory, ve
         product='apache httpd',
         version='1.0'
     )
-    service2 = service_factory.create(port=1)
+    service2 = service_factory.create(port=2)
     versioninfo_factory.create(
         host_id=service2.host.id,
         host_address=service2.host.address,
         host_hostname=service2.host.hostname,
         service_proto=service2.proto,
         service_port=service2.port,
+        product='apache httpd',
+        version='1.1'
+    )
+    service3 = service_factory.create(port=3)
+    versioninfo_factory.create(
+        host_id=service3.host.id,
+        host_address=service3.host.address,
+        host_hostname=service3.host.hostname,
+        service_proto=service3.proto,
+        service_port=service3.port,
         product='apache httpd',
         version='1.2'
     )
@@ -78,7 +88,7 @@ def test_versioninfo_list_json_route_query_form(cl_operator, service_factory, ve
             product='ApAcHe',
             versionspec=">=1.1"
         ),
-        {'draw': 1, 'start': 0, 'length': 100}
+        {'draw': 1, 'start': 1, 'length': 100}
     )
     assert response.status_code == HTTPStatus.OK
     response_data = json.loads(response.body.decode('utf-8'))
