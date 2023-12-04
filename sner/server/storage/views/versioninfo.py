@@ -61,15 +61,27 @@ def versioninfo_list_json_route():
     if request.values.get('product'):
         query = query.filter(Versioninfo.product.ilike(f"%{request.values.get('product')}%"))
 
-    versioninfos = DataTables(request.values.to_dict(), query, columns).output_result()
+    # pre-query, fake server side paging
+    request_values = request.values.to_dict()
+    orig_start = int(request_values.get('start', '0'))
+    orig_length = int(request_values.get('length', '-1'))
+    request_values.update({'start': '0', 'length': '-1'})
 
-    if request.values.get('versionspec'):
-        parsed_version_specifier = versionspec_parse(request.values.get('versionspec'))
+    versioninfos = DataTables(request_values, query, columns).output_result()
+
+    if request_values.get('versionspec'):
+        parsed_version_specifier = versionspec_parse(request_values.get('versionspec'))
         versioninfos["data"] = list(filter(
             lambda item: is_in_version_range(item["version"], parsed_version_specifier),
             versioninfos["data"]
         ))
         versioninfos["recordsFiltered"] = len(versioninfos["data"])
+
+    # post-query, fake server side paging
+    if orig_start > 0:
+        versioninfos["data"] = versioninfos["data"][orig_start:]
+    if orig_length >= 0:
+        versioninfos["data"] = versioninfos["data"][:orig_length]
 
     return Response(json.dumps(versioninfos, cls=SnerJSONEncoder), mimetype='application/json')
 
