@@ -40,6 +40,10 @@ coverage-server:
 	coverage run --source sner/server -m pytest tests/server -x -vv
 	coverage report --show-missing --fail-under 100
 
+coverage-server-storage:
+	coverage run --source sner/server/storage -m pytest tests/server/storage -x -vv
+	coverage report --show-missing --fail-under 100
+
 coverage-plugin:
 	coverage run --source sner/plugin -m pytest tests/plugin -x -vv
 	coverage report --show-missing --fail-under 100
