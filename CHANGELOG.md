@@ -2,16 +2,16 @@
 
 ## 0.12.0 - taglytics [BC BREAK]
 
-changed: server, full-fat taggable models for versioninfo and vulnsearch (requires db migratin)
-changed: server, configurable filters on vulnsearch list
-changed: server: api, paginate vulnsearch by default (can produce large output)
-changed: server: remove host_filter from elastic rebuilders
-added: server, host list tabs for versioninfo and vulnsearch
-added: server, add astext_ilike sqlafilter (naive JSON columns filtering)
-added: server: sqlafilters, add inet_in, inet_not_in, bumps sqlalchemy-filters
-added: coverage server-storage helper
-fixed: server, handle null value for sum in metrics
-fixed: fix versioninfo paging for datatables
+* changed: server, full-fat taggable models for versioninfo and vulnsearch (requires db migratin)
+* changed: server, configurable filters on vulnsearch list
+* changed: server: api, paginate vulnsearch by default (can produce large output)
+* changed: server: remove host_filter from elastic rebuilders
+* added: server, host list tabs for versioninfo and vulnsearch
+* added: server, add astext_ilike sqlafilter (naive JSON columns filtering)
+* added: server: sqlafilters, add inet_in, inet_not_in, bumps sqlalchemy-filters
+* added: coverage server-storage helper
+* fixed: server, handle null value for sum in metrics
+* fixed: fix versioninfo paging for datatables
 
 
 ## 0.11.0 - local analytics [BC BREAK]
