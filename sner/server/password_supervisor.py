@@ -6,9 +6,10 @@ password supervisor service
 import re
 import secrets
 import string
-from crypt import crypt, mksalt, METHOD_SHA512  # pylint: disable=no-name-in-module
 from hashlib import sha512
 from hmac import compare_digest
+
+from passlib.hash import sha512_crypt
 
 
 class PasswordSupervisorResult():
@@ -80,12 +81,12 @@ class PasswordSupervisor():
     @staticmethod
     def hash(value, salt=None):
         """encoder; hash password with algo"""
-        return crypt(value, salt if salt else mksalt(METHOD_SHA512))
+        return sha512_crypt.hash(value, salt=salt, rounds=5000)
 
     @staticmethod
     def get_salt(value):
         """encoder; demerge salt from value"""
-        return value[:value.rfind('$')] if value else None
+        return value.split('$')[2] if value else None
 
     @staticmethod
     def compare(value1, value2):

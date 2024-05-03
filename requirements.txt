@@ -18,6 +18,7 @@ lark-parser
 littletable
 lxml
 packaging
+passlib
 psycopg2
 pylint
 pyroute2
