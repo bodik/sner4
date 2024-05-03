@@ -152,7 +152,11 @@ class VulnsearchManager:
     def cvefor(self, cpe):  # pragma: nocover  ; mocked
         """query cvesearch and filter out response"""
 
-        res = requests.get(f'{self.cvesearch_url}/api/cvefor/{cpe}', cert=(self.tlsauth_cert, self.tlsauth_key))
+        res = requests.get(
+            f'{self.cvesearch_url}/api/cvefor/{cpe}',
+            cert=(self.tlsauth_cert, self.tlsauth_key),
+            timeout=30
+        )
         if res.status_code == HTTPStatus.OK:
             # filter unused/oversized data; ex. linux:linux_kernel:xyz is about 800MB
             data = res.json()
