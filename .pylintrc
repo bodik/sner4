@@ -7,3 +7,7 @@ ignored-classes=SQLAlchemy, sqlalchemy.orm.scoping.scoped_session
 [SIMILARITIES]
 min-similarity-lines=8
 ignore-imports=yes
+
+[MESSAGES CONTROL]
+disable=
+    cyclic-import  # py 3.11 + pylint 3.1.0 > buggy cyclic imports detection
