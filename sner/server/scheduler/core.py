@@ -413,7 +413,7 @@ class SchedulerService:
         heat_count = conn.execute(
             pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
-            .on_conflict_do_update(constraint='heatmap_pkey', set_=dict(count=Heatmap.count+1))
+            .on_conflict_do_update(constraint='heatmap_pkey', set_={"count": Heatmap.count + 1})
             .returning(Heatmap.count)
         ).scalar()
 
@@ -431,7 +431,7 @@ class SchedulerService:
         heat_count = conn.execute(
             pg_insert(Heatmap)
             .values(hashval=hashval, count=1)
-            .on_conflict_do_update(constraint='heatmap_pkey', set_=dict(count=Heatmap.count-1))
+            .on_conflict_do_update(constraint='heatmap_pkey', set_={"count": Heatmap.count - 1})
             .returning(Heatmap.count)
         ).scalar()
 
