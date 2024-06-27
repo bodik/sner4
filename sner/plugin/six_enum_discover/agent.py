@@ -47,7 +47,7 @@ class AgentModule(ModuleBase):
             return False, None
 
         addr = ip_address(addr)
-        for record in NDB().addresses.summary():
+        for record in NDB().addresses.summary():  # pylint: disable=no-member
             if addr in ip_network(f'{record.address}/{record.prefixlen}', strict=False):
                 return True, record.ifname
 
