@@ -26,6 +26,16 @@ from sner.server.utils import filter_query
 blueprint = Blueprint('api', __name__)  # pylint: disable=invalid-name
 
 
+class QueryPage(Page):
+    """flask_smorest paging helper class"""
+
+    @property
+    def item_count(self):
+        if not self.collection:
+            return 0
+        return self.collection.count()
+
+
 @blueprint.route('/v2/scheduler/job/assign', methods=['POST'])
 @apikey_required('agent')
 @blueprint.arguments(api_schema.JobAssignArgsSchema)
@@ -130,6 +140,7 @@ def _storage_host_api(args):
 @apikey_required('user')
 @blueprint.arguments(api_schema.PublicRangeArgsSchema, location='query')
 @blueprint.response(HTTPStatus.OK, api_schema.PublicRangeSchema(many=True))
+@blueprint.paginate(QueryPage, page_size=1000, max_page_size=10000)
 def v2_public_storage_range_route_get(args):
     """DEPRECATED list of hosts by cidr with simplified data"""
 
@@ -140,6 +151,7 @@ def v2_public_storage_range_route_get(args):
 @apikey_required('user')
 @blueprint.arguments(api_schema.PublicRangeArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicRangeSchema(many=True))
+@blueprint.paginate(QueryPage, page_size=1000, max_page_size=10000)
 def v2_public_storage_range_route(args):
     """list of hosts by cidr with simplified data"""
 
@@ -150,23 +162,24 @@ def _storage_range_api(args):
     """storage host backward compatibility stub"""
 
     if not current_user.api_networks:
-        return None
+        return []
 
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     query = Host.query.filter(Host.address.op('<<=')(str(args['cidr']))).filter(or_(*restrict))
     current_app.logger.info(f'api.public storage range {args}')
-    return query.all()
+    return query
 
 
 @blueprint.route('/v2/public/storage/servicelist', methods=['POST'])
 @apikey_required('user')
 @blueprint.arguments(api_schema.PublicServicelistArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicServicelistSchema(many=True))
+@blueprint.paginate(QueryPage, page_size=1000, max_page_size=10000)
 def v2_public_storage_servicelist_route(args):
     """filtered servicelist (see sner.server.sqlafilter for syntax)"""
 
     if not current_user.api_networks:
-        return None
+        return []
 
     restrict = [Host.address.op('<<=')(net) for net in current_user.api_networks]
     query = db.session.query().select_from(Service).outerjoin(Host).add_columns(
@@ -179,21 +192,23 @@ def v2_public_storage_servicelist_route(args):
     ).filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get('filter'))):
-        return jsonify({'message': 'Failed to filter query'}), HTTPStatus.BAD_REQUEST
+        # must use abort for paginate
+        abort(HTTPStatus.BAD_REQUEST, message="Failed to filter query")
 
     current_app.logger.info(f'api.public storage servicelist {args}')
-    return query.all()
+    return query
 
 
 @blueprint.route("/v2/public/storage/notelist", methods=['POST'])
 @apikey_required("user")
 @blueprint.arguments(api_schema.PublicNotelistArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicNotelistSchema(many=True))
+@blueprint.paginate(QueryPage, page_size=1000, max_page_size=10000)
 def v2_public_storage_notelist_route(args):
     """filtered notelist (see sner.server.sqlafilter for syntax)"""
 
     if not current_user.api_networks:
-        return None
+        return []
 
     restrict = [Host.address.op("<<=")(net) for net in current_user.api_networks]
     query = (
@@ -219,27 +234,30 @@ def v2_public_storage_notelist_route(args):
     )
 
     if not (query := filter_query(query, args.get("filter"))):
-        return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
+        # must use abort for paginate
+        abort(HTTPStatus.BAD_REQUEST, message="Failed to filter query")
 
     current_app.logger.info(f"api.public storage notelist {args}")
-    return query.all()
+    return query
 
 
 @blueprint.route("/v2/public/storage/versioninfo", methods=["POST"])
 @apikey_required("user")
 @blueprint.arguments(api_schema.PublicVersioninfoArgsSchema)
 @blueprint.response(HTTPStatus.OK, api_schema.PublicVersioninfoSchema(many=True))
+@blueprint.paginate(Page, page_size=1000, max_page_size=10000)
 def v2_public_storage_versioninfo_route(args):
     """simple version search"""
 
     if not current_user.api_networks:
-        return None
+        return []
 
     restrict = [Versioninfo.host_address.op("<<=")(net) for net in current_user.api_networks]
     query = Versioninfo.query.filter(or_(*restrict))
 
     if not (query := filter_query(query, args.get("filter"))):
-        return jsonify({"message": "Failed to filter query"}), HTTPStatus.BAD_REQUEST
+        # must use abort for paginate
+        abort(HTTPStatus.BAD_REQUEST, message="Failed to filter query")
 
     if "product" in args:
         query = query.filter(Versioninfo.product.ilike(f'%{args["product"]}%'))
@@ -255,16 +273,6 @@ def v2_public_storage_versioninfo_route(args):
 
     current_app.logger.info(f"api.public storage versioninfo {args}")
     return data
-
-
-class QueryPage(Page):
-    """flask_smorest paging helper class"""
-
-    @property
-    def item_count(self):
-        if not self.collection:
-            return 0
-        return self.collection.count()
 
 
 @blueprint.route("/v2/public/storage/vulnsearch", methods=["POST"])
@@ -283,7 +291,7 @@ def v2_public_storage_vulnsearch_route(args):
 
     if not (query := filter_query(query, args.get("filter"))):
         # must use abort for paginate
-        abort(HTTPStatus.BAD_REQUEST, "Failed to filter query")
+        abort(HTTPStatus.BAD_REQUEST, message="Failed to filter query")
 
     current_app.logger.info(f"api.public storage vulnsearch {args}")
     return query
