@@ -13,7 +13,7 @@ from flask.cli import with_appcontext
 
 from sner.lib import format_host_address
 from sner.server.extensions import db
-from sner.server.parser import REGISTERED_PARSERS
+from sner.server.parser import REGISTERED_PARSERS, auto_detect_parser
 from sner.server.storage.core import StorageManager, vuln_export, vuln_report
 from sner.server.storage.models import Host, Service, Versioninfo, Vulnsearch
 from sner.server.storage.versioninfo import VersioninfoManager
@@ -37,20 +37,30 @@ def command():
 @with_appcontext
 @click.option('--dry', is_flag=True, help='do not update database, only print new items')
 @click.option('--addtag', multiple=True, help='add tag to all imported objects, can be used several times')
-@click.argument('parser')
+@click.option('--parser', help='specify which parser to use instead of auto detection')
 @click.argument('path', nargs=-1)
 def storage_import(path, parser, **kwargs):
     """import data"""
 
-    if parser not in REGISTERED_PARSERS:
+    is_auto_parser = parser is None
+
+    if parser not in REGISTERED_PARSERS and not is_auto_parser:
         current_app.logger.error('no such parser')
         sys.exit(1)
 
-    parser_impl = REGISTERED_PARSERS[parser]
     for item in path:
         if not Path(item).is_file():
             current_app.logger.warning(f'invalid path "{item}"')
             continue
+
+        if is_auto_parser:
+            parser = auto_detect_parser(item)
+
+            if parser is None:
+                current_app.logger.error(f'parser was not automatically detected for the file: {item}')
+                continue
+
+        parser_impl = REGISTERED_PARSERS[parser]
 
         try:
             if kwargs.get('dry'):
