@@ -1,5 +1,14 @@
 # sner4 changelog
 
+## 0.13.0 - wormilable [BC BREAK]
+
+* changed: minor fixes for six_enum_discover
+* changed: enforce paging on all public API enpoints
+* changed: python dependencies required for Debian 12 Bookworm
+* fixed: bookworm postgres permissions setup
+* added: vulnsearch add request timeout
+
+
 ## 0.12.0 - taglytics [BC BREAK]
 
 * changed: server, full-fat taggable models for versioninfo and vulnsearch (requires db migratin)
